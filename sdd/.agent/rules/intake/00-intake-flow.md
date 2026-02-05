@@ -52,3 +52,8 @@ Only write sections that have answers.
 
 ## Stop for Approval
 After writing the spec files, stop and ask for explicit approval.
+
+## Sprint Plan (Post-Approval)
+If the user approves, the agent should say "I will create sprint plan" and then populate:
+- `sdd/memory-bank/core/sprint-plan.md`
+- `sdd/memory-bank/core/sprint-current.md`

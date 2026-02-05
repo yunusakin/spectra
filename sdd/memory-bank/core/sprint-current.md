@@ -1,3 +1,18 @@
 # Current Sprint
 
-> Optional. Use if you track work in sprints.
+> Auto-filled by the agent after spec approval.
+
+## Sprint Name
+
+## Dates
+
+## Sprint Backlog
+
+
+## In Progress
+
+
+## Done
+
+
+## Notes
