@@ -1,0 +1,11 @@
+# Cursor Adapter
+
+All canonical rules live in `sdd/.agent/`.
+
+Read and follow:
+- `sdd/.agent/README.md`
+- `sdd/.agent/rules/index.md`
+
+Init trigger: when the user message is exactly `init`, start the intake flow.
+Do not write application code before explicit approval.
+All application code must live under `app/`.
