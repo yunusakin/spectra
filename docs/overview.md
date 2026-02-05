@@ -14,9 +14,10 @@ SDD Spine provides a spec-driven backbone that keeps project structure stable wh
 2. Answer mandatory questions.
 3. Review auto-filled spec files.
 4. Reply `approved` to start coding.
+5. The `app/` directory will be created automatically upon approval (if it doesn't exist).
 
 ## Key Paths
 - `sdd/` rules, memory bank, and process artifacts
-- `app/` application code only
+- `app/` application code only (created after approval)
 - `docs/` project documentation
 - `scripts/` helper scripts

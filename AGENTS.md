@@ -12,6 +12,7 @@ If the user message is exactly `init`, start the intake flow and do not write an
 ## Hard Rules
 - Do not generate application code before explicit approval.
 - All application code must be generated under `app/` only.
+- Create the `app/` directory if it doesn't exist when approval is received.
 - Specs and decisions live under `sdd/memory-bank/`.
 - If a free-text answer is blank, do not write any section for it.
 - Free-text answers may use Markdown; keep it concise and prefer bullets.

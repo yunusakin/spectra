@@ -6,6 +6,7 @@
 ## Hard Rules
 - Do not generate application code before explicit approval.
 - All application code must be generated under `app/` only.
+- If `app/` directory does not exist, create it after receiving approval.
 - Specs and decisions live under `sdd/memory-bank/`.
 
 ## Mandatory Questions
@@ -52,6 +53,12 @@ Only write sections that have answers.
 
 ## Stop for Approval
 After writing the spec files, stop and ask for explicit approval.
+
+## After Approval
+When the user replies "approved":
+1. Create the `app/` directory if it doesn't exist.
+2. Generate application code only under `app/`.
+3. Say "I will create sprint plan" and populate sprint files.
 
 ## Sprint Plan (Post-Approval)
 If the user approves, the agent should say "I will create sprint plan" and then populate:

@@ -9,3 +9,4 @@ Read and follow:
 Init trigger: when the user message is exactly `init`, start the intake flow.
 Do not write application code before explicit approval.
 All application code must live under `app/`.
+Create the `app/` directory if it doesn't exist when approval is received.

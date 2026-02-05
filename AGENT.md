@@ -10,5 +10,6 @@ Key rules (summary):
 - Type `init` to start the intake flow.
 - Do not write application code before explicit approval.
 - All application code must be generated under `app/` only.
+- Create the `app/` directory if it doesn't exist when approval is received.
 - Specs and decisions live under `sdd/memory-bank/`.
 - After intake, auto-fill spec files with collected answers.

@@ -38,9 +38,11 @@ Developers can tailor the structure and prompts to a specific agent by updating 
 
 ## Folder Structure
 - `sdd/` spec rules, memory bank, and process artifacts
-- `app/` application code only
+- `app/` application code only (created after approval)
 - `docs/` project documentation
 - `scripts/` helper scripts
+
+**Note:** The `app/` directory does not exist in this repository because SDD Spine is a template/framework. When you use SDD Spine for your project, the `app/` directory will be created automatically after the intake process and approval. All your application code will live there.
 
 ## Use Cases
 - Starting a new project with a spec-first process
