@@ -2,36 +2,46 @@
 
 This guide explains the end-to-end workflow in SDD Spine and shows how the intake, validation, approval gate, and post-approval skills fit together.
 
-## The Workflow (Mermaid)
+## Workflow Scenarios (Mermaid)
+
+The diagrams below are intentionally split by scenario so each stays readable. The README keeps only the "at a glance" version.
+
+### Scenario 1: Happy Path (Init -> Intake -> Validate -> Approved)
 
 ```mermaid
 flowchart TD
-  start([Open repo root in your agent]) --> init[User runs init]
-  init --> p1[Phase 1 core intake]
-  p1 --> ck1[Checkpoint: write specs and update intake state]
-  ck1 --> v1{Validate phase 1}
-  v1 -- fails --> fix1[Ask only missing or invalid answers]
-  fix1 --> ck1
-  v1 -- passes --> p2[Phase 2 type specific follow ups]
-  p2 --> p2b[Phase 2b API style follow ups if applicable]
-  p2b --> p3{Advanced questions}
-  p3 -- skip --> ck2[Checkpoint: write specs and update intake state]
-  p3 -- answer --> adv[Ask Phase 3 questions in small batches]
-  adv --> ck2
-  ck2 --> v2{Validate specs}
-  v2 -- fails --> fix2[Report validation errors and ask targeted follow ups]
-  fix2 --> ck2
-  v2 -- passes --> approveQ[Ask for explicit approval: user replies approved]
-  approveQ --> approved{Approved}
-  approved -- no --> p2
-  approved -- yes --> appdir[Ensure app directory exists]
-  appdir --> sprint[Create sprint plan files]
-  sprint --> skill[Pick skills before coding]
-  skill --> code[Generate application code under app only]
-  code --> change{Spec change later}
-  change -- yes --> spec[Update specs and spec history then validate and reapprove if needed]
-  spec --> code
-  change -- no --> done([Continue development and release])
+  A[Pick an agent adapter] --> B[Run init]
+  B --> C[Answer intake questions]
+  C --> D{Validation passes}
+  D -- no --> C
+  D -- yes --> E[Reply approved]
+  E --> F[Generate code under app only]
+```
+
+### Scenario 2: Validation Fails (Targeted Fix Loop)
+
+```mermaid
+flowchart TD
+  A[Run init] --> B[Answer questions]
+  B --> C{Validation passes}
+  C -- no --> D[Agent reports missing or invalid fields]
+  D --> B
+  C -- yes --> E[Continue intake phases]
+```
+
+### Scenario 3: After Approval (Spec Change)
+
+```mermaid
+flowchart TD
+  A[Need a change] --> B[Update specs first]
+  B --> C[Record spec history]
+  C --> D[Validate specs]
+  D --> E{Re approval needed}
+  E -- yes --> F[Ask for approval again]
+  F --> G{Approved}
+  G -- no --> B
+  G -- yes --> H[Update code under app]
+  E -- no --> H
 ```
 
 ## Quick Checklist
@@ -56,6 +66,11 @@ flowchart TD
   - `sdd/memory-bank/core/spec-history.md`
 - Post-approval skills:
   - `sdd/.agent/skills/USAGE.md`
+
+## Example Scenarios
+- Backend API: [`docs/examples/backend-api-orders-service.md`](docs/examples/backend-api-orders-service.md)
+- Worker: [`docs/examples/worker-billing-reconciler.md`](docs/examples/worker-billing-reconciler.md)
+- CLI tool: [`docs/examples/cli-reporting-tool.md`](docs/examples/cli-reporting-tool.md)
 
 ## Common Mistakes
 - Generating code before approval: not allowed (approval gate).

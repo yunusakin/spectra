@@ -21,56 +21,24 @@ A spec-driven development (SDD) backbone that keeps project structure stable whi
 
 > Resume: If you stop mid-intake, run `init` again. Progress is tracked in [`sdd/memory-bank/core/intake-state.md`](sdd/memory-bank/core/intake-state.md).
 
-## Workflow Diagram (Mermaid)
+## Workflow (At A Glance)
 
 ```mermaid
 flowchart TD
-  S([Open repo]) --> A[Pick an agent adapter]
-  A --> I[Run init]
-
-  subgraph Intake["Intake and validation"]
-    direction TB
-    P1[Phase 1 core intake] --> V1{Validate phase 1}
-    V1 -- fix --> P1
-    V1 -- ok --> P2[Phase 2 type specific]
-    P2 --> API[Phase 2b API style]
-    API --> ADV{Advanced questions}
-    ADV -- skip --> VS{Validate specs}
-    ADV -- answer --> P3[Phase 3 advanced]
-    P3 --> VS
-    VS -- fix --> P2
-    VS -- ok --> AP[Ask for approval]
-    AP --> G{Approved}
-    G -- no --> P2
-  end
-
-  I --> P1
-
-  subgraph After["After approval"]
-    direction TB
-    APP[Ensure app directory exists] --> SK[Pick skills] --> CODE[Generate code under app only]
-    CODE --> CH{Spec change later}
-    CH -- yes --> UP[Update specs and spec history]
-    UP --> VS
-    CH -- no --> E([Continue development])
-  end
-
-  G -- yes --> APP
-
-  %% Styling (GitHub Mermaid compatible)
-  classDef phase fill:#E6F4FF,stroke:#0550AE,color:#0B2F5B
-  classDef decision fill:#FFF4E5,stroke:#B54708,color:#4A2500
-  classDef action fill:#ECFDF3,stroke:#027A48,color:#054F31
-  classDef terminal fill:#F2F4F7,stroke:#667085,color:#101828
-
-  class P1,P2,API,P3 phase
-  class V1,ADV,VS,G,CH decision
-  class S,A,I,AP,APP,SK,CODE,UP action
-  class E terminal
-
-  style Intake fill:#F8FAFC,stroke:#CBD5E1
-  style After fill:#F8FAFC,stroke:#CBD5E1
+  A[Pick an agent adapter] --> B[Run init]
+  B --> C[Answer intake questions]
+  C --> D{Validation passes}
+  D -- no --> C
+  D -- yes --> E[Reply approved]
+  E --> F[Generate code under app only]
+  F --> G{Spec change}
+  G -- yes --> C
+  G -- no --> H[Continue development]
 ```
+
+More detailed, scenario-based diagrams:
+- [`docs/getting-started.md`](docs/getting-started.md)
+- [`docs/workflow.md`](docs/workflow.md)
 
 ## Docs
 
