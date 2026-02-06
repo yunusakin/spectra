@@ -11,4 +11,4 @@ Key workflow:
 - Auto-fill spec files after intake with collected answers.
 
 Skills live under `sdd/.agent/skills/` and are used after approval.
-
+Prompts live under `sdd/.agent/prompts/` and are optional reusable templates/checklists.
