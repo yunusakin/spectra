@@ -64,6 +64,7 @@ Developers can tailor the structure and prompts to a specific agent by updating 
 
 ## Quick Start
 - See `docs/quick-start.md` for a concise, step-by-step guide to running the intake and approval flow.
+- See `docs/getting-started.md` for the full workflow with a Mermaid diagram.
 - See `docs/examples/` for copy-pasteable example intake answers and scenarios.
 - See `docs/workflow.md` for spec change, re-approval, and rollback guidance.
 - See `docs/testing.md` for repo validation and intake regression scenarios.
