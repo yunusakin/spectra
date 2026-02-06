@@ -2,6 +2,35 @@
 
 SDD Spine is a spec-driven development backbone that keeps project structure stable while working with AI agents or human-driven workflows.
 
+## Getting Started
+1. Pick your agent adapter file:
+   - Codex: `AGENTS.md`
+   - Claude: `CLAUDE.md`
+   - Cursor: `.cursorrules`
+   - Other tools: `AGENT.md`
+2. Open your agent in the repo root and type `init`.
+3. Answer the intake questions in phases. The agent will:
+   - write specs under `sdd/memory-bank/`
+   - track progress in `sdd/memory-bank/core/intake-state.md`
+   - validate checkpoints (`sdd/.agent/rules/intake/02-validation.md`)
+4. Fix any validation errors the agent reports.
+5. Reply `approved`. After approval, all application code must be generated under `app/` only.
+
+Example intake answers (Phase 1):
+- Project name: Customer Orders Service
+- Primary purpose/goal: Manage customer orders, payments, and shipment status.
+- App type: Backend API
+- Primary language + version: Java 21
+- Framework + version: Spring Boot 3.2
+- Architecture style: Hexagonal
+- Primary data store + version: PostgreSQL 16
+- Deployment target: Kubernetes
+- API style: REST
+
+If you stop mid-intake, re-run `init` later. The agent should resume using `sdd/memory-bank/core/intake-state.md`.
+
+If requirements change after approval, update specs first, record the change in `sdd/memory-bank/core/spec-history.md`, and re-approve when required (see `docs/workflow.md`).
+
 ## Goals
 - Stable, spec-first workflow across projects
 - Clear separation of specs and application code
@@ -55,16 +84,9 @@ Developers can tailor the structure and prompts to a specific agent by updating 
 - Enforcing a specific programming language or tech stack
 - Shipping end-user features directly
 
-## Workflow
-1. Open an agent in the repo root.
-2. Type `init` to start intake.
-3. Answer the mandatory questions.
-4. Review the auto-filled spec files.
-5. Reply `approved` to start coding in `app/`.
-
-## Quick Start
-- See `docs/quick-start.md` for a concise, step-by-step guide to running the intake and approval flow.
-- See `docs/getting-started.md` for the full workflow with a Mermaid diagram.
+## Docs
+- `docs/getting-started.md`: Full workflow with Mermaid diagram.
+- `docs/quick-start.md`: Concise step-by-step intake + approval flow.
 - See `docs/examples/` for copy-pasteable example intake answers and scenarios.
 - See `docs/workflow.md` for spec change, re-approval, and rollback guidance.
 - See `docs/testing.md` for repo validation and intake regression scenarios.
