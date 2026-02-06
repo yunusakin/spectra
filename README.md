@@ -8,20 +8,24 @@ A spec-driven development (SDD) backbone that keeps project structure stable whi
 
 ## Quick Start
 
-1. Pick your agent adapter:
+1. 🧩 Choose an agent adapter:
    - Codex: [`AGENTS.md`](AGENTS.md)
    - Claude: [`CLAUDE.md`](CLAUDE.md)
    - Cursor: [`.cursorrules`](.cursorrules)
    - Other tools: [`AGENT.md`](AGENT.md)
-2. In the repo root, run: `init`
-3. Complete intake in phases (Core -> Type-specific -> Optional Advanced).
-4. Fix any validation errors (rules: [`sdd/.agent/rules/intake/02-validation.md`](sdd/.agent/rules/intake/02-validation.md)).
-5. When validation passes, reply `approved`.
-6. After approval, all application code must be generated under `app/` only (see [`app/README.md`](app/README.md)).
+2. ▶️ In the repo root, run: `init`
+3. 📝 Complete intake in phases (Core -> Type-specific -> Optional Advanced).
+4. ✅ Fix any validation errors (rules: [`sdd/.agent/rules/intake/02-validation.md`](sdd/.agent/rules/intake/02-validation.md)).
+5. 🔒 When validation passes, reply `approved`.
+6. 🏗️ After approval, all application code must be generated under `app/` only (see [`app/README.md`](app/README.md)).
 
-> Resume: If you stop mid-intake, run `init` again. Progress is tracked in [`sdd/memory-bank/core/intake-state.md`](sdd/memory-bank/core/intake-state.md).
+> 🔁 Resume: If you stop mid-intake, run `init` again. Progress is tracked in [`sdd/memory-bank/core/intake-state.md`](sdd/memory-bank/core/intake-state.md).
 
-## Workflow (At A Glance)
+## Workflow Scenarios (Mermaid)
+
+### Scenario 1: Happy Path
+
+✅ Default path for most projects.
 
 ```mermaid
 flowchart TD
@@ -31,12 +35,39 @@ flowchart TD
   D -- no --> C
   D -- yes --> E[Reply approved]
   E --> F[Generate code under app only]
-  F --> G{Spec change}
-  G -- yes --> C
-  G -- no --> H[Continue development]
 ```
 
-More detailed, scenario-based diagrams:
+### Scenario 2: Validation Fails
+
+🔁 When validation fails, the agent should ask only targeted follow ups until the next validation pass.
+
+```mermaid
+flowchart TD
+  A[Run validation] --> B{Missing or invalid fields}
+  B -- yes --> C[Agent reports errors and asks targeted follow ups]
+  C --> D[User answers]
+  D --> A
+  B -- no --> E[Proceed to next phase]
+```
+
+### Scenario 3: Spec Change After Approval
+
+🔄 When requirements change, update specs first, then validate, then update code under `app/`.
+
+```mermaid
+flowchart TD
+  A[Need a change] --> B[Update specs first]
+  B --> C[Record spec history]
+  C --> D[Validate specs]
+  D --> E{Re approval needed}
+  E -- yes --> F[Ask for approval again]
+  F --> G{Approved}
+  G -- no --> B
+  G -- yes --> H[Update code under app]
+  E -- no --> H
+```
+
+For the full walkthrough and edge cases, see:
 - [`docs/getting-started.md`](docs/getting-started.md)
 - [`docs/workflow.md`](docs/workflow.md)
 
@@ -46,7 +77,7 @@ More detailed, scenario-based diagrams:
 | --- | --- |
 | [`docs/overview.md`](docs/overview.md) | What this repo is and the core principles |
 | [`docs/quick-start.md`](docs/quick-start.md) | Minimal path: init -> validate -> approved |
-| [`docs/getting-started.md`](docs/getting-started.md) | Full walkthrough + detailed diagram |
+| [`docs/getting-started.md`](docs/getting-started.md) | Full walkthrough (diagrams are in this README) |
 | [`docs/workflow.md`](docs/workflow.md) | Resume, spec changes, re-approval, rollback |
 | [`docs/testing.md`](docs/testing.md) | Repo validation and regression scenarios |
 | [`docs/examples/`](docs/examples/) | Copy-paste scenarios for common app types |

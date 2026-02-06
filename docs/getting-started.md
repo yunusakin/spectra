@@ -4,45 +4,11 @@ This guide explains the end-to-end workflow in SDD Spine and shows how the intak
 
 ## Workflow Scenarios (Mermaid)
 
-The diagrams below are intentionally split by scenario so each stays readable. The README keeps only the "at a glance" version.
+All Mermaid workflow diagrams live in the repo [`README.md`](../README.md#workflow-scenarios-mermaid) so the entry page stays self-contained.
 
-### Scenario 1: Happy Path (Init -> Intake -> Validate -> Approved)
-
-```mermaid
-flowchart TD
-  A[Pick an agent adapter] --> B[Run init]
-  B --> C[Answer intake questions]
-  C --> D{Validation passes}
-  D -- no --> C
-  D -- yes --> E[Reply approved]
-  E --> F[Generate code under app only]
-```
-
-### Scenario 2: Validation Fails (Targeted Fix Loop)
-
-```mermaid
-flowchart TD
-  A[Run init] --> B[Answer questions]
-  B --> C{Validation passes}
-  C -- no --> D[Agent reports missing or invalid fields]
-  D --> B
-  C -- yes --> E[Continue intake phases]
-```
-
-### Scenario 3: After Approval (Spec Change)
-
-```mermaid
-flowchart TD
-  A[Need a change] --> B[Update specs first]
-  B --> C[Record spec history]
-  C --> D[Validate specs]
-  D --> E{Re approval needed}
-  E -- yes --> F[Ask for approval again]
-  F --> G{Approved}
-  G -- no --> B
-  G -- yes --> H[Update code under app]
-  E -- no --> H
-```
+- Scenario 1: Happy path: [`README.md#scenario-1-happy-path`](../README.md#scenario-1-happy-path)
+- Scenario 2: Validation fails: [`README.md#scenario-2-validation-fails`](../README.md#scenario-2-validation-fails)
+- Scenario 3: Spec change after approval: [`README.md#scenario-3-spec-change-after-approval`](../README.md#scenario-3-spec-change-after-approval)
 
 ## Quick Checklist
 
