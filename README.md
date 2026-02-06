@@ -4,17 +4,43 @@ SDD Spine is a spec-driven development backbone that keeps project structure sta
 
 ## Getting Started
 1. Pick your agent adapter file:
-   - Codex: `AGENTS.md`
-   - Claude: `CLAUDE.md`
-   - Cursor: `.cursorrules`
-   - Other tools: `AGENT.md`
+   - Codex: [`AGENTS.md`](AGENTS.md)
+   - Claude: [`CLAUDE.md`](CLAUDE.md)
+   - Cursor: [`.cursorrules`](.cursorrules)
+   - Other tools: [`AGENT.md`](AGENT.md)
 2. Open your agent in the repo root and type `init`.
 3. Answer the intake questions in phases. The agent will:
-   - write specs under `sdd/memory-bank/`
-   - track progress in `sdd/memory-bank/core/intake-state.md`
-   - validate checkpoints (`sdd/.agent/rules/intake/02-validation.md`)
+   - write specs under [`sdd/memory-bank/`](sdd/memory-bank/)
+   - track progress in [`sdd/memory-bank/core/intake-state.md`](sdd/memory-bank/core/intake-state.md)
+   - validate checkpoints ([`sdd/.agent/rules/intake/02-validation.md`](sdd/.agent/rules/intake/02-validation.md))
 4. Fix any validation errors the agent reports.
-5. Reply `approved`. After approval, all application code must be generated under `app/` only.
+5. Reply `approved`. After approval, all application code must be generated under `app/` only (see [`app/README.md`](app/README.md)).
+
+## Workflow Diagram (Mermaid)
+
+```mermaid
+flowchart TD
+  A[Open repo root in your agent] --> B[User: type `init`]
+  B --> C[Phase 1: Core intake]
+  C --> D{Validate Phase 1}
+  D -- fails --> C
+  D -- passes --> E[Phase 2: Type-specific + Phase 2b: API-style]
+  E --> F{Phase 3 (Advanced)?}
+  F -- skip --> G{Validate specs}
+  F -- do --> H[Phase 3 questions]
+  H --> G
+  G -- fails --> E
+  G -- passes --> I[Ask for approval: reply `approved`]
+  I --> J{Approved?}
+  J -- no --> E
+  J -- yes --> K[Ensure `app/` exists]
+  K --> L[Pick skill(s)]
+  L --> M[Generate code under `app/` only]
+  M --> N{Spec change later?}
+  N -- yes --> O[Update specs + spec-history + validate + re-approve if needed]
+  O --> M
+  N -- no --> P[Continue development / release]
+```
 
 Example intake answers (Phase 1):
 - Project name: Customer Orders Service
@@ -27,9 +53,9 @@ Example intake answers (Phase 1):
 - Deployment target: Kubernetes
 - API style: REST
 
-If you stop mid-intake, re-run `init` later. The agent should resume using `sdd/memory-bank/core/intake-state.md`.
+If you stop mid-intake, re-run `init` later. The agent should resume using [`sdd/memory-bank/core/intake-state.md`](sdd/memory-bank/core/intake-state.md).
 
-If requirements change after approval, update specs first, record the change in `sdd/memory-bank/core/spec-history.md`, and re-approve when required (see `docs/workflow.md`).
+If requirements change after approval, update specs first, record the change in [`sdd/memory-bank/core/spec-history.md`](sdd/memory-bank/core/spec-history.md), and re-approve when required (see [`docs/workflow.md`](docs/workflow.md)).
 
 ## Goals
 - Stable, spec-first workflow across projects
@@ -85,11 +111,11 @@ Developers can tailor the structure and prompts to a specific agent by updating 
 - Shipping end-user features directly
 
 ## Docs
-- `docs/getting-started.md`: Full workflow with Mermaid diagram.
-- `docs/quick-start.md`: Concise step-by-step intake + approval flow.
-- See `docs/examples/` for copy-pasteable example intake answers and scenarios.
-- See `docs/workflow.md` for spec change, re-approval, and rollback guidance.
-- See `docs/testing.md` for repo validation and intake regression scenarios.
+- [`docs/getting-started.md`](docs/getting-started.md): Full workflow with Mermaid diagram.
+- [`docs/quick-start.md`](docs/quick-start.md): Concise step-by-step intake + approval flow.
+- [`docs/examples/`](docs/examples/): Copy-pasteable example intake answers and scenarios.
+- [`docs/workflow.md`](docs/workflow.md): Spec change, re-approval, and rollback guidance.
+- [`docs/testing.md`](docs/testing.md): Repo validation and intake regression scenarios.
 
 ## Roadmap
 - Add templates for common project types
@@ -103,7 +129,7 @@ Developers can tailor the structure and prompts to a specific agent by updating 
 - Prefer small, focused PRs with clear scope.
 
 ## Entry Files for Agents
-- `AGENT.md` (generic adapter)
-- `AGENTS.md` (Codex adapter)
-- `CLAUDE.md` (Claude adapter)
-- `.cursorrules` (Cursor adapter)
+- [`AGENT.md`](AGENT.md) (generic adapter)
+- [`AGENTS.md`](AGENTS.md) (Codex adapter)
+- [`CLAUDE.md`](CLAUDE.md) (Claude adapter)
+- [`.cursorrules`](.cursorrules) (Cursor adapter)
