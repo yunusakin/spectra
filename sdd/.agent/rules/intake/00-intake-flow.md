@@ -31,6 +31,8 @@ After each phase, checkpoint by updating spec files. This enables resume if inta
 
 ## Question Rules
 - Keep each question batch small (aim for <= 10 questions per turn).
+- If a phase has > 10 questions, split it into multiple turns (e.g., Phase 1a / 1b).
+- Prefer "answer in bullets" prompts and accept partial answers; then ask the next smallest relevant batch.
 - After Phase 2, explicitly offer to continue with Phase 3 or skip advanced questions.
 - Every multiple-choice question must include an `Other` option.
 - If a free-text answer is blank, omit that section from docs.
@@ -58,11 +60,17 @@ Additionally, apply API-style follow-ups:
 - Tech stack: `sdd/memory-bank/tech/stack.md`
 - Architecture: `sdd/memory-bank/arch/patterns-overview.md`
 - Current status: `sdd/memory-bank/core/activeContext.md`
+- Intake progress (resume): `sdd/memory-bank/core/intake-state.md`
 
 ## Checkpointing / Resume
 - After Phase 1, write at least: Project Brief, Tech Stack, Architecture Patterns Overview.
 - After Phase 2, update: Requirements and Constraints with the app-type specifics.
 - After Phase 3, fill: observability, testing, environments, compliance constraints where applicable.
+- After each user response during intake, update `core/intake-state.md` with:
+  - current phase
+  - phase completion checkboxes
+  - missing mandatory fields (if any)
+  - last updated date
 - If the user re-runs `init` and spec files already contain partial answers, treat it as a resume:
   1. Ask only missing mandatory fields first.
   2. Then offer to continue Phase 2/3.

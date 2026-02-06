@@ -9,6 +9,9 @@ The intake is designed to be run in phases:
 Users can answer in a single message using bullets.
 
 ## Phase 1: Core (Required)
+Ask in small batches (<= 10 questions per turn). If the user prefers, they can answer all Phase 1 questions at once.
+
+### Phase 1a: Project Basics
 1) Project name? (free text)
 2) Primary purpose/goal? (free text)
 3) App type?
@@ -20,6 +23,8 @@ Users can answer in a single message using bullets.
    F) Worker/Batch
    G) Library/SDK
    H) Other
+
+### Phase 1b: Language / Framework / Architecture
 4) Primary language?
    A) Java
    B) .NET
@@ -44,6 +49,8 @@ Users can answer in a single message using bullets.
    D) Microservices
    E) Event-Driven
    F) Other
+
+### Phase 1c: Data / Deployment / API Style
 9) Primary data store?
    A) PostgreSQL
    B) MySQL
@@ -277,6 +284,9 @@ Ask only the section that matches the chosen API style (if applicable).
 - Delivery semantics? A) At-most-once B) At-least-once C) Exactly-once D) Other
 
 ## Phase 3: Advanced (Optional)
+Ask in small batches (<= 10 questions per turn). Offer to skip Phase 3 entirely after Phase 2.
+
+### Phase 3a: Product / NFR Targets
 1) Non-goals/exclusions? (free text)
 2) Performance targets?
    A) None
@@ -303,6 +313,8 @@ Ask only the section that matches the chosen API style (if applicable).
    A) Plain text
    B) Structured JSON
    C) Other
+
+### Phase 3b: Quality / Delivery / Compliance
 7) Testing strategy?
    A) Unit only
    B) Unit+Integration
@@ -337,4 +349,3 @@ Ask only the section that matches the chosen API style (if applicable).
     E) Other
 13) Timeline/milestones? (free text)
 14) Approval gate: confirm you will review the generated spec files before coding? (Yes/No)
-

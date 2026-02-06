@@ -7,6 +7,7 @@
 5. Answer the Phase 1 (Core) mandatory intake questions about project name, purpose, tech stack, and architecture.
 6. If prompted, continue with Phase 2 (type-specific) follow-ups that match your app type, and optionally skip Phase 3 (advanced) questions.
 7. Review the generated spec files under `sdd/memory-bank/`.
+   - If you stop mid-intake, re-run `init` later. The agent should resume using `sdd/memory-bank/core/intake-state.md`.
 8. Reply `approved` when you are happy with the specs so the agent can start coding in `app/` (see `app/README.md` for a suggested layout).
 
 <!--

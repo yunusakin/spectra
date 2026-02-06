@@ -5,6 +5,7 @@
 - `core/progress.md`
 
 ## Task-Based
+- `core/intake-state.md` (during intake / resume)
 - `tech/stack.md`
 - `arch/patterns-overview.md`
 - `core/sprint-current.md` (if using sprints)
