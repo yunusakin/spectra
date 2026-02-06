@@ -20,26 +20,26 @@ SDD Spine is a spec-driven development backbone that keeps project structure sta
 
 ```mermaid
 flowchart TD
-  A[Open repo root in your agent] --> B[User: type `init`]
-  B --> C[Phase 1: Core intake]
-  C --> D{Validate Phase 1}
+  A[Open repo root in your agent] --> B[User runs init]
+  B --> C[Phase 1 core intake]
+  C --> D{Validate phase 1}
   D -- fails --> C
-  D -- passes --> E[Phase 2: Type-specific + Phase 2b: API-style]
-  E --> F{Phase 3 (Advanced)?}
+  D -- passes --> E[Phase 2 type specific and API style]
+  E --> F{Advanced questions}
   F -- skip --> G{Validate specs}
-  F -- do --> H[Phase 3 questions]
+  F -- answer --> H[Phase 3 questions]
   H --> G
   G -- fails --> E
-  G -- passes --> I[Ask for approval: reply `approved`]
-  I --> J{Approved?}
+  G -- passes --> I[Ask for approval: user replies approved]
+  I --> J{Approved}
   J -- no --> E
-  J -- yes --> K[Ensure `app/` exists]
-  K --> L[Pick skill(s)]
-  L --> M[Generate code under `app/` only]
-  M --> N{Spec change later?}
-  N -- yes --> O[Update specs + spec-history + validate + re-approve if needed]
+  J -- yes --> K[Ensure app directory exists]
+  K --> L[Pick skills]
+  L --> M[Generate code under app only]
+  M --> N{Spec change later}
+  N -- yes --> O[Update specs and spec history then validate and reapprove if needed]
   O --> M
-  N -- no --> P[Continue development / release]
+  N -- no --> P[Continue development and release]
 ```
 
 Example intake answers (Phase 1):

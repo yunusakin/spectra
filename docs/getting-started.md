@@ -6,32 +6,32 @@ This guide explains the end-to-end workflow in SDD Spine and shows how the intak
 
 ```mermaid
 flowchart TD
-  start([Open repo root in your agent]) --> init[User: type `init`]
-  init --> p1[Phase 1: Core intake]
-  p1 --> ck1[Checkpoint: write specs + update intake-state]
-  ck1 --> v1{Validate Phase 1}
-  v1 -- fails --> fix1[Ask only missing/invalid answers]
+  start([Open repo root in your agent]) --> init[User runs init]
+  init --> p1[Phase 1 core intake]
+  p1 --> ck1[Checkpoint: write specs and update intake state]
+  ck1 --> v1{Validate phase 1}
+  v1 -- fails --> fix1[Ask only missing or invalid answers]
   fix1 --> ck1
-  v1 -- passes --> p2[Phase 2: Type-specific follow-ups]
-  p2 --> p2b[Phase 2b: API-style follow-ups (if applicable)]
-  p2b --> p3{Phase 3: Advanced?}
-  p3 -- skip --> ck2[Checkpoint: write specs + update intake-state]
-  p3 -- do --> adv[Ask Phase 3 questions in small batches]
+  v1 -- passes --> p2[Phase 2 type specific follow ups]
+  p2 --> p2b[Phase 2b API style follow ups if applicable]
+  p2b --> p3{Advanced questions}
+  p3 -- skip --> ck2[Checkpoint: write specs and update intake state]
+  p3 -- answer --> adv[Ask Phase 3 questions in small batches]
   adv --> ck2
   ck2 --> v2{Validate specs}
-  v2 -- fails --> fix2[Report `Validation errors` + ask targeted follow-ups]
+  v2 -- fails --> fix2[Report validation errors and ask targeted follow ups]
   fix2 --> ck2
-  v2 -- passes --> approveQ[Ask for explicit approval: reply `approved`]
-  approveQ --> approved{User replied `approved`?}
+  v2 -- passes --> approveQ[Ask for explicit approval: user replies approved]
+  approveQ --> approved{Approved}
   approved -- no --> p2
-  approved -- yes --> appdir[Ensure `app/` exists (create if missing)]
+  approved -- yes --> appdir[Ensure app directory exists]
   appdir --> sprint[Create sprint plan files]
-  sprint --> skill[Pick skill(s) before coding]
-  skill --> code[Generate application code under `app/` only]
-  code --> change{Spec change later?}
-  change -- yes --> spec[Update specs + spec-history + validate + re-approval if needed]
+  sprint --> skill[Pick skills before coding]
+  skill --> code[Generate application code under app only]
+  code --> change{Spec change later}
+  change -- yes --> spec[Update specs and spec history then validate and reapprove if needed]
   spec --> code
-  change -- no --> done([Continue development / release])
+  change -- no --> done([Continue development and release])
 ```
 
 ## Quick Checklist
@@ -61,4 +61,3 @@ flowchart TD
 - Generating code before approval: not allowed (approval gate).
 - Skipping validation: the agent should not ask for approval until validation passes.
 - Changing a mandatory choice (stack/arch/API style) after approval without re-approval.
-
