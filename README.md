@@ -66,6 +66,7 @@ Developers can tailor the structure and prompts to a specific agent by updating 
 - See `docs/quick-start.md` for a concise, step-by-step guide to running the intake and approval flow.
 - See `docs/examples/` for copy-pasteable example intake answers and scenarios.
 - See `docs/workflow.md` for spec change, re-approval, and rollback guidance.
+- See `docs/testing.md` for repo validation and intake regression scenarios.
 
 ## Roadmap
 - Add templates for common project types
