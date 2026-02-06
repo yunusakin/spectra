@@ -19,7 +19,7 @@ All canonical rules live in `sdd/.agent/`.
 - Free-text answers may use Markdown; keep it concise and prefer bullets.
 - Run intake in phases and validate checkpoints per `sdd/.agent/rules/intake/02-validation.md`.
 - Use `sdd/memory-bank/core/intake-state.md` to resume intake if interrupted.
-- After intake, auto-fill the spec files with the collected answers (omit blank sections).
+- After intake, auto-fill spec files with collected answers (omit blank sections).
 - After approval, follow the approval gate including sprint plan creation.
 
 ## Canonical Workflows
