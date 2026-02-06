@@ -62,6 +62,9 @@ Developers can tailor the structure and prompts to a specific agent by updating 
 4. Review the auto-filled spec files.
 5. Reply `approved` to start coding in `app/`.
 
+## Quick Start
+- See `docs/quick-start.md` for a concise, step-by-step guide to running the intake and approval flow.
+
 ## Roadmap
 - Add templates for common project types
 - Provide reusable checklists for reviews and releases
