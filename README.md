@@ -21,56 +21,31 @@ A spec-driven development (SDD) backbone that keeps project structure stable whi
 
 > 🔁 Resume: If you stop mid-intake, run `init` again. Progress is tracked in [`sdd/memory-bank/core/intake-state.md`](sdd/memory-bank/core/intake-state.md).
 
-## Workflow Scenarios (Mermaid)
+## Workflow Scenarios (Excalidraw)
 
 ### Scenario 1: Happy Path
 
 ✅ Default path for most projects.
 
-```mermaid
-flowchart LR
-  Start([Start]) --> Adapter[Choose agent adapter]
-  Adapter --> Init[Run init]
-  Init --> Intake[Answer intake questions]
-  Intake --> Checkpoint[Agent writes specs and updates intake state]
-  Checkpoint --> Validate[Validate specs]
-  Validate --> Approve[Reply approved]
-  Approve --> Skills[Pick skills]
-  Skills --> Code[Generate code under app]
-  Code --> End([Done])
-```
+![Scenario 1: Happy Path](docs/diagrams/workflow-scenario-1-happy-path.svg)
+
+Source: `docs/diagrams/workflow-scenario-1-happy-path.excalidraw`
 
 ### Scenario 2: Validation Fails
 
 🔁 When validation fails, the agent should ask only targeted follow ups until the next validation pass.
 
-```mermaid
-flowchart LR
-  Intake[Answer intake questions] --> Check{Validation passes}
-  Check -->|No| Report[Agent reports missing or invalid fields]
-  Report --> Fix[User provides missing answers]
-  Fix --> Update[Agent updates specs and intake state]
-  Update --> Check
-  Check -->|Yes| Next[Proceed to next phase]
-```
+![Scenario 2: Validation Fails](docs/diagrams/workflow-scenario-2-validation-fails.svg)
+
+Source: `docs/diagrams/workflow-scenario-2-validation-fails.excalidraw`
 
 ### Scenario 3: Spec Change After Approval
 
 🔄 When requirements change, update specs first, then validate, then update code under `app/`.
 
-```mermaid
-flowchart LR
-  Change[Need a change] --> Specs[Update specs first]
-  Specs --> History[Record spec history]
-  History --> Validate[Validate specs]
-  Validate --> Reapprove{Re approval needed}
-  Reapprove -->|No| Code[Update code under app]
-  Reapprove -->|Yes| Ask[Ask for approval again]
-  Ask --> Approved{Approved}
-  Approved -->|No| Specs
-  Approved -->|Yes| Code
-  Code --> Done([Continue development])
-```
+![Scenario 3: Spec Change After Approval](docs/diagrams/workflow-scenario-3-spec-change-after-approval.svg)
+
+Source: `docs/diagrams/workflow-scenario-3-spec-change-after-approval.excalidraw`
 
 For the full walkthrough and edge cases, see:
 - [`docs/getting-started.md`](docs/getting-started.md)

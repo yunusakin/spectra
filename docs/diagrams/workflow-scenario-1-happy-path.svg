@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="260" viewBox="0 0 1100 260" role="img" aria-label="SDD Spine workflow scenario 1: happy path">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1e1e1e" />
+    </marker>
+    <style>
+      .node { fill: #ffffff; stroke: #1e1e1e; stroke-width: 2; }
+      .arrow { stroke: #1e1e1e; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .text { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 16px; fill: #1e1e1e; }
+    </style>
+  </defs>
+
+  <!-- Row 1 -->
+  <ellipse class="node" cx="80" cy="70" rx="60" ry="30" />
+  <rect class="node" x="170" y="40" width="170" height="60" />
+  <rect class="node" x="370" y="40" width="130" height="60" />
+  <rect class="node" x="530" y="40" width="190" height="60" />
+  <rect class="node" x="750" y="40" width="250" height="60" />
+
+  <line class="arrow" x1="140" y1="70" x2="170" y2="70" />
+  <line class="arrow" x1="340" y1="70" x2="370" y2="70" />
+  <line class="arrow" x1="500" y1="70" x2="530" y2="70" />
+  <line class="arrow" x1="720" y1="70" x2="750" y2="70" />
+
+  <!-- Snake connector -->
+  <path class="arrow" d="M 875 100 L 875 130 L 95 130 L 95 160" />
+
+  <!-- Row 2 -->
+  <rect class="node" x="20" y="160" width="150" height="60" />
+  <rect class="node" x="200" y="160" width="160" height="60" />
+  <rect class="node" x="390" y="160" width="130" height="60" />
+  <rect class="node" x="550" y="160" width="210" height="60" />
+  <ellipse class="node" cx="850" cy="190" rx="60" ry="30" />
+
+  <line class="arrow" x1="170" y1="190" x2="200" y2="190" />
+  <line class="arrow" x1="360" y1="190" x2="390" y2="190" />
+  <line class="arrow" x1="520" y1="190" x2="550" y2="190" />
+  <line class="arrow" x1="760" y1="190" x2="790" y2="190" />
+
+  <!-- Text: Row 1 -->
+  <text class="text" x="80" y="70" text-anchor="middle" dominant-baseline="middle">Start</text>
+
+  <text class="text" x="255" y="63" text-anchor="middle">Choose agent</text>
+  <text class="text" x="255" y="83" text-anchor="middle">adapter</text>
+
+  <text class="text" x="435" y="70" text-anchor="middle" dominant-baseline="middle">Run init</text>
+
+  <text class="text" x="625" y="63" text-anchor="middle">Answer intake</text>
+  <text class="text" x="625" y="83" text-anchor="middle">questions</text>
+
+  <text class="text" x="875" y="58" text-anchor="middle">Agent writes specs</text>
+  <text class="text" x="875" y="76" text-anchor="middle">and updates intake</text>
+  <text class="text" x="875" y="94" text-anchor="middle">state</text>
+
+  <!-- Text: Row 2 -->
+  <text class="text" x="95" y="183" text-anchor="middle">Validate</text>
+  <text class="text" x="95" y="203" text-anchor="middle">specs</text>
+
+  <text class="text" x="280" y="183" text-anchor="middle">Reply</text>
+  <text class="text" x="280" y="203" text-anchor="middle">approved</text>
+
+  <text class="text" x="455" y="190" text-anchor="middle" dominant-baseline="middle">Pick skills</text>
+
+  <text class="text" x="655" y="183" text-anchor="middle">Generate code</text>
+  <text class="text" x="655" y="203" text-anchor="middle">under app</text>
+
+  <text class="text" x="850" y="190" text-anchor="middle" dominant-baseline="middle">Done</text>
+</svg>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="360" viewBox="0 0 1100 360" role="img" aria-label="SDD Spine workflow scenario 3: spec change after approval">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1e1e1e" />
+    </marker>
+    <style>
+      .node { fill: #ffffff; stroke: #1e1e1e; stroke-width: 2; }
+      .arrow { stroke: #1e1e1e; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .text { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 16px; fill: #1e1e1e; }
+      .label { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; font-size: 14px; fill: #1e1e1e; }
+    </style>
+  </defs>
+
+  <!-- Row 1 -->
+  <rect class="node" x="20" y="40" width="160" height="60" />
+  <rect class="node" x="200" y="40" width="180" height="60" />
+  <rect class="node" x="400" y="40" width="180" height="60" />
+  <rect class="node" x="600" y="40" width="160" height="60" />
+
+  <line class="arrow" x1="180" y1="70" x2="200" y2="70" />
+  <line class="arrow" x1="380" y1="70" x2="400" y2="70" />
+  <line class="arrow" x1="580" y1="70" x2="600" y2="70" />
+
+  <!-- Snake to Row 2 decision -->
+  <path class="arrow" d="M 680 100 L 680 130 L 110 130 L 110 170" />
+
+  <!-- Row 2 -->
+  <!-- Re-approval needed? diamond (bbox x=20 y=170 w=180 h=100) -->
+  <polygon class="node" points="110,170 200,220 110,270 20,220" />
+
+  <rect class="node" x="220" y="190" width="200" height="60" />
+
+  <!-- Approved diamond (bbox x=440 y=170 w=160 h=100) -->
+  <polygon class="node" points="520,170 600,220 520,270 440,220" />
+
+  <rect class="node" x="620" y="190" width="200" height="60" />
+  <ellipse class="node" cx="940" cy="220" rx="100" ry="30" />
+
+  <!-- Branches from re-approval decision -->
+  <line class="arrow" x1="200" y1="220" x2="220" y2="220" />
+  <text class="label" x="204" y="206">Yes</text>
+
+  <path class="arrow" d="M 110 270 L 110 320 L 720 320 L 720 250" />
+  <text class="label" x="120" y="314">No</text>
+
+  <!-- Ask -> Approved -> Code -> Done -->
+  <line class="arrow" x1="420" y1="220" x2="440" y2="220" />
+  <line class="arrow" x1="600" y1="220" x2="620" y2="220" />
+  <text class="label" x="606" y="206">Yes</text>
+
+  <line class="arrow" x1="820" y1="220" x2="840" y2="220" />
+
+  <!-- Approved No loops back to specs -->
+  <path class="arrow" d="M 520 170 L 520 20 L 290 20 L 290 40" />
+  <text class="label" x="494" y="34">No</text>
+
+  <!-- Text: Row 1 -->
+  <text class="text" x="100" y="70" text-anchor="middle" dominant-baseline="middle">Need a change</text>
+
+  <text class="text" x="290" y="63" text-anchor="middle">Update specs</text>
+  <text class="text" x="290" y="83" text-anchor="middle">first</text>
+
+  <text class="text" x="490" y="63" text-anchor="middle">Record spec</text>
+  <text class="text" x="490" y="83" text-anchor="middle">history</text>
+
+  <text class="text" x="680" y="63" text-anchor="middle">Validate</text>
+  <text class="text" x="680" y="83" text-anchor="middle">specs</text>
+
+  <!-- Text: Row 2 -->
+  <text class="text" x="110" y="210" text-anchor="middle">Re approval</text>
+  <text class="text" x="110" y="230" text-anchor="middle">needed</text>
+
+  <text class="text" x="320" y="213" text-anchor="middle">Ask for approval</text>
+  <text class="text" x="320" y="233" text-anchor="middle">again</text>
+
+  <text class="text" x="520" y="220" text-anchor="middle" dominant-baseline="middle">Approved</text>
+
+  <text class="text" x="720" y="213" text-anchor="middle">Update code</text>
+  <text class="text" x="720" y="233" text-anchor="middle">under app</text>
+
+  <text class="text" x="940" y="220" text-anchor="middle" dominant-baseline="middle">Continue development</text>
+</svg>

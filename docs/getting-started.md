@@ -2,9 +2,9 @@
 
 This guide explains the end-to-end workflow in SDD Spine and shows how the intake, validation, approval gate, and post-approval skills fit together.
 
-## Workflow Scenarios (Mermaid)
+## Workflow Scenarios (Excalidraw)
 
-All Mermaid workflow diagrams live in the repo [`README.md`](../README.md#workflow-scenarios-mermaid) so the entry page stays self-contained.
+All workflow diagrams live in the repo [`README.md`](../README.md#workflow-scenarios-excalidraw) so the entry page stays self-contained.
 
 - Scenario 1: Happy path: [`README.md#scenario-1-happy-path`](../README.md#scenario-1-happy-path)
 - Scenario 2: Validation fails: [`README.md#scenario-2-validation-fails`](../README.md#scenario-2-validation-fails)
