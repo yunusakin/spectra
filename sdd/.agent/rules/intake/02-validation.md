@@ -50,14 +50,11 @@ If inconsistencies exist:
 
 ### 4) Spec File Presence + Minimum Content (Blocking)
 After Phase 1, ensure these files are updated with non-empty, human-readable content (not just templates/examples):
-- `sdd/memory-bank/core/projectbrief.md`
-- `sdd/memory-bank/tech/stack.md`
-- `sdd/memory-bank/arch/patterns-overview.md`
+- `sdd/memory-bank/core/projectbrief.md` (Project name, Purpose, App type)
 - `sdd/memory-bank/core/intake-state.md`
 
 After Phase 2, additionally ensure:
-- `sdd/memory-bank/core/requirements.md` includes top features / scope.
-- `sdd/memory-bank/core/constraints.md` includes key constraints (deployment/security/org).
+- `sdd/memory-bank/core/projectbrief.md` includes top features / scope and key constraints (deployment/security/org).
 
 Before asking for approval, also sanity check:
 - No unresolved placeholders like `TBD`, `TODO`, or `<...>` in the required spec files (unless inside an example comment).

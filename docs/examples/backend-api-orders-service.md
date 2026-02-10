@@ -52,8 +52,6 @@ Use this as a reference for answering `init` prompts.
 - Environments: Dev+Stage+Prod
 
 ## What You Should See Updated
-- `sdd/memory-bank/core/projectbrief.md` (name, purpose, app type)
+- `sdd/memory-bank/core/projectbrief.md` (name, purpose, app type, product context, requirements, constraints)
 - `sdd/memory-bank/tech/stack.md` (language/framework/db + versions)
 - `sdd/memory-bank/arch/patterns-overview.md` (hexagonal)
-- `sdd/memory-bank/core/requirements.md` and `sdd/memory-bank/core/constraints.md` (features, NFRs)
-

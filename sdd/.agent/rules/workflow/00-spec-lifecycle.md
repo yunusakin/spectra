@@ -64,4 +64,10 @@ If code/spec changes need to be undone:
   - prefer `git revert` over rewriting history
 - Update specs first to reflect the intended state after rollback.
 - Record the rollback in `sdd/memory-bank/core/spec-history.md` with the reason.
-- If the rollback is ambiguous or destructive, ask for confirmation before executing it.
+## Automated Progress Tracking (Mandatory)
+At the end of every task where a file is modified (spec or code), the agent MUST update `sdd/memory-bank/core/progress.md` with:
+- The latest task status.
+- A concise summary of what was changed.
+- Clear next steps.
+
+This ensures the Memory Bank remains the source of truth for the project's current state and prevents desynchronization during long sessions or between different agents.

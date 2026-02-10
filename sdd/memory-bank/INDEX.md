@@ -14,10 +14,7 @@
 - `core/sprint-plan.md` (if using sprints)
 
 ## Reference
-- `core/projectbrief.md`
-- `core/productContext.md`
-- `core/requirements.md`
-- `core/constraints.md`
+- `core/projectbrief.md` (Context, Requirements, Constraints)
 - `core/backlog.md`
 - `core/progress-archive.md`
 - `arch/decisions.md`

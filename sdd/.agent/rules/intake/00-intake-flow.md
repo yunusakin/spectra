@@ -55,9 +55,7 @@ Additionally, apply API-style follow-ups:
 - Async messaging: broker, delivery semantics, retry/DLQ.
 
 ## Where to Write Answers
-- Overview: `sdd/memory-bank/core/projectbrief.md`
-- Requirements: `sdd/memory-bank/core/requirements.md`
-- Constraints: `sdd/memory-bank/core/constraints.md`
+- Overview, Requirements, Constraints: `sdd/memory-bank/core/projectbrief.md`
 - Tech stack: `sdd/memory-bank/tech/stack.md`
 - Architecture: `sdd/memory-bank/arch/patterns-overview.md`
 - Current status: `sdd/memory-bank/core/activeContext.md`
@@ -65,7 +63,7 @@ Additionally, apply API-style follow-ups:
 
 ## Checkpointing / Resume
 - After Phase 1, write at least: Project Brief, Tech Stack, Architecture Patterns Overview.
-- After Phase 2, update: Requirements and Constraints with the app-type specifics.
+- After Phase 2, update: `projectbrief.md` with the app-type specifics (requirements and constraints).
 - After Phase 3, fill: observability, testing, environments, compliance constraints where applicable.
 - After each user response during intake, update `core/intake-state.md` with:
   - current phase
