@@ -10,25 +10,43 @@ Specs live in `sdd/memory-bank/`, agent rules in `sdd/.agent/`, application code
 
 ```mermaid
 flowchart TD
-    Init["Init"] --> Intake["Intake"]
+    Init(["🧩 Init"]) --> Intake["📝 Intake"]
 
-    subgraph spec ["Spec Phase"]
-        Intake --> Specs["Specs Written"]
-        Specs --> Validate{"Validation"}
-        Validate -->|Fail| Fix["Fix errors"]
-        Fix --> Validate
+    subgraph spec [" "]
+        direction TB
+        Intake --> Specs["📄 Specs"]
+        Specs --> Validate{"Validate"}
+        Validate -.->|Fail| Fix["🔧 Fix"]
+        Fix -.-> Validate
     end
 
-    Validate -->|Pass| Approve["Approved"]
+    Validate ==>|Pass| Approve{{"🔒 Approved"}}
 
-    subgraph dev ["Development Phase"]
-        Approve --> Scaffold["Scaffold"]
-        Scaffold --> Sprint["Sprint Loop"]
-        Sprint --> Verify["Verify"]
+    subgraph dev [" "]
+        direction TB
+        Approve ==> Scaffold["🏗️ Scaffold"]
+        Scaffold ==> Sprint["🔄 Sprint Loop"]
+        Sprint ==> Verify["✅ Verify"]
         Verify -->|Next item| Sprint
     end
 
-    Verify -->|Sprint done| Ship["Ship"]
+    Verify ==>|Sprint done| Ship(["🚀 Ship"])
+
+    classDef start fill:#6C5CE7,stroke:#6C5CE7,color:#fff,font-weight:bold
+    classDef phase fill:#0984E3,stroke:#0984E3,color:#fff
+    classDef gate fill:#00B894,stroke:#00B894,color:#fff,font-weight:bold
+    classDef action fill:#FDCB6E,stroke:#F39C12,color:#2D3436
+    classDef finish fill:#E17055,stroke:#E17055,color:#fff,font-weight:bold
+    classDef fix fill:#D63031,stroke:#D63031,color:#fff
+
+    class Init start
+    class Intake,Specs,Scaffold,Sprint,Verify phase
+    class Approve gate
+    class Fix fix
+    class Ship finish
+
+    style spec fill:none,stroke:#0984E3,stroke-width:2px,stroke-dasharray:5 5,color:#0984E3
+    style dev fill:none,stroke:#00B894,stroke-width:2px,stroke-dasharray:5 5,color:#00B894
 ```
 
 | Phase | What Happens |
@@ -114,18 +132,30 @@ How the agent works through backlog items after approval.
 
 ```mermaid
 flowchart TD
-  Pick["Pick next item"] --> Plan["Plan"]
-  Plan --> Skill["Skill check"]
-  Skill --> Code["Code"]
-  Code --> Test["Test"]
-  Test -->|Fail| Code
-  Test -->|Pass| Verify["Verify"]
-  Verify --> Update["Update progress"]
+  Pick(["📋 Pick"]) ==> Plan["📐 Plan"]
+  Plan ==> Skill{{"🧩 Skill Check"}}
+  Skill ==> Code["💻 Code"]
+  Code ==> Test{"🧪 Test"}
+  Test -.->|Fail| Code
+  Test ==>|Pass| Verify["✅ Verify"]
+  Verify ==> Update["📊 Update"]
   Update -->|More items| Pick
-  Update -->|Sprint done| Done(["Done"])
+  Update ==>|Sprint done| Done(["🚀 Done"])
 
-  Code -.->|Spec gap found| Discovery["Discovery protocol"]
-  Discovery -.->|User approves change| Plan
+  Code -.->|Spec gap| Discovery["🔍 Discovery"]
+  Discovery -.->|Approved| Plan
+
+  classDef start fill:#6C5CE7,stroke:#6C5CE7,color:#fff,font-weight:bold
+  classDef work fill:#0984E3,stroke:#0984E3,color:#fff
+  classDef check fill:#00B894,stroke:#00B894,color:#fff,font-weight:bold
+  classDef warn fill:#FDCB6E,stroke:#F39C12,color:#2D3436
+  classDef finish fill:#E17055,stroke:#E17055,color:#fff,font-weight:bold
+
+  class Pick start
+  class Plan,Code,Update work
+  class Skill,Test,Verify check
+  class Discovery warn
+  class Done finish
 ```
 
 ### Validation Failures
@@ -134,12 +164,23 @@ Agent asks targeted follow-ups until validation passes.
 
 ```mermaid
 flowchart LR
-  Intake["Intake answers"] --> Check{"Validation"}
-  Check -->|Fail| Report["Report errors"]
-  Report --> Fix["User fixes"]
-  Fix --> Update["Update specs"]
-  Update --> Check
-  Check -->|Pass| Next["Next phase"]
+  Intake(["📝 Answers"]) ==> Check{"Validate"}
+  Check -.->|Fail| Report["⚠️ Errors"]
+  Report -.-> Fix["🔧 Fix"]
+  Fix -.-> Update["📄 Update"]
+  Update -.-> Check
+  Check ==>|Pass| Next(["✅ Next"])
+
+  classDef start fill:#0984E3,stroke:#0984E3,color:#fff
+  classDef ok fill:#00B894,stroke:#00B894,color:#fff,font-weight:bold
+  classDef err fill:#D63031,stroke:#D63031,color:#fff
+  classDef fix fill:#FDCB6E,stroke:#F39C12,color:#2D3436
+
+  class Intake start
+  class Check,Update start
+  class Report err
+  class Fix fix
+  class Next ok
 ```
 
 ### Spec Changes After Approval
@@ -148,19 +189,29 @@ Requirements change — update specs first, then code.
 
 ```mermaid
 flowchart TD
-  Change["Need a change"] --> Type{"Change type?"}
+  Change(["💡 Change needed"]) ==> Type{"Type?"}
 
-  Type -->|Clarification| Update["Update specs"]
-  Type -->|Behavioral| Specs["Update specs"]
+  Type -->|Clarification| Update["📝 Update specs"]
+  Type ==>|Behavioral| Specs["📝 Update specs"]
 
-  Specs --> History["Record in spec-history"]
-  History --> Reapprove["Re-approval"]
-  Reapprove -->|Approved| Code["Update code"]
-  Reapprove -->|Rejected| Specs
+  Specs ==> History["📚 Spec history"]
+  History ==> Reapprove{{"🔒 Re-approve"}}
+  Reapprove ==>|Approved| Code["💻 Update code"]
+  Reapprove -.->|Rejected| Specs
 
-  Update --> Code
-  Code --> Verify["Verify and test"]
-  Verify --> Done(["Continue"])
+  Update ==> Code
+  Code ==> Verify["✅ Verify"]
+  Verify ==> Done(["Continue"])
+
+  classDef start fill:#6C5CE7,stroke:#6C5CE7,color:#fff
+  classDef work fill:#0984E3,stroke:#0984E3,color:#fff
+  classDef gate fill:#00B894,stroke:#00B894,color:#fff,font-weight:bold
+  classDef finish fill:#00B894,stroke:#00B894,color:#fff
+
+  class Change start
+  class Update,Specs,History,Code work
+  class Type,Reapprove gate
+  class Verify,Done finish
 ```
 
 See [`docs/getting-started.md`](docs/getting-started.md) and [`docs/workflow.md`](docs/workflow.md) for more detail.
