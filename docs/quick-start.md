@@ -8,8 +8,12 @@
 6. If prompted, continue with Phase 2 (type-specific) follow-ups that match your app type, and optionally skip Phase 3 (advanced) questions.
 7. Review the generated spec files under `sdd/memory-bank/`.
    - If you stop mid-intake, re-run `init` later. The agent should resume using `sdd/memory-bank/core/intake-state.md`.
-8. Reply `approved` when you are happy with the specs so the agent can start coding in `app/` (see `app/README.md` for a suggested layout).
-   - If you change requirements after approval, follow `docs/workflow.md` (spec updates + possible re-approval).
+8. Reply `approved` when you are happy with the specs so the agent can start coding.
+   - If you change requirements after approval, follow `docs/workflow.md`.
+9. After approval, the agent scaffolds the project under `app/` using a template matching your app type.
+10. The agent works through sprint items: code, test, verify, update progress, repeat.
+
+At any point, run `bash scripts/health-check.sh` to see a quick project status summary.
 
 <!--
 Example intake answers (very short):

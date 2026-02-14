@@ -245,4 +245,4 @@ API style:          REST
 
 ## License
 
-See [`LICENSE`](LICENSE).
+MIT — see [`LICENSE`](LICENSE).

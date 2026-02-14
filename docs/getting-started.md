@@ -4,11 +4,11 @@ This guide explains the end-to-end workflow in Spectra and shows how the intake,
 
 ## Workflow Scenarios (Mermaid)
 
-All Mermaid workflow diagrams live in the repo [`README.md`](../README.md#workflow-scenarios-mermaid) so the entry page stays self-contained.
+All Mermaid workflow diagrams live in the repo [`README.md`](../README.md#workflow-scenarios) so the entry page stays self-contained.
 
-- Scenario 1: Happy path: [`README.md#scenario-1-happy-path`](../README.md#scenario-1-happy-path)
-- Scenario 2: Validation fails: [`README.md#scenario-2-validation-fails`](../README.md#scenario-2-validation-fails)
-- Scenario 3: Spec change after approval: [`README.md#scenario-3-spec-change-after-approval`](../README.md#scenario-3-spec-change-after-approval)
+- Sprint execution: [`README.md#sprint-execution`](../README.md#sprint-execution)
+- Validation failures: [`README.md#validation-failures`](../README.md#validation-failures)
+- Spec changes after approval: [`README.md#spec-changes-after-approval`](../README.md#spec-changes-after-approval)
 
 ## Quick Checklist
 
@@ -35,6 +35,8 @@ All Mermaid workflow diagrams live in the repo [`README.md`](../README.md#workfl
 
 ## Example Scenarios
 - Backend API: [`examples/backend-api-orders-service.md`](examples/backend-api-orders-service.md)
+- Web Frontend: [`examples/web-frontend-dashboard.md`](examples/web-frontend-dashboard.md)
+- Full-Stack: [`examples/full-stack-booking-platform.md`](examples/full-stack-booking-platform.md)
 - Worker: [`examples/worker-billing-reconciler.md`](examples/worker-billing-reconciler.md)
 - CLI tool: [`examples/cli-reporting-tool.md`](examples/cli-reporting-tool.md)
 
