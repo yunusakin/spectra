@@ -10,3 +10,4 @@ This directory contains helper scripts for development and maintenance.
 ## Scripts
 - `validate-repo.sh`: Validate rule/spec index references, adapter consistency, and template formatting.
 - `spec-diff.sh`: Append a markdown diff entry for spec changes under `sdd/memory-bank/`.
+- `normalize-diagram-svgs.sh`: Add safe vertical padding to Excalidraw SVG exports to prevent clipped text on GitHub.

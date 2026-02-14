@@ -10,3 +10,4 @@ Recommended workflow:
 1. Edit the `.excalidraw` file in Excalidraw.
 2. Export as SVG (white background).
 3. Replace the matching `.svg` file in this folder.
+4. Run `scripts/normalize-diagram-svgs.sh docs/diagrams/*.svg` to add GitHub-safe vertical padding and avoid clipped text.
