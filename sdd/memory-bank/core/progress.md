@@ -1,7 +1,7 @@
 # Progress
 
 ## Done
-- Replaced Mermaid workflow diagrams with Excalidraw sources and Excalidraw-exported SVG snapshots for README rendering.
+- Replaced Mermaid workflow diagrams with Excalidraw sources and committed SVG snapshots for README rendering.
 - Implemented SDDLite: Consolidated product context, requirements, and constraints into `sdd/memory-bank/core/projectbrief.md` (retired separate files).
 - Updated intake rules and memory bank index to reflect the new structure.
 - Added mandatory automated progress tracking rule to `00-spec-lifecycle.md`.
