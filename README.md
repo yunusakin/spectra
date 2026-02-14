@@ -237,10 +237,11 @@ API style:          REST
 | [`overview.md`](docs/overview.md) | Principles and design philosophy |
 | [`quick-start.md`](docs/quick-start.md) | Shortest path: init → validate → approved |
 | [`getting-started.md`](docs/getting-started.md) | Full walkthrough |
-| [`workflow.md`](docs/workflow.md) | Resume, spec changes, rollback |
+| [`workflow.md`](docs/workflow.md) | Resume, post-approval workflows, spec changes, rollback |
 | [`testing.md`](docs/testing.md) | Validation and regression |
 | [`spec-merge.md`](docs/spec-merge.md) | Merging specs safely |
 | [`multi-project.md`](docs/multi-project.md) | Monorepo patterns |
+| [`monorepo-conventions.md`](docs/monorepo-conventions.md) | Naming, ownership, change rules |
 | [`examples/`](docs/examples/) | Common app type scenarios |
 
 ## License

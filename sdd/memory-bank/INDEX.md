@@ -25,3 +25,4 @@
 - `tech/gateway-stack.md`
 - `tech/functional-tests-stack.md`
 - `tech/frontend-bff-integration.md`
+- `tech/environments.md`

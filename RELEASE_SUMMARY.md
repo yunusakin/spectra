@@ -1,4 +1,4 @@
 # Release Summary
 
 ## Unreleased
-- Starter pack created.
+- Initial Spectra setup.

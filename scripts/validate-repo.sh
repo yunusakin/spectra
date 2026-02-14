@@ -209,7 +209,9 @@ if [[ -f "sdd/memory-bank/INDEX.md" ]]; then
 fi
 
 # Adapter consistency: bodies should match (ignore first line)
-tmp_dir="$(mktemp -d)"
+tmp_dir="$(mktemp -d 2>/dev/null)" \
+  || tmp_dir="$(TMPDIR=/tmp mktemp -d 2>/dev/null)" \
+  || { tmp_dir="${REPO_ROOT}/.validate-tmp"; mkdir -p "${tmp_dir}"; }
 cleanup() { rm -rf "${tmp_dir}"; }
 trap cleanup EXIT
 
