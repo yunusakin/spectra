@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # check-policy.sh — Approve-gate and progress-tracking policy checks.
-# Run in CI alongside validate-repo.sh to enforce SDD Spine invariants.
+# Run in CI alongside validate-repo.sh to enforce Spectra invariants.
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "${REPO_ROOT}"

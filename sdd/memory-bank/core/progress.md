@@ -1,13 +1,13 @@
 # Progress
 
 ## Done
-<!-- Completed tasks go here. Update after each task. -->
+- Renamed project branding from `SDD Spine` / `SDD-SP` to `Spectra` across docs, scripts, and templates.
 
 ## In Progress
-<!-- Currently active work. -->
+- None.
 
 ## Next
-<!-- Planned next steps. -->
+- Decide whether to also rename repository-level identifiers (for example repo slug and remote URL) to match `Spectra`.
 
 <!--
 Example (remove when using):

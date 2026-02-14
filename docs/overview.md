@@ -1,7 +1,7 @@
-# SDD Spine Overview
+# Spectra Overview
 
 ## Purpose
-SDD Spine provides a spec-driven backbone that keeps project structure stable while working with any agent.
+Spectra provides a spec-driven backbone that keeps project structure stable while working with any agent.
 
 ## Core Principles
 - Specs first, code second

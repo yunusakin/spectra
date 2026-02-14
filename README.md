@@ -1,4 +1,4 @@
-# SDD Spine
+# Spectra
 
 A spec-driven development backbone for working with AI coding agents. It keeps your project specs, decisions, and context in structured files so agents don't lose track of what they're building between sessions.
 

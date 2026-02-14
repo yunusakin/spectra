@@ -1,4 +1,4 @@
 # Changelog
 
 ## Unreleased
-- Initial SDD-SP scaffolding.
+- Initial Spectra scaffolding.

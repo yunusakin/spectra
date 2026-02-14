@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide explains the end-to-end workflow in SDD Spine and shows how the intake, validation, approval gate, and post-approval skills fit together.
+This guide explains the end-to-end workflow in Spectra and shows how the intake, validation, approval gate, and post-approval skills fit together.
 
 ## Workflow Scenarios (Mermaid)
 

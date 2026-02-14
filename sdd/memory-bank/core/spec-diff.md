@@ -8,7 +8,7 @@
 > - Append a new diff entry after changing specs:
 >   - `bash scripts/spec-diff.sh --update`
 >
-> This file is designed to stay empty in the spine template and get populated in real projects.
+> This file is designed to stay empty in the Spectra template and get populated in real projects.
 
 <!--
 Notes:

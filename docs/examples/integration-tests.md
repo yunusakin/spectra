@@ -1,6 +1,6 @@
 # Example: Integration Tests (Patterns)
 
-This is a tool-agnostic reference for how to approach integration tests in projects that use SDD Spine.
+This is a tool-agnostic reference for how to approach integration tests in projects that use Spectra.
 
 For agent prompt templates, see:
 - `sdd/.agent/prompts/tests/write-integration-tests-with-db.md`
@@ -41,4 +41,3 @@ Async worker integration tests:
 - Unit tests for core validation and business rules.
 - Integration tests for DB queries/migrations and any external boundary.
 - CI runs tests on every PR (fast unit tests, optional slower integration suite).
-

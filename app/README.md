@@ -2,7 +2,7 @@
 
 This directory is reserved for application code.
 
-SDD Spine is spec-first: before approval, do not generate any application code. After the user replies `approved`, generate all application code under `app/` only.
+Spectra is spec-first: before approval, do not generate any application code. After the user replies `approved`, generate all application code under `app/` only.
 
 If `app/` does not exist, create it after approval before writing any code.
 
@@ -27,4 +27,3 @@ Full-stack:
 ## Keep Specs Out Of `app/`
 - Specs and decisions live under `sdd/memory-bank/`.
 - Agent rules live under `sdd/.agent/`.
-
