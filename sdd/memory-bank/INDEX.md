@@ -12,6 +12,7 @@
 - `arch/patterns-overview.md`
 - `core/sprint-current.md` (if using sprints)
 - `core/sprint-plan.md` (if using sprints)
+- `core/traceability.md` (spec → code mapping)
 
 ## Reference
 - `core/projectbrief.md` (Context, Requirements, Constraints)

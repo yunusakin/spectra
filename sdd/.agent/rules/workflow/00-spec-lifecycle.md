@@ -56,6 +56,15 @@ Re-approval is not required for non-behavioral changes like:
 - adding examples
 - making implicit assumptions explicit without changing behavior
 
+## Discovery During Implementation
+If coding reveals that a requirement is ambiguous, impossible, or needs refinement:
+1. Stop coding the ambiguous part.
+2. Document the discovery in `sdd/memory-bank/core/activeContext.md` → Open Decisions.
+3. Propose a spec update to the user.
+4. If the user approves the spec change, update specs first, then continue coding.
+5. If the change is behavioral, follow the re-approval workflow above.
+6. Record the discovery and resolution in `sdd/memory-bank/core/spec-history.md`.
+
 ## Rollback Mechanism
 If code/spec changes need to be undone:
 

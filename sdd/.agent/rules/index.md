@@ -4,6 +4,8 @@
 - Intake questions: `rules/intake/01-questions.md`
 - Intake validation: `rules/intake/02-validation.md`
 - Spec lifecycle and change workflow: `rules/workflow/00-spec-lifecycle.md`
+- Sprint execution loop: `rules/workflow/01-sprint-execution.md`
+- Post-code verification: `rules/workflow/02-post-code-verification.md`
 - Approval gate: `rules/approval/00-approval-gate.md`
 - Engineering standards: `rules/standards/00-engineering-standards.md`
 - Architecture options: `rules/architecture/00-architecture-options.md`
@@ -15,3 +17,6 @@
 - Documentation standards: `rules/docs/00-docs-standards.md`
 - Skills index: `skills/index.md`
 - Skill usage rules: `rules/skills/00-skill-usage.md`
+- Skill auto-selection: `rules/skills/01-skill-auto-select.md`
+- Scaffolding guide: `scaffolds/README.md`
+

@@ -22,6 +22,7 @@ All canonical rules live in `sdd/.agent/`.
 - After intake, auto-fill spec files with collected answers (omit blank sections).
 - After approval, follow the approval gate including sprint plan creation.
 - After every task where files are modified, update `sdd/memory-bank/core/progress.md`.
+- At session start, read `sdd/memory-bank/core/activeContext.md`. At end of every significant task, update it.
 
 ## Canonical Workflows
 - Intake: `sdd/.agent/rules/intake/00-intake-flow.md`
@@ -29,4 +30,8 @@ All canonical rules live in `sdd/.agent/`.
 - Validation: `sdd/.agent/rules/intake/02-validation.md`
 - Spec lifecycle: `sdd/.agent/rules/workflow/00-spec-lifecycle.md`
 - Approval gate: `sdd/.agent/rules/approval/00-approval-gate.md`
+- Sprint execution: `sdd/.agent/rules/workflow/01-sprint-execution.md`
+- Post-code verification: `sdd/.agent/rules/workflow/02-post-code-verification.md`
+- Scaffolding: `sdd/.agent/scaffolds/README.md`
 - Skills (post-approval): `sdd/.agent/rules/skills/00-skill-usage.md`
+- Skill auto-selection: `sdd/.agent/rules/skills/01-skill-auto-select.md`
