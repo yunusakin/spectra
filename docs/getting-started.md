@@ -34,9 +34,9 @@ All Mermaid workflow diagrams live in the repo [`README.md`](../README.md#workfl
   - `sdd/.agent/skills/USAGE.md`
 
 ## Example Scenarios
-- Backend API: [`docs/examples/backend-api-orders-service.md`](docs/examples/backend-api-orders-service.md)
-- Worker: [`docs/examples/worker-billing-reconciler.md`](docs/examples/worker-billing-reconciler.md)
-- CLI tool: [`docs/examples/cli-reporting-tool.md`](docs/examples/cli-reporting-tool.md)
+- Backend API: [`examples/backend-api-orders-service.md`](examples/backend-api-orders-service.md)
+- Worker: [`examples/worker-billing-reconciler.md`](examples/worker-billing-reconciler.md)
+- CLI tool: [`examples/cli-reporting-tool.md`](examples/cli-reporting-tool.md)
 
 ## Common Mistakes
 - Generating code before approval: not allowed (approval gate).

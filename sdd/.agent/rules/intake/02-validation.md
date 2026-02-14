@@ -51,6 +51,8 @@ If inconsistencies exist:
 ### 4) Spec File Presence + Minimum Content (Blocking)
 After Phase 1, ensure these files are updated with non-empty, human-readable content (not just templates/examples):
 - `sdd/memory-bank/core/projectbrief.md` (Project name, Purpose, App type)
+- `sdd/memory-bank/tech/stack.md` (Language, Framework, Data store + versions)
+- `sdd/memory-bank/arch/patterns-overview.md` (Architecture style)
 - `sdd/memory-bank/core/intake-state.md`
 
 After Phase 2, additionally ensure:

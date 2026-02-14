@@ -9,5 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate repo
-        run: bash scripts/validate-repo.sh
+        with:
+          fetch-depth: 2
+      - name: Validate repo (strict)
+        run: STRICT=1 bash scripts/validate-repo.sh
+      - name: Policy checks
+        run: bash scripts/check-policy.sh

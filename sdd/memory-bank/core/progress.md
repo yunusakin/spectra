@@ -1,28 +1,24 @@
 # Progress
 
 ## Done
-- Implemented SDDLite: Consolidated product context, requirements, and constraints into `sdd/memory-bank/core/projectbrief.md` (retired separate files).
-- Updated intake rules and memory bank index to reflect the new structure.
-- Added mandatory automated progress tracking rule to `00-spec-lifecycle.md`.
-- Updated `docs/examples/backend-api-orders-service.md` to reference consolidated `projectbrief.md` instead of deleted files.
-- Verified repository integrity; no stale references to deleted spec files found.
+<!-- Completed tasks go here. Update after each task. -->
 
 ## In Progress
-- Final validation of the consolidated spec logic.
+<!-- Currently active work. -->
 
 ## Next
-- Monitor for any edge cases in the new intake flow.
+<!-- Planned next steps. -->
 
 <!--
-Example:
-
+Example (remove when using):
 ## Done
-- Added example sections to memory-bank templates.
+- Completed intake Phase 1 (project brief, stack, architecture).
+- Implemented user authentication module under `app/src/auth/`.
 
 ## In Progress
-- Implement intake validation rules.
+- Building order creation endpoint (`POST /api/orders`).
 
 ## Next
-- Add adapter consistency checks.
-- Add docs/examples for common project types.
+- Add integration tests for order creation.
+- Set up CI pipeline.
 -->

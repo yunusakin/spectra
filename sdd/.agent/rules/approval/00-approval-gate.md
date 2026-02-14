@@ -9,6 +9,11 @@
   3. Say "I will create sprint plan" and populate `sdd/memory-bank/core/sprint-plan.md` and `sdd/memory-bank/core/sprint-current.md`.
   4. Append an entry to `sdd/memory-bank/core/spec-history.md` (initial approval).
 
+## Pre-Approval Validation (Mandatory)
+Before asking for approval, the agent MUST:
+1. Run `bash scripts/validate-repo.sh` and confirm it passes.
+2. If it reports errors, fix them first — do not ask for approval until all checks pass.
+
 ## After Approval (Spec Changes)
 - If requirements or technical choices change after approval:
   - update the relevant spec files first

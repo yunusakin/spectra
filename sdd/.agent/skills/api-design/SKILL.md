@@ -27,7 +27,7 @@ Define consistent, well-structured APIs aligned with project standards.
 
 ## Outputs
 - API design notes
-- Updates to `sdd/memory-bank/core/requirements.md` if needed
+- Updates to `sdd/memory-bank/core/projectbrief.md` (Requirements section) if needed
 - Updates to `CHANGELOG.md` for breaking changes
 
 ## Checklist

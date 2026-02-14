@@ -21,6 +21,7 @@ All canonical rules live in `sdd/.agent/`.
 - Use `sdd/memory-bank/core/intake-state.md` to resume intake if interrupted.
 - After intake, auto-fill spec files with collected answers (omit blank sections).
 - After approval, follow the approval gate including sprint plan creation.
+- After every task where files are modified, update `sdd/memory-bank/core/progress.md`.
 
 ## Canonical Workflows
 - Intake: `sdd/.agent/rules/intake/00-intake-flow.md`

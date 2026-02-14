@@ -265,7 +265,7 @@ if [[ -d "${skills_dir}" ]]; then
 
     if [[ -n "${indexed_skills}" ]]; then
       if ! printf '%s\n' "${indexed_skills}" | grep -qx "${skill_name}"; then
-        add_warn "${d}: not listed in sdd/.agent/skills/index.md"
+        add_error "${d}: not listed in sdd/.agent/skills/index.md"
       fi
     fi
   done
@@ -284,7 +284,7 @@ if [[ -f "${prompts_index}" ]]; then
   while IFS= read -r -d '' p; do
     rel="${p#${prompts_root}/}"
     if ! printf '%s\n' "${indexed_prompts}" | grep -qx "${rel}"; then
-      add_warn "${prompts_root}/${rel}: not listed in prompts index"
+      add_error "${prompts_root}/${rel}: not listed in prompts index"
     fi
   done < <(
     find "${prompts_root}" -type f -name '*.md' \
@@ -301,6 +301,51 @@ done < <(find "sdd/memory-bank" -type f -name '*.md' -print0)
 while IFS= read -r -d '' f; do
   check_markdown_has_h1 "${f}"
 done < <(find "sdd/.agent/rules" -type f -name '*.md' -print0)
+
+# Markdown link checker — resolve [text](relative/path) links
+check_markdown_links() {
+  local file="$1"
+  local file_dir
+  file_dir="$(dirname "${file}")"
+  local target
+  # Extract markdown link targets: [text](target) — skip URLs, anchors, images, and mermaid
+  while IFS= read -r target; do
+    [[ -n "${target}" ]] || continue
+    # Skip URLs, pure anchors, and mailto
+    [[ "${target}" == http://* || "${target}" == https://* || "${target}" == "#"* || "${target}" == mailto:* ]] && continue
+    # Strip trailing anchor fragment
+    target="${target%%#*}"
+    [[ -n "${target}" ]] || continue
+    # Resolve relative to file's directory
+    local resolved
+    if [[ "${target}" == /* ]]; then
+      resolved="${target}"
+    else
+      resolved="${file_dir}/${target}"
+    fi
+    if [[ ! -e "${resolved}" ]]; then
+      # Also try relative to repo root
+      if [[ ! -e "${REPO_ROOT}/${target}" ]]; then
+        add_error "${file}: broken link -> ${target}"
+      fi
+    fi
+  done < <(
+    grep -oE '\[[^]]*\]\([^)]+\)' "${file}" 2>/dev/null \
+      | sed 's/.*](//' | sed 's/)$//' || true
+  )
+}
+
+while IFS= read -r -d '' f; do
+  check_markdown_links "${f}"
+done < <(find "docs" -type f -name '*.md' -print0 2>/dev/null)
+
+while IFS= read -r -d '' f; do
+  check_markdown_links "${f}"
+done < <(find "sdd/memory-bank" -type f -name '*.md' -print0 2>/dev/null)
+
+while IFS= read -r -d '' f; do
+  check_markdown_links "${f}"
+done < <(find "sdd/.agent" -type f -name '*.md' -print0 2>/dev/null)
 
 ########
 # Report

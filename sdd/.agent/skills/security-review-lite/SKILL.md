@@ -25,7 +25,7 @@ Identify common security risks early in development.
 
 ## Outputs
 - Security review notes
-- Updates to `sdd/memory-bank/core/constraints.md` if needed
+- Updates to `sdd/memory-bank/core/projectbrief.md` (Constraints section) if needed
 
 ## Checklist
 - [ ] Input validation enforced
