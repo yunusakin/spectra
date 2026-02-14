@@ -70,6 +70,7 @@ Additionally, apply API-style follow-ups:
   - phase completion checkboxes
   - missing mandatory fields (if any)
   - validation errors (if any)
+  - approval status (`not approved` until explicit approval)
   - last updated date
 - If the user re-runs `init` and spec files already contain partial answers, treat it as a resume:
   1. Ask only missing mandatory fields first.
@@ -87,9 +88,10 @@ After writing the spec files, run validation (`02-validation.md`). Only if valid
 
 ## After Approval
 When the user replies "approved":
-1. Create the `app/` directory if it doesn't exist.
-2. Generate application code only under `app/`.
-3. Say "I will create sprint plan" and populate sprint files.
+1. Set `## Approval Status` in `sdd/memory-bank/core/intake-state.md` to `approved`.
+2. Create the `app/` directory if it doesn't exist.
+3. Generate application code only under `app/`.
+4. Say "I will create sprint plan" and populate sprint files.
 
 ## Sprint Plan (Post-Approval)
 If the user approves, the agent should say "I will create sprint plan" and then populate:

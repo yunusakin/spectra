@@ -1,46 +1,60 @@
 # Getting Started
 
-This guide explains the end-to-end workflow in Spectra and shows how the intake, validation, approval gate, and post-approval skills fit together.
+This guide explains Spectra end-to-end: intake, validation, approval, scaffolding, sprint execution, and post-code verification.
 
-## Workflow Scenarios (Mermaid)
+## End-to-End Checklist
 
-All Mermaid workflow diagrams live in the repo [`README.md`](../README.md#workflow-scenarios) so the entry page stays self-contained.
+1. Start intake with `init`.
+2. Answer Phase 1 (Core) questions.
+3. Agent updates specs and `sdd/memory-bank/core/intake-state.md`.
+4. Agent validates and asks targeted follow-ups if needed.
+5. Continue Phase 2 / 2b; optionally skip Phase 3.
+6. Run strict repository validation:
 
-- Sprint execution: [`README.md#sprint-execution`](../README.md#sprint-execution)
-- Validation failures: [`README.md#validation-failures`](../README.md#validation-failures)
-- Spec changes after approval: [`README.md#spec-changes-after-approval`](../README.md#spec-changes-after-approval)
+```bash
+bash scripts/validate-repo.sh --strict
+```
 
-## Quick Checklist
+7. Reply `approved`.
+8. Agent scaffolds project under `app/`.
+9. Agent executes sprint loop (plan -> skill checks -> code -> test -> verify).
+10. Use `bash scripts/health-check.sh` to monitor overall status.
 
-1. Start intake: user types `init`.
-2. Answer Phase 1 questions (Core).
-3. Agent checkpoints by updating specs under `sdd/memory-bank/` and `sdd/memory-bank/core/intake-state.md`.
-4. Agent validates (`sdd/.agent/rules/intake/02-validation.md`).
-5. Continue Phase 2 / Phase 2b, optionally skip Phase 3.
-6. When validation passes, agent asks for approval (reply `approved`).
-7. After approval: code goes under `app/` only, and the agent selects a skill workflow.
+## Core Files To Know
 
-## Key Files To Know
-- Intake flow + questions:
-  - `sdd/.agent/rules/intake/00-intake-flow.md`
-  - `sdd/.agent/rules/intake/01-questions.md`
-- Validation:
-  - `sdd/.agent/rules/intake/02-validation.md`
-- Resume:
-  - `sdd/memory-bank/core/intake-state.md`
-- Spec change tracking:
-  - `sdd/memory-bank/core/spec-history.md`
-- Post-approval skills:
-  - `sdd/.agent/skills/USAGE.md`
+- Intake flow: `sdd/.agent/rules/intake/00-intake-flow.md`
+- Intake questions: `sdd/.agent/rules/intake/01-questions.md`
+- Intake validation: `sdd/.agent/rules/intake/02-validation.md`
+- Approval gate: `sdd/.agent/rules/approval/00-approval-gate.md`
+- Sprint execution: `sdd/.agent/rules/workflow/01-sprint-execution.md`
+- Post-code verification: `sdd/.agent/rules/workflow/02-post-code-verification.md`
+- Resume state: `sdd/memory-bank/core/intake-state.md`
+- Active context: `sdd/memory-bank/core/activeContext.md`
+- Progress tracking: `sdd/memory-bank/core/progress.md`
+- Traceability: `sdd/memory-bank/core/traceability.md`
 
-## Example Scenarios
+## Example Intake Scenarios
+
 - Backend API: [`examples/backend-api-orders-service.md`](examples/backend-api-orders-service.md)
 - Web Frontend: [`examples/web-frontend-dashboard.md`](examples/web-frontend-dashboard.md)
 - Full-Stack: [`examples/full-stack-booking-platform.md`](examples/full-stack-booking-platform.md)
 - Worker: [`examples/worker-billing-reconciler.md`](examples/worker-billing-reconciler.md)
-- CLI tool: [`examples/cli-reporting-tool.md`](examples/cli-reporting-tool.md)
+- CLI: [`examples/cli-reporting-tool.md`](examples/cli-reporting-tool.md)
 
 ## Common Mistakes
-- Generating code before approval: not allowed (approval gate).
-- Skipping validation: the agent should not ask for approval until validation passes.
-- Changing a mandatory choice (stack/arch/API style) after approval without re-approval.
+
+- Generating code before `approved`.
+- Skipping validation before approval.
+- Changing mandatory choices after approval without re-approval.
+- Forgetting to update `progress.md` and `activeContext.md` after significant work.
+
+## Troubleshooting
+
+Validation loops:
+- Fix only reported errors, then re-run validation.
+
+Interrupted intake:
+- Run `init` again; agent resumes from `intake-state.md`.
+
+Spec changes after approval:
+- Update specs first, then validate, then re-approve if behavior changed.

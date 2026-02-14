@@ -10,8 +10,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+
       - name: Validate repo (strict)
-        run: STRICT=1 bash scripts/validate-repo.sh
+        run: bash scripts/validate-repo.sh --strict
+
       - name: Policy checks
-        run: bash scripts/check-policy.sh
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            bash scripts/check-policy.sh \
+              --base "${{ github.event.pull_request.base.sha }}" \
+              --head "${{ github.event.pull_request.head.sha }}"
+          elif [[ "${{ github.event_name }}" == "push" && "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]]; then
+            bash scripts/check-policy.sh \
+              --base "${{ github.event.before }}" \
+              --head "${{ github.sha }}"
+          else
+            bash scripts/check-policy.sh
+          fi

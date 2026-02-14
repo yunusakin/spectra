@@ -9,6 +9,7 @@ This rule defines what happens when intake is interrupted, when specs change aft
   - completed phases
   - missing mandatory answers
   - validation errors
+  - approval status (`not approved` / `approved`)
   - last updated date
 - If the user runs `init` again and specs already contain partial answers:
   - treat it as resume
@@ -34,7 +35,10 @@ When requirements/constraints/tech choices change after approval:
    - otherwise: run `bash scripts/spec-diff.sh --update`
 5. Re-run intake validation rules (`sdd/.agent/rules/intake/02-validation.md`) for any impacted mandatory fields.
 6. Decide whether re-approval is required (see below).
-7. If re-approval is required: stop, summarize the changes, and ask the user to reply `approved` to continue implementation.
+7. If re-approval is required:
+   - set `## Approval Status` in `sdd/memory-bank/core/intake-state.md` to `not approved`
+   - stop, summarize the changes, and ask the user to reply `approved` to continue implementation
+   - after re-approval, set `## Approval Status` back to `approved`
 8. Update sprint files if used:
    - `sdd/memory-bank/core/sprint-plan.md`
    - `sdd/memory-bank/core/sprint-current.md`
@@ -59,7 +63,7 @@ Re-approval is not required for non-behavioral changes like:
 ## Discovery During Implementation
 If coding reveals that a requirement is ambiguous, impossible, or needs refinement:
 1. Stop coding the ambiguous part.
-2. Document the discovery in `sdd/memory-bank/core/activeContext.md` → Open Decisions.
+2. Document the discovery in `sdd/memory-bank/core/activeContext.md` -> Open Decisions.
 3. Propose a spec update to the user.
 4. If the user approves the spec change, update specs first, then continue coding.
 5. If the change is behavioral, follow the re-approval workflow above.

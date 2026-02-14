@@ -1,8 +1,54 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# check-policy.sh — Approve-gate and progress-tracking policy checks.
-# Run in CI alongside validate-repo.sh to enforce Spectra invariants.
+# check-policy.sh — Approval-gate and progress-tracking policy checks.
+# Supports local checks and explicit commit range checks for CI.
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  bash scripts/check-policy.sh [--base <git-ref-or-sha>] [--head <git-ref-or-sha>]
+
+Checks:
+- Approval gate: no non-README app code unless intake-state Approval Status is `approved`
+- Required specs do not contain unresolved placeholders (TBD/TODO/<...>)
+- Progress tracking: if sdd/* or app/* changed in checked range, progress.md must be touched
+
+Examples:
+  bash scripts/check-policy.sh
+  bash scripts/check-policy.sh --base origin/main --head HEAD
+USAGE
+}
+
+BASE_REF=""
+HEAD_REF=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --base)
+      BASE_REF="${2:-}"
+      shift 2
+      ;;
+    --head)
+      HEAD_REF="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+if [[ -n "${BASE_REF}" && -z "${HEAD_REF}" ]] || [[ -z "${BASE_REF}" && -n "${HEAD_REF}" ]]; then
+  echo "Error: --base and --head must be provided together." >&2
+  exit 2
+fi
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "${REPO_ROOT}"
@@ -10,19 +56,79 @@ cd "${REPO_ROOT}"
 errors=()
 add_error() { errors+=("$1"); }
 
+parse_approval_status() {
+  local state_file="$1"
+  if [[ ! -f "${state_file}" ]]; then
+    return 0
+  fi
+
+  awk '
+    BEGIN { in_section = 0; in_comment = 0 }
+    {
+      if ($0 ~ /<!--/) in_comment = 1
+      if (in_comment == 1) {
+        if ($0 ~ /-->/) in_comment = 0
+        next
+      }
+
+      if ($0 ~ /^##[[:space:]]+Approval Status[[:space:]]*$/) {
+        in_section = 1
+        next
+      }
+
+      if (in_section == 1 && $0 ~ /^##[[:space:]]+/) {
+        exit
+      }
+
+      if (in_section == 1) {
+        line = $0
+        gsub(/^[[:space:]-]+/, "", line)
+        gsub(/[[:space:]]+$/, "", line)
+        if (line != "") {
+          print tolower(line)
+          exit
+        }
+      }
+    }
+  ' "${state_file}" 2>/dev/null || true
+}
+
+collect_changed_files() {
+  if [[ -n "${BASE_REF}" ]]; then
+    if ! git rev-parse --verify "${BASE_REF}^{commit}" >/dev/null 2>&1; then
+      add_error "Base ref not found or not a commit: ${BASE_REF}"
+      return 0
+    fi
+    if ! git rev-parse --verify "${HEAD_REF}^{commit}" >/dev/null 2>&1; then
+      add_error "Head ref not found or not a commit: ${HEAD_REF}"
+      return 0
+    fi
+    git diff --name-only "${BASE_REF}...${HEAD_REF}" 2>/dev/null || true
+    return 0
+  fi
+
+  if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+    git diff --name-only HEAD~1..HEAD 2>/dev/null || true
+    return 0
+  fi
+
+  # No previous commit; nothing to compare.
+  return 0
+}
+
 ###################################
 # 1. Approval gate: no app/ code without approval evidence
 ###################################
 if [[ -d "app" ]]; then
-  # Count non-README files in app/
-  app_files=$(find app -type f ! -name 'README.md' | head -1)
+  app_files="$(find app -type f ! -name 'README.md' | head -1)"
   if [[ -n "${app_files}" ]]; then
     state_file="sdd/memory-bank/core/intake-state.md"
     if [[ ! -f "${state_file}" ]]; then
       add_error "app/ contains code but ${state_file} does not exist."
     else
-      if ! grep -qi "approved" "${state_file}" 2>/dev/null; then
-        add_error "app/ contains code but ${state_file} does not show approval."
+      approval_status="$(parse_approval_status "${state_file}")"
+      if [[ "${approval_status}" != "approved" ]]; then
+        add_error "app/ contains code but Approval Status is not 'approved' in ${state_file}."
       fi
     fi
   fi
@@ -37,7 +143,6 @@ required_specs=(
 
 for spec in "${required_specs[@]}"; do
   if [[ -f "${spec}" ]]; then
-    # Skip HTML comment blocks (<!-- ... -->), only check real content
     if grep -Pn '(?i)\bTBD\b|\bTODO\b|<\.\.\.>' "${spec}" 2>/dev/null \
        | grep -v '<!--' | grep -v -- '-->' | head -5 | grep -q .; then
       add_error "${spec}: contains unresolved placeholders (TBD/TODO/<...>)."
@@ -46,26 +151,25 @@ for spec in "${required_specs[@]}"; do
 done
 
 ###################################
-# 3. Progress tracking: if spec/code files changed in the current commit,
-#    progress.md should also be touched.
+# 3. Progress tracking for checked range
 ###################################
 progress_file="sdd/memory-bank/core/progress.md"
+changed_files="$(collect_changed_files)"
 
-# Only check if we're in a git repo with at least one commit
-if git rev-parse --verify HEAD >/dev/null 2>&1; then
-  changed_files="$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)"
-  if [[ -n "${changed_files}" ]]; then
-    has_spec_or_code_change=false
-    while IFS= read -r f; do
-      case "${f}" in
-        sdd/*|app/*) has_spec_or_code_change=true; break ;;
-      esac
-    done <<< "${changed_files}"
+if [[ -n "${changed_files}" ]]; then
+  has_spec_or_code_change=false
+  while IFS= read -r f; do
+    case "${f}" in
+      sdd/*|app/*)
+        has_spec_or_code_change=true
+        break
+        ;;
+    esac
+  done <<< "${changed_files}"
 
-    if "${has_spec_or_code_change}"; then
-      if ! echo "${changed_files}" | grep -qx "${progress_file}"; then
-        add_error "Spec/code files changed but ${progress_file} was not updated."
-      fi
+  if "${has_spec_or_code_change}"; then
+    if ! echo "${changed_files}" | grep -qx "${progress_file}"; then
+      add_error "Spec/code files changed in checked range but ${progress_file} was not updated."
     fi
   fi
 fi

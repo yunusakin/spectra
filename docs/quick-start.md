@@ -1,27 +1,24 @@
 ## Quick Start
 
 1. Clone this repository.
-2. Open your preferred AI agent in the repo root.
-3. Optional: see `docs/examples/` for sample intake answers.
-4. Type `init` to start the intake flow.
-5. Answer the Phase 1 (Core) mandatory intake questions about project name, purpose, tech stack, and architecture.
-6. If prompted, continue with Phase 2 (type-specific) follow-ups that match your app type, and optionally skip Phase 3 (advanced) questions.
-7. Review the generated spec files under `sdd/memory-bank/`.
-   - If you stop mid-intake, re-run `init` later. The agent should resume using `sdd/memory-bank/core/intake-state.md`.
-8. Reply `approved` when you are happy with the specs so the agent can start coding.
-   - If you change requirements after approval, follow `docs/workflow.md`.
-9. After approval, the agent scaffolds the project under `app/` using a template matching your app type.
-10. The agent works through sprint items: code, test, verify, update progress, repeat.
+2. Open your AI agent in the repository root.
+3. (Optional) Review `docs/examples/` for intake answer patterns.
+4. Type `init`.
+5. Answer Phase 1 (Core) questions.
+6. Continue Phase 2 / 2b questions relevant to your app type and API style.
+7. Optionally continue or skip Phase 3 (advanced).
+8. Review generated specs under `sdd/memory-bank/`.
+9. Run validation:
 
-At any point, run `bash scripts/health-check.sh` to see a quick project status summary.
+```bash
+bash scripts/validate-repo.sh --strict
+```
 
-<!--
-Example intake answers (very short):
+10. When specs are correct and validation passes, reply `approved`.
+11. After `approved`, the agent scaffolds under `app/` and starts the sprint loop.
 
-- Project name: Customer Orders Service
-- Purpose: Manage customer orders, payments, and shipment status.
-- App type: Backend API
-- Language + framework: Java 21, Spring Boot 3.2
-- Database: PostgreSQL 16
-- Architecture: Hexagonal
--->
+Health check anytime:
+
+```bash
+bash scripts/health-check.sh
+```
