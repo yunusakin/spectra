@@ -3,6 +3,7 @@
 - Intake flow: `rules/intake/00-intake-flow.md`
 - Intake questions: `rules/intake/01-questions.md`
 - Intake validation: `rules/intake/02-validation.md`
+- Intake discovery mode: `rules/intake/03-discovery.md`
 - Spec lifecycle and change workflow: `rules/workflow/00-spec-lifecycle.md`
 - Sprint execution loop: `rules/workflow/01-sprint-execution.md`
 - Post-code verification: `rules/workflow/02-post-code-verification.md`

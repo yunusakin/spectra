@@ -38,6 +38,13 @@ After each phase, run validation per `02-validation.md` before continuing.
 - Every multiple-choice question must include an `Other` option.
 - If a free-text answer is blank, omit that section from docs.
 - Free-text answers may use Markdown; keep it concise and prefer bullets.
+- If the user responds with "I don't know", "recommend", "not sure", or equivalent on a technical question, activate discovery mode per `03-discovery.md`.
+
+## Discovery Announcement
+Before Phase 1b (technical questions), inform the user once:
+> "We're moving to technical questions now. If you're unsure about any answer, just say **'recommend'** and I'll suggest the best option based on your project."
+
+Do not repeat this announcement.
 
 ## Conditional Follow-ups
 Based on App Type, ask only the relevant follow-up section from `01-questions.md`:

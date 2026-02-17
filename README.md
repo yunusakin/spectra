@@ -1,7 +1,22 @@
-# Spectra
+<p align="center">
+  <img src="assets/logo.png" alt="Spectra Logo" width="200">
+</p>
+
 
 Spectra is a spec-driven development backbone for AI-assisted software projects.
 It keeps requirements, decisions, and execution context in structured files so agents can build reliably across sessions.
+
+## Quick Install
+
+```bash
+# From within the Spectra repo — install into your project:
+./scripts/init.sh /path/to/your-project
+
+# Or from any directory (downloads automatically):
+bash <(curl -sL https://raw.githubusercontent.com/yunusakin/spectra/main/scripts/init.sh)
+```
+
+The script copies all Spectra files and optionally walks you through 3 quick questions to pre-fill your project brief.
 
 ## What Spectra Is
 

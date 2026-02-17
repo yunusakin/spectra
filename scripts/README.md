@@ -11,6 +11,7 @@ Helper scripts for development and maintenance.
 
 | Script | Purpose | When to use |
 |--------|---------|-------------|
+| `init.sh` | Sets up Spectra in any project (copies files + optional wizard to pre-fill project basics) | Once — when starting a new project |
 | `validate-repo.sh` | Validates rule/spec indexes, adapter consistency, skills front matter, markdown links/templates | Every push (runs in CI) |
 | `check-policy.sh` | Checks approval-gate invariants and progress tracking (`--base/--head` supported) | Every push/PR (runs in CI) |
 | `health-check.sh` | Prints a quick project health summary (intake, approval, sprint, tests, spec freshness) | Anytime — run manually for status |
