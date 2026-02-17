@@ -303,7 +303,7 @@ main() {
   copy_dir "$SPECTRA_SOURCE/sdd"     "$target/sdd"     "sdd/"
   copy_dir "$SPECTRA_SOURCE/scripts" "$target/scripts"  "scripts/"
   copy_dir "$SPECTRA_SOURCE/docs"    "$target/docs"     "docs/"
-  copy_dir "$SPECTRA_SOURCE/assets"  "$target/assets"   "assets/"
+
 
   # GitHub workflows
   copy_dir "$SPECTRA_SOURCE/.github" "$target/.github"  ".github/"
