@@ -35,30 +35,12 @@ bash scripts/check-policy.sh --base <base_sha> --head <head_sha>
 
 - Approval-gate invariant for application code under `app/`.
 - Canonical approval signal in `sdd/memory-bank/core/intake-state.md`.
+- Open technical questions block approval and code progression.
+- Open technical questions require issue references.
+- Review-gate unresolved `critical`/`warning` findings are blocking.
+- Invariant changes require decision trail updates.
 - No unresolved placeholders in required specs.
-- Progress tracking requirement when `sdd/*` or `app/*` changed in the checked range.
-
-## Manual Workflow Regression Scenarios
-
-1. Intake resume
-- Start `init`, answer partially, stop, run `init` again.
-- Expect only missing mandatory questions.
-
-2. Validation correction loop
-- Provide inconsistent answers (for example framework none + version set).
-- Expect targeted validation follow-up.
-
-3. Approval gate
-- Attempt app code generation before `approved`.
-- Expect workflow to block and ask for approval.
-
-4. Full-stack coverage
-- Choose Full-stack app type.
-- Expect both backend and frontend follow-ups.
-
-5. Spec change after approval
-- Change mandatory field after approval.
-- Expect spec update + re-validation + re-approval gate.
+- Progress tracking for `sdd/*` or `app/*` changes in checked range.
 
 ## Policy Script Test Scenarios
 
@@ -66,22 +48,34 @@ bash scripts/check-policy.sh --base <base_sha> --head <head_sha>
 - `bash scripts/validate-repo.sh --strict`
 - Expect `Validation: OK`.
 
-2. Policy local default
+2. Baseline policy
 - `bash scripts/check-policy.sh`
-- Expect pass on unchanged repo.
+- Expect `Policy check: OK` on unchanged repo.
 
-3. Range-aware pass (docs-only)
-- `bash scripts/check-policy.sh --base <base> --head <head>` on docs-only range.
-- Expect no progress-tracking violation.
+3. Open technical question blocks approval
+- `Approval Status: approved` + one `open` question.
+- Expect policy fail.
 
-4. Range-aware fail (spec/code changed without progress update)
-- Include `sdd/*` or `app/*` changes without `sdd/memory-bank/core/progress.md`.
-- Expect clear policy failure.
+4. Missing issue reference for open question
+- `open` question row without issue link.
+- Expect policy fail.
 
-5. Approval-gate fail
-- Include non-README `app/` file changes while approval status is not `approved`.
-- Expect policy failure.
+5. Review-gate severity blocking
+- unresolved `warning` -> fail.
+- unresolved `critical` -> fail.
 
-6. Approval-gate pass
-- Same range with approval status set to `approved`.
-- Expect policy pass.
+6. App code + open question
+- non-README `app/` file exists and open question exists.
+- Expect policy fail.
+
+7. Invariant change trail
+- range includes `core/invariants.md` change without `spec-history.md` or `arch/decisions.md`.
+- Expect policy fail.
+
+8. Range-aware mode
+- `bash scripts/check-policy.sh --base <base> --head <head>`
+- Expect same rules enforced over full range.
+
+9. Docs-only range
+- docs-only changes in range.
+- Expect no false-positive policy failures.

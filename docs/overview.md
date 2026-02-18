@@ -10,22 +10,26 @@ It combines structured specs, explicit approvals, and workflow guardrails so imp
 - Specs first, code second.
 - No application code before explicit `approved`.
 - Persistent memory across sessions (`sdd/memory-bank/`).
-- Delivery loop includes planning, coding, testing, verification, and traceability.
+- Technical choices must be confirmed and logged.
+- Delivery loop includes validation and challenge gates.
 
 ## Lifecycle
 
 1. Intake: collect project requirements in phases.
-2. Specs: write/update memory-bank files.
-3. Validation: resolve missing/inconsistent inputs.
-4. Approval: user replies `approved`.
-5. Scaffold: generate project skeleton under `app/`.
-6. Sprint loop: pick item -> plan -> skill checks -> code -> test -> verify.
-7. Ship: finalize release notes and rollback readiness.
+2. Decision capture: log confirmed technical choices and unresolved technical questions.
+3. Specs: write/update memory-bank files.
+4. Validation: resolve missing/inconsistent inputs.
+5. Approval: user replies `approved`.
+6. Scaffold: generate project skeleton under `app/`.
+7. Sprint loop: code -> validate -> challenge -> resolve/escalate.
+8. Ship: finalize release notes and rollback readiness.
 
 ## Key Paths
 
 - `sdd/.agent/` - canonical rules, skills, scaffolds, prompts.
-- `sdd/memory-bank/` - project specs, context, progress, traceability.
+- `sdd/memory-bank/core/invariants.md` - non-negotiable anchors.
+- `sdd/memory-bank/core/intake-state.md` - phase, decision log, open questions, approval state.
+- `sdd/memory-bank/core/review-gate.md` - severity findings and resolution state.
 - `app/` - application code only (post-approval).
 - `scripts/` - validation, policy, health, and spec-diff helpers.
 - `docs/` - guides and examples.

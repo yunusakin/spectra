@@ -6,6 +6,8 @@
 
 ## Task-Based
 - `core/intake-state.md` (during intake / resume)
+- `core/invariants.md` (non-negotiable technical anchors)
+- `core/review-gate.md` (validation/challenge findings and resolution)
 - `core/spec-history.md` (spec versioning / change tracking)
 - `core/spec-diff.md` (optional: spec diff report)
 - `tech/stack.md`

@@ -10,21 +10,30 @@
 bash <(curl -sL https://raw.githubusercontent.com/yunusakin/spectra/main/scripts/init.sh)
 ```
 
-2. The script copies all files and optionally asks 3 basic questions (name, purpose, app type).
-3. Open your project in your AI agent (Cursor, VS Code, etc.).
-4. Type `init`.
-5. Answer Phase 1 (Core) questions. If unsure about any technical question, say **"recommend"** — the agent will suggest the best option for your project.
-6. Continue Phase 2 / 2b questions relevant to your app type and API style.
-7. Optionally continue or skip Phase 3 (advanced).
-8. Review generated specs under `sdd/memory-bank/`.
-9. Run validation:
+2. Open your project in your AI agent.
+3. Type `init`.
+4. Answer Phase 1 (Core) questions.
+5. For technical choices, confirm recommendations before persistence.
+6. Ensure `sdd/memory-bank/core/intake-state.md` has:
+   - `Decision Log` entries for confirmed choices
+   - no unresolved blockers before approval
+7. Run checks:
 
 ```bash
 bash scripts/validate-repo.sh --strict
+bash scripts/check-policy.sh
 ```
 
-10. When specs are correct and validation passes, reply `approved`.
-11. After `approved`, the agent scaffolds under `app/` and starts the sprint loop.
+8. When specs are correct and checks pass, reply `approved`.
+9. After `approved`, the agent scaffolds under `app/` and starts sprint execution.
+
+## Open Question Workflow
+
+If a technical question is unresolved:
+1. Add it to `Open Technical Questions` with status `open`.
+2. Attach an issue reference.
+3. Resolve and set status to `resolved`.
+4. Re-run policy checks.
 
 Health check anytime:
 

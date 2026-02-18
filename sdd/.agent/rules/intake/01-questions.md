@@ -8,13 +8,20 @@ The intake is designed to be run in phases:
 
 Users can answer in a single message using bullets.
 
+## Question Contract Requirement
+For technical questions, follow `04-question-contract.md` and use IDs from `05-question-catalog.md`.
+
+- Do not persist technical choices before explicit confirmation.
+- Record confirmed technical choices in `intake-state.md` -> `## Decision Log`.
+- Record unresolved technical choices in `intake-state.md` -> `## Open Technical Questions`.
+
 ## Phase 1: Core (Required)
 Ask in small batches (<= 10 questions per turn). If the user prefers, they can answer all Phase 1 questions at once.
 
 ### Phase 1a: Project Basics
-1) Project name? (free text)
-2) Primary purpose/goal? (free text)
-3) App type?
+1) [Q-CORE-001] Project name? (free text)
+2) [Q-CORE-002] Primary purpose/goal? (free text)
+3) [Q-CORE-003] App type?
    A) Backend API
    B) Web (frontend only)
    C) Full-stack
@@ -25,15 +32,15 @@ Ask in small batches (<= 10 questions per turn). If the user prefers, they can a
    H) Other
 
 ### Phase 1b: Language / Framework / Architecture
-4) Primary language?
+4) [Q-TECH-001] Primary language?
    A) Java
    B) .NET
    C) Go
    D) Node.js
    E) Python
    F) Other
-5) Language version? (free text)
-6) Framework?
+5) [Q-TECH-001] Language version? (free text)
+6) [Q-TECH-002] Framework?
    A) Spring Boot
    B) ASP.NET Core
    C) Gin/Fiber
@@ -41,8 +48,8 @@ Ask in small batches (<= 10 questions per turn). If the user prefers, they can a
    E) Django/FastAPI
    F) None
    G) Other
-7) Framework version? (free text, or "none")
-8) Architecture style?
+7) [Q-TECH-002] Framework version? (free text, or "none")
+8) [Q-TECH-003] Architecture style?
    A) Layered
    B) Hexagonal
    C) CQRS
@@ -51,7 +58,7 @@ Ask in small batches (<= 10 questions per turn). If the user prefers, they can a
    F) Other
 
 ### Phase 1c: Data / Deployment / API Style
-9) Primary data store?
+9) [Q-TECH-004] Primary data store?
    A) PostgreSQL
    B) MySQL
    C) SQL Server
@@ -59,15 +66,15 @@ Ask in small batches (<= 10 questions per turn). If the user prefers, they can a
    E) SQLite
    F) None
    G) Other
-10) Data store version? (free text, or "none")
-11) Deployment target?
+10) [Q-TECH-004] Data store version? (free text, or "none")
+11) [Q-TECH-005] Deployment target?
    A) Local only
    B) Docker
    C) Kubernetes
    D) Cloud managed
    E) On-prem
    F) Other
-12) API style?
+12) [Q-TECH-006] API style?
    A) REST
    B) GraphQL
    C) gRPC

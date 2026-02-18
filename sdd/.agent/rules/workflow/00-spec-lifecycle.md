@@ -1,88 +1,67 @@
 # Spec Lifecycle and Change Workflow
 
-This rule defines what happens when intake is interrupted, when specs change after approval, and how to track and roll back changes.
+This rule defines intake resume behavior, post-approval spec changes, and rollback-safe tracking.
 
 ## Intake Interruption / Resume
-- Intake must be checkpointed after each phase (Phase 1, 2, 2b, 3).
-- Record progress in `sdd/memory-bank/core/intake-state.md`:
+- Checkpoint intake after each phase (1, 2, 2b, 3).
+- Record in `sdd/memory-bank/core/intake-state.md`:
   - current phase
   - completed phases
   - missing mandatory answers
   - validation errors
   - approval status (`not approved` / `approved`)
+  - decision log entries for technical choices
+  - open technical questions (`open` / `resolved`)
   - last updated date
-- If the user runs `init` again and specs already contain partial answers:
-  - treat it as resume
-  - ask only missing mandatory answers first
-  - then continue the next smallest relevant batch of questions
 
-## After Approval: Keeping Specs Source-Of-Truth
-- Specs must be updated before (or at least in the same change as) any behavior-changing code.
-- If the user asks for a change that affects behavior, update specs first and validate before coding further.
+If user runs `init` again:
+- ask only missing mandatory answers first
+- continue the next smallest relevant batch
+
+## After Approval: Specs Stay Source-of-Truth
+- Specs must be updated before (or in the same change as) behavior-changing code.
+- If user requests behavior changes, update specs first and validate before coding further.
 
 ## Spec Change Workflow (Post-Approval)
-When requirements/constraints/tech choices change after approval:
+1. Clarify the requested change.
+2. Update impacted specs under `sdd/memory-bank/`.
+3. Append entry to `sdd/memory-bank/core/spec-history.md`.
+4. Update spec diff report (`bash scripts/spec-diff.sh --update`) when useful.
+5. Re-run intake validation for impacted mandatory fields.
+6. Decide re-approval need.
+7. If re-approval required:
+   - set Approval Status to `not approved`
+   - stop and ask for `approved`
+   - set back to `approved` only after user confirmation
+8. Update sprint files if used.
 
-1. Clarify the change in one or two questions if needed.
-2. Update the relevant spec files under `sdd/memory-bank/` first.
-3. Append an entry to `sdd/memory-bank/core/spec-history.md` describing:
-   - version/date
-   - summary
-   - high-level files touched
-   - whether re-approval is required
-4. Update the spec diff report (recommended):
-   - if baseline is not initialized yet: run `bash scripts/spec-diff.sh --init`
-   - otherwise: run `bash scripts/spec-diff.sh --update`
-5. Re-run intake validation rules (`sdd/.agent/rules/intake/02-validation.md`) for any impacted mandatory fields.
-6. Decide whether re-approval is required (see below).
-7. If re-approval is required:
-   - set `## Approval Status` in `sdd/memory-bank/core/intake-state.md` to `not approved`
-   - stop, summarize the changes, and ask the user to reply `approved` to continue implementation
-   - after re-approval, set `## Approval Status` back to `approved`
-8. Update sprint files if used:
-   - `sdd/memory-bank/core/sprint-plan.md`
-   - `sdd/memory-bank/core/sprint-current.md`
-
-### When Re-Approval Is Required (Default: Yes)
+## Re-Approval Required (Default: Yes)
 Require explicit re-approval if any of these change:
-- App type
-- Primary language/framework (or versions)
-- Architecture style
-- Primary data store (or versions)
-- Deployment target
-- API style or external API contracts
-- Authentication/authorization model
-- Any non-functional requirement that forces a redesign (latency, availability, compliance)
-- Scope: adding/removing must-have features
-
-Re-approval is not required for non-behavioral changes like:
-- typos, clarifications, formatting
-- adding examples
-- making implicit assumptions explicit without changing behavior
+- app type
+- primary language/framework/version
+- architecture style
+- primary datastore/version
+- deployment target
+- API style or external contracts
+- auth/authz model
+- NFRs requiring redesign
+- must-have feature scope
 
 ## Discovery During Implementation
-If coding reveals that a requirement is ambiguous, impossible, or needs refinement:
-1. Stop coding the ambiguous part.
-2. Document the discovery in `sdd/memory-bank/core/activeContext.md` -> Open Decisions.
-3. Propose a spec update to the user.
-4. If the user approves the spec change, update specs first, then continue coding.
-5. If the change is behavioral, follow the re-approval workflow above.
-6. Record the discovery and resolution in `sdd/memory-bank/core/spec-history.md`.
+If coding reveals ambiguity:
+1. Stop ambiguous part.
+2. Add entry to `sdd/memory-bank/core/activeContext.md` Open Decisions.
+3. Add or update row in `sdd/memory-bank/core/intake-state.md` Open Technical Questions.
+4. Propose spec update.
+5. Resolve question, update specs first, then continue coding.
 
 ## Rollback Mechanism
-If code/spec changes need to be undone:
+- Prefer additive history (`git revert`) over history rewrite.
+- Update specs to post-rollback intent.
+- Record rollback in `sdd/memory-bank/core/spec-history.md`.
 
-- Prefer additive history:
-  - create a new commit that reverts the change
-  - prefer `git revert` over rewriting history
-- Update specs first to reflect the intended state after rollback.
-- Record the rollback in `sdd/memory-bank/core/spec-history.md` with the reason.
-- If the rollback is ambiguous or destructive, ask for confirmation before executing it.
-
-## Automated Progress Tracking (Mandatory)
-At the end of every task where a file is modified (spec or code), the agent MUST update `sdd/memory-bank/core/progress.md` with:
-- The latest task status.
-- A concise summary of what was changed.
-- Clear next steps.
-
-This ensures the Memory Bank remains the source of truth for the project's current state and prevents desynchronization during long sessions or between different agents.
+## Progress Tracking (Mandatory)
+After every task that modifies files, update `sdd/memory-bank/core/progress.md` with:
+- latest status
+- concise change summary
+- clear next steps

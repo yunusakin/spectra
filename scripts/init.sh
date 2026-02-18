@@ -242,7 +242,7 @@ Phase 1b (Language / Framework / Architecture)
 - [ ] Phase 2: Type-specific follow-ups
 - [ ] Phase 3: Advanced (optional)
 
-## Missing Mandatory Fields
+## Missing Mandatory Answers
 - Primary language
 - Framework
 - Architecture style
@@ -251,10 +251,18 @@ Phase 1b (Language / Framework / Architecture)
 - API style
 
 ## Validation Errors
-None
+- (none)
 
 ## Approval Status
 not approved
+
+## Decision Log
+| Date | Question ID | Decision | Confirmation | Notes |
+|---|---|---|---|---|
+
+## Open Technical Questions
+| Question ID | Question | Status | Issue | Owner | Notes |
+|---|---|---|---|---|---|
 
 ## Last Updated
 $today (pre-filled via spectra init)

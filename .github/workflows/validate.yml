@@ -15,7 +15,7 @@ jobs:
       - name: Validate repo (strict)
         run: bash scripts/validate-repo.sh --strict
 
-      - name: Policy checks
+      - name: Policy checks (range-aware)
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then

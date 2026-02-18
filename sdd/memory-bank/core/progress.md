@@ -1,29 +1,41 @@
 # Progress
 
 ## Done
-- Refreshed onboarding docs for clarity and consistency across `README.md`, `docs/overview.md`, `docs/quick-start.md`, `docs/getting-started.md`, `docs/workflow.md`, and `docs/testing.md`.
-- Added a single high-level flow in `README.md`, plus a concrete "First 10 Minutes" command path and troubleshooting snippets.
-- Hardened `scripts/check-policy.sh` with range-aware checks (`--base`/`--head`) and explicit approval-status parsing from `sdd/memory-bank/core/intake-state.md`.
-- Updated CI in `.github/workflows/validate.yml` to run strict validation and pass explicit range SHAs to policy checks.
-- Added canonical `## Approval Status` guidance in intake/approval/workflow rules and the `sdd/memory-bank/core/intake-state.md` template.
+- Added intake decision governance with new rules:
+  - `sdd/.agent/rules/intake/04-question-contract.md`
+  - `sdd/.agent/rules/intake/05-question-catalog.md`
+- Added role-based quality loop governance:
+  - `sdd/.agent/rules/workflow/03-role-loop-gate.md`
+  - `sdd/.agent/rules/workflow/04-escalation-policy.md`
+- Updated intake/workflow/approval rules to enforce:
+  - confirmed technical decisions in `Decision Log`
+  - blocking behavior for `Open Technical Questions`
+  - blocking behavior for unresolved `critical`/`warning` findings
+- Expanded memory-bank schema and references:
+  - `sdd/memory-bank/core/intake-state.md` now includes `Decision Log` and `Open Technical Questions`
+  - added `sdd/memory-bank/core/invariants.md`
+  - added `sdd/memory-bank/core/review-gate.md`
+  - updated `sdd/memory-bank/INDEX.md`
+- Hardened `scripts/check-policy.sh` with additional checks:
+  - open technical question blockers
+  - issue reference requirement for open technical questions
+  - review-gate severity blockers
+  - invariant change trail requirement
+  - existing approval/progress/range checks preserved
+- Added GitHub issue template for unresolved technical intake decisions:
+  - `.github/ISSUE_TEMPLATE/intake-question.yml`
+- Aligned docs and adapters with the governance model:
+  - `README.md`, `docs/overview.md`, `docs/quick-start.md`, `docs/workflow.md`, `docs/testing.md`, `scripts/README.md`
+  - `AGENT.md`, `AGENTS.md`, `CLAUDE.md`, `.cursorrules`
+- Added release visibility updates for `v1.0.1` in:
+  - `README.md` (`Release History` + `What's New in v1.0.1`)
+  - `CHANGELOG.md`
+  - `RELEASE_SUMMARY.md`
+  - `sdd/memory-bank/core/spec-history.md`
 
 ## In Progress
-- None.
+- Running final validation, commit/push, and release publication steps for `v1.0.1`.
 
 ## Next
-- Review wording and examples with the team for any preferred terminology tweaks.
-- Commit and push this docs + policy hardening pass if accepted.
-
-<!--
-Example (remove when using):
-## Done
-- Completed intake Phase 1 (project brief, stack, architecture).
-- Implemented user authentication module under `app/src/auth/`.
-
-## In Progress
-- Building order creation endpoint (`POST /api/orders`).
-
-## Next
-- Add integration tests for order creation.
-- Set up CI pipeline.
--->
+- Complete single commit and push to `main`.
+- Publish GitHub release `v1.0.1` using `RELEASE_SUMMARY.md`.
