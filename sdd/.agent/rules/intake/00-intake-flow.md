@@ -34,6 +34,11 @@ After each phase:
 - Update `sdd/memory-bank/core/intake-state.md`.
 - Run validation via `02-validation.md`.
 
+## Context Loading (Token Budget)
+- Follow `sdd/.agent/runtime/minimal.md`.
+- Use `01-questions.md` as router only.
+- Load only one relevant intake question pack at a time from `rules/intake/questions/`.
+
 ## Question Rules
 - Keep question batches small (<= 10 per turn).
 - If user is uncertain on a technical choice, activate discovery mode (`03-discovery.md`).

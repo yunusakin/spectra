@@ -1,7 +1,18 @@
 # Rules Index
 
+- Runtime minimal context: `runtime/minimal.md`
 - Intake flow: `rules/intake/00-intake-flow.md`
-- Intake questions: `rules/intake/01-questions.md`
+- Intake questions router: `rules/intake/01-questions.md`
+- Intake question packs: `rules/intake/questions/`
+- Intake phase 1 pack: `rules/intake/questions/01-phase-1-core.md`
+- Intake backend pack: `rules/intake/questions/02-phase-2-backend.md`
+- Intake web pack: `rules/intake/questions/03-phase-2-web.md`
+- Intake mobile pack: `rules/intake/questions/04-phase-2-mobile.md`
+- Intake CLI pack: `rules/intake/questions/05-phase-2-cli.md`
+- Intake worker pack: `rules/intake/questions/06-phase-2-worker.md`
+- Intake library pack: `rules/intake/questions/07-phase-2-library.md`
+- Intake API-style pack: `rules/intake/questions/08-phase-2b-api-style.md`
+- Intake advanced pack: `rules/intake/questions/09-phase-3-advanced.md`
 - Intake validation: `rules/intake/02-validation.md`
 - Intake discovery mode: `rules/intake/03-discovery.md`
 - Intake question contract: `rules/intake/04-question-contract.md`

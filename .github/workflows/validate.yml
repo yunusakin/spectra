@@ -29,3 +29,6 @@ jobs:
           else
             bash scripts/check-policy.sh
           fi
+
+      - name: Skill resolver smoke check
+        run: bash scripts/resolve-skills.sh --task-type api-change

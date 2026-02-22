@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  cat <<'EOF'
+  cat <<'USAGE'
 Usage:
   bash scripts/validate-repo.sh [--strict]
 
@@ -10,7 +10,8 @@ Checks:
 - Required paths exist
 - Index files reference existing markdown files
 - Adapter bodies match (AGENT.md, AGENTS.md, CLAUDE.md, .cursorrules)
-- Skills: SKILL.md exists + YAML front matter (name/description) + index coverage
+- Skills: SKILL.md exists + YAML front matter (name/description/task_types) + index coverage
+- Skill dependency map integrity (known skills, no self-loops, required flags)
 - Prompts: all prompt files are listed in prompts index
 - Markdown expectations for templates
 
@@ -18,7 +19,7 @@ Exit codes:
   0: OK
   1: FAIL
   2: CLI usage error
-EOF
+USAGE
 }
 
 STRICT=0
@@ -41,7 +42,6 @@ add_warn() { warns+=("$1"); }
 
 extract_backtick_tokens() {
   local file="$1"
-  # grep exits 1 on "no matches"; that is not an error for our use.
   grep -oE '`[^`]+`' "$file" 2>/dev/null | sed 's/^`//;s/`$//' || true
 }
 
@@ -96,7 +96,6 @@ check_index_backtick_paths() {
 
 normalize_adapter_body() {
   local file="$1"
-  # Drop the first line and trim leading/trailing blank lines.
   tail -n +2 "$file" | sed 's/[[:space:]]*$//' | awk '
     { lines[++n] = $0 }
     END {
@@ -109,12 +108,36 @@ normalize_adapter_body() {
   '
 }
 
+extract_front_matter_field() {
+  local file="$1"
+  local key="$2"
+
+  awk -v key="${key}" '
+    BEGIN { in_meta = 0 }
+    NR == 1 {
+      if ($0 == "---") {
+        in_meta = 1
+        next
+      }
+    }
+    in_meta == 1 {
+      if ($0 == "---") exit
+      if ($0 ~ "^" key ":[[:space:]]*") {
+        line = $0
+        sub("^" key ":[[:space:]]*", "", line)
+        gsub(/[[:space:]]+$/, "", line)
+        print line
+        exit
+      }
+    }
+  ' "$file" 2>/dev/null || true
+}
+
 parse_skill_front_matter() {
   local skill_md="$1"
   local out_name="$2"
   local out_desc="$3"
 
-  # Defaults (written by echo at end)
   local name=""
   local desc=""
   local end_found=0
@@ -123,8 +146,8 @@ parse_skill_front_matter() {
   first="$(head -n 1 "$skill_md" 2>/dev/null | tr -d '\r' || true)"
   if [[ "${first}" != "---" ]]; then
     add_error "${skill_md}: missing YAML front matter (expected leading '---')"
-    printf '%s\n' "" "" > "${out_name}"
-    printf '%s\n' "" "" > "${out_desc}"
+    printf '%s\n' "" > "${out_name}"
+    printf '%s\n' "" > "${out_desc}"
     return 0
   fi
 
@@ -179,6 +202,61 @@ parse_skill_front_matter() {
   printf '%s\n' "${desc}" > "${out_desc}"
 }
 
+check_skill_dependency_map() {
+  local map_file="$1"
+  local skills_dir="$2"
+
+  if [[ ! -f "${map_file}" ]]; then
+    add_error "Missing skill dependency map: ${map_file}"
+    return 0
+  fi
+
+  local known_skills
+  known_skills="$(find "${skills_dir}" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)"
+
+  local has_row=0
+  local row_no=0
+  while IFS=$'\t' read -r from to relation required order_weight reason; do
+    row_no=$((row_no + 1))
+    [[ -n "${from}" ]] || continue
+    [[ "${from:0:1}" == "#" ]] && continue
+
+    has_row=1
+
+    if [[ -z "${to}" || -z "${relation}" || -z "${required}" || -z "${order_weight}" ]]; then
+      add_error "${map_file}:${row_no}: expected 6 tab-separated columns"
+      continue
+    fi
+
+    if ! printf '%s\n' "${known_skills}" | grep -qx "${from}"; then
+      add_error "${map_file}:${row_no}: unknown from_skill '${from}'"
+    fi
+    if ! printf '%s\n' "${known_skills}" | grep -qx "${to}"; then
+      add_error "${map_file}:${row_no}: unknown to_skill '${to}'"
+    fi
+
+    if [[ "${from}" == "${to}" ]]; then
+      add_error "${map_file}:${row_no}: self-loop is not allowed ('${from}' -> '${to}')"
+    fi
+
+    if [[ "${relation}" != "precedes" ]]; then
+      add_error "${map_file}:${row_no}: relation must be 'precedes'"
+    fi
+
+    if [[ "${required}" != "true" && "${required}" != "false" ]]; then
+      add_error "${map_file}:${row_no}: required must be true or false"
+    fi
+
+    if [[ ! "${order_weight}" =~ ^[0-9]+$ ]]; then
+      add_error "${map_file}:${row_no}: order_weight must be an integer"
+    fi
+  done < "${map_file}"
+
+  if [[ "${has_row}" -eq 0 ]]; then
+    add_error "${map_file}: must contain at least one dependency row"
+  fi
+}
+
 ########
 # Checks
 ########
@@ -197,7 +275,6 @@ for p in "${required_paths[@]}"; do
   fi
 done
 
-# Validate index references
 if [[ -f "sdd/.agent/rules/index.md" ]]; then
   check_index_backtick_paths "sdd/.agent/rules/index.md" "sdd/.agent"
 fi
@@ -208,7 +285,6 @@ if [[ -f "sdd/memory-bank/INDEX.md" ]]; then
   check_index_backtick_paths "sdd/memory-bank/INDEX.md" "sdd/memory-bank"
 fi
 
-# Adapter consistency: bodies should match (ignore first line)
 tmp_dir="$(mktemp -d 2>/dev/null)" \
   || tmp_dir="$(TMPDIR=/tmp mktemp -d 2>/dev/null)" \
   || { tmp_dir="${REPO_ROOT}/.validate-tmp"; mkdir -p "${tmp_dir}"; }
@@ -235,18 +311,12 @@ if [[ -n "${ref_path}" ]]; then
   done
 fi
 
-# Skills: SKILL.md + front matter + index coverage
 skills_dir="sdd/.agent/skills"
 skills_index="${skills_dir}/index.md"
 indexed_skills=""
 if [[ -f "${skills_index}" ]]; then
-  indexed_skills="$(
-    extract_backtick_tokens "${skills_index}" \
-      | awk 'index($0, "/") == 0 && index($0, ".") == 0 { print }' \
-      | sort -u
-  )"
+  indexed_skills="$(extract_backtick_tokens "${skills_index}" | awk 'index($0, "/") == 0 && index($0, ".") == 0 { print }' | sort -u)"
 fi
-
 if [[ -d "${skills_dir}" ]]; then
   for d in "${skills_dir}"/*; do
     [[ -d "${d}" ]] || continue
@@ -265,6 +335,15 @@ if [[ -d "${skills_dir}" ]]; then
       add_error "${skill_md}: front matter name '${parsed_name}' does not match directory '${skill_name}'"
     fi
 
+    task_types="$(extract_front_matter_field "${skill_md}" "task_types")"
+    if [[ -z "${task_types}" ]]; then
+      add_error "${skill_md}: front matter missing \`task_types\`"
+    else
+      if ! echo "${task_types}" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | awk 'NF > 0 { found = 1 } END { exit found ? 0 : 1 }'; then
+        add_error "${skill_md}: \`task_types\` must contain at least one value"
+      fi
+    fi
+
     if [[ -n "${indexed_skills}" ]]; then
       if ! printf '%s\n' "${indexed_skills}" | grep -qx "${skill_name}"; then
         add_error "${d}: not listed in sdd/.agent/skills/index.md"
@@ -273,7 +352,8 @@ if [[ -d "${skills_dir}" ]]; then
   done
 fi
 
-# Prompt index coverage
+check_skill_dependency_map "${skills_dir}/dependency-map.tsv" "${skills_dir}"
+
 prompts_root="sdd/.agent/prompts"
 prompts_index="${prompts_root}/index.md"
 if [[ -f "${prompts_index}" ]]; then
@@ -294,7 +374,6 @@ if [[ -f "${prompts_index}" ]]; then
   )
 fi
 
-# Markdown checks (templates)
 while IFS= read -r -d '' f; do
   check_markdown_has_h1 "${f}"
   check_examples_inside_html_comments "${f}"
@@ -304,21 +383,16 @@ while IFS= read -r -d '' f; do
   check_markdown_has_h1 "${f}"
 done < <(find "sdd/.agent/rules" -type f -name '*.md' -print0)
 
-# Markdown link checker — resolve [text](relative/path) links
 check_markdown_links() {
   local file="$1"
   local file_dir
   file_dir="$(dirname "${file}")"
   local target
-  # Extract markdown link targets: [text](target) — skip URLs, anchors, images, and mermaid
   while IFS= read -r target; do
     [[ -n "${target}" ]] || continue
-    # Skip URLs, pure anchors, and mailto
     [[ "${target}" == http://* || "${target}" == https://* || "${target}" == "#"* || "${target}" == mailto:* ]] && continue
-    # Strip trailing anchor fragment
     target="${target%%#*}"
     [[ -n "${target}" ]] || continue
-    # Resolve relative to file's directory
     local resolved
     if [[ "${target}" == /* ]]; then
       resolved="${target}"
@@ -326,7 +400,6 @@ check_markdown_links() {
       resolved="${file_dir}/${target}"
     fi
     if [[ ! -e "${resolved}" ]]; then
-      # Also try relative to repo root
       if [[ ! -e "${REPO_ROOT}/${target}" ]]; then
         add_error "${file}: broken link -> ${target}"
       fi
@@ -376,4 +449,3 @@ fi
 
 echo "Validation: OK"
 exit 0
-

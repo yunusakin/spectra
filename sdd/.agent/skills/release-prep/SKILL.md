@@ -1,6 +1,7 @@
 ---
 name: release-prep
 description: Prepare a release with changelog and release summary updates. Use before tagging or deploying.
+task_types: release,full-stack-change
 ---
 
 # Release Prep

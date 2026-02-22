@@ -2,32 +2,58 @@
 
 When the agent is about to implement a task (post-approval), it MUST classify the task and apply the relevant skill checklist(s) **before writing code**.
 
-## Classification Rules
+## Mandatory Contract
 
-| If the task involves... | Apply skill | Required? |
+1. Classify the implementation item into a `task_type`.
+2. Run `bash scripts/resolve-skills.sh --task-type <task_type>`.
+3. Use the reported `Recommended Order` as execution order.
+4. If overriding with explicit skills, validate with:
+   - `bash scripts/resolve-skills.sh --task-type <task_type> --skills <csv>`
+5. If resolver returns non-zero, do not proceed to coding.
+
+Canonical dependency source:
+- `sdd/.agent/skills/dependency-map.tsv`
+
+## Task Type Mapping
+
+| Task type | Typical scope | Baseline skills |
 |---|---|---|
-| Designing or changing API endpoints, contracts, errors, pagination | `api-design` | Yes |
-| Changing database schema, adding tables/columns/indexes, backfills | `db-migration` | Yes |
-| Handling auth, PII, secrets, or exposing external APIs | `security-review-lite` | Yes |
-| Any code change (always) | `testing-plan` (checklist only) | Yes |
-| Preparing deployment, env vars, health checks, rollout | `ops-deploy` | If deployment is in scope |
-| Preparing a release | `release-prep` | If releasing |
+| `api-change` | Endpoints/contracts/errors/pagination | `api-design`, `security-review-lite`, `testing-plan` |
+| `db-change` | Schema/index/migration changes | `db-migration`, `testing-plan`, `ops-deploy` |
+| `api-db-change` | API + DB together | `db-migration`, `api-design`, `security-review-lite`, `testing-plan`, `ops-deploy` |
+| `security-change` | Auth/PII/secrets/exposure hardening | `security-review-lite`, `testing-plan` |
+| `deploy-change` | Env/rollout/health/rollback | `ops-deploy`, `testing-plan` |
+| `release` | Release packaging and readiness | `testing-plan`, `ops-deploy`, `release-prep` |
+| `full-stack-change` | Broad cross-area implementation | `db-migration`, `api-design`, `security-review-lite`, `testing-plan`, `ops-deploy`, `release-prep` |
+| `bugfix` | Focused fix | `testing-plan` |
+
+## Recording (Required)
+
+For each implementation item, append one row to:
+- `sdd/memory-bank/core/skill-runs.md`
+
+Minimum row fields:
+- Date
+- Item
+- Task Type
+- Selected Skills
+- Execution Order
+- Result
+- Notes
+
+Also summarize applied skills and decisions in:
+- `sdd/memory-bank/core/progress.md`
 
 ## Multi-Area Tasks
 
-If a task touches multiple areas (e.g., new API + DB migration):
-1. Apply skills in dependency-graph order (see `sdd/.agent/skills/dependency-graph.md`).
-2. Complete each skill's checklist before moving to the next.
-3. Typical order: `db-migration` → `api-design` → `security-review-lite` → `testing-plan` → `ops-deploy` → `release-prep`.
-
-## Recording
-
-After applying skills, record in `sdd/memory-bank/core/progress.md`:
-- Which skills were applied.
-- Any issues or decisions surfaced by the skill checklists.
+If a task touches multiple areas:
+1. Prefer `task_type: api-db-change` or `full-stack-change`.
+2. Resolve order via `resolve-skills.sh`.
+3. Complete each skill checklist in the resolved order.
 
 ## When Uncertain
 
-If the task classification is ambiguous:
-1. Propose the best-match skill(s) to the user.
-2. Wait for confirmation before proceeding.
+If classification is ambiguous:
+1. Propose likely `task_type` values to the user.
+2. Wait for confirmation.
+3. Then run resolver and continue.

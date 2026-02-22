@@ -5,6 +5,31 @@
 ### Planned
 - (none)
 
+## [v1.0.2] - 2026-02-22
+
+### Added
+- Feature: Token-Efficient Intake Context
+  - Split intake questions into phase/app-type packs under `sdd/.agent/rules/intake/questions/`.
+  - Added runtime minimal loading manifest: `sdd/.agent/runtime/minimal.md`.
+- Feature: Skill Graph Enforcement
+  - Added canonical skill dependency map: `sdd/.agent/skills/dependency-map.tsv`.
+  - Added skill run ledger: `sdd/memory-bank/core/skill-runs.md`.
+  - Added resolver CLI: `scripts/resolve-skills.sh`.
+
+### Changed
+- Converted `sdd/.agent/rules/intake/01-questions.md` into a lightweight router.
+- Updated `sdd/.agent/rules/intake/00-intake-flow.md` to load only relevant question packs.
+- Updated adapter read-first contract to include `sdd/.agent/runtime/minimal.md`.
+- Updated `sdd/.agent/rules/index.md` and `sdd/.agent/README.md` for runtime + pack discovery.
+
+### Enforced
+- Skill graph hard-fail checks in `scripts/check-policy.sh` for `app/*` ranges:
+  - requires `skill-runs.md` updates
+  - validates dependency order and required edges
+- Repository validation in `scripts/validate-repo.sh` for:
+  - skill `task_types` front matter
+  - `dependency-map.tsv` integrity and known skill references
+
 ## [v1.0.1] - 2026-02-18
 
 ### Added

@@ -1,6 +1,7 @@
 ---
 name: ops-deploy
 description: Deployment planning and environment readiness. Use when preparing infra, env vars, or rollout steps.
+task_types: deploy-change,db-change,api-db-change,release,full-stack-change
 ---
 
 # Ops Deploy

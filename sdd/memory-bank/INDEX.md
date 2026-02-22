@@ -14,6 +14,7 @@
 - `arch/patterns-overview.md`
 - `core/sprint-current.md` (if using sprints)
 - `core/sprint-plan.md` (if using sprints)
+- `core/skill-runs.md` (required when app code changes)
 - `core/traceability.md` (spec → code mapping)
 
 ## Reference

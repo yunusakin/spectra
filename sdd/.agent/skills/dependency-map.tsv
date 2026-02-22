@@ -1,0 +1,11 @@
+# from_skill	to_skill	relation	required	order_weight	reason
+db-migration	api-design	precedes	false	10	Database-first ordering reduces contract drift during schema changes.
+api-design	security-review-lite	precedes	true	20	Security checks require finalized API surface.
+api-design	testing-plan	precedes	true	30	Test plans should reflect finalized API contracts.
+db-migration	testing-plan	precedes	false	40	Test plans should include migration and data-change coverage.
+db-migration	ops-deploy	precedes	false	50	Operational rollout should include migration constraints.
+security-review-lite	testing-plan	precedes	false	60	Security findings should feed negative/security test cases.
+testing-plan	ops-deploy	precedes	false	70	Deployment gating should include agreed test gates.
+ops-deploy	release-prep	precedes	true	80	Release readiness depends on deployment/rollback checks.
+testing-plan	release-prep	precedes	true	90	Release readiness depends on test status and coverage.
+security-review-lite	release-prep	precedes	false	100	Release notes may need security highlights.

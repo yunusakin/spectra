@@ -1,41 +1,63 @@
 # Progress
 
-## Done
-- Added intake decision governance with new rules:
-  - `sdd/.agent/rules/intake/04-question-contract.md`
-  - `sdd/.agent/rules/intake/05-question-catalog.md`
-- Added role-based quality loop governance:
-  - `sdd/.agent/rules/workflow/03-role-loop-gate.md`
-  - `sdd/.agent/rules/workflow/04-escalation-policy.md`
-- Updated intake/workflow/approval rules to enforce:
-  - confirmed technical decisions in `Decision Log`
-  - blocking behavior for `Open Technical Questions`
-  - blocking behavior for unresolved `critical`/`warning` findings
-- Expanded memory-bank schema and references:
-  - `sdd/memory-bank/core/intake-state.md` now includes `Decision Log` and `Open Technical Questions`
-  - added `sdd/memory-bank/core/invariants.md`
-  - added `sdd/memory-bank/core/review-gate.md`
-  - updated `sdd/memory-bank/INDEX.md`
-- Hardened `scripts/check-policy.sh` with additional checks:
-  - open technical question blockers
-  - issue reference requirement for open technical questions
-  - review-gate severity blockers
-  - invariant change trail requirement
-  - existing approval/progress/range checks preserved
-- Added GitHub issue template for unresolved technical intake decisions:
-  - `.github/ISSUE_TEMPLATE/intake-question.yml`
-- Aligned docs and adapters with the governance model:
-  - `README.md`, `docs/overview.md`, `docs/quick-start.md`, `docs/workflow.md`, `docs/testing.md`, `scripts/README.md`
-  - `AGENT.md`, `AGENTS.md`, `CLAUDE.md`, `.cursorrules`
-- Added release visibility updates for `v1.0.1` in:
-  - `README.md` (`Release History` + `What's New in v1.0.1`)
-  - `CHANGELOG.md`
-  - `RELEASE_SUMMARY.md`
-  - `sdd/memory-bank/core/spec-history.md`
+> Auto-maintained by the agent.
+>
+> This file is project-bound: when Spectra is used inside a project, this file tracks that target project's execution progress, not Spectra framework maintenance history.
+
+## Project Binding
+- Project Name: Spectra (framework maintenance context)
+- Project Root: `/Users/yunus.akin/Documents/projects/spectra`
+- Repository: `yunusakin/spectra`
+- Branch: `main`
+- Sprint/Iteration: SG-REL-001
+
+## Progress Summary
+- Overall Status: on-track
+- Completion: 92%
+- Current Milestone: release package for `v1.0.2` validated and documented
+- Next Milestone: commit, push, tag, and publish release
+
+## Work Log
+| Date | Item ID | Area | Change | Status | Evidence |
+|------|---------|------|--------|--------|----------|
+| 2026-02-22 | SG-COST-001 | Intake Rules | Split question corpus into phase/app-type packs | done | `sdd/.agent/rules/intake/questions/` |
+| 2026-02-22 | SG-COST-002 | Runtime Context | Added minimal context manifest | done | `sdd/.agent/runtime/minimal.md` |
+| 2026-02-22 | SG-REL-001 | README | Added `v1.0.2` release row and separate feature sections | done | `README.md` |
+| 2026-02-22 | SG-REL-002 | Changelog | Added `[v1.0.2]` entry with Added/Changed/Enforced | done | `CHANGELOG.md` |
+| 2026-02-22 | SG-REL-003 | Release Notes | Updated release summary with two feature tracks | done | `RELEASE_SUMMARY.md` |
+| 2026-02-22 | SG-REL-004 | Validation | Re-ran strict validation and local/range policy checks | done | `validate-repo.sh`, `check-policy.sh` |
+| 2026-02-22 | SG-REL-005 | README | Restored concise `v1.0.1` summary under release notes | done | `README.md` |
+
+## Completed
+| Item ID | Description | Specs Updated | Code/Test Links | Done Date |
+|---------|-------------|---------------|-----------------|-----------|
+| SG-COST-001 | Intake question pack split | yes | `sdd/.agent/rules/intake/questions/` | 2026-02-22 |
+| SG-COST-002 | Minimal runtime context manifest | yes | `sdd/.agent/runtime/minimal.md` | 2026-02-22 |
+| SG-REL-001 | README release visibility for v1.0.2 | yes | `README.md` | 2026-02-22 |
+| SG-REL-004 | Validation and policy re-check after release doc updates | yes | `scripts/validate-repo.sh`, `scripts/check-policy.sh` | 2026-02-22 |
 
 ## In Progress
-- Running final validation, commit/push, and release publication steps for `v1.0.1`.
+| Item ID | Description | Owner | Blockers | Next Checkpoint |
+|---------|-------------|-------|----------|-----------------|
+| SG-REL-006 | Commit/push and publish `v1.0.2` | agent | none | run commit + tag + release commands |
 
-## Next
-- Complete single commit and push to `main`.
-- Publish GitHub release `v1.0.1` using `RELEASE_SUMMARY.md`.
+## Blocked
+| Item ID | Blocker | Decision Needed | Owner | ETA |
+|---------|---------|-----------------|-------|-----|
+| - | - | - | - | - |
+
+## Next Actions
+1. Review staged diff scope.
+2. Commit and push `main`.
+3. Tag and publish `v1.0.2` release.
+
+## Validation Snapshot
+- `validate-repo.sh --strict`: OK (2026-02-22)
+- `check-policy.sh`: OK (2026-02-22)
+- `check-policy.sh --base HEAD --head HEAD`: OK (2026-02-22)
+- tests/build: not applicable for this rules/docs-only change
+
+## Session Boundary
+- Last Updated: 2026-02-22
+- Resume From: commit/push + release publish step
+- Handoff Notes: release docs explicitly separate Skill Graph as standalone feature and all policy checks pass.

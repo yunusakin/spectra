@@ -1,6 +1,7 @@
 ---
 name: db-migration
 description: Plan and implement database schema changes. Use when adding tables/columns/indexes or changing data models.
+task_types: db-change,api-db-change,full-stack-change
 ---
 
 # DB Migration Skill

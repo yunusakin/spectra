@@ -1,6 +1,7 @@
 ---
 name: security-review-lite
 description: Quick security review checklist for new features, endpoints, and data handling. Use when adding auth, handling PII, or exposing APIs.
+task_types: api-change,security-change,api-db-change,full-stack-change
 ---
 
 # Security Review (Lite)

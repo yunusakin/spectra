@@ -13,12 +13,17 @@ After sprint plan creation, the agent follows this loop for each backlog item.
 
 ### 2. Plan
 - Create/select a plan template from `sdd/.agent/plans/`.
-- Identify relevant skills (`rules/skills/01-skill-auto-select.md`).
+- Identify task type and relevant skills (`rules/skills/01-skill-auto-select.md`).
 - If ambiguous, ask targeted clarification.
 
-### 3. Skill Check
-- Apply relevant skill checklist(s) before coding.
-- Record applied skills in `progress.md`.
+### 3. Skill Check (Hard Gate)
+- Run resolver before coding:
+  - `bash scripts/resolve-skills.sh --task-type <task_type>`
+- If using explicit skills/order, validate with:
+  - `bash scripts/resolve-skills.sh --task-type <task_type> --skills <csv>`
+- If resolver exits non-zero, stop and fix selection/order first.
+- Record selected skills + execution order in `sdd/memory-bank/core/skill-runs.md`.
+- Record summary in `progress.md`.
 
 ### 4. Code
 - Generate code under `app/` following specs and rules.

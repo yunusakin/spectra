@@ -1,6 +1,7 @@
 ---
 name: testing-plan
 description: Define testing strategy and coverage expectations. Use when planning a feature or release.
+task_types: api-change,db-change,api-db-change,security-change,deploy-change,release,full-stack-change,bugfix
 ---
 
 # Testing Plan

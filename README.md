@@ -33,7 +33,7 @@ The script copies all Spectra files and optionally walks you through 3 quick que
 5. Run validation and policy checks.
 6. Reply `approved`.
 7. Agent scaffolds under `app/`.
-8. Agent runs sprint loop: plan -> code -> validate -> challenge -> fix/escalate -> verify.
+8. Agent runs sprint loop: plan -> resolve skills -> log skill run -> code -> validate -> challenge -> fix/escalate -> verify.
 
 ## Intake Decision Loop
 
@@ -44,6 +44,29 @@ For technical choices, Spectra enforces:
 - final value in specs
 
 If unresolved, the question is tracked as `open` in `sdd/memory-bank/core/intake-state.md` and blocks approval.
+
+## Skill Graph Contract
+
+For post-approval implementation work, skill ordering is enforced.
+
+Canonical artifacts:
+- Visual graph: `sdd/.agent/skills/dependency-graph.md`
+- Machine-readable map: `sdd/.agent/skills/dependency-map.tsv`
+- Run log: `sdd/memory-bank/core/skill-runs.md`
+
+Before coding an item:
+
+```bash
+bash scripts/resolve-skills.sh --task-type <task_type>
+```
+
+If explicit skill order is provided:
+
+```bash
+bash scripts/resolve-skills.sh --task-type <task_type> --skills <csv>
+```
+
+If resolver fails, coding is blocked.
 
 ## Quality Gate Loop
 
@@ -103,10 +126,11 @@ flowchart TD
     Fix -.-> Validate
     Validate -->|Yes| Approved(["approved"])
     Approved --> Scaffold["Scaffold app/"]
-    Scaffold --> RoleLoop["Code -> Validate -> Challenge"]
+    Scaffold --> SkillLoop["Resolve Skills + Log Run"]
+    SkillLoop --> RoleLoop["Code -> Validate -> Challenge"]
     RoleLoop --> Gate{"Blocking findings?"}
     Gate -.->|Yes| Iterate["Fix or Escalate"]
-    Iterate -.-> RoleLoop
+    Iterate -.-> SkillLoop
     Gate -->|No| Verify["Post-code Verification"]
     Verify --> Ship(["Ship"])
 ```
@@ -127,8 +151,9 @@ scripts/                   # Validation, policy, health, spec diff helpers
 | Command | Purpose |
 |---|---|
 | `bash scripts/validate-repo.sh --strict` | Validate indexes, links, adapter consistency, templates |
-| `bash scripts/check-policy.sh` | Enforce approval/open-question/review-gate/progress policies |
+| `bash scripts/check-policy.sh` | Enforce approval/open-question/review-gate/progress/skill-graph policies |
 | `bash scripts/check-policy.sh --base <sha> --head <sha>` | Range-aware policy check for CI/PR validation |
+| `bash scripts/resolve-skills.sh --task-type <type>` | Resolve graph-compliant skill order for implementation work |
 | `bash scripts/health-check.sh` | Quick project health snapshot |
 | `bash scripts/spec-diff.sh --update` | Append spec diff report entry |
 
@@ -146,16 +171,29 @@ scripts/                   # Validation, policy, health, spec diff helpers
 
 | Version | Date | Highlights | Notes |
 |---|---|---|---|
+| `v1.0.2` | 2026-02-22 | Token-efficient intake question packs + runtime minimal context; Skill Graph enforcement and hard-fail gates | See [CHANGELOG.md](CHANGELOG.md) |
 | `v1.0.1` | 2026-02-18 | Intake decision governance, open-question blockers, role-based quality gate, escalation policy, policy hardening | See [CHANGELOG.md](CHANGELOG.md) |
 | `v1.0.0` | 2026-02-17 | First stable Spectra release | [GitHub Release](https://github.com/yunusakin/spectra/releases/tag/v1.0.0) |
 
-## What's New in v1.0.1
+## What's New in v1.0.2
 
-- Added canonical intake decision tracking (`Decision Log` + `Open Technical Questions`).
-- Added invariants and review-gate memory templates for drift prevention and severity tracking.
-- Added role-loop and escalation workflow rules (`coding -> validation -> challenge`, max 3 iterations).
-- Hardened policy checks for open technical questions, issue references, unresolved `critical`/`warning`, and invariant change trails.
-- Aligned adapters, CI, and docs with the new governance model.
+### Feature: Token-Efficient Intake Context
+- Split large intake question corpus into phase/app-type packs under `sdd/.agent/rules/intake/questions/`.
+- Converted `sdd/.agent/rules/intake/01-questions.md` into a lightweight router.
+- Added `sdd/.agent/runtime/minimal.md` to enforce minimal context loading by mode and phase.
+- Updated intake flow and adapters to avoid preloading unrelated packs.
+
+### Feature: Skill Graph Enforcement
+- Added canonical skill dependency map `sdd/.agent/skills/dependency-map.tsv`.
+- Added `scripts/resolve-skills.sh` for graph-compliant skill ordering per task type.
+- Enforced hard-fail policy checks for skill runs on `app/*` changes.
+- Added `sdd/memory-bank/core/skill-runs.md` for auditable skill execution order tracking.
+
+## What's New in v1.0.1
+- Added intake decision governance with explicit confirmation and decision logging.
+- Added open technical question lifecycle with blocking policy enforcement.
+- Added role-based quality gate loop (`code -> validate -> challenge`) with escalation rules.
+- Hardened CI/policy checks for approval state, unresolved findings, and traceability trails.
 
 ## License
 

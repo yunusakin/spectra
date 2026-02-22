@@ -1,30 +1,47 @@
 # Active Context
 
 > Auto-maintained by the agent. Read this first when resuming work.
+>
+> This file is project-bound: when Spectra is used inside a project, this file must describe that target project's current state, not Spectra framework development notes.
+
+## Project Binding
+- Project Name: Spectra (framework maintenance context)
+- Project Root: `/Users/yunus.akin/Documents/projects/spectra`
+- Repository: `yunusakin/spectra`
+- Branch: `main`
+- Primary Owner: yunus.akin
 
 ## Current Focus
-- Finalize governance hardening as `v1.0.1` with synced release documentation and GitHub release publishing.
+- Current Phase: release-prep
+- Current Objective: publish `v1.0.2` with explicit separate features for Token-Efficient Intake Context and Skill Graph Enforcement
+- Current Sprint Item: SG-REL-005
+
+## State Snapshot
+- Approval Status: not applicable (framework update)
+- Intake Phase: not applicable
+- Open Technical Questions: none
+- Unresolved Review Findings: none
+- Last Validation Result: `validate-repo.sh --strict` OK; `check-policy.sh` OK; `check-policy.sh --base HEAD --head HEAD` OK (2026-02-22)
 
 ## Recent Changes
-| File | Change |
-|------|--------|
-| `sdd/.agent/rules/intake/04-question-contract.md` | Added canonical decision contract for technical intake questions. |
-| `sdd/.agent/rules/intake/05-question-catalog.md` | Added stable question ID catalog for core/technical intake fields. |
-| `sdd/.agent/rules/workflow/03-role-loop-gate.md` | Added coding -> validation -> challenge gate with severity blocking. |
-| `sdd/.agent/rules/workflow/04-escalation-policy.md` | Added max-iteration escalation policy and logging obligations. |
-| `sdd/memory-bank/core/intake-state.md` | Added canonical `Decision Log` and `Open Technical Questions` sections. |
-| `sdd/memory-bank/core/invariants.md` | Added non-negotiable architecture/pattern/terminology anchors template. |
-| `sdd/memory-bank/core/review-gate.md` | Added findings register for validation/challenge severity/status tracking. |
-| `scripts/check-policy.sh` | Added blockers for open technical questions, missing issue refs, unresolved critical/warning findings, and invariant change trail checks. |
-| `.github/ISSUE_TEMPLATE/intake-question.yml` | Added async intake decision issue template. |
-| `README.md` | Added release history table and `v1.0.1` highlights alongside governance flow updates. |
-| `CHANGELOG.md` | Added `v1.0.1` release notes with added/changed/enforced sections. |
-| `RELEASE_SUMMARY.md` | Prepared `v1.0.1` release summary for GitHub release notes. |
-| `sdd/memory-bank/core/spec-history.md` | Added `v1.0.1` spec change trail entry. |
+| Date | Project File/Area | Change | Why |
+|------|--------------------|--------|-----|
+| 2026-02-22 | `README.md` | Added `v1.0.2` release row + separate `Token-Efficient` and `Skill Graph` feature sections | Make release scope explicit for users before publish |
+| 2026-02-22 | `README.md` | Restored concise `v1.0.1` summary block under release notes | Prevent empty prior-version section |
+| 2026-02-22 | `CHANGELOG.md` | Added `[v1.0.2]` with Added/Changed/Enforced sections | Keep canonical release history synchronized |
+| 2026-02-22 | `RELEASE_SUMMARY.md` | Rewritten for `v1.0.2` with two feature groups | Use as GitHub release notes source |
 
 ## Open Decisions
-- None currently blocked.
+| ID | Decision Needed | Options | Owner | Due Date | Blocking |
+|----|------------------|---------|-------|----------|----------|
+| - | none | - | - | - | no |
+
+## Next Actions
+1. Stage all changes and confirm final diff scope.
+2. Commit and push `main`.
+3. Tag and publish GitHub release `v1.0.2`.
 
 ## Session Boundary
-- Governance model has moved to decision + quality-gate enforcement.
-- Current step is packaging and publishing `v1.0.1` on GitHub.
+- Last Updated: 2026-02-22
+- Resume From: commit/push step
+- Handoff Notes: release docs and policy checks are green; repository is ready for `v1.0.2` packaging.

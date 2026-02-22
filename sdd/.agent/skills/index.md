@@ -12,6 +12,10 @@ Start here: `sdd/.agent/skills/USAGE.md`
 | `security-review-lite` | Auth/PII/secrets/external exposure | Security notes + constraints updates |
 | `testing-plan` | Test layers/coverage/CI gates | Test plan + progress updates |
 
+## Skill Graph Sources
+- Visual: `sdd/.agent/skills/dependency-graph.md`
+- Canonical: `sdd/.agent/skills/dependency-map.tsv`
+
 ## Suggested Combinations
 See `sdd/.agent/skills/dependency-graph.md`.
 

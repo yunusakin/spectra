@@ -1,6 +1,7 @@
 ---
 name: api-design
 description: Design or review HTTP APIs. Use when adding or changing endpoints, request/response contracts, error formats, pagination, or versioning.
+task_types: api-change,api-db-change,full-stack-change
 ---
 
 # API Design Skill

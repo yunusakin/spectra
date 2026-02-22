@@ -3,6 +3,7 @@
 All canonical rules live in `sdd/.agent/`.
 
 ## Read First
+- `sdd/.agent/runtime/minimal.md`
 - `sdd/.agent/README.md`
 - `sdd/.agent/rules/index.md`
 
@@ -18,12 +19,14 @@ All canonical rules live in `sdd/.agent/`.
 - Use intake question IDs and confirmation rules for technical decisions.
 - Do not ask for approval while open technical questions exist.
 - Do not advance stable status with unresolved `critical`/`warning` review findings.
+- Follow `sdd/.agent/runtime/minimal.md` and load only needed intake question packs.
 - After every task where files are modified, update `sdd/memory-bank/core/progress.md`.
 - At session start, read `sdd/memory-bank/core/activeContext.md`. At end of every significant task, update it.
 
 ## Canonical Workflows
 - Intake: `sdd/.agent/rules/intake/00-intake-flow.md`
-- Questions: `sdd/.agent/rules/intake/01-questions.md`
+- Questions router: `sdd/.agent/rules/intake/01-questions.md`
+- Intake question packs: `sdd/.agent/rules/intake/questions/`
 - Validation: `sdd/.agent/rules/intake/02-validation.md`
 - Discovery mode: `sdd/.agent/rules/intake/03-discovery.md`
 - Question contract: `sdd/.agent/rules/intake/04-question-contract.md`

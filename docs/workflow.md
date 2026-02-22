@@ -30,6 +30,19 @@ After `approved`, the agent:
 2. Selects a scaffold from `sdd/.agent/scaffolds/`.
 3. Generates initial structure under `app/`.
 
+### Skill Graph Loop (Before Coding)
+
+For each implementation item:
+1. Classify task type (`api-change`, `db-change`, `api-db-change`, etc.).
+2. Resolve skill order:
+   - `bash scripts/resolve-skills.sh --task-type <task_type>`
+3. If using explicit skills/order, validate with:
+   - `bash scripts/resolve-skills.sh --task-type <task_type> --skills <csv>`
+4. Append run log row to `sdd/memory-bank/core/skill-runs.md`.
+
+Blocking rule:
+- non-zero resolver exit means no coding yet.
+
 ### Role-Based Quality Loop
 
 Per implementation item:
@@ -74,6 +87,14 @@ Policy check fails in CI:
 ```bash
 bash scripts/check-policy.sh --base <base_sha> --head <head_sha>
 ```
+
+Skill graph order fails:
+
+```bash
+bash scripts/resolve-skills.sh --task-type <task_type> --skills <csv>
+```
+
+Then use returned `Recommended Order` and log in `skill-runs.md`.
 
 Intake blocked before approval:
 - Resolve all `open` technical questions.

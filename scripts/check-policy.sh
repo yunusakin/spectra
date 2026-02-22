@@ -17,6 +17,7 @@ Checks:
 - Invariant change trail: invariants.md changes require spec-history.md or arch/decisions.md updates
 - Required specs do not contain unresolved placeholders (TBD/TODO/<...>)
 - Progress tracking: if sdd/* or app/* changed in checked range, progress.md must be touched
+- Skill graph: app/* changes require skill-runs update and graph-compliant execution order
 
 Examples:
   bash scripts/check-policy.sh
@@ -59,6 +60,14 @@ cd "${REPO_ROOT}"
 
 errors=()
 add_error() { errors+=("$1"); }
+
+normalize_csv() {
+  local raw="$1"
+  echo "${raw}" \
+    | tr ',' '\n' \
+    | sed 's/^ *//;s/ *$//' \
+    | awk 'NF > 0'
+}
 
 parse_approval_status() {
   local state_file="$1"
@@ -199,6 +208,59 @@ parse_blocking_review_findings() {
   ' "${review_file}" 2>/dev/null || true
 }
 
+parse_skill_runs() {
+  local skill_runs_file="$1"
+  if [[ ! -f "${skill_runs_file}" ]]; then
+    return 0
+  fi
+
+  awk '
+    function trim(s) {
+      gsub(/^[[:space:]]+/, "", s)
+      gsub(/[[:space:]]+$/, "", s)
+      return s
+    }
+
+    BEGIN { in_section = 0; in_comment = 0 }
+    {
+      if ($0 ~ /<!--/) in_comment = 1
+      if (in_comment == 1) {
+        if ($0 ~ /-->/) in_comment = 0
+        next
+      }
+
+      if ($0 ~ /^##[[:space:]]+Runs[[:space:]]*$/) {
+        in_section = 1
+        next
+      }
+
+      if (in_section == 1 && $0 ~ /^##[[:space:]]+/) {
+        exit
+      }
+
+      if (in_section == 1 && $0 ~ /^[[:space:]]*\|/) {
+        line = $0
+        if (line ~ /^[[:space:]]*\|[[:space:]-]+\|/) next
+
+        gsub(/^[[:space:]]*\|/, "", line)
+        gsub(/\|[[:space:]]*$/, "", line)
+        n = split(line, cols, "|")
+        if (n < 7) next
+
+        date = trim(cols[1])
+        task_type = trim(cols[3])
+        selected = trim(cols[4])
+        exec_order = trim(cols[5])
+
+        if (date == "Date") next
+        if (selected == "" && exec_order == "") next
+
+        print NR "\t" task_type "\t" selected "\t" exec_order
+      }
+    }
+  ' "${skill_runs_file}" 2>/dev/null || true
+}
+
 collect_changed_files() {
   if [[ -n "${BASE_REF}" ]]; then
     if ! git rev-parse --verify "${BASE_REF}^{commit}" >/dev/null 2>&1; then
@@ -221,11 +283,151 @@ collect_changed_files() {
   return 0
 }
 
+validate_skill_run_row() {
+  local map_file="$1"
+  local skill_runs_file="$2"
+  local row_no="$3"
+  local selected_csv="$4"
+  local exec_order_csv="$5"
+
+  local output
+  output="$(awk \
+    -v map_file="${map_file}" \
+    -v file="${skill_runs_file}" \
+    -v row_no="${row_no}" \
+    -v selected_csv="${selected_csv}" \
+    -v exec_order_csv="${exec_order_csv}" '
+    function trim(s) {
+      gsub(/^[[:space:]]+/, "", s)
+      gsub(/[[:space:]]+$/, "", s)
+      return s
+    }
+
+    function add_error(msg) {
+      errors[++error_count] = file ":" row_no ": " msg
+    }
+
+    BEGIN {
+      sel_count = split(selected_csv, sel_raw, ",")
+      for (i = 1; i <= sel_count; i++) {
+        s = trim(sel_raw[i])
+        if (s == "") continue
+        if (!(s in selected_set)) {
+          selected_set[s] = 1
+          selected[++selected_n] = s
+        }
+      }
+
+      ord_count = split(exec_order_csv, ord_raw, ",")
+      for (i = 1; i <= ord_count; i++) {
+        s = trim(ord_raw[i])
+        if (s == "") continue
+        if (s in order_seen) {
+          add_error("duplicate skill '\''" s "'\'' in Execution Order")
+          continue
+        }
+        order_seen[s] = 1
+        order_index[s] = ++order_n
+        order[++order_list_n] = s
+      }
+
+      if (selected_n == 0) add_error("Selected Skills is empty")
+      if (order_n == 0) add_error("Execution Order is empty")
+
+      while ((getline line < map_file) > 0) {
+        if (line ~ /^[[:space:]]*$/) continue
+        if (line ~ /^[[:space:]]*#/) continue
+
+        n = split(line, cols, "\t")
+        if (n < 5) continue
+
+        from = trim(cols[1])
+        to = trim(cols[2])
+        relation = trim(cols[3])
+        required = tolower(trim(cols[4]))
+
+        if (from != "") known[from] = 1
+        if (to != "") known[to] = 1
+
+        if (relation == "precedes") {
+          edge_count++
+          edge_from[edge_count] = from
+          edge_to[edge_count] = to
+          edge_required[edge_count] = required
+        }
+      }
+      close(map_file)
+
+      for (i = 1; i <= selected_n; i++) {
+        s = selected[i]
+        if (!(s in known)) {
+          add_error("unknown selected skill '\''" s "'\''")
+        }
+        if (!(s in order_index)) {
+          add_error("missing '\''" s "'\'' in Execution Order")
+        }
+      }
+
+      for (i = 1; i <= order_list_n; i++) {
+        s = order[i]
+        if (!(s in known)) {
+          add_error("unknown skill in Execution Order '\''" s "'\''")
+        }
+        if (!(s in selected_set)) {
+          add_error("Execution Order skill '\''" s "'\'' is not listed in Selected Skills")
+        }
+      }
+
+      for (i = 1; i <= edge_count; i++) {
+        from = edge_from[i]
+        to = edge_to[i]
+        required = edge_required[i]
+
+        if (required == "true" && (to in selected_set) && !(from in selected_set)) {
+          add_error("required dependency missing: '\''" to "'\'' requires '\''" from "'\''")
+        }
+
+        if ((from in selected_set) && (to in selected_set) && (from in order_index) && (to in order_index)) {
+          if (order_index[from] > order_index[to]) {
+            if (required == "true") {
+              add_error("required order violation: '\''" from "'\'' must run before '\''" to "'\''")
+            } else {
+              add_error("order violation: '\''" from "'\'' should run before '\''" to "'\''")
+            }
+          }
+        }
+      }
+
+      if (error_count > 0) {
+        for (i = 1; i <= error_count; i++) print errors[i]
+        exit 1
+      }
+
+      exit 0
+    }
+  ' 2>/dev/null || true)"
+
+  if [[ -n "${output}" ]]; then
+    while IFS= read -r line; do
+      [[ -n "${line}" ]] || continue
+      add_error "${line}"
+    done <<< "${output}"
+
+    if echo "${output}" | grep -q .; then
+      return 1
+    fi
+  fi
+
+  return 0
+}
+
 state_file="sdd/memory-bank/core/intake-state.md"
 review_gate_file="sdd/memory-bank/core/review-gate.md"
 invariants_file="sdd/memory-bank/core/invariants.md"
 spec_history_file="sdd/memory-bank/core/spec-history.md"
 arch_decisions_file="sdd/memory-bank/arch/decisions.md"
+skill_runs_file="sdd/memory-bank/core/skill-runs.md"
+skill_map_file="sdd/.agent/skills/dependency-map.tsv"
 
 approval_status="$(parse_approval_status "${state_file}")"
 open_questions="$(parse_open_technical_questions "${state_file}")"
@@ -343,6 +545,48 @@ if [[ -n "${changed_files}" ]]; then
   if "${has_spec_or_code_change}"; then
     if ! echo "${changed_files}" | grep -qx "${progress_file}"; then
       add_error "Spec/code files changed in checked range but ${progress_file} was not updated."
+    fi
+  fi
+fi
+
+###################################
+# 7. Skill graph enforcement for app changes in checked range
+###################################
+has_app_change_in_range=false
+if [[ -n "${changed_files}" ]]; then
+  while IFS= read -r f; do
+    [[ -n "${f}" ]] || continue
+    if [[ "${f}" == app/* && "${f}" != "app/README.md" ]]; then
+      has_app_change_in_range=true
+      break
+    fi
+  done <<< "${changed_files}"
+fi
+
+if "${has_app_change_in_range}"; then
+  if ! echo "${changed_files}" | grep -qx "${skill_runs_file}"; then
+    add_error "app/* changed in checked range but ${skill_runs_file} was not updated."
+  fi
+
+  if [[ ! -f "${skill_map_file}" ]]; then
+    add_error "Missing skill dependency map: ${skill_map_file}."
+  fi
+
+  skill_runs="$(parse_skill_runs "${skill_runs_file}")"
+
+  if [[ -z "${skill_runs}" ]]; then
+    add_error "app/* changed in checked range but ${skill_runs_file} has no skill run records."
+  else
+    has_valid_row=false
+    while IFS=$'\t' read -r row_no task_type selected_csv exec_order_csv; do
+      [[ -n "${row_no}" ]] || continue
+      [[ -n "${selected_csv}" ]] || continue
+      has_valid_row=true
+      validate_skill_run_row "${skill_map_file}" "${skill_runs_file}" "${row_no}" "${selected_csv}" "${exec_order_csv}" || true
+    done <<< "${skill_runs}"
+
+    if ! "${has_valid_row}"; then
+      add_error "app/* changed in checked range but ${skill_runs_file} has no usable run rows."
     fi
   fi
 fi
