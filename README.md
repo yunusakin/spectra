@@ -189,12 +189,6 @@ scripts/                   # Validation, policy, health, spec diff helpers
 - Enforced hard-fail policy checks for skill runs on `app/*` changes.
 - Added `sdd/memory-bank/core/skill-runs.md` for auditable skill execution order tracking.
 
-## What's New in v1.0.1
-- Added intake decision governance with explicit confirmation and decision logging.
-- Added open technical question lifecycle with blocking policy enforcement.
-- Added role-based quality gate loop (`code -> validate -> challenge`) with escalation rules.
-- Hardened CI/policy checks for approval state, unresolved findings, and traceability trails.
-
 ## License
 
 MIT — see [`LICENSE`](LICENSE).

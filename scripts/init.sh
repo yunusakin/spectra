@@ -224,11 +224,12 @@ EOF
     info "projectbrief.md pre-filled"
   fi
 
+  local today
+  today=$(date +%Y-%m-%d)
+
   # Update intake-state.md
   local intake="$target/sdd/memory-bank/core/intake-state.md"
   if [[ -f "$intake" ]]; then
-    local today
-    today=$(date +%Y-%m-%d)
     cat > "$intake" << EOF
 # Intake State
 
@@ -268,6 +269,123 @@ not approved
 $today (pre-filled via spectra init)
 EOF
     info "intake-state.md → Phase 1a complete"
+  fi
+
+
+  # Update activeContext.md
+  local active_context="$target/sdd/memory-bank/core/activeContext.md"
+  if [[ -f "$active_context" ]]; then
+    cat > "$active_context" << EOF
+# Active Context
+
+> Auto-maintained by the agent. Read this first when resuming work.
+>
+> This file is project-bound: it must describe the target application being built with Spectra.
+
+## Project Binding
+- Project Name: $project_name
+- Project Root: `$target`
+- Repository: not set (update after git remote is configured)
+- Branch: main
+- Primary Owner: project team
+
+## Current Focus
+- Current Phase: intake
+- Current Objective: complete intake and validation for $project_name
+- Current Sprint Item: INTAKE-001
+
+## State Snapshot
+- Approval Status: not approved
+- Intake Phase: Phase 1b (Language / Framework / Architecture)
+- Open Technical Questions: none
+- Unresolved Review Findings: none
+- Last Validation Result: pending
+
+## Recent Changes
+| Date | Project File/Area | Change | Why |
+|------|--------------------|--------|-----|
+| $today | `sdd/memory-bank/core/projectbrief.md` | Pre-filled project basics | Bootstrap target project context |
+| $today | `sdd/memory-bank/core/intake-state.md` | Marked Phase 1a complete | Start intake from Phase 1b quickly |
+
+## Open Decisions
+| ID | Decision Needed | Options | Owner | Due Date | Blocking |
+|----|------------------|---------|-------|----------|----------|
+| - | none | - | - | - | no |
+
+## Next Actions
+1. Complete Phase 1b mandatory intake answers.
+2. Run `bash scripts/validate-repo.sh --strict`.
+3. Resolve open technical questions and request `approved`.
+
+## Session Boundary
+- Last Updated: $today
+- Resume From: intake phase
+- Handoff Notes: initialized by spectra init wizard with project basics.
+EOF
+    info "activeContext.md pre-filled"
+  fi
+
+  # Update progress.md
+  local progress="$target/sdd/memory-bank/core/progress.md"
+  if [[ -f "$progress" ]]; then
+    cat > "$progress" << EOF
+# Progress
+
+> Auto-maintained by the agent.
+>
+> This file is project-bound: it tracks execution progress for the target application built with Spectra.
+
+## Project Binding
+- Project Name: $project_name
+- Project Root: `$target`
+- Repository: not set (update after git remote is configured)
+- Branch: main
+- Sprint/Iteration: INTAKE-001
+
+## Progress Summary
+- Overall Status: on-track
+- Completion: 10%
+- Current Milestone: complete mandatory intake answers
+- Next Milestone: validation pass and approval gate
+
+## Work Log
+| Date | Item ID | Area | Change | Status | Evidence |
+|------|---------|------|--------|--------|----------|
+| $today | INTAKE-001 | `projectbrief.md` | Project name, purpose, and app type pre-filled | done | `sdd/memory-bank/core/projectbrief.md` |
+| $today | INTAKE-002 | `intake-state.md` | Phase 1a marked complete | done | `sdd/memory-bank/core/intake-state.md` |
+
+## Completed
+| Item ID | Description | Specs Updated | Code/Test Links | Done Date |
+|---------|-------------|---------------|-----------------|-----------|
+| INTAKE-001 | Bootstrap project basics via spectra init wizard | yes | `sdd/memory-bank/core/projectbrief.md` | $today |
+| INTAKE-002 | Move intake start point to Phase 1b | yes | `sdd/memory-bank/core/intake-state.md` | $today |
+
+## In Progress
+| Item ID | Description | Owner | Blockers | Next Checkpoint |
+|---------|-------------|-------|----------|-----------------|
+| INTAKE-003 | Complete mandatory Phase 1b and 1c questions | agent + human | none | run `bash scripts/validate-repo.sh --strict` |
+
+## Blocked
+| Item ID | Blocker | Decision Needed | Owner | ETA |
+|---------|---------|-----------------|-------|-----|
+| - | - | - | - | - |
+
+## Next Actions
+1. Fill missing mandatory intake answers.
+2. Run validation and policy checks.
+3. Request approval only after open technical questions are resolved.
+
+## Validation Snapshot
+- `validate-repo.sh --strict`: pending
+- `check-policy.sh`: pending
+- tests/build: not applicable at intake stage
+
+## Session Boundary
+- Last Updated: $today
+- Resume From: intake completion
+- Handoff Notes: context and progress now track the target project, not Spectra framework maintenance.
+EOF
+    info "progress.md pre-filled"
   fi
 
   echo ""
