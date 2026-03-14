@@ -1,0 +1,30 @@
+apiVersion: spectra/v2
+kind: ReleaseThresholds
+metadata:
+  id: spectra-core-release
+  version: 0.1.0
+  status: draft
+feature_id: spectra-core
+eval_thresholds_ref: ./evals/release-thresholds.yaml
+gates:
+  validation:
+    required: true
+  tests:
+    required: true
+  evals:
+    required_suite: release
+    min_pass_rate: 0.98
+  telemetry:
+    required_signals:
+      - verify_pass_rate
+      - approval_block_rate
+  quality:
+    max_open_critical: 0
+    max_open_warning: 0
+manual_approvals:
+  - engineering
+  - release-manager
+rollback:
+  required: true
+  trigger: verify_pass_rate < 0.90 or any critical release blocker
+  path: revert deployment, restore previous approval baseline, re-run verify

@@ -1,0 +1,13 @@
+.git
+node_modules
+dist
+build
+coverage
+.next
+.turbo
+.cache
+tmp
+vendor
+*.log
+assets
+notion

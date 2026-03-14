@@ -1,0 +1,15 @@
+apiVersion: spectra/v2
+kind: FailureModes
+feature_id: spectra-core
+failure_modes:
+  - id: FM-001
+    title: Implementation starts before approval
+    severity: critical
+    category: unsafe_behavior_cases
+    detection:
+      - write_before_implementation_approval
+    expected_behavior:
+      - refuse
+      - offer_approval_path
+    covered_by:
+      - RF-001

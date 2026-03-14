@@ -1,0 +1,74 @@
+apiVersion: spectra/v2
+kind: TelemetryContract
+metadata:
+  id: spectra-core-telemetry
+  version: 0.1.0
+  status: draft
+feature_id: spectra-core
+tracked_events:
+  - name: spectra_context_pack_requested
+    trigger: context pack resolution starts
+    requirement_ids:
+      - FR-1
+    required: true
+    fields:
+      - name: role
+        type: string
+        required: true
+        pii: none
+      - name: goal
+        type: string
+        required: true
+        pii: none
+  - name: spectra_verify_completed
+    trigger: verify pipeline completes
+    requirement_ids:
+      - NFR-1
+    required: true
+    fields:
+      - name: profile
+        type: string
+        required: true
+        pii: none
+      - name: confidence_score
+        type: number
+        required: true
+        pii: none
+success_signals:
+  - id: verify_pass_rate
+    requirement_ids:
+      - NFR-1
+    expression: successful_verify_runs / total_verify_runs
+    source_events:
+      - spectra_verify_completed
+    target: ">= 0.95"
+    window: 24h
+    release_gate: true
+failure_signals:
+  - id: approval_block_rate
+    requirement_ids:
+      - FR-2
+    expression: blocked_implementation_attempts / total_implementation_attempts
+    source_events:
+      - spectra_approval_stage_changed
+    threshold: ">= 0"
+    severity: high
+    release_gate: true
+alert_conditions:
+  - id: verify-pass-rate-alert
+    signal_ref: verify_pass_rate
+    condition: < 0.95 for 1h
+    for: 1h
+    severity: high
+    route_to: engineering
+dashboards:
+  - id: spectra-core-overview
+    name: Spectra Core Overview
+    audience: engineering
+    panels:
+      - verify_pass_rate
+      - approval_block_rate
+ownership:
+  product_owner: product
+  engineering_owner: engineering
+  oncall_team: engineering

@@ -1,0 +1,37 @@
+apiVersion: spectra/v2
+kind: DecisionGraph
+metadata:
+  version: 0.1.0
+  feature_id: spectra-core
+decisions:
+  - decision_id: DEC-001
+    question_id: PI-001
+    title: Primary product scope centers on spec-driven AI development.
+    depends_on: []
+    affects:
+      - artifact:sdd/features/spectra-core/feature.spec.yaml
+      - decision:DEC-002
+    risk_level: high
+    reversibility: moderate
+    owner: product
+    evidence:
+      - sdd/features/spectra-core/brief.md
+    review_date: null
+    status: draft
+    approval_policy: review
+  - decision_id: DEC-002
+    question_id: AI-001
+    title: Implementation stays blocked until implementation approval is granted.
+    depends_on:
+      - decision:DEC-001
+    affects:
+      - artifact:sdd/features/spectra-core/ai-behavior-spec.yaml
+      - gate:implementation
+    risk_level: critical
+    reversibility: hard
+    owner: engineering
+    evidence:
+      - sdd/features/spectra-core/ai-behavior-spec.yaml
+    review_date: null
+    status: draft
+    approval_policy: reapprove

@@ -1,0 +1,17 @@
+{
+  "name": "spectra-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "spectra": "node packages/cli/bin/spectra.js",
+    "doctor": "node packages/cli/bin/spectra.js doctor",
+    "validate": "node packages/cli/bin/spectra.js validate",
+    "verify": "node packages/cli/bin/spectra.js verify"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

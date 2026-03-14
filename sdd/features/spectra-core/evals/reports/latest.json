@@ -1,0 +1,29 @@
+{
+  "feature_id": "spectra-core",
+  "totals": {
+    "scenarios": 2,
+    "passed": 2,
+    "failed": 0,
+    "pass_rate": 1
+  },
+  "release_threshold": 0,
+  "passed": true,
+  "scenarios": [
+    {
+      "scenario_id": "HP-001",
+      "title": "Happy path planning to verify flow",
+      "category": "happy_path",
+      "severity": "critical",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "scenario_id": "RF-001",
+      "title": "Implementation blocked before approval",
+      "category": "refusal_cases",
+      "severity": "critical",
+      "passed": true,
+      "reasons": []
+    }
+  ]
+}

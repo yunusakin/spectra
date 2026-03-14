@@ -1,0 +1,37 @@
+# Rules Index
+
+- Runtime minimal context: `runtime/minimal.md`
+- Intake flow: `rules/intake/00-intake-flow.md`
+- Intake questions router: `rules/intake/01-questions.md`
+- Intake question packs: `rules/intake/questions/`
+- Intake phase 1 pack: `rules/intake/questions/01-phase-1-core.md`
+- Intake backend pack: `rules/intake/questions/02-phase-2-backend.md`
+- Intake web pack: `rules/intake/questions/03-phase-2-web.md`
+- Intake mobile pack: `rules/intake/questions/04-phase-2-mobile.md`
+- Intake CLI pack: `rules/intake/questions/05-phase-2-cli.md`
+- Intake worker pack: `rules/intake/questions/06-phase-2-worker.md`
+- Intake library pack: `rules/intake/questions/07-phase-2-library.md`
+- Intake API-style pack: `rules/intake/questions/08-phase-2b-api-style.md`
+- Intake advanced pack: `rules/intake/questions/09-phase-3-advanced.md`
+- Intake validation: `rules/intake/02-validation.md`
+- Intake discovery mode: `rules/intake/03-discovery.md`
+- Intake question contract: `rules/intake/04-question-contract.md`
+- Intake question catalog: `rules/intake/05-question-catalog.md`
+- Spec lifecycle and change workflow: `rules/workflow/00-spec-lifecycle.md`
+- Sprint execution loop: `rules/workflow/01-sprint-execution.md`
+- Post-code verification: `rules/workflow/02-post-code-verification.md`
+- Role loop gate: `rules/workflow/03-role-loop-gate.md`
+- Escalation policy: `rules/workflow/04-escalation-policy.md`
+- Approval gate: `rules/approval/00-approval-gate.md`
+- Engineering standards: `rules/standards/00-engineering-standards.md`
+- Architecture options: `rules/architecture/00-architecture-options.md`
+- API standards: `rules/api/00-api-standards.md`
+- Database standards: `rules/database/00-db-standards.md`
+- Testing standards: `rules/testing/00-testing-standards.md`
+- Security basics: `rules/security/00-security-basics.md`
+- Deployment standards: `rules/ops/00-deployment-standards.md`
+- Documentation standards: `rules/docs/00-docs-standards.md`
+- Skills index: `skills/index.md`
+- Skill usage rules: `rules/skills/00-skill-usage.md`
+- Skill auto-selection: `rules/skills/01-skill-auto-select.md`
+- Scaffolding guide: `scaffolds/README.md`

@@ -1,0 +1,14 @@
+apiVersion: spectra/v2
+kind: TechnicalDecisions
+feature_id: spectra-core
+architecture_style: repo-native CLI orchestrating a packaged shell runtime
+system_boundaries:
+  - CLI layer owns UX and orchestration
+  - packaged runtime owns deterministic shell workflows
+  - feature bundle owns executable specs and quality contracts
+data_and_state:
+  - approval state and summaries are stored in repo-local files
+  - generated cache lives under .spectra/cache
+constraints:
+  - Node CLI must work without network access
+  - shell runtime remains internal to the product

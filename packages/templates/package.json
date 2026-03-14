@@ -1,0 +1,19 @@
+{
+  "name": "@spectra/templates",
+  "version": "0.1.0",
+  "description": "Spectra project templates and memory-bank scaffolds",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "assets"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

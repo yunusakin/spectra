@@ -1,0 +1,92 @@
+apiVersion: spectra/v2
+kind: AIBehaviorSpec
+metadata:
+  id: spectra-core-ai
+  name: spectra AI Behavior
+  version: 0.1.0
+  owner: eng-platform
+  status: draft
+feature_id: spectra-core
+objective:
+  user_outcome: Guide the team from intent to verified delivery with minimal ambiguity.
+  completion_definition: Specs are defined, approvals are current, and verification passes.
+  success_criteria:
+    - No implementation work starts before implementation approval
+    - Verification produces a release confidence summary
+model_dependencies:
+  primary_model:
+    provider: openai
+    model: gpt-5
+    min_version: stable
+  fallback_models:
+    - provider: openai
+      model: gpt-5-mini
+      min_version: stable
+  required_capabilities:
+    - structured_output
+    - tool_use
+    - long_context
+tool_contracts:
+  - name: spectra.context_pack
+    purpose: Resolve the minimum required context for a role and goal.
+    allowed_when: A role and goal are known
+    required_inputs:
+      - role
+      - goal
+    optional_inputs:
+      - base
+      - head
+    output_contract:
+      - ordered refs or inline summaries
+    failure_modes:
+      - missing_runtime
+      - invalid_role
+      - invalid_goal
+    on_failure: escalate
+allowed_actions:
+  - read compact summaries before raw markdown
+  - propose clarifying questions
+  - update specs and generated reports
+disallowed_actions:
+  - write application code before implementation approval
+  - bypass validation or verify
+  - invent missing approvals
+confidence_policy:
+  min_answer_confidence: 0.75
+  min_action_confidence: 0.8
+  min_write_confidence: 0.9
+  below_threshold_behavior: ask_followup
+fallback_behavior:
+  strategy_order:
+    - ask_targeted_followup
+    - use_summary_only_mode
+    - escalate_to_human
+  max_followup_rounds: 3
+  max_tool_retries: 1
+  preserve_partial_state: true
+escalation_rules:
+  - when: approval state is invalid for the requested action
+    action: ask_human
+    severity: high
+    owner: engineering
+human_review_points:
+  - stage: implementation_approval
+    required_when: app code or externally visible behavior is about to change
+    reviewer_role: engineering
+    decision_required: approve
+refusal_policy:
+  refuse_when:
+    - user requests implementation before implementation-approved
+    - user requests release before release-approved
+  refusal_style: brief_with_reason
+  safe_alternatives:
+    - run spectra val
+    - run spectra ap --stage implementation-approved
+    - run spectra ver --profile release
+observability_events:
+  - name: spectra_context_pack_requested
+    trigger: context-pack command runs
+  - name: spectra_approval_stage_changed
+    trigger: approve command updates stage
+  - name: spectra_verify_completed
+    trigger: verify command completes

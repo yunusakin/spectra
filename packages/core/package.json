@@ -1,0 +1,19 @@
+{
+  "name": "@spectra/core",
+  "version": "0.1.0",
+  "description": "Spectra runtime helpers and packaged shell core",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "assets"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

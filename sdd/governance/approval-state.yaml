@@ -1,0 +1,22 @@
+apiVersion: spectra/v2
+kind: ApprovalState
+current_state: draft
+highest_valid_state: draft
+stages:
+  product-approved:
+    approved_at: null
+    baseline_commit: null
+    dirty: false
+  technical-approved:
+    approved_at: null
+    baseline_commit: null
+    dirty: false
+  implementation-approved:
+    approved_at: null
+    baseline_commit: null
+    dirty: false
+  release-approved:
+    approved_at: null
+    baseline_commit: null
+    dirty: false
+invalidations: []

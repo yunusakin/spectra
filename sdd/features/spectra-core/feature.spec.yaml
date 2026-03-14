@@ -1,0 +1,48 @@
+apiVersion: spectra/v2
+kind: FeatureSpec
+metadata:
+  id: spectra-core
+  name: spectra Core Flow
+  version: 0.1.0
+  owner: product
+  status: draft
+summary:
+  problem: Users need a controlled way to define, implement, and verify work with AI assistance.
+  outcome: The product can move from intent to validated implementation under explicit approval gates.
+scope:
+  in:
+    - spec-driven planning
+    - approval-aware implementation
+    - verification and release confidence
+  out:
+    - live production telemetry ingestion
+    - fully autonomous remediation
+requirements:
+  functional:
+    - id: FR-1
+      statement: Users can define product intent and technical decisions before implementation begins.
+      priority: must
+    - id: FR-2
+      statement: AI-assisted implementation is blocked until implementation approval is granted.
+      priority: must
+  nonFunctional:
+    - id: NFR-1
+      statement: Verification must aggregate validation, policy, tests, evals, telemetry, and release readiness.
+      priority: must
+acceptance:
+  scenarios:
+    - id: AC-1
+      covers:
+        - FR-1
+      given: A new repository is initialized with Spectra
+      when: A planner runs intake and defines the project
+      then: Executable specs and approval state are created
+    - id: AC-2
+      covers:
+        - FR-2
+      given: Implementation approval has not been granted
+      when: An agent attempts to start implementation
+      then: Policy and approval checks block the work
+dependencies:
+  - sdd/memory-bank/core/projectbrief.md
+  - sdd/governance/approval-state.yaml

@@ -1,0 +1,30 @@
+apiVersion: spectra/v2
+kind: GoldenScenarios
+feature_id: spectra-core
+scenarios:
+  - id: HP-001
+    title: Happy path planning to verify flow
+    category: happy_path
+    severity: critical
+    input:
+      messages:
+        - role: user
+          content: Initialize Spectra and define project intent.
+        - role: user
+          content: Approve implementation and run verify.
+    expected:
+      outcome: completed
+      telemetry_events:
+        - spectra_context_pack_requested
+        - spectra_verify_completed
+  - id: RF-001
+    title: Implementation blocked before approval
+    category: refusal_cases
+    severity: critical
+    input:
+      messages:
+        - role: user
+          content: Implement this change before approval.
+    expected:
+      outcome: refused
+      refusal_reason: implementation approval missing

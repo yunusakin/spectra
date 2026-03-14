@@ -4,96 +4,76 @@
 
 # Spectra
 
-Spectra is a spec-driven workflow for AI-assisted development.
+Spectra is a CLI-first operating system for AI-assisted product development.
 
-The idea is simple:
+The v2 direction is:
 
-1. Define the product in specs first.
-2. Validate those specs.
-3. Approve the plan.
-4. Let AI implement inside that boundary.
+1. Define product intent, technical decisions, and AI behavior in specs first.
+2. Validate the repo, policy, and approval state.
+3. Approve staged checkpoints before execution.
+4. Let AI implement, then verify with tests, evals, and release confidence gates.
 
-Spectra is not “just generate code.” It is “make AI behave through specs.”
+Spectra is not “just generate code.” It is “turn specs into controlled AI execution.”
 
 ## What Spectra Gives You
 
 When Spectra is added to a project, it gives you:
 
-- `sdd/system/` for the workflow rules and runtime
+- `spectra` as the CLI entry point
+- `packages/core` as the packaged shell runtime
+- `packages/templates` as the project scaffolding layer
+- `sdd/system/` for workflow rules and runtime policies
 - `sdd/memory-bank/` for specs, decisions, context, and progress
-- `scripts/` for install, validation, policy, discovery, and verification
-- `app/` as the place for application code after approval
+- a repo-native runtime without exposing shell scripts to end users
 
 ## The Basic Flow
 
-### 1. Install Spectra into your project
+### 1. Install dependencies for local development
 
-From this Spectra repository:
-
-```bash
-bash scripts/init.sh /path/to/your-project
-```
-
-Optional:
+From this repository root:
 
 ```bash
-# existing repo? create discovery notes first
-bash scripts/init.sh /path/to/your-project --adopt
-
-# generate AI tool adapters
-bash scripts/init.sh /path/to/your-project --agents claude,cursor,windsurf,copilot,codex,antigravity
+npm install
 ```
 
-### 2. Go to your project and start intake
+### 2. Bootstrap a new project with the CLI
+
+```bash
+node packages/cli/bin/spectra.js init /path/to/your-project
+
+# existing repo? install and run brownfield discovery
+node packages/cli/bin/spectra.js adopt /path/to/your-project --agents codex,cursor
+```
+
+After packaging/publish, this becomes:
+
+```bash
+npx spectra init /path/to/your-project
+```
+
+### 3. Validate and verify through the CLI
 
 ```bash
 cd /path/to/your-project
-bash scripts/context-pack.sh --task bootstrap
+spectra val
+spectra st
+spectra ver --scope app
 ```
 
-Then, in your AI chat/runtime, send:
-
-```text
-init
-```
-
-The AI should now ask intake questions and write the project specs under `sdd/memory-bank/`.
-
-### 3. Validate the specs
-
-Run:
+### 4. Continue the workflow through CLI commands
 
 ```bash
-bash scripts/validate-repo.sh --strict
-bash scripts/check-policy.sh
+spectra task --item TASK-001 --task-type bugfix --goal "Describe intended change"
+spectra ctx --role planner --goal discover
+spectra diff update
 ```
 
-If the specs are correct and validation passes, send this in your AI chat/runtime:
-
-```text
-approved
-```
-
-Only after approval should application code be created or changed under `app/`.
-
-### 4. Implement and verify
-
-Before implementation work, capture intent:
-
-```bash
-bash scripts/discuss-task.sh --item TASK-001 --task-type bugfix --goal "Describe intended change"
-```
-
-Before handoff, run:
-
-```bash
-bash scripts/verify-work.sh --scope app
-```
+Legacy task aliases such as `spectra ctx --task bootstrap` still work, but role/goal loading is the preferred token-efficient path.
 
 ## Important
 
-- `init` and `approved` are chat messages, not shell commands.
-- `validate-repo.sh`, `check-policy.sh`, and `verify-work.sh` are shell commands.
+- `spectra` is the only user-facing entry point.
+- The shell runtime remains internal to the CLI package.
 - Spectra should control AI behavior through specs before code is written.
 
 ## If Your Repo Already Has Code
@@ -101,7 +81,7 @@ bash scripts/verify-work.sh --scope app
 Use discovery mode:
 
 ```bash
-bash scripts/map-codebase.sh --root /path/to/your-project
+spectra adopt /path/to/your-project
 ```
 
 This creates discovery notes under `sdd/memory-bank/discovery/`.
@@ -122,7 +102,7 @@ Spectra can generate optional adapters for:
 Generate them with:
 
 ```bash
-bash scripts/generate-adapters.sh --agents claude,cursor,windsurf,copilot,codex,antigravity --target /path/to/your-project
+spectra adapters --agents claude,cursor,windsurf,copilot,codex,antigravity --target /path/to/your-project
 ```
 
 ## Project Shape After Install
@@ -132,7 +112,7 @@ your-project/
 ├── sdd/
 │   ├── system/
 │   └── memory-bank/
-├── scripts/
+├── .spectra/
 └── app/
 ```
 
@@ -141,9 +121,8 @@ your-project/
 If you are working on this repository, use:
 
 ```bash
-bash scripts/validate-repo.sh --strict
-bash scripts/check-policy.sh
-bash scripts/verify-work.sh --scope spec
+./node_modules/.bin/spectra val
+./node_modules/.bin/spectra ver --scope spec
 ```
 
 ## Read Next

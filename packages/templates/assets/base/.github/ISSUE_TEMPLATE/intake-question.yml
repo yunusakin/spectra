@@ -1,0 +1,53 @@
+name: Intake Technical Question
+about: Track an unresolved technical intake decision that blocks approval or implementation.
+title: "[Intake] <question_id> - <short-title>"
+labels:
+  - intake
+  - needs-input
+body:
+  - type: input
+    id: question_id
+    attributes:
+      label: question_id
+      description: Stable question ID (for example Q-TECH-004)
+      placeholder: Q-TECH-004
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_options
+    attributes:
+      label: current_options
+      description: Candidate options discussed so far.
+      placeholder: |
+        - Option A
+        - Option B
+        - Option C
+    validations:
+      required: true
+
+  - type: textarea
+    id: recommended_option
+    attributes:
+      label: recommended_option
+      description: Recommended option and short rationale.
+      placeholder: Option B — aligns with current deployment and team skillset.
+    validations:
+      required: true
+
+  - type: textarea
+    id: blocking_reason
+    attributes:
+      label: blocking_reason
+      description: Why this unresolved question blocks approval or coding.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_for_resolution
+    attributes:
+      label: acceptance_for_resolution
+      description: What explicit answer/criteria resolves this issue.
+      placeholder: Confirm Option B and version 16 in writing.
+    validations:
+      required: true

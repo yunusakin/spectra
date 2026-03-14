@@ -1,0 +1,28 @@
+apiVersion: spectra/v2
+kind: RegressionSuite
+feature_id: spectra-core
+suites:
+  - id: smoke
+    description: Fast contract-driven checks
+    scenario_ids:
+      - HP-001
+      - RF-001
+    execution:
+      model_matrix:
+        - provider: openai
+          model: gpt-5
+      tool_mode: contract
+    compare_against: latest-approved
+  - id: release
+    description: Release gate contract-driven checks
+    include_categories:
+      - happy_path
+      - refusal_cases
+    include_severities:
+      - critical
+    execution:
+      model_matrix:
+        - provider: openai
+          model: gpt-5
+      tool_mode: contract
+    compare_against: latest-release

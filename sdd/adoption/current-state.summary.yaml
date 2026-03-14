@@ -1,0 +1,6 @@
+apiVersion: spectra/v2
+kind: CurrentStateSummary
+repo_mode: brownfield
+services: []
+discovery_sources: []
+generated_at: null
