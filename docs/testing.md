@@ -7,19 +7,19 @@ Spectra tests focus on process integrity (rules, indexes, links, policy invarian
 Run strict validation:
 
 ```bash
-spectra val
+spectra validate
 ```
 
 Run policy checks (local working-tree mode):
 
 ```bash
-spectra val
+spectra validate
 ```
 
 Run policy checks for an explicit range:
 
 ```bash
-spectra val --base <base_sha> --head <head_sha>
+spectra validate --base <base_sha> --head <head_sha>
 ```
 
 Resolve skill order for a task type:
@@ -66,11 +66,11 @@ spectra adapters --agents claude,cursor,windsurf,copilot,codex,antigravity --tar
 ## Policy Script Test Scenarios
 
 1. Baseline strict validation
-- `spectra val`
+- `spectra validate`
 - Expect `Validation: OK`.
 
 2. Baseline policy
-- `spectra val`
+- `spectra validate`
 - Expect `Policy check: OK` on unchanged repo.
 
 3. Adapter generation baseline
@@ -110,15 +110,15 @@ spectra adapters --agents claude,cursor,windsurf,copilot,codex,antigravity --tar
 - Expect policy fail.
 
 12. Quick lane rejects app changes
-- `spectra q --type docs --task "refresh docs"` with `app/*` changes present.
+- `spectra quick --type docs --task "refresh docs"` with `app/*` changes present.
 - Expect quick lane fail.
 
 13. Verify-work blocked state
 - Leave unresolved `warning` in `review-gate.md`.
-- Expect `spectra ver --scope app` to fail.
+- Expect `spectra verify --scope app` to fail.
 
 14. Range-aware mode
-- `spectra val --base <base> --head <head>`
+- `spectra validate --base <base> --head <head>`
 - Expect same rules enforced over full range.
 
 15. Docs-only range

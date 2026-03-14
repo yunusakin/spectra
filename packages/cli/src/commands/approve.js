@@ -10,7 +10,7 @@ function approveCommand(argv) {
   });
 
   if (options["--help"]) {
-    title("Usage: spectra ap --stage <product-approved|technical-approved|implementation-approved|release-approved> [--cwd <path>]");
+    title("Usage: spectra approve --stage <product-approved|technical-approved|implementation-approved|release-approved> [--cwd <path>]");
     return 0;
   }
 
@@ -27,9 +27,9 @@ function approveCommand(argv) {
   const updated = approveStage(repoRoot, options["--stage"]);
 
   ok(`Approval stage updated: ${previous} -> ${updated.current_state}`);
-  next("spectra val");
+  next("spectra validate");
   if (updated.current_state === "release-approved") {
-    next("spectra ver --profile release");
+    next("spectra verify --profile release");
   }
   return 0;
 }

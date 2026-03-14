@@ -25,14 +25,14 @@ function printHelp() {
   title("  adopt [path]               Add Spectra to an existing repo");
   title("");
   title("Workflow:");
-  title("  ctx                        Print a role/goal-aware context pack");
+  title("  context                    Print a role/goal-aware context pack");
   title("  task                       Create an implementation brief");
-  title("  ap                         Advance the staged approval state");
-  title("  val                        Run validation and policy checks");
-  title("  ver                        Run release confidence verification");
-  title("  st                         Show repo health plus staged approval status");
-  title("  doc                        Check environment and local runtime health");
-  title("  q                          Run the non-app quick lane");
+  title("  approve                    Advance the staged approval state");
+  title("  validate                   Run validation and policy checks");
+  title("  verify                     Run release confidence verification");
+  title("  status                     Show repo health plus staged approval status");
+  title("  doctor                     Check environment and local runtime health");
+  title("  quick                      Run the non-app quick lane");
   title("  skills                     Resolve or validate skill order");
   title("  eval                       Run contract-driven eval suites");
   title("");
@@ -40,27 +40,15 @@ function printHelp() {
   title("  adapters                   Generate AI tool adapters");
   title("  diff <init|update|semantic>  Run spec diff reporting");
   title("");
-  title("Short forms are the default UX.");
+  title("Single-word commands are the default UX.");
 }
 
 function normalizeCommand(command, subcommand, ...rest) {
   switch (command) {
-    case "ctx":
+    case "context":
       return { command: "context-pack", subcommand, rest };
     case "task":
       return { command: "discuss-task", subcommand, rest };
-    case "ap":
-      return { command: "approve", subcommand, rest };
-    case "val":
-      return { command: "validate", subcommand, rest };
-    case "ver":
-      return { command: "verify", subcommand, rest };
-    case "st":
-      return { command: "status", subcommand, rest };
-    case "doc":
-      return { command: "doctor", subcommand, rest };
-    case "q":
-      return { command: "quick", subcommand, rest };
     case "skills":
       if (subcommand === undefined || subcommand.startsWith("-")) {
         return {

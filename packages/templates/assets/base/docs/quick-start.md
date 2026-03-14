@@ -15,10 +15,10 @@ npx spectra adopt /path/to/your-project
 2. Resolve bootstrap context:
 
 ```bash
-spectra ctx --role planner --goal discover
+spectra context --role planner --goal discover
 ```
 
-Legacy alias: `spectra ctx --task bootstrap`
+Legacy alias: `spectra context --task bootstrap`
 
 3. Type `init`.
    This is a chat/runtime message, not a shell command.
@@ -30,15 +30,15 @@ Legacy alias: `spectra ctx --task bootstrap`
 7. Run checks:
 
 ```bash
-spectra val
+spectra validate
 ```
 
 8. When specs are correct and checks pass, advance the staged approvals:
 
 ```bash
-spectra ap --stage product-approved
-spectra ap --stage technical-approved
-spectra ap --stage implementation-approved
+spectra approve --stage product-approved
+spectra approve --stage technical-approved
+spectra approve --stage implementation-approved
 ```
 
 9. Before implementation work, write an implementation brief:
@@ -60,5 +60,5 @@ If a technical question is unresolved:
 Health check anytime:
 
 ```bash
-spectra st
+spectra status
 ```

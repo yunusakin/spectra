@@ -11,7 +11,7 @@ function statusCommand(argv) {
   });
 
   if (options["--help"]) {
-    title("Usage: spectra st [--cwd <path>]");
+    title("Usage: spectra status [--cwd <path>]");
     return 0;
   }
 

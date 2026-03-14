@@ -9,7 +9,7 @@ function quickCommand(argv) {
   });
 
   if (options["--help"]) {
-    title("Usage: spectra q --type <docs|rules|spec|ops> --task <description> [--cwd <path>]");
+    title("Usage: spectra quick --type <docs|rules|spec|ops> --task <description> [--cwd <path>]");
     return 0;
   }
 

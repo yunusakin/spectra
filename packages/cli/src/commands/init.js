@@ -21,7 +21,7 @@ function initCommand(argv) {
 
   ok(`Installed Spectra runtime in ${result.targetDir}`);
   next(`cd ${result.targetDir}`);
-  next("spectra val");
+  next("spectra validate");
   return 0;
 }
 

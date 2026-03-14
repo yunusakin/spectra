@@ -66,7 +66,7 @@ function contextPackCommand(argv) {
   });
 
   if (options["--help"]) {
-    title("Usage: spectra ctx [--role <role>] [--goal <goal>] [--task <legacy_pack>] [--cwd <path>] [--format <refs|inline|json>] [--changed|--base <ref> --head <ref>]");
+    title("Usage: spectra context [--role <role>] [--goal <goal>] [--task <legacy_pack>] [--cwd <path>] [--format <refs|inline|json>] [--changed|--base <ref> --head <ref>]");
     return 0;
   }
 

@@ -11,7 +11,7 @@ function verifyCommand(argv) {
   });
 
   if (options["--help"]) {
-    title("Usage: spectra ver [--cwd <path>] [--scope <all|spec|app>] [--item <id>] [--profile <standard|release>]");
+    title("Usage: spectra verify [--cwd <path>] [--scope <all|spec|app>] [--item <id>] [--profile <standard|release>]");
     return 0;
   }
 

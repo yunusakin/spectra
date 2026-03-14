@@ -10,7 +10,7 @@ function doctorCommand(argv) {
   });
 
   if (options["--help"]) {
-    title("Usage: spectra doc [--cwd <path>]");
+    title("Usage: spectra doctor [--cwd <path>]");
     return 0;
   }
 

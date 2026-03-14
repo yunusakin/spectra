@@ -349,9 +349,9 @@ function buildFeatureBundle(projectName) {
         ],
         refusal_style: "brief_with_reason",
         safe_alternatives: [
-          "run spectra val",
-          "run spectra ap --stage implementation-approved",
-          "run spectra ver --profile release"
+          "run spectra validate",
+          "run spectra approve --stage implementation-approved",
+          "run spectra verify --profile release"
         ]
       },
       observability_events: [
@@ -1117,7 +1117,7 @@ function approveStage(repoRoot, stage) {
   if (stage === "release-approved") {
     const releaseReport = verifyV2(repoRoot, { scope: "all", profile: "release" });
     if (releaseReport.blocked) {
-      throw new Error(`Cannot approve release stage: ver --profile release is ${releaseReport.verdict}.`);
+      throw new Error(`Cannot approve release stage: verify --profile release is ${releaseReport.verdict}.`);
     }
   }
 

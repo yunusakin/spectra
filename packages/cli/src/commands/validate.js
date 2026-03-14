@@ -11,7 +11,7 @@ function validateCommand(argv) {
   });
 
   if (options["--help"]) {
-    title("Usage: spectra val [--cwd <path>] [--base <ref> --head <ref>]");
+    title("Usage: spectra validate [--cwd <path>] [--base <ref> --head <ref>]");
     return 0;
   }
 

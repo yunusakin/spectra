@@ -7,7 +7,7 @@ How to resume intake, execute sprints after approval, apply quality gates, and e
 - Intake progress is tracked in `sdd/memory-bank/core/intake-state.md`.
 - If intake is interrupted, run `init` again.
 - Ask only missing mandatory answers first, then continue phase flow.
-- Use `spectra ctx --role planner --goal decide` to load only the required files.
+- Use `spectra context --role planner --goal decide` to load only the required files.
 
 ## Intake Decision Loop
 
@@ -34,7 +34,7 @@ After `implementation-approved`, Spectra:
 Before coding a task:
 1. Capture intent with `spectra task --item <id> --task-type <type> --goal "<goal>"`.
 2. Review `sdd/memory-bank/core/implementation-brief.md`.
-3. Load implementation context with `spectra ctx --role implementer --goal implement`.
+3. Load implementation context with `spectra context --role implementer --goal implement`.
 
 ### Skill Graph Loop (Before Coding)
 
@@ -65,18 +65,18 @@ Record findings in `sdd/memory-bank/core/review-gate.md`.
 ### Verify Work
 
 Before marking an item ready:
-1. Run `spectra ver --scope app` for implementation work.
-2. Run `spectra ver --scope spec` for spec-only work.
+1. Run `spectra verify --scope app` for implementation work.
+2. Run `spectra verify --scope spec` for spec-only work.
 3. Fix blockers before handoff.
-4. Use `spectra ctx --role verifier --goal verify` when you need compact verification context.
-5. For release confidence, run `spectra ver --profile release` before `spectra ap --stage release-approved`.
+4. Use `spectra context --role verifier --goal verify` when you need compact verification context.
+5. For release confidence, run `spectra verify --profile release` before `spectra approve --stage release-approved`.
 
 ### Quick Lane
 
 For docs/rules/spec/ops work with no `app/*` changes:
 
 ```bash
-spectra q --type docs --task "refresh workflow docs"
+spectra quick --type docs --task "refresh workflow docs"
 ```
 
 If `app/*` changes are detected, quick lane exits non-zero and the full workflow is required.
@@ -110,7 +110,7 @@ When requirements/tech choices change:
 Policy check fails in CI:
 
 ```bash
-spectra val --base <base_sha> --head <head_sha>
+spectra validate --base <base_sha> --head <head_sha>
 ```
 
 Skill graph order fails:
@@ -124,4 +124,4 @@ Then use returned `Recommended Order` and log in `skill-runs.md`.
 Intake blocked before approval:
 - Resolve all `open` technical questions.
 - Resolve all unresolved `critical`/`warning` findings.
-- Re-run `spectra val`.
+- Re-run `spectra validate`.

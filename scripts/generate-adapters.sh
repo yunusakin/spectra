@@ -84,9 +84,9 @@ ${common_body}
 ## Tool Notes
 
 - Target: ${tool_name}
-- Bootstrap context: \`spectra ctx --role planner --goal discover\`
-- Intake context: \`spectra ctx --role planner --goal decide\`
-- Verification gate: \`spectra ver\`
+- Bootstrap context: \`spectra context --role planner --goal discover\`
+- Intake context: \`spectra context --role planner --goal decide\`
+- Verification gate: \`spectra verify\`
 
 ## Ignore Guidance
 ${ignore_lines}
@@ -113,13 +113,13 @@ EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.cursor/rules/spectra-workflow.mdc"
 # Spectra Workflow
 
-- Preferred compact context: \`spectra ctx --role implementer --goal implement\`
-- Use \`spectra ver --scope app\` before marking implementation ready.
+- Preferred compact context: \`spectra context --role implementer --goal implement\`
+- Use \`spectra verify --scope app\` before marking implementation ready.
 EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.cursor/rules/spectra-context.mdc"
 # Spectra Context Routing
 
-- Ask Spectra for role/goal context with \`spectra ctx --role <role> --goal <goal>\`.
+- Ask Spectra for role/goal context with \`spectra context --role <role> --goal <goal>\`.
 - Do not preload unrelated files when a pack exists.
 EOF
       ;;
@@ -133,12 +133,12 @@ EOF
 # Spectra Workflow
 
 - Run \`spectra task --item <id> --task-type <type> --goal "<goal>"\` before post-approval coding.
-- Run \`spectra ver --scope app\` before handoff.
+- Run \`spectra verify --scope app\` before handoff.
 EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.windsurf/rules/spectra-context.md"
 # Spectra Context
 
-- Resolve the required pack with \`spectra ctx --role <role> --goal <goal>\`.
+- Resolve the required pack with \`spectra context --role <role> --goal <goal>\`.
 EOF
       ;;
     copilot)
@@ -165,12 +165,12 @@ EOF
 # Spectra Workflow
 
 - Use \`spectra task --item <id> --task-type <type> --goal "<goal>"\` before implementation work.
-- Use \`spectra ver\` before marking work complete.
+- Use \`spectra verify\` before marking work complete.
 EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.agent/rules/spectra-context.md"
 # Spectra Context
 
-- Resolve task context via \`spectra ctx --role <role> --goal <goal>\`.
+- Resolve task context via \`spectra context --role <role> --goal <goal>\`.
 EOF
       ;;
     *)

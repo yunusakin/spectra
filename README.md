@@ -55,20 +55,20 @@ npx spectra init /path/to/your-project
 
 ```bash
 cd /path/to/your-project
-spectra val
-spectra st
-spectra ver --scope app
+spectra validate
+spectra status
+spectra verify --scope app
 ```
 
 ### 4. Continue the workflow through CLI commands
 
 ```bash
 spectra task --item TASK-001 --task-type bugfix --goal "Describe intended change"
-spectra ctx --role planner --goal discover
+spectra context --role planner --goal discover
 spectra diff update
 ```
 
-Legacy task aliases such as `spectra ctx --task bootstrap` still work, but role/goal loading is the preferred token-efficient path.
+Legacy task aliases such as `spectra context --task bootstrap` still work, but role/goal loading is the preferred token-efficient path.
 
 ## Important
 
@@ -121,8 +121,8 @@ your-project/
 If you are working on this repository, use:
 
 ```bash
-./node_modules/.bin/spectra val
-./node_modules/.bin/spectra ver --scope spec
+./node_modules/.bin/spectra validate
+./node_modules/.bin/spectra verify --scope spec
 ```
 
 ## Read Next

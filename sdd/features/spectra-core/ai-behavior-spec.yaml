@@ -80,9 +80,9 @@ refusal_policy:
     - user requests release before release-approved
   refusal_style: brief_with_reason
   safe_alternatives:
-    - run spectra val
-    - run spectra ap --stage implementation-approved
-    - run spectra ver --profile release
+    - run spectra validate
+    - run spectra approve --stage implementation-approved
+    - run spectra verify --profile release
 observability_events:
   - name: spectra_context_pack_requested
     trigger: context-pack command runs

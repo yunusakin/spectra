@@ -12,7 +12,7 @@ Work in two places:
 1. Install Spectra core: `npx spectra init /path/to/your-project`.
 2. Optionally add adapters: `npx spectra init /path/to/your-project --agents claude,cursor,windsurf,copilot,codex,antigravity`.
 3. For brownfield repos, run `npx spectra adopt /path/to/your-project`.
-4. Resolve baseline context with `spectra ctx --role planner --goal discover`.
+4. Resolve baseline context with `spectra context --role planner --goal discover`.
 5. Answer Phase 1 (Core) questions. Say **"recommend"** if unsure about any technical choice.
 6. Spectra updates specs and `sdd/memory-bank/core/intake-state.md`.
 7. Spectra validates and asks targeted follow-ups if needed.
@@ -21,20 +21,20 @@ Work in two places:
 10. Run strict repository validation:
 
 ```bash
-spectra val
+spectra validate
 ```
 
 11. Approve the product, technical, and implementation stages explicitly:
 
 ```bash
-spectra ap --stage product-approved
-spectra ap --stage technical-approved
-spectra ap --stage implementation-approved
+spectra approve --stage product-approved
+spectra approve --stage technical-approved
+spectra approve --stage implementation-approved
 ```
 
 12. Spectra scaffolds project under `app/`.
 13. Spectra executes sprint loop (plan -> skill checks -> code -> test -> verify).
-14. Use `spectra st` to monitor overall status.
+14. Use `spectra status` to monitor overall status.
 
 ## Core Files To Know
 
@@ -45,7 +45,7 @@ spectra ap --stage implementation-approved
 - Approval gate: `sdd/system/rules/approval/00-approval-gate.md`
 - Sprint execution: `sdd/system/rules/workflow/01-sprint-execution.md`
 - Post-code verification: `sdd/system/rules/workflow/02-post-code-verification.md`
-- Context packs: `spectra ctx --role <role> --goal <goal>` (legacy `--task` aliases are still supported)
+- Context packs: `spectra context --role <role> --goal <goal>` (legacy `--task` aliases are still supported)
 - Resume state: `sdd/memory-bank/core/intake-state.md`
 - Active context: `sdd/memory-bank/core/activeContext.md`
 - Progress tracking: `sdd/memory-bank/core/progress.md`

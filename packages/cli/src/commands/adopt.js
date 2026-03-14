@@ -21,8 +21,8 @@ function adoptCommand(argv) {
   });
 
   ok(`Adopted Spectra in ${result.targetDir}`);
-  next("spectra st");
-  next("spectra val");
+  next("spectra status");
+  next("spectra validate");
   return 0;
 }
 
