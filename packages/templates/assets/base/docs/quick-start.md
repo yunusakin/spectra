@@ -3,13 +3,13 @@
 1. Install Spectra in your project:
 
 ```bash
-npx spectra init /path/to/your-project
+npx spectra-pack@latest init /path/to/your-project
 
 # Optional adapters:
-npx spectra init /path/to/your-project --agents claude,cursor,windsurf,copilot,codex,antigravity
+npx spectra-pack@latest init /path/to/your-project --agents claude,cursor,windsurf,copilot,codex,antigravity
 
 # Optional brownfield discovery:
-npx spectra adopt /path/to/your-project
+npx spectra-pack@latest adopt /path/to/your-project
 ```
 
 2. Resolve bootstrap context:
@@ -20,13 +20,13 @@ spectra context --role planner --goal discover
 
 Legacy alias: `spectra context --task bootstrap`
 
-3. Type `init`.
-   This is a chat/runtime message, not a shell command.
+3. Define the first feature bundle under `sdd/features/<feature-id>/`.
 4. Answer Phase 1 (Core) questions.
 5. For technical choices, confirm recommendations before persistence.
-6. Ensure `sdd/memory-bank/core/intake-state.md` has:
-   - `Decision Log` entries for confirmed choices
-   - no unresolved blockers before approval
+6. Ensure:
+   - `sdd/features/<feature-id>/feature.spec.yaml` has confirmed scope and requirements
+   - `sdd/governance/approval-state.yaml` still shows no blocking downgrade
+   - there are no unresolved blockers before approval
 7. Run checks:
 
 ```bash

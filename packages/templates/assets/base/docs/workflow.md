@@ -4,7 +4,7 @@ How to resume intake, execute sprints after approval, apply quality gates, and e
 
 ## Resume Intake
 
-- Intake progress is tracked in `sdd/memory-bank/core/intake-state.md`.
+- Intake progress is tracked through the current feature bundle and `sdd/governance/approval-state.yaml`.
 - If intake is interrupted, run `init` again.
 - Ask only missing mandatory answers first, then continue phase flow.
 - Use `spectra context --role planner --goal decide` to load only the required files.
@@ -15,8 +15,8 @@ For every technical question:
 1. Ask with stable `question_id`.
 2. Present options and recommendation.
 3. Capture explicit user confirmation.
-4. Persist final value to specs.
-5. Append to `Decision Log`.
+4. Persist final value to the executable specs.
+5. Append to the decision graph and any supporting decision log.
 
 If unresolved:
 - add row to `Open Technical Questions` (`status: open` + issue reference)
@@ -94,10 +94,10 @@ If `app/*` changes are detected, quick lane exits non-zero and the full workflow
 
 When requirements/tech choices change:
 1. Update specs first.
-2. Append to `sdd/memory-bank/core/spec-history.md`.
+2. Append to `sdd/memory-bank/core/spec-history.md` when human-readable history is needed.
 3. Optionally run `spectra diff update`.
 4. Re-run validation/policy checks.
-5. If behavior or mandatory fields changed, require re-approval.
+5. If behavior, contracts, or mandatory fields changed, require re-approval.
 
 ## Rollback
 

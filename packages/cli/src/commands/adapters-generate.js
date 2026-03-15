@@ -1,4 +1,4 @@
-import { runInstalledScript } from "@spectra/core";
+import { runInstalledScript } from "../lib/runtime.js";
 import { title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 

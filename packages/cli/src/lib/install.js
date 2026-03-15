@@ -10,8 +10,8 @@ import {
   runInstalledScript,
   updateManifestRepoMode,
   writeInstallMetadata
-} from "@spectra/core";
-import { getBaseTemplateDir } from "@spectra/templates";
+} from "./runtime.js";
+import { getBaseTemplateDir } from "./runtime.js";
 import { buildAdoptionArtifacts, ensureV2Scaffolding } from "./specs.js";
 
 function installSpectra({ targetDir, adopt = false, agents = "" }) {

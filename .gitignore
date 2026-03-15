@@ -11,3 +11,5 @@ coverage/
 .cache/
 .validate-tmp/
 .spectra/cache/
+packages/cli/assets/
+packages/cli/*.tgz

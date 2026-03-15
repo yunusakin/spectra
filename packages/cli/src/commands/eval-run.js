@@ -1,4 +1,4 @@
-import { findSpectraRoot } from "@spectra/core";
+import { findSpectraRoot } from "../lib/runtime.js";
 import { fail, ok, title } from "../lib/output.js";
 import { runEvalSuite } from "../lib/specs.js";
 import { parseOptions } from "../lib/options.js";

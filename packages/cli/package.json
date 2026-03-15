@@ -1,18 +1,20 @@
 {
-  "name": "spectra",
+  "name": "spectra-pack",
   "version": "0.1.0",
   "description": "CLI-first operating system for AI-assisted product development",
   "type": "module",
   "bin": {
-    "spectra": "./bin/spectra.js"
+    "spectra": "bin/spectra.js"
+  },
+  "scripts": {
+    "prepack": "node ./scripts/sync-assets.mjs"
   },
   "files": [
     "bin",
-    "src"
+    "src",
+    "assets"
   ],
   "dependencies": {
-    "@spectra/core": "0.1.0",
-    "@spectra/templates": "0.1.0",
     "yaml": "^2.8.2"
   },
   "engines": {

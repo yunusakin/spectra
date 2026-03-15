@@ -6,7 +6,7 @@ This repository is designed to be a stable Spectra workspace for a single projec
 
 - Create a new repo per project based on this Spectra template.
 - Treat the repo root as the agent working directory.
-- Keep specs under `sdd/memory-bank/` and code under `app/` (after approval).
+- Keep executable specs under `sdd/features/`, governance under `sdd/governance/`, and code under `app/` (after approval).
 
 This keeps the approval gate and "app code under `app/` only" rule straightforward.
 
@@ -22,27 +22,27 @@ projects/
     sdd/
     app/
     docs/
-    scripts/
+    .spectra/
   billing/
     sdd/
     app/
     docs/
-    scripts/
+    .spectra/
 shared/
   libs/
 ```
 
 Guidelines:
-- Do not share `sdd/memory-bank/` between projects. Each project should own its own specs.
+- Do not share `sdd/governance/` or `sdd/memory-bank/` between projects. Each project should own its own spec and approval state.
 - Shared code should live outside `app/` (for example under `shared/`) and be referenced by the project builds as needed.
 
 See also: `docs/monorepo-conventions.md`.
 
 ## Option: Single Spectra Workspace For Multiple Services (Not Recommended)
 
-If you insist on using one `sdd/memory-bank/` to drive multiple services, be explicit:
+If you insist on using one Spectra workspace to drive multiple services, be explicit:
 - maintain separate requirement sections per service
-- track decisions per service in `sdd/memory-bank/arch/decisions.md`
+- track decisions per service in the decision graph and supporting architecture logs
 - keep the approval gate clear (who approves what, and when)
 
 This tends to increase coordination cost and makes validation and re-approval more ambiguous.

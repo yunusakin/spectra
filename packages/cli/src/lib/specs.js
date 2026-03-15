@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { ensureDirectory, findSpectraRoot } from "@spectra/core";
+import { ensureDirectory, findSpectraRoot } from "./runtime.js";
 import YAML from "yaml";
 
 const STAGES = [

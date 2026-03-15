@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { ensureDirectory, findSpectraRoot } from "@spectra/core";
+import { ensureDirectory, findSpectraRoot } from "./runtime.js";
 import { getFeatureDirs, readJsonContract } from "./specs.js";
 
 const contextModuleFile = fileURLToPath(import.meta.url);

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { findSpectraRoot, getRuntimeAssetsDir, hasCommand } from "@spectra/core";
+import { findSpectraRoot, getRuntimeAssetsDir, hasCommand } from "../lib/runtime.js";
 import { fail, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 

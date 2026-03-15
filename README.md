@@ -23,7 +23,9 @@ When Spectra is added to a project, it gives you:
 - `packages/core` as the packaged shell runtime
 - `packages/templates` as the project scaffolding layer
 - `sdd/system/` for workflow rules and runtime policies
-- `sdd/memory-bank/` for specs, decisions, context, and progress
+- `sdd/features/` for executable feature specs
+- `sdd/governance/` for staged approval and decision graph state
+- `sdd/memory-bank/` for human-readable context, progress, and long-form notes
 - a repo-native runtime without exposing shell scripts to end users
 
 ## The Basic Flow
@@ -45,11 +47,13 @@ node packages/cli/bin/spectra.js init /path/to/your-project
 node packages/cli/bin/spectra.js adopt /path/to/your-project --agents codex,cursor
 ```
 
-After packaging/publish, this becomes:
+Public npm package target:
 
 ```bash
-npx spectra init /path/to/your-project
+npx spectra-pack@latest init /path/to/your-project
 ```
+
+Until that publish step happens, use the local CLI from this repository.
 
 ### 3. Validate and verify through the CLI
 
@@ -109,12 +113,17 @@ spectra adapters --agents claude,cursor,windsurf,copilot,codex,antigravity --tar
 
 ```text
 your-project/
-├── sdd/
-│   ├── system/
-│   └── memory-bank/
 ├── .spectra/
-└── app/
+├── app/
+├── docs/
+├── sdd/
+│   ├── features/
+│   ├── governance/
+│   ├── memory-bank/
+│   └── system/
 ```
+
+For a full repo map, read `docs/structure.md`.
 
 ## If You Are Changing Spectra Itself
 
@@ -128,6 +137,7 @@ If you are working on this repository, use:
 ## Read Next
 
 - `docs/quick-start.md`
+- `docs/structure.md`
 - `docs/getting-started.md`
 - `docs/workflow.md`
 - `CHANGELOG.md`

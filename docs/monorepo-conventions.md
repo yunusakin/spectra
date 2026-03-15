@@ -3,7 +3,7 @@
 ## Structure
 - `app/` contains all application code (generated after approval).
 - `docs/` contains project documentation.
-- `scripts/` contains helper scripts.
+- `.spectra/` contains local install metadata and caches.
 - `sdd/` contains spec-driven artifacts and rules.
 
 **Note:** This repository includes `app/README.md` as a placeholder and structure guide. Agents must still wait for approval before generating any application code. If `app/` is missing, create it after approval before writing code.

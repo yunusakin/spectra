@@ -51,7 +51,7 @@ spectra adapters --agents claude,cursor,windsurf,copilot,codex,antigravity --tar
 ## What `check-policy.sh` Verifies
 
 - Approval-gate invariant for application code under `app/`.
-- Canonical approval signal in `sdd/memory-bank/core/intake-state.md`.
+- Canonical staged approval signal in `sdd/governance/approval-state.yaml`.
 - Open technical questions block approval and code progression.
 - Open technical questions require issue references.
 - Review-gate unresolved `critical`/`warning` findings are blocking.
@@ -86,7 +86,7 @@ spectra adapters --agents claude,cursor,windsurf,copilot,codex,antigravity --tar
 - Expect non-zero (required order/dependency violation).
 
 6. Open technical question blocks approval
-- `Approval Status: approved` + one `open` question.
+- staged approval advanced while one question remains `open`.
 - Expect policy fail.
 
 7. Missing issue reference for open question

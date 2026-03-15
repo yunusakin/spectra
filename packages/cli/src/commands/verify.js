@@ -1,7 +1,7 @@
-import { runInstalledScript } from "@spectra/core";
+import { runInstalledScript } from "../lib/runtime.js";
 import { fail, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
-import { findSpectraRoot } from "@spectra/core";
+import { findSpectraRoot } from "../lib/runtime.js";
 import { verifyV2 } from "../lib/specs.js";
 
 function verifyCommand(argv) {

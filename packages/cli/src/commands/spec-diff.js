@@ -1,4 +1,4 @@
-import { findSpectraRoot, runInstalledScript } from "@spectra/core";
+import { findSpectraRoot, runInstalledScript } from "../lib/runtime.js";
 import { ok, title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { buildSemanticDiff, computeApprovalState } from "../lib/specs.js";
