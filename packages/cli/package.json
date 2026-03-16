@@ -1,7 +1,7 @@
 {
   "name": "spectra-pack",
-  "version": "0.1.1",
-  "description": "CLI-first operating system for AI-assisted product development",
+  "version": "0.1.2",
+  "description": "Spec-first CLI for AI-assisted product development",
   "license": "MIT",
   "author": "Yunus Akin",
   "type": "module",
@@ -25,8 +25,11 @@
     "evals",
     "governance",
     "product-development",
+    "release-confidence",
     "spectra",
-    "spec-driven"
+    "spec-driven",
+    "telemetry",
+    "verification"
   ],
   "homepage": "https://github.com/yunusakin/spectra#readme",
   "bugs": {

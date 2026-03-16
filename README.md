@@ -6,6 +6,18 @@
 
 Spectra is a CLI-first operating system for AI-assisted product development.
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/spectra-pack">
+    <img src="https://img.shields.io/npm/v/spectra-pack?color=cb3837&label=npm" alt="npm version">
+  </a>
+  <a href="https://www.npmjs.com/package/spectra-pack">
+    <img src="https://img.shields.io/npm/dm/spectra-pack" alt="npm downloads">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License">
+  </a>
+</p>
+
 The v2 direction is:
 
 1. Define product intent, technical decisions, and AI behavior in specs first.
@@ -14,6 +26,21 @@ The v2 direction is:
 4. Let AI implement, then verify with tests, evals, and release confidence gates.
 
 Spectra is not “just generate code.” It is “turn specs into controlled AI execution.”
+
+## Install With npx
+
+```bash
+npx spectra-pack@latest init /path/to/your-project
+cd /path/to/your-project
+spectra validate
+spectra status
+```
+
+Already have a repo?
+
+```bash
+npx spectra-pack@latest adopt /path/to/your-project
+```
 
 ## What Spectra Gives You
 
@@ -30,15 +57,15 @@ When Spectra is added to a project, it gives you:
 
 ## The Basic Flow
 
-### 1. Install dependencies for local development
+### 1. Bootstrap a new project with the CLI
 
-From this repository root:
+Published package:
 
 ```bash
-npm install
+npx spectra-pack@latest init /path/to/your-project
 ```
 
-### 2. Bootstrap a new project with the CLI
+Working from this repository directly:
 
 ```bash
 node packages/cli/bin/spectra.js init /path/to/your-project
@@ -47,15 +74,7 @@ node packages/cli/bin/spectra.js init /path/to/your-project
 node packages/cli/bin/spectra.js adopt /path/to/your-project --agents codex,cursor
 ```
 
-Public npm package target:
-
-```bash
-npx spectra-pack@latest init /path/to/your-project
-```
-
-Until that publish step happens, use the local CLI from this repository.
-
-### 3. Validate and verify through the CLI
+### 2. Validate and verify through the CLI
 
 ```bash
 cd /path/to/your-project
@@ -64,7 +83,7 @@ spectra status
 spectra verify --scope app
 ```
 
-### 4. Continue the workflow through CLI commands
+### 3. Continue the workflow through CLI commands
 
 ```bash
 spectra task --item TASK-001 --task-type bugfix --goal "Describe intended change"
@@ -73,6 +92,16 @@ spectra diff update
 ```
 
 Legacy task aliases such as `spectra context --task bootstrap` still work, but role/goal loading is the preferred token-efficient path.
+
+## Local Development
+
+From this repository root:
+
+```bash
+npm install
+./node_modules/.bin/spectra validate
+./node_modules/.bin/spectra verify --scope spec
+```
 
 ## Important
 
@@ -124,15 +153,6 @@ your-project/
 ```
 
 For a full repo map, read `docs/structure.md`.
-
-## If You Are Changing Spectra Itself
-
-If you are working on this repository, use:
-
-```bash
-./node_modules/.bin/spectra validate
-./node_modules/.bin/spectra verify --scope spec
-```
 
 ## Read Next
 

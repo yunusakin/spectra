@@ -2,15 +2,28 @@
 
 Spectra is a CLI-first operating system for AI-assisted product development.
 
+[![npm version](https://img.shields.io/npm/v/spectra-pack?color=cb3837&label=npm)](https://www.npmjs.com/package/spectra-pack)
+[![npm downloads](https://img.shields.io/npm/dm/spectra-pack)](https://www.npmjs.com/package/spectra-pack)
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/yunusakin/spectra/blob/main/LICENSE)
+
 This package installs the `spectra` CLI and includes the runtime and template assets needed to bootstrap or adopt a repository.
 
-## Install and Run
-
-One-off usage with `npx`:
+## Install With npx
 
 ```bash
 npx spectra-pack@latest init /path/to/project
+cd /path/to/project
+spectra validate
+spectra status
 ```
+
+Brownfield adoption:
+
+```bash
+npx spectra-pack@latest adopt /path/to/project
+```
+
+## Install and Run
 
 After initialization, use the installed CLI command inside the target repository:
 
@@ -64,6 +77,7 @@ Spectra initializes a repository with:
 - [Quick Start](https://github.com/yunusakin/spectra/blob/main/docs/quick-start.md)
 - [Structure](https://github.com/yunusakin/spectra/blob/main/docs/structure.md)
 - [Workflow](https://github.com/yunusakin/spectra/blob/main/docs/workflow.md)
+- [Issues](https://github.com/yunusakin/spectra/issues)
 
 ## License
 
