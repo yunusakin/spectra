@@ -14,6 +14,10 @@ import { statusCommand } from "./commands/status.js";
 import { validateCommand } from "./commands/validate.js";
 import { verifyCommand } from "./commands/verify.js";
 import { fail, title } from "./lib/output.js";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+const { version: cliVersion } = require("../package.json");
 
 function printHelp() {
   title("Spectra CLI");
@@ -101,7 +105,7 @@ function dispatch(argv) {
       return 0;
     case "--version":
     case "version":
-      title("spectra 0.1.0");
+      title(`spectra ${cliVersion}`);
       return 0;
     case "init":
       return initCommand([subcommand, ...rest].filter(Boolean));

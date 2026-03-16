@@ -1,7 +1,7 @@
 {
   "name": "@spectra/templates",
-  "version": "0.1.0",
-  "description": "Spectra project templates and memory-bank scaffolds",
+  "version": "0.1.3",
+  "description": "Spectra project templates and scaffolds",
   "type": "module",
   "exports": {
     ".": "./src/index.js"
