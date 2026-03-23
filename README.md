@@ -20,7 +20,28 @@ Spectra is the CLI operating system for AI-assisted product development.
 
 Spectra turns product intent into executable specs, staged approvals, implementation guidance, evals, and release confidence.
 
-## Install With npx
+For teams building AI-assisted products that need more than prompt glue and coding copilots, Spectra gives one repo-native workflow for planning, approval, implementation, evals, and release readiness.
+
+## Who Spectra Is For
+
+Spectra is for teams that:
+
+- build product features with AI agents or assistants
+- want specs to be machine-readable, not just markdown notes
+- need explicit approval gates before implementation and release
+- care about evals, telemetry, and release confidence instead of "tests passed, probably fine"
+
+If you only need a code generator, Spectra is too opinionated. If you need a working system for AI-assisted product delivery, this is the right layer.
+
+## What Spectra Does
+
+- defines features as executable YAML contracts plus a short brief
+- enforces staged approvals before implementation and release
+- loads token-aware context packs by role and goal
+- tracks semantic spec diffs and approval impact
+- runs eval and verify flows before shipping
+
+## Get A First Win In 60 Seconds
 
 ```bash
 npx spectra-pack@latest init my-product
@@ -30,11 +51,56 @@ spectra validate
 spectra status
 ```
 
+What you get immediately:
+
+- a working Spectra repo with CLI-first workflow
+- a feature bundle under `sdd/features/demo-intake/`
+- governance state under `sdd/governance/`
+- a starting point for approvals, evals, and release verification
+
+See also: [Quick Start](docs/quick-start.md) and [Getting Started](docs/getting-started.md)
+
 Already have a repo?
 
 ```bash
 npx spectra-pack@latest adopt .
 ```
+
+## Minimal Executable Spec
+
+`spectra feature init` creates a bundle like this:
+
+```yaml
+apiVersion: spectra/v2
+kind: FeatureSpec
+metadata:
+  id: demo-intake
+  name: Demo Intake Assistant
+  version: 1.0.0
+summary:
+  problem: Inbound demo requests are incomplete and hard to route.
+  outcome: Users can submit a complete demo request through an AI-guided intake flow.
+requirements:
+  functional:
+    - id: FR-1
+      statement: Collect the minimum required demo request fields.
+      priority: must
+acceptance:
+  scenarios:
+    - id: AC-1
+      covers: [FR-1]
+      given: A user starts a demo request
+      when: The user answers the intake questions
+      then: The required fields are captured
+```
+
+That feature bundle is then paired with:
+
+- `ai-behavior-spec.yaml`
+- `telemetry-contract.yaml`
+- `technical-decisions.yaml`
+- `evals/*`
+- `release-checklist.md`
 
 ## The v2 Story
 
@@ -69,6 +135,19 @@ spectra eval demo-intake --suite smoke
 spectra verify --profile release
 spectra approve --stage release-approved
 ```
+
+## What Works Today
+
+- `spectra init` and `spectra adopt`
+- `spectra feature init` for new feature bundles
+- staged approval state under `sdd/governance/`
+- CLI-first `validate`, `status`, `eval`, and `verify`
+- role-aware `spectra context`
+- brownfield discovery outputs under `sdd/adoption/`
+
+Spectra is already usable as a CLI product. The system is still evolving, but the public workflow is the CLI, not internal runtime scripts.
+
+For command details and verification behavior, see [CLI Reference](docs/cli-reference.md) and [Testing](docs/testing.md).
 
 ## What Spectra Creates
 
@@ -140,12 +219,25 @@ Adoption outputs live under:
 - `sdd/adoption/gap-analysis.yaml`
 - `sdd/adoption/review-queue.yaml`
 
+Typical outcomes:
+
+- `matches`: current code already fits the target spec
+- `partial`: some behavior exists but coverage or contracts are incomplete
+- `missing`: the target capability is not present
+- `conflict`: current behavior contradicts the target spec
+- `unknown`: manual review is still needed
+
+See also: [Workflow](docs/workflow.md) and [Structure](docs/structure.md)
+
 ## Read Next
 
+- [Overview](docs/overview.md)
 - [Quick Start](docs/quick-start.md)
+- [Getting Started](docs/getting-started.md)
 - [CLI Reference](docs/cli-reference.md)
 - [Structure](docs/structure.md)
 - [Workflow](docs/workflow.md)
+- [Testing](docs/testing.md)
 - [Minimal Feature Example](docs/examples/minimal-feature/README.md)
 
 ## Local Development
