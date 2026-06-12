@@ -42,13 +42,13 @@ SPECTRA_HOME="$HOME/tools/spectra" SPECTRA_BIN="$HOME/bin" sh install.sh
 Install a specific release from a downloaded installer:
 
 ```bash
-SPECTRA_VERSION=v0.1.4 sh install.sh
+SPECTRA_VERSION=v2.0.1 sh install.sh
 ```
 
 Install a specific release through `curl`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | SPECTRA_VERSION=v0.1.4 sh
+curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | SPECTRA_VERSION=v2.0.1 sh
 ```
 
 ## Repo-Local Launcher
@@ -80,7 +80,7 @@ The first native MVP still expects `bash` for some internal runtime scripts. Nod
 
 ## Maintainer Release Notes
 
-Native artifacts are built by `.github/workflows/native-release.yml` on version tags such as `v0.1.4`.
+Native artifacts are built by `.github/workflows/native-release.yml` on version tags such as `v2.0.1`.
 The build uses Node SEA and must run with an official Node.js binary that includes the SEA fuse.
 If a local Homebrew or distro Node binary fails with a sentinel error, use the GitHub Actions release workflow
 or install Node from nodejs.org for artifact builds.

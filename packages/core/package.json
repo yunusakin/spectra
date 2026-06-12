@@ -1,6 +1,6 @@
 {
   "name": "@spectra/core",
-  "version": "0.1.4",
+  "version": "2.0.1",
   "description": "Spectra runtime helpers and packaged core assets",
   "type": "module",
   "exports": {

@@ -1,4 +1,4 @@
-const CLI_VERSION = "0.1.4";
+const CLI_VERSION = "2.0.1";
 
 function getCliVersion() {
   return CLI_VERSION;

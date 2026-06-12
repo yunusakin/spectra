@@ -5,6 +5,16 @@
 ### Planned
 - (none)
 
+## [v2.0.1] - 2026-06-12
+
+### Added
+- Native macOS/Linux install path through GitHub Release artifacts and `install.sh`.
+- Repo-local `.spectra/bin/spectra` launcher for initialized and adopted projects.
+
+### Changed
+- Simplified the public CLI by removing the separate `spectra feature` scaffolding command.
+- Aligned package, CLI, native, and runtime versions on `2.0.1`.
+
 ## [v2.0.0] - 2026-03-07
 
 ### Added
