@@ -13,7 +13,6 @@ This package installs the `spectra` CLI and includes the runtime and template as
 ```bash
 npx spectra-pack@latest init /path/to/project
 cd /path/to/project
-spectra feature init demo-intake --name "Demo Intake Assistant" --type assistant
 spectra validate
 spectra status
 ```
@@ -22,6 +21,13 @@ Brownfield adoption:
 
 ```bash
 npx spectra-pack@latest adopt /path/to/project
+```
+
+Without npm or Node, use the native installer from the repository:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
+spectra init /path/to/project
 ```
 
 ## Install and Run
@@ -46,13 +52,12 @@ spectra adopt [path]
 Workflow:
 
 ```bash
-spectra feature init demo-intake --name "Demo Intake Assistant" --type assistant
 spectra context --role planner --goal discover
 spectra task --item TASK-001 --task-type bugfix --goal "Describe intended change"
 spectra approve --stage implementation-approved
 spectra validate
 spectra verify
-spectra eval spectra-core --suite smoke
+spectra eval <project-id>-core --suite smoke
 ```
 
 Utilities:
@@ -68,7 +73,7 @@ spectra doctor
 Spectra initializes a repository with:
 
 - `.spectra/` install metadata and cache
-- `sdd/features/` executable spec bundles
+- `sdd/features/` executable spec bundles created during `init` or `adopt`
 - `sdd/governance/` approval and decision graph state
 - `sdd/memory-bank/` human-readable working context
 - `sdd/system/` runtime rules, prompts, adapters, and scaffolds
@@ -77,6 +82,7 @@ Spectra initializes a repository with:
 
 - [Repository README](https://github.com/yunusakin/spectra#readme)
 - [Quick Start](https://github.com/yunusakin/spectra/blob/main/docs/quick-start.md)
+- [Native Install](https://github.com/yunusakin/spectra/blob/main/docs/native-install.md)
 - [CLI Reference](https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md)
 - [Structure](https://github.com/yunusakin/spectra/blob/main/docs/structure.md)
 - [Workflow](https://github.com/yunusakin/spectra/blob/main/docs/workflow.md)

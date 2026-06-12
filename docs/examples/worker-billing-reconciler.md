@@ -1,6 +1,6 @@
 # Example: Worker/Batch (Billing Reconciler)
 
-Use this scenario if you are building a worker or scheduled job with `spectra init` and then creating feature bundles with `spectra feature init`.
+Use this scenario to shape the core executable spec bundle created by `spectra init` or `spectra adopt`.
 
 ## Phase 1 (Core) Answers
 - Project name: Billing Reconciler Worker

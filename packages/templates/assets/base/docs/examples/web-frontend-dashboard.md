@@ -1,6 +1,6 @@
 # Example: Web Frontend (Dashboard App)
 
-Use this as a reference for shaping a frontend analytics product with `spectra init` and then creating feature bundles with `spectra feature init`.
+Use this as a reference for shaping the core executable spec bundle created by `spectra init` or `spectra adopt`.
 
 ## Phase 1 (Core) Answers
 - Project name: Analytics Dashboard

@@ -4,7 +4,7 @@ This folder shows the smallest useful Spectra v2 feature bundle.
 
 Use it as:
 
-- a reference for `spectra feature init`
+- a reference for the core bundle created by `spectra init` or `spectra adopt`
 - a copy-paste starting point for docs and tests
 - a sanity check for the v2 contract structure
 
@@ -15,4 +15,4 @@ Files:
 - `telemetry-contract.yaml`
 - `evals/release-thresholds.yaml`
 
-These files are illustrative. The CLI remains the preferred way to create and evolve feature bundles.
+These files are illustrative. The CLI creates the first bundle during `init` or `adopt`; evolve it by editing the YAML contracts and running `spectra validate`.

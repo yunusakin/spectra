@@ -3,9 +3,37 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+function getExecutablePath() {
+  try {
+    return fs.realpathSync(process.execPath);
+  } catch {
+    return process.execPath;
+  }
+}
+
+const moduleDir =
+  typeof import.meta.url === "string" ? path.dirname(fileURLToPath(import.meta.url)) : path.dirname(getExecutablePath());
+const packageRoot = path.resolve(moduleDir, "..", "..");
 
 function resolveAssetDir(localRelativePath, devFallbackRelativePath) {
+  const nativeAssetsRoot = process.env.SPECTRA_ASSETS_DIR;
+  if (nativeAssetsRoot) {
+    const nativePath = path.join(nativeAssetsRoot, path.basename(localRelativePath));
+    if (fs.existsSync(nativePath)) {
+      return nativePath;
+    }
+  }
+
+  const binaryAssetCandidates = [
+    path.resolve(path.dirname(process.execPath), "..", localRelativePath),
+    path.resolve(path.dirname(getExecutablePath()), "..", localRelativePath)
+  ];
+  for (const binaryRelativePath of binaryAssetCandidates) {
+    if (fs.existsSync(binaryRelativePath)) {
+      return binaryRelativePath;
+    }
+  }
+
   const localPath = path.join(packageRoot, localRelativePath);
   if (fs.existsSync(localPath)) {
     return localPath;
@@ -178,12 +206,18 @@ function getBaseTemplateDir() {
   return baseTemplateDir;
 }
 
+function getCliPackageRoot() {
+  return packageRoot;
+}
+
 export {
   copyDirectory,
   copyFile,
   ensureDirectory,
   findSpectraRoot,
   getBaseTemplateDir,
+  getCliPackageRoot,
+  getExecutablePath,
   getRuntimeAssetsDir,
   hasCommand,
   mergeGitignore,

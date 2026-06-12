@@ -1,0 +1,83 @@
+name: native-release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+    paths:
+      - ".github/workflows/native-release.yml"
+      - "install.sh"
+      - "package.json"
+      - "package-lock.json"
+      - "packages/cli/**"
+      - "packages/core/**"
+      - "packages/templates/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build-native:
+    name: build ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: darwin-arm64
+            os: macos-14
+          - target: darwin-x64
+            os: macos-13
+          - target: linux-x64
+            os: ubuntu-latest
+          - target: linux-arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build native archive
+        run: npm run build:native --workspace packages/cli
+
+      - name: Smoke native binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$(ls packages/cli/dist/native/spectra-${{ matrix.target }}.tar.gz)"
+          mkdir -p /tmp/spectra-native
+          tar -xzf "$archive" -C /tmp/spectra-native
+          /tmp/spectra-native/bin/spectra --help
+          /tmp/spectra-native/bin/spectra version
+          smoke_dir="$(mktemp -d)"
+          /tmp/spectra-native/bin/spectra init "$smoke_dir"
+          "$smoke_dir/.spectra/bin/spectra" status
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spectra-${{ matrix.target }}
+          path: |
+            packages/cli/dist/native/spectra-${{ matrix.target }}.tar.gz
+            packages/cli/dist/native/spectra-${{ matrix.target }}.tar.gz.sha256
+
+      - name: Upload GitHub release assets
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "$tag" --notes "Spectra native binaries for $tag"
+          gh release upload "$tag" \
+            "packages/cli/dist/native/spectra-${{ matrix.target }}.tar.gz" \
+            "packages/cli/dist/native/spectra-${{ matrix.target }}.tar.gz.sha256" \
+            --clobber

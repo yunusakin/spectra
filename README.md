@@ -43,10 +43,21 @@ If you only need a code generator, Spectra is too opinionated. If you need a wor
 
 ## Get A First Win In 60 Seconds
 
+With npm:
+
 ```bash
 npx spectra-pack@latest init my-product
 cd my-product
-spectra feature init demo-intake --name "Demo Intake Assistant" --type assistant
+spectra validate
+spectra status
+```
+
+Without npm or Node:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
+spectra init my-product
+cd my-product
 spectra validate
 spectra status
 ```
@@ -54,11 +65,12 @@ spectra status
 What you get immediately:
 
 - a working Spectra repo with CLI-first workflow
-- a feature bundle under `sdd/features/demo-intake/`
+- native install support for macOS and Linux
+- a core executable spec bundle under `sdd/features/my-product-core/`
 - governance state under `sdd/governance/`
 - a starting point for approvals, evals, and release verification
 
-See also: [Quick Start](docs/quick-start.md) and [Getting Started](docs/getting-started.md)
+See also: [Quick Start](docs/quick-start.md), [Getting Started](docs/getting-started.md), and [Native Install](docs/native-install.md)
 
 Already have a repo?
 
@@ -68,14 +80,14 @@ npx spectra-pack@latest adopt .
 
 ## Minimal Executable Spec
 
-`spectra feature init` creates a bundle like this:
+`spectra init` creates a core executable spec bundle like this:
 
 ```yaml
 apiVersion: spectra/v2
 kind: FeatureSpec
 metadata:
-  id: demo-intake
-  name: Demo Intake Assistant
+  id: my-product-core
+  name: My Product Core Flow
   version: 1.0.0
 summary:
   problem: Inbound demo requests are incomplete and hard to route.
@@ -120,18 +132,17 @@ This is not a shell-script toolkit and not a markdown-only process template. The
 npx spectra-pack@latest init my-product
 cd my-product
 
-spectra feature init demo-intake --name "Demo Intake Assistant" --type assistant
 spectra context --role planner --goal discover
 
 spectra validate
 spectra approve --stage product-approved
 spectra approve --stage technical-approved
 
-spectra task --item FEAT-001 --task-type feature --goal "Implement demo intake assistant"
+spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
 spectra approve --stage implementation-approved
 
 spectra context --role implementer --goal implement
-spectra eval demo-intake --suite smoke
+spectra eval my-product-core --suite smoke
 spectra verify --profile release
 spectra approve --stage release-approved
 ```
@@ -139,7 +150,7 @@ spectra approve --stage release-approved
 ## What Works Today
 
 - `spectra init` and `spectra adopt`
-- `spectra feature init` for new feature bundles
+- automatic core executable spec bundles during `init` and `adopt`
 - staged approval state under `sdd/governance/`
 - CLI-first `validate`, `status`, `eval`, and `verify`
 - role-aware `spectra context`
@@ -154,6 +165,7 @@ For command details and verification behavior, see [CLI Reference](docs/cli-refe
 ```text
 your-project/
 ├── .spectra/
+│   └── bin/
 ├── app/
 ├── docs/
 └── sdd/
@@ -165,6 +177,7 @@ your-project/
 
 Important directories:
 
+- `.spectra/bin/`: repo-local Spectra launcher
 - `sdd/features/`: executable feature bundles
 - `sdd/governance/`: staged approval state and decision graph
 - `sdd/system/`: runtime rules, prompts, adapters, and scaffolds
@@ -178,7 +191,6 @@ Setup:
 ```bash
 spectra init [path]
 spectra adopt [path]
-spectra feature init <feature-id>
 ```
 
 Workflow:
@@ -234,6 +246,7 @@ See also: [Workflow](docs/workflow.md) and [Structure](docs/structure.md)
 - [Overview](docs/overview.md)
 - [Quick Start](docs/quick-start.md)
 - [Getting Started](docs/getting-started.md)
+- [Native Install](docs/native-install.md)
 - [CLI Reference](docs/cli-reference.md)
 - [Structure](docs/structure.md)
 - [Workflow](docs/workflow.md)

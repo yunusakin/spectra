@@ -15,26 +15,30 @@ Existing codebase:
 npx spectra-pack@latest adopt .
 ```
 
-## 2. Create your first feature bundle
+No npm or Node available:
 
 ```bash
-spectra feature init demo-intake --name "Demo Intake Assistant" --type assistant
+curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
+spectra init my-product
+cd my-product
 ```
 
-## 3. Load planning context
+`init` creates the first executable spec bundle automatically under `sdd/features/my-product-core/`.
+
+## 2. Load planning context
 
 ```bash
 spectra context --role planner --goal discover
 ```
 
-## 4. Validate the current state
+## 3. Validate the current state
 
 ```bash
 spectra validate
 spectra status
 ```
 
-## 5. Advance staged approvals
+## 4. Advance staged approvals
 
 ```bash
 spectra approve --stage product-approved
@@ -42,26 +46,26 @@ spectra approve --stage technical-approved
 spectra approve --stage implementation-approved
 ```
 
-## 6. Create an implementation brief
+## 5. Create an implementation brief
 
 ```bash
-spectra task --item FEAT-001 --task-type feature --goal "Implement demo intake assistant"
+spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
 ```
 
-## 7. Load implementation context
+## 6. Load implementation context
 
 ```bash
 spectra context --role implementer --goal implement
 ```
 
-## 8. Run eval and verify
+## 7. Run eval and verify
 
 ```bash
-spectra eval demo-intake --suite smoke
+spectra eval my-product-core --suite smoke
 spectra verify --profile release
 ```
 
-## 9. Mark release approval
+## 8. Mark release approval
 
 ```bash
 spectra approve --stage release-approved
@@ -70,5 +74,6 @@ spectra approve --stage release-approved
 ## Next
 
 - [CLI Reference](cli-reference.md)
+- [Native Install](native-install.md)
 - [Workflow](workflow.md)
 - [Minimal Feature Example](examples/minimal-feature/README.md)

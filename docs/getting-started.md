@@ -17,21 +17,24 @@ Brownfield repo:
 npx spectra-pack@latest adopt .
 ```
 
-## 2. Create a feature
-
-Every meaningful change should start with a feature bundle:
+Without npm or Node:
 
 ```bash
-spectra feature init demo-intake --name "Demo Intake Assistant" --type assistant
+curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
+spectra init my-product
+cd my-product
 ```
 
-That creates:
+## 2. Review the generated core spec bundle
 
-- `sdd/features/demo-intake/feature.spec.yaml`
-- `sdd/features/demo-intake/ai-behavior-spec.yaml`
-- `sdd/features/demo-intake/telemetry-contract.yaml`
-- `sdd/features/demo-intake/evals/*`
-- `sdd/features/demo-intake/brief.md`
+`spectra init` and `spectra adopt` create the first executable spec bundle automatically.
+For `my-product`, the generated bundle is:
+
+- `sdd/features/my-product-core/feature.spec.yaml`
+- `sdd/features/my-product-core/ai-behavior-spec.yaml`
+- `sdd/features/my-product-core/telemetry-contract.yaml`
+- `sdd/features/my-product-core/evals/*`
+- `sdd/features/my-product-core/brief.md`
 
 ## 3. Plan with the minimum context
 
@@ -67,7 +70,7 @@ Meaning:
 ## 6. Create implementation intent
 
 ```bash
-spectra task --item FEAT-001 --task-type feature --goal "Implement demo intake assistant"
+spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
 ```
 
 This writes the implementation brief used during execution and review.
@@ -89,7 +92,7 @@ Use:
 ## 8. Evaluate behavior
 
 ```bash
-spectra eval demo-intake --suite smoke
+spectra eval my-product-core --suite smoke
 ```
 
 This checks the feature’s eval contracts, golden scenarios, and release thresholds.
@@ -120,3 +123,13 @@ spectra approve --stage release-approved
 - skipping `spectra validate`
 - starting implementation before `implementation-approved`
 - treating `verify` like a test runner instead of a release-confidence gate
+
+## Native Install
+
+If `npm`, `npx`, or Node are unavailable, install the standalone binary first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
+```
+
+See [Native Install](native-install.md) for version pinning and repo-local launcher behavior.

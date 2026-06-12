@@ -6,13 +6,7 @@ Spectra v2 has one default loop:
 
 ## Define
 
-Create a feature bundle:
-
-```bash
-spectra feature init demo-intake --name "Demo Intake Assistant" --type assistant
-```
-
-Then load planning context:
+`spectra init` and `spectra adopt` create the core executable spec bundle. Start by loading planning context:
 
 ```bash
 spectra context --role planner --goal discover
@@ -28,6 +22,7 @@ spectra status
 Validation should happen:
 
 - after feature creation
+- after initialization or adoption
 - after meaningful spec changes
 - before every approval transition
 - before verify
@@ -52,7 +47,7 @@ Rule:
 Capture intent first:
 
 ```bash
-spectra task --item FEAT-001 --task-type feature --goal "Implement demo intake assistant"
+spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
 spectra context --role implementer --goal implement
 ```
 
@@ -67,13 +62,13 @@ spectra quick --type docs --task "refresh docs"
 Run feature behavior checks:
 
 ```bash
-spectra eval demo-intake --suite smoke
+spectra eval my-product-core --suite smoke
 ```
 
 Use release profile checks when preparing to ship:
 
 ```bash
-spectra eval demo-intake --suite release
+spectra eval my-product-core --suite release
 ```
 
 ## Verify

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { ensureDirectory, findSpectraRoot } from "./runtime.js";
 import { getFeatureDirs, readJsonContract } from "./specs.js";
 
-const contextModuleFile = fileURLToPath(import.meta.url);
+const contextModuleFile = typeof import.meta.url === "string" ? fileURLToPath(import.meta.url) : null;
 
 const ROLE_ALIASES = {
   pm: "planner",
@@ -839,7 +839,7 @@ function needsRebuild(outputPath, sourcePaths) {
   }
 
   const outputMtime = fs.statSync(outputPath).mtimeMs;
-  return [contextModuleFile, ...sourcePaths].some(
+  return [contextModuleFile, ...sourcePaths].filter(Boolean).some(
     (sourcePath) => fs.existsSync(sourcePath) && fs.statSync(sourcePath).mtimeMs > outputMtime
   );
 }

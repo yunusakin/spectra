@@ -61,7 +61,7 @@ Use these selectively. They are supporting context, not the primary v2 machine-r
 
 ## Command-to-Structure Mapping
 
-- `spectra feature init` creates a feature bundle under `sdd/features/`
+- `spectra init` and `spectra adopt` create the core feature bundle under `sdd/features/`
 - `spectra approve` updates `sdd/governance/approval-state.yaml`
 - `spectra diff semantic` inspects changed spec/governance state
 - `spectra context` reads compact summaries and selected source files

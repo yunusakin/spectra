@@ -1,6 +1,6 @@
 # Example: Backend API (Orders Service)
 
-Use this as a reference for shaping a backend API project with `spectra init` and then creating feature bundles with `spectra feature init`.
+Use this as a reference for shaping the core executable spec bundle created by `spectra init` or `spectra adopt`.
 
 ## Phase 1 (Core) Answers
 - Project name: Customer Orders Service
