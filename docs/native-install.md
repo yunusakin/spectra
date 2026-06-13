@@ -1,9 +1,8 @@
 # Native Install
 
-Use this path when `npm`, `npx`, or Node are not available on the target machine.
+Use this path when `npm`, `npx`, or Node are unavailable on the target machine.
 
-This installer requires a published GitHub Release with native artifacts. Before the first native release is cut,
-the install command will fail because there is no archive to download yet.
+The npm package remains the primary distribution path. The native installer depends on GitHub Release artifacts being attached for the requested version.
 
 ## Install
 
@@ -19,16 +18,28 @@ cd my-product
 spectra validate
 ```
 
-## What It Installs
+## Release Artifacts
 
-The installer downloads the matching GitHub Release archive for your platform:
+The installer downloads the matching archive for your platform:
 
 - `spectra-darwin-arm64.tar.gz`
 - `spectra-darwin-x64.tar.gz`
 - `spectra-linux-arm64.tar.gz`
 - `spectra-linux-x64.tar.gz`
 
-Default install locations:
+Each archive is expected to contain:
+
+- `bin/spectra`
+- `assets/runtime/`
+- `assets/base/`
+- `VERSION`
+- `LICENSE`
+
+If a release exists but has no native assets, the installer cannot complete. Use the npm path or rerun the native release workflow for that tag.
+
+## Install Locations
+
+Default locations:
 
 - runtime: `$HOME/.local/share/spectra/<version>/`
 - command: `$HOME/.local/bin/spectra`
@@ -66,7 +77,13 @@ Use it when global PATH setup is unavailable:
 ./.spectra/bin/spectra verify --profile release
 ```
 
-The launcher tries the recorded native binary first, then a local Node CLI if available, then `spectra` on PATH.
+The launcher tries:
+
+1. recorded native binary path
+2. local Node CLI fallback if available
+3. `spectra` on PATH
+
+The launcher is intentionally thin. It does not duplicate Spectra logic.
 
 ## Requirements
 
@@ -81,6 +98,5 @@ The first native MVP still expects `bash` for some internal runtime scripts. Nod
 ## Maintainer Release Notes
 
 Native artifacts are built by `.github/workflows/native-release.yml` on version tags such as `v2.0.1`.
-The build uses Node SEA and must run with an official Node.js binary that includes the SEA fuse.
-If a local Homebrew or distro Node binary fails with a sentinel error, use the GitHub Actions release workflow
-or install Node from nodejs.org for artifact builds.
+
+The build uses Node SEA and should run with an official Node.js binary that includes the SEA fuse. If a local Homebrew or distro Node binary fails with a sentinel error, use the GitHub Actions release workflow or install Node from nodejs.org for artifact builds.

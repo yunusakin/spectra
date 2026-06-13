@@ -1,6 +1,6 @@
 # Discovery
 
-> Unconfirmed observations captured from `bash scripts/map-codebase.sh`.
+> Unconfirmed observations captured during `spectra adopt`.
 
 These files should describe what the repository appears to contain. They are not confirmed decisions until intake or discussion records them explicitly.
 

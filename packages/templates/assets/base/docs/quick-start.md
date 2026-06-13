@@ -1,8 +1,10 @@
 # Quick Start
 
-This is the fastest CLI-only path through Spectra v2.
+This is the shortest supported path through Spectra v2.
 
-## 1. Initialize a repo
+## 1. Create or Adopt a Repo
+
+New project:
 
 ```bash
 npx spectra-pack@latest init my-product
@@ -23,22 +25,38 @@ spectra init my-product
 cd my-product
 ```
 
-`init` creates the first executable spec bundle automatically under `sdd/features/my-product-core/`.
+The native path requires GitHub Release artifacts. If they are missing, use the npm path.
 
-## 2. Load planning context
+## 2. Inspect the Generated Spec Bundle
+
+`init` and `adopt` create the first executable spec bundle automatically:
+
+```text
+sdd/features/my-product-core/
+├── feature.spec.yaml
+├── ai-behavior-spec.yaml
+├── telemetry-contract.yaml
+├── technical-decisions.yaml
+├── release-thresholds.yaml
+├── brief.md
+├── release-checklist.md
+└── evals/
+```
+
+## 3. Load Planning Context
 
 ```bash
 spectra context --role planner --goal discover
 ```
 
-## 3. Validate the current state
+## 4. Validate the Repo
 
 ```bash
 spectra validate
 spectra status
 ```
 
-## 4. Advance staged approvals
+## 5. Advance Approvals
 
 ```bash
 spectra approve --stage product-approved
@@ -46,26 +64,26 @@ spectra approve --stage technical-approved
 spectra approve --stage implementation-approved
 ```
 
-## 5. Create an implementation brief
+## 6. Create Implementation Intent
 
 ```bash
 spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
 ```
 
-## 6. Load implementation context
+## 7. Load Implementation Context
 
 ```bash
 spectra context --role implementer --goal implement
 ```
 
-## 7. Run eval and verify
+## 8. Run Eval and Verify
 
 ```bash
 spectra eval my-product-core --suite smoke
 spectra verify --profile release
 ```
 
-## 8. Mark release approval
+## 9. Mark Release Approval
 
 ```bash
 spectra approve --stage release-approved
@@ -73,7 +91,8 @@ spectra approve --stage release-approved
 
 ## Next
 
+- [Getting Started](getting-started.md)
 - [CLI Reference](cli-reference.md)
 - [Native Install](native-install.md)
 - [Workflow](workflow.md)
-- [Minimal Feature Example](examples/minimal-feature/README.md)
+- [Examples](examples/README.md)

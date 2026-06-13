@@ -21,7 +21,6 @@ spectra status
 
 Validation should happen:
 
-- after feature creation
 - after initialization or adoption
 - after meaningful spec changes
 - before every approval transition

@@ -1,10 +1,12 @@
 <p align="center">
-  <img src="assets/logo.png" alt="Spectra Logo" width="200">
+  <img src="assets/logo.png" alt="Spectra Logo" width="180">
 </p>
 
 # Spectra
 
-Spectra is the CLI operating system for AI-assisted product development.
+**Spectra is a CLI-first operating system for AI-assisted product development.**
+
+It turns product intent into executable specs, staged approvals, role-aware agent context, behavior evals, telemetry contracts, and release-confidence checks.
 
 <p align="center">
   <a href="https://www.npmjs.com/package/spectra-pack">
@@ -13,37 +15,32 @@ Spectra is the CLI operating system for AI-assisted product development.
   <a href="https://www.npmjs.com/package/spectra-pack">
     <img src="https://img.shields.io/npm/dm/spectra-pack" alt="npm downloads">
   </a>
+  <a href="https://github.com/yunusakin/spectra/releases">
+    <img src="https://img.shields.io/github/v/release/yunusakin/spectra?label=release" alt="GitHub release">
+  </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License">
   </a>
 </p>
 
-Spectra turns product intent into executable specs, staged approvals, implementation guidance, evals, and release confidence.
+## Why Spectra Exists
 
-For teams building AI-assisted products that need more than prompt glue and coding copilots, Spectra gives one repo-native workflow for planning, approval, implementation, evals, and release readiness.
+AI-assisted development fails when product intent, model behavior, implementation work, evals, approvals, and release readiness live in disconnected places.
 
-## Who Spectra Is For
+Spectra gives teams a repo-native workflow where:
 
-Spectra is for teams that:
+- product requirements are captured as executable YAML contracts, not only Markdown notes
+- AI behavior is specified explicitly through tool, fallback, escalation, and refusal rules
+- staged approvals control when implementation and release work can proceed
+- evals and telemetry contracts are part of the feature definition
+- agents load only the context needed for their role and goal
+- release confidence is checked through one CLI surface
 
-- build product features with AI agents or assistants
-- want specs to be machine-readable, not just markdown notes
-- need explicit approval gates before implementation and release
-- care about evals, telemetry, and release confidence instead of "tests passed, probably fine"
+Spectra is not a code generator. It is governance and operating infrastructure for teams building with AI agents.
 
-If you only need a code generator, Spectra is too opinionated. If you need a working system for AI-assisted product delivery, this is the right layer.
+## Install
 
-## What Spectra Does
-
-- defines features as executable YAML contracts plus a short brief
-- enforces staged approvals before implementation and release
-- loads token-aware context packs by role and goal
-- tracks semantic spec diffs and approval impact
-- runs eval and verify flows before shipping
-
-## Get A First Win In 60 Seconds
-
-With npm:
+Primary path:
 
 ```bash
 npx spectra-pack@latest init my-product
@@ -52,139 +49,68 @@ spectra validate
 spectra status
 ```
 
-Without npm or Node:
+Brownfield path:
+
+```bash
+npx spectra-pack@latest adopt .
+spectra validate
+spectra diff semantic
+```
+
+Native no-Node path:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
 spectra init my-product
-cd my-product
-spectra validate
-spectra status
 ```
 
-What you get immediately:
+Native install uses GitHub Release artifacts for macOS and Linux. If release assets are not attached for a version yet, use the npm path. See [Native Install](docs/native-install.md).
 
-- a working Spectra repo with CLI-first workflow
-- native install support for macOS and Linux
-- a core executable spec bundle under `sdd/features/my-product-core/`
-- governance state under `sdd/governance/`
-- a starting point for approvals, evals, and release verification
+## What You Get
 
-See also: [Quick Start](docs/quick-start.md), [Getting Started](docs/getting-started.md), and [Native Install](docs/native-install.md)
-
-Already have a repo?
-
-```bash
-npx spectra-pack@latest adopt .
-```
-
-## Minimal Executable Spec
-
-`spectra init` creates a core executable spec bundle like this:
-
-```yaml
-apiVersion: spectra/v2
-kind: FeatureSpec
-metadata:
-  id: my-product-core
-  name: My Product Core Flow
-  version: 1.0.0
-summary:
-  problem: Inbound demo requests are incomplete and hard to route.
-  outcome: Users can submit a complete demo request through an AI-guided intake flow.
-requirements:
-  functional:
-    - id: FR-1
-      statement: Collect the minimum required demo request fields.
-      priority: must
-acceptance:
-  scenarios:
-    - id: AC-1
-      covers: [FR-1]
-      given: A user starts a demo request
-      when: The user answers the intake questions
-      then: The required fields are captured
-```
-
-That feature bundle is then paired with:
-
-- `ai-behavior-spec.yaml`
-- `telemetry-contract.yaml`
-- `technical-decisions.yaml`
-- `evals/*`
-- `release-checklist.md`
-
-## The v2 Story
-
-Spectra is built around one flow:
-
-1. Define a feature as executable specs.
-2. Validate structure, policy, and approval state.
-3. Advance staged approvals before implementation.
-4. Load token-aware context packs by role and goal.
-5. Evaluate behavior and verify release confidence before shipping.
-
-This is not a shell-script toolkit and not a markdown-only process template. The product surface is the `spectra` CLI.
-
-## Golden Path
-
-```bash
-npx spectra-pack@latest init my-product
-cd my-product
-
-spectra context --role planner --goal discover
-
-spectra validate
-spectra approve --stage product-approved
-spectra approve --stage technical-approved
-
-spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
-spectra approve --stage implementation-approved
-
-spectra context --role implementer --goal implement
-spectra eval my-product-core --suite smoke
-spectra verify --profile release
-spectra approve --stage release-approved
-```
-
-## What Works Today
-
-- `spectra init` and `spectra adopt`
-- automatic core executable spec bundles during `init` and `adopt`
-- staged approval state under `sdd/governance/`
-- CLI-first `validate`, `status`, `eval`, and `verify`
-- role-aware `spectra context`
-- brownfield discovery outputs under `sdd/adoption/`
-
-Spectra is already usable as a CLI product. The system is still evolving, but the public workflow is the CLI, not internal runtime scripts.
-
-For command details and verification behavior, see [CLI Reference](docs/cli-reference.md) and [Testing](docs/testing.md).
-
-## What Spectra Creates
+After `spectra init my-product`, Spectra creates a repo-local operating layer:
 
 ```text
-your-project/
+my-product/
 ├── .spectra/
-│   └── bin/
+│   ├── bin/spectra
+│   └── install.json
 ├── app/
 ├── docs/
 └── sdd/
     ├── features/
-    │   └── <feature-id>/
+    │   └── my-product-core/
+    │       ├── feature.spec.yaml
+    │       ├── ai-behavior-spec.yaml
+    │       ├── telemetry-contract.yaml
+    │       ├── technical-decisions.yaml
+    │       ├── release-thresholds.yaml
+    │       ├── brief.md
+    │       ├── release-checklist.md
+    │       └── evals/
     ├── governance/
+    │   ├── approval-state.yaml
+    │   └── decision-graph.yaml
     └── system/
 ```
 
-Important directories:
+The YAML files are the canonical machine-readable contracts. Markdown files provide human context and should not duplicate canonical state.
 
-- `.spectra/bin/`: repo-local Spectra launcher
-- `sdd/features/`: executable feature bundles
-- `sdd/governance/`: staged approval state and decision graph
-- `sdd/system/`: runtime rules, prompts, adapters, and scaffolds
+## Core Capabilities
 
-Optional supporting context may also exist under `sdd/memory-bank/`, but the v2 source of truth is the feature bundle plus governance YAML.
+| Capability | What Spectra Provides |
+| --- | --- |
+| Executable specs | Feature, AI behavior, telemetry, eval, technical decision, and release threshold contracts |
+| Staged approvals | `draft -> product-approved -> technical-approved -> implementation-approved -> release-approved` |
+| AI behavior governance | Tool contracts, allowed/disallowed actions, fallback rules, escalation, human review, and refusal policy |
+| Eval system | Golden scenarios, regression suites, failure modes, and release thresholds |
+| Telemetry contract | Requirement-to-event traceability, success/failure signals, alert conditions, dashboards, and ownership |
+| Semantic diff | Meaning-based spec diff categories for approval invalidation and impact analysis |
+| Brownfield adoption | Current-state discovery, gap analysis, review queue, and adoption classification |
+| Context packs | Role-aware and goal-aware context loading for planner, architect, implementer, reviewer, verifier, and release manager |
+| Verify v2 | Structure, policy, tests, evals, telemetry, and release readiness checks in one release-confidence pipeline |
 
-## Core Commands
+## CLI Overview
 
 Setup:
 
@@ -193,76 +119,96 @@ spectra init [path]
 spectra adopt [path]
 ```
 
-Workflow:
+Daily workflow:
 
 ```bash
-spectra context --role <role> --goal <goal>
-spectra task --item <id> --task-type <type> --goal "<goal>"
-spectra approve --stage <stage>
+spectra context --role planner --goal discover
 spectra validate
-spectra eval <feature-id> --suite smoke
+spectra approve --stage product-approved
+spectra approve --stage technical-approved
+spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
+spectra approve --stage implementation-approved
+spectra context --role implementer --goal implement
+spectra eval my-product-core --suite smoke
 spectra verify --profile release
-spectra status
+spectra approve --stage release-approved
 ```
 
 Utilities:
 
 ```bash
-spectra adapters --agents codex,cursor --target .
-spectra diff semantic
+spectra status
 spectra doctor
+spectra diff semantic
+spectra adapters --agents codex,cursor --target .
 spectra quick --type docs --task "refresh docs"
 ```
 
-## Brownfield Adoption
+See [CLI Reference](docs/cli-reference.md) for the full command surface.
 
-Use `spectra adopt` when code already exists.
+## Golden Path
 
-```bash
-spectra adopt .
-spectra validate
-spectra diff semantic
-spectra status
-```
+1. Initialize or adopt a repo.
+2. Review the generated core spec bundle under `sdd/features/<project>-core/`.
+3. Load minimal planning context with `spectra context`.
+4. Run `spectra validate`.
+5. Move through staged approvals.
+6. Create an implementation brief with `spectra task`.
+7. Run evals with `spectra eval`.
+8. Run release confidence checks with `spectra verify --profile release`.
+9. Record release approval.
 
-Adoption outputs live under:
+This keeps product decisions, AI behavior, implementation work, evals, telemetry, and release readiness traceable in the repository.
 
-- `sdd/adoption/current-state.summary.yaml`
-- `sdd/adoption/gap-analysis.yaml`
-- `sdd/adoption/review-queue.yaml`
+## Project Status
 
-Typical outcomes:
+Current version: `2.0.1`
 
-- `matches`: current code already fits the target spec
-- `partial`: some behavior exists but coverage or contracts are incomplete
-- `missing`: the target capability is not present
-- `conflict`: current behavior contradicts the target spec
-- `unknown`: manual review is still needed
+What works today:
 
-See also: [Workflow](docs/workflow.md) and [Structure](docs/structure.md)
+- npm-distributed CLI package: [`spectra-pack`](https://www.npmjs.com/package/spectra-pack)
+- `init` and `adopt` workflows
+- executable v2 spec bundle generation
+- staged approval state and decision graph
+- validation, semantic diff, eval, verify, status, and context-pack commands
+- repo-local launcher under `.spectra/bin/spectra`
+- native installer script and GitHub Release artifact workflow
 
-## Read Next
+Known limitation:
+
+- Native install depends on release archives being present on GitHub Releases. The npm path is the primary supported installation path.
+- Some internal runtime checks still call packaged shell scripts. The user-facing product surface is the `spectra` CLI.
+
+## Documentation
 
 - [Overview](docs/overview.md)
 - [Quick Start](docs/quick-start.md)
 - [Getting Started](docs/getting-started.md)
-- [Native Install](docs/native-install.md)
 - [CLI Reference](docs/cli-reference.md)
-- [Structure](docs/structure.md)
+- [Native Install](docs/native-install.md)
+- [Repository Structure](docs/structure.md)
 - [Workflow](docs/workflow.md)
-- [Testing](docs/testing.md)
-- [Minimal Feature Example](docs/examples/minimal-feature/README.md)
+- [Testing and Verification](docs/testing.md)
+- [Examples](docs/examples/README.md)
 
 ## Local Development
 
-If you are changing Spectra itself:
-
 ```bash
 npm install
-./node_modules/.bin/spectra validate
-./node_modules/.bin/spectra verify --scope spec
+npm run spectra -- --help
+npm run validate
+npm run verify
 ```
+
+Useful checks before publishing:
+
+```bash
+node packages/cli/scripts/check-versions.mjs
+npm_config_cache=/tmp/spectra-npm-cache npm pack --workspace packages/cli --dry-run --json
+```
+
+Native artifacts are built by `.github/workflows/native-release.yml` on version tags such as `v2.0.1`.
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
+MIT. See [LICENSE](LICENSE).

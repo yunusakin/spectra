@@ -1,18 +1,14 @@
 # spectra-pack
 
-Spectra is a CLI-first operating system for AI-assisted product development.
+`spectra-pack` installs the `spectra` CLI.
 
-[![npm version](https://img.shields.io/npm/v/spectra-pack?color=cb3837&label=npm)](https://www.npmjs.com/package/spectra-pack)
-[![npm downloads](https://img.shields.io/npm/dm/spectra-pack)](https://www.npmjs.com/package/spectra-pack)
-[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/yunusakin/spectra/blob/main/LICENSE)
+Spectra is a CLI-first operating system for AI-assisted product development. It bootstraps executable specs, staged approvals, eval contracts, telemetry contracts, semantic diff checks, role-aware context packs, and release-confidence verification.
 
-This package installs the `spectra` CLI and includes the runtime and template assets needed to bootstrap or adopt a repository.
-
-## Install With npx
+## Install
 
 ```bash
-npx spectra-pack@latest init /path/to/project
-cd /path/to/project
+npx spectra-pack@latest init my-product
+cd my-product
 spectra validate
 spectra status
 ```
@@ -20,27 +16,14 @@ spectra status
 Brownfield adoption:
 
 ```bash
-npx spectra-pack@latest adopt /path/to/project
-```
-
-Without npm or Node, use the native installer from the repository:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
-spectra init /path/to/project
-```
-
-## Install and Run
-
-After initialization, use the installed CLI command inside the target repository:
-
-```bash
+npx spectra-pack@latest adopt .
 spectra validate
-spectra status
-spectra verify
+spectra diff semantic
 ```
 
-## Core Commands
+Native no-Node install is documented in the repository: [Native Install](https://github.com/yunusakin/spectra/blob/main/docs/native-install.md).
+
+## Commands
 
 Setup:
 
@@ -53,11 +36,12 @@ Workflow:
 
 ```bash
 spectra context --role planner --goal discover
-spectra task --item TASK-001 --task-type bugfix --goal "Describe intended change"
+spectra task --item TASK-001 --task-type feature --goal "Describe intended change"
 spectra approve --stage implementation-approved
 spectra validate
-spectra verify
-spectra eval <project-id>-core --suite smoke
+spectra eval <feature-id> --suite smoke
+spectra verify --profile release
+spectra status
 ```
 
 Utilities:
@@ -66,24 +50,26 @@ Utilities:
 spectra adapters --agents codex,cursor --target .
 spectra diff semantic
 spectra doctor
+spectra quick --type docs --task "refresh docs"
 ```
 
 ## What It Installs
 
 Spectra initializes a repository with:
 
-- `.spectra/` install metadata and cache
+- `.spectra/` install metadata and repo-local launcher
 - `sdd/features/` executable spec bundles created during `init` or `adopt`
 - `sdd/governance/` approval and decision graph state
-- `sdd/memory-bank/` human-readable working context
 - `sdd/system/` runtime rules, prompts, adapters, and scaffolds
+- `sdd/memory-bank/` optional human-readable working context
 
 ## Documentation
 
 - [Repository README](https://github.com/yunusakin/spectra#readme)
 - [Quick Start](https://github.com/yunusakin/spectra/blob/main/docs/quick-start.md)
-- [Native Install](https://github.com/yunusakin/spectra/blob/main/docs/native-install.md)
+- [Getting Started](https://github.com/yunusakin/spectra/blob/main/docs/getting-started.md)
 - [CLI Reference](https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md)
+- [Native Install](https://github.com/yunusakin/spectra/blob/main/docs/native-install.md)
 - [Structure](https://github.com/yunusakin/spectra/blob/main/docs/structure.md)
 - [Workflow](https://github.com/yunusakin/spectra/blob/main/docs/workflow.md)
 - [Issues](https://github.com/yunusakin/spectra/issues)

@@ -1,8 +1,8 @@
 # Getting Started
 
-This guide explains the end-to-end Spectra v2 workflow in the order teams should actually use it.
+This guide explains the end-to-end Spectra v2 workflow in the order teams should use it.
 
-## 1. Initialize Spectra
+## 1. Install and Initialize
 
 New repo:
 
@@ -17,7 +17,7 @@ Brownfield repo:
 npx spectra-pack@latest adopt .
 ```
 
-Without npm or Node:
+Native no-Node path:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
@@ -25,35 +25,52 @@ spectra init my-product
 cd my-product
 ```
 
-## 2. Review the generated core spec bundle
+The npm path is the primary supported distribution. The native path depends on GitHub Release artifacts.
+
+## 2. Understand the Generated Bundle
 
 `spectra init` and `spectra adopt` create the first executable spec bundle automatically.
+
 For `my-product`, the generated bundle is:
 
 - `sdd/features/my-product-core/feature.spec.yaml`
 - `sdd/features/my-product-core/ai-behavior-spec.yaml`
 - `sdd/features/my-product-core/telemetry-contract.yaml`
+- `sdd/features/my-product-core/technical-decisions.yaml`
+- `sdd/features/my-product-core/release-thresholds.yaml`
 - `sdd/features/my-product-core/evals/*`
 - `sdd/features/my-product-core/brief.md`
+- `sdd/features/my-product-core/release-checklist.md`
 
-## 3. Plan with the minimum context
+YAML is canonical. Markdown is support context.
+
+## 3. Plan with Minimum Context
 
 ```bash
 spectra context --role planner --goal discover
 ```
 
-Use context packs by role and goal instead of opening the whole repo.
+Use context packs by role and goal instead of opening the whole repository.
 
-## 4. Validate before approval
+Recommended role and goal pairs:
+
+- `planner + discover`
+- `planner + decide`
+- `implementer + implement`
+- `reviewer + verify`
+- `verifier + verify`
+- `release-manager + ship`
+
+## 4. Validate Before Approval
 
 ```bash
 spectra validate
 spectra status
 ```
 
-Validation should pass before any approval moves forward.
+Validation should pass before any approval stage moves forward.
 
-## 5. Advance staged approvals
+## 5. Advance Staged Approvals
 
 ```bash
 spectra approve --stage product-approved
@@ -63,11 +80,12 @@ spectra approve --stage implementation-approved
 
 Meaning:
 
-- `product-approved`: feature intent and scope are accepted
+- `product-approved`: product intent and scope are accepted
 - `technical-approved`: architecture and technical boundaries are accepted
 - `implementation-approved`: implementation can start
+- `release-approved`: release signoff is complete
 
-## 6. Create implementation intent
+## 6. Create Implementation Intent
 
 ```bash
 spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
@@ -75,42 +93,37 @@ spectra task --item FEAT-001 --task-type feature --goal "Implement core product 
 
 This writes the implementation brief used during execution and review.
 
-## 7. Implement with role-aware context
+## 7. Implement with Role-Aware Context
 
 ```bash
 spectra context --role implementer --goal implement
 ```
 
-Use:
+Agents should read compact YAML contracts and generated summaries before long-form Markdown.
 
-- `planner + discover`
-- `planner + decide`
-- `implementer + implement`
-- `verifier + verify`
-- `release-manager + ship`
-
-## 8. Evaluate behavior
+## 8. Evaluate Behavior
 
 ```bash
 spectra eval my-product-core --suite smoke
 ```
 
-This checks the feature’s eval contracts, golden scenarios, and release thresholds.
+This checks eval contracts, golden scenarios, regression suites, failure modes, and release thresholds.
 
-## 9. Verify release confidence
+## 9. Verify Release Confidence
 
 ```bash
 spectra verify --profile release
 ```
 
-Verify is the final release gate. It should answer:
+Verify answers:
 
 - is the repo structurally valid?
 - is policy current?
-- do eval and telemetry contracts exist?
+- are tests, evals, and telemetry contracts present?
+- is approval state valid?
 - is release confidence high enough?
 
-## 10. Mark release approval
+## 10. Mark Release Approval
 
 ```bash
 spectra approve --stage release-approved
@@ -118,18 +131,15 @@ spectra approve --stage release-approved
 
 ## Common Mistakes
 
-- treating Spectra like a binary `approved / not approved` system
-- editing YAML manually before using the CLI flow
+- treating Spectra as a binary `approved / not approved` system
+- duplicating canonical YAML state in Markdown
 - skipping `spectra validate`
 - starting implementation before `implementation-approved`
-- treating `verify` like a test runner instead of a release-confidence gate
+- treating `verify` like a plain test runner instead of a release-confidence gate
 
-## Native Install
+## Next
 
-If `npm`, `npx`, or Node are unavailable, install the standalone binary first:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
-```
-
-See [Native Install](native-install.md) for version pinning and repo-local launcher behavior.
+- [CLI Reference](cli-reference.md)
+- [Structure](structure.md)
+- [Workflow](workflow.md)
+- [Native Install](native-install.md)

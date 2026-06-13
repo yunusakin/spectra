@@ -35,8 +35,8 @@ Purpose:
 Run it:
 
 ```bash
-spectra eval demo-intake --suite smoke
-spectra eval demo-intake --suite release
+spectra eval my-product-core --suite smoke
+spectra eval my-product-core --suite release
 ```
 
 Use it:

@@ -9,6 +9,8 @@ After `spectra init`, a repo should look like this:
 ```text
 your-project/
 ├── .spectra/
+│   ├── bin/spectra
+│   └── install.json
 ├── app/
 ├── docs/
 └── sdd/
@@ -58,6 +60,13 @@ Long-form human context may still exist for migration, brownfield adoption, or s
 - traceability
 
 Use these selectively. They are supporting context, not the primary v2 machine-readable source.
+
+### `.spectra/`
+
+Repo-local Spectra install metadata and launcher:
+
+- `install.json`
+- `bin/spectra`
 
 ## Command-to-Structure Mapping
 
