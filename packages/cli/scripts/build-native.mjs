@@ -114,13 +114,15 @@ await build({
   target: "node22",
   format: "cjs",
   outfile: bundledEntry,
-  banner: {
-    js: "#!/usr/bin/env node"
-  },
   logOverride: {
     "empty-import-meta": "silent"
   }
 });
+
+// Node SEA embeds this file as CommonJS source. Unlike the normal CLI bin,
+// the embedded source must not contain a shebang.
+const bundledSource = fs.readFileSync(bundledEntry, "utf8");
+fs.writeFileSync(bundledEntry, bundledSource.replace(/^(?:#![^\n]*\n)+/, ""));
 
 const target = targetName();
 const executablePath = path.join(buildRoot, "spectra");
