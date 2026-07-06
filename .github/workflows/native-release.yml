@@ -64,7 +64,7 @@ jobs:
           mkdir -p "$brownfield_dir/src/test/java"
           printf 'class BalanceServiceTest {}\n' > "$brownfield_dir/src/test/java/BalanceServiceTest.java"
           /tmp/spectra-native/bin/spectra adopt "$brownfield_dir"
-          brownfield_status="$("$brownfield_dir/.spectra/bin/spectra" status)"
+          brownfield_status="$("$brownfield_dir/.spectra/bin/spectra" status --cwd "$brownfield_dir")"
           printf '%s\n' "$brownfield_status"
           grep -F '1 test file(s) found across repository' <<< "$brownfield_status"
           grep -F 'No requirement rows mapped yet' <<< "$brownfield_status"
