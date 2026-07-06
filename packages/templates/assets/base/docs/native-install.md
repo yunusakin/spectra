@@ -91,10 +91,10 @@ curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh |
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | \
-  SPECTRA_VERSION=v2.0.1 sh
+  SPECTRA_VERSION=v2.0.2 sh
 ```
 
-Version values use the Git tag form, such as `v2.0.1`.
+Version values use the Git tag form, such as `v2.0.2`.
 
 ## Repo-Local Launcher
 

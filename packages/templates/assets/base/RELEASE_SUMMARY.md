@@ -1,5 +1,15 @@
 # Release Summary
 
+## v2.0.2
+
+### Brownfield Status Accuracy
+- Detects tests across repository layouts instead of assuming application code lives under `app/`.
+- Ignores traceability examples inside comments and reports only real requirement rows.
+- Distinguishes untouched templates, uncommitted specs, and committed spec history.
+
+### Release Safety
+- Adds a Java-style brownfield adoption fixture to every native artifact smoke test.
+
 ## v2.0.1
 
 ### Feature: Native Install Path

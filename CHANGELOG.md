@@ -5,6 +5,26 @@
 ### Planned
 - (none)
 
+## [v2.0.2] - 2026-07-06
+
+### Fixed
+- Made `spectra status` detect tests across brownfield repository layouts, including JVM `src/test/` trees.
+- Counted only real traceability table rows instead of commented examples and status legends.
+- Reported unstarted template state and uncommitted executable specs accurately.
+
+### Changed
+- Added brownfield health assertions to the native release smoke matrix.
+
+## [v2.0.1] - 2026-06-12
+
+### Added
+- Native macOS/Linux install path through GitHub Release artifacts and `install.sh`.
+- Repo-local `.spectra/bin/spectra` launcher for initialized and adopted projects.
+
+### Changed
+- Simplified the public CLI by removing the separate `spectra feature` scaffolding command.
+- Aligned package, CLI, native, and runtime versions on `2.0.1`.
+
 ## [v2.0.0] - 2026-03-07
 
 ### Added

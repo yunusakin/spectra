@@ -1,6 +1,6 @@
 {
   "name": "@spectra/templates",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Spectra project templates and scaffolds",
   "type": "module",
   "exports": {

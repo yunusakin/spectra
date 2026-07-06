@@ -60,6 +60,14 @@ jobs:
           smoke_dir="$(mktemp -d)"
           /tmp/spectra-native/bin/spectra init "$smoke_dir"
           "$smoke_dir/.spectra/bin/spectra" status
+          brownfield_dir="$(mktemp -d)"
+          mkdir -p "$brownfield_dir/src/test/java"
+          printf 'class BalanceServiceTest {}\n' > "$brownfield_dir/src/test/java/BalanceServiceTest.java"
+          /tmp/spectra-native/bin/spectra adopt "$brownfield_dir"
+          brownfield_status="$("$brownfield_dir/.spectra/bin/spectra" status)"
+          printf '%s\n' "$brownfield_status"
+          grep -F '1 test file(s) found across repository' <<< "$brownfield_status"
+          grep -F 'No requirement rows mapped yet' <<< "$brownfield_status"
 
       - uses: actions/upload-artifact@v4
         with:

@@ -17,8 +17,9 @@ ok()   { printf "${GREEN}✅${NC} %-22s %s\n" "$1" "$2"; }
 warn() { printf "${YELLOW}⚠️${NC}  %-22s %s\n" "$1" "$2"; }
 fail() { printf "${RED}❌${NC} %-22s %s\n" "$1" "$2"; }
 
-parse_approval_status() {
+parse_section_value() {
   local state_file="$1"
+  local section_name="$2"
   awk '
     BEGIN { in_section = 0; in_comment = 0 }
     {
@@ -28,7 +29,8 @@ parse_approval_status() {
         next
       }
 
-      if ($0 ~ /^##[[:space:]]+Approval Status[[:space:]]*$/) {
+      expected = "## " section
+      if ($0 == expected) {
         in_section = 1
         next
       }
@@ -42,12 +44,22 @@ parse_approval_status() {
         gsub(/^[[:space:]-]+/, "", line)
         gsub(/[[:space:]]+$/, "", line)
         if (line != "") {
-          print tolower(line)
+          print line
           exit
         }
       }
     }
-  ' "${state_file}" 2>/dev/null || true
+  ' section="${section_name}" "${state_file}" 2>/dev/null || true
+}
+
+parse_approval_status() {
+  local approval_file="sdd/governance/approval-state.yaml"
+  if [[ -f "${approval_file}" ]]; then
+    awk '/^current_state:[[:space:]]*/ { print tolower($2); exit }' "${approval_file}" 2>/dev/null || true
+    return
+  fi
+
+  parse_section_value "$1" "Approval Status" | tr '[:upper:]' '[:lower:]'
 }
 
 echo ""
@@ -58,13 +70,11 @@ echo ""
 # 1. Intake status
 intake_state="sdd/memory-bank/core/intake-state.md"
 if [[ -f "${intake_state}" ]]; then
-  # Check if it has real content (not just template)
-  real_content=$(grep -v '^#\|^>\|^$\|^<!--\|^-->' "${intake_state}" 2>/dev/null | grep -v '^\s*$' | head -1 || true)
-  if [[ -n "${real_content}" ]]; then
-    phase=$(grep -i 'current phase' "${intake_state}" 2>/dev/null | head -1 | sed 's/.*: *//' || echo "unknown")
+  phase="$(parse_section_value "${intake_state}" "Current Phase")"
+  if [[ -n "${phase}" ]]; then
     ok "Intake:" "Active (${phase})"
   else
-    warn "Intake:" "Template only — run 'init' to start"
+    warn "Intake:" "Not started — Current Phase is empty"
   fi
 else
   fail "Intake:" "intake-state.md not found"
@@ -74,8 +84,8 @@ fi
 approval_status="$(parse_approval_status "${intake_state}")"
 if [[ "${approval_status}" == "approved" || "${approval_status}" == *"-approved" ]]; then
   ok "Approval:" "Approved (${approval_status})"
-elif [[ -d "app" ]] && find app -type f ! -name 'README.md' | head -1 | grep -q .; then
-  warn "Approval:" "app/ has code but no approval evidence"
+elif [[ "${approval_status}" == "draft" ]]; then
+  warn "Approval:" "Draft"
 else
   warn "Approval:" "Not yet approved"
 fi
@@ -83,15 +93,30 @@ fi
 # 3. Sprint status
 sprint_current="sdd/memory-bank/core/sprint-current.md"
 if [[ -f "${sprint_current}" ]]; then
-  done_count="$(grep -Ec '^\- \[x\]|^- .*Done' "${sprint_current}" 2>/dev/null || true)"
-  backlog_count="$(grep -Ec '^\- ' "${sprint_current}" 2>/dev/null || true)"
-  done_count="${done_count:-0}"
-  backlog_count="${backlog_count:-0}"
-  real_sprint=$(grep -v '^#\|^>\|^$\|^<!--\|^-->' "${sprint_current}" 2>/dev/null | grep -v '^\s*$' | head -1 || true)
-  if [[ -n "${real_sprint}" ]]; then
-    ok "Sprint:" "Active (${done_count} items tracked)"
+  read -r tracked_count done_count < <(
+    awk '
+      BEGIN { in_comment = 0; section = ""; tracked = 0; done = 0 }
+      /<!--/ { in_comment = 1 }
+      in_comment == 1 {
+        if (/-->/) in_comment = 0
+        next
+      }
+      /^## Sprint Backlog[[:space:]]*$/ { section = "backlog"; next }
+      /^## In Progress[[:space:]]*$/ { section = "progress"; next }
+      /^## Done[[:space:]]*$/ { section = "done"; next }
+      /^## / { section = ""; next }
+      section != "" && /^- / {
+        tracked++
+        if (section == "done" || $0 ~ /^- \[[xX]\]/) done++
+      }
+      END { print tracked, done }
+    ' "${sprint_current}"
+  )
+  sprint_name="$(parse_section_value "${sprint_current}" "Sprint Name")"
+  if [[ -n "${sprint_name}" ]]; then
+    ok "Sprint:" "Active (${tracked_count} items tracked, ${done_count} done)"
   else
-    warn "Sprint:" "Template only — not started"
+    warn "Sprint:" "Not started — Sprint Name is empty"
   fi
 else
   warn "Sprint:" "sprint-current.md not found"
@@ -100,16 +125,15 @@ fi
 # 4. Progress freshness
 progress="sdd/memory-bank/core/progress.md"
 if [[ -f "${progress}" ]]; then
-  real_progress=$(grep -v '^#\|^>\|^$\|^<!--\|^-->' "${progress}" 2>/dev/null | grep -v '^\s*$' | head -1 || true)
-  if [[ -n "${real_progress}" ]]; then
+  if grep -q '<target-project-name>\|<absolute-target-project-path>' "${progress}" 2>/dev/null; then
+    warn "Progress:" "Template only — project binding is incomplete"
+  else
     if git log -1 --format="%ar" -- "${progress}" 2>/dev/null | grep -q .; then
       last_update=$(git log -1 --format="%ar" -- "${progress}" 2>/dev/null)
       ok "Progress:" "Updated ${last_update}"
     else
-      ok "Progress:" "Has content"
+      ok "Progress:" "Populated but not committed yet"
     fi
-  else
-    warn "Progress:" "Template only — not populated"
   fi
 else
   fail "Progress:" "progress.md not found"
@@ -118,12 +142,25 @@ fi
 # 5. Traceability
 traceability="sdd/memory-bank/core/traceability.md"
 if [[ -f "${traceability}" ]]; then
-  mapped=$(grep -cE '✅|🔄|Done|In progress' "${traceability}" 2>/dev/null || echo "0")
-  total=$(grep -cE '^\| [0-9]' "${traceability}" 2>/dev/null || echo "0")
+  read -r mapped total < <(
+    awk '
+      BEGIN { in_comment = 0; mapped = 0; total = 0 }
+      /<!--/ { in_comment = 1 }
+      in_comment == 1 {
+        if (/-->/) in_comment = 0
+        next
+      }
+      /^\|[[:space:]]*[0-9]+[[:space:]]*\|/ {
+        total++
+        if ($0 ~ /✅|🔄|Done|In progress/) mapped++
+      }
+      END { print mapped, total }
+    ' "${traceability}"
+  )
   if [[ "${total}" -gt 0 ]]; then
     ok "Traceability:" "${mapped}/${total} features mapped"
   else
-    warn "Traceability:" "Template only — no features mapped"
+    warn "Traceability:" "No requirement rows mapped yet"
   fi
 else
   warn "Traceability:" "traceability.md not found"
@@ -132,35 +169,61 @@ fi
 # 6. Active Context
 active_ctx="sdd/memory-bank/core/activeContext.md"
 if [[ -f "${active_ctx}" ]]; then
-  real_ctx=$(grep -v '^#\|^>\|^$\|^<!--\|^-->' "${active_ctx}" 2>/dev/null | grep -v '^\s*$' | head -1 || true)
-  if [[ -n "${real_ctx}" ]]; then
-    ok "Active Context:" "Populated"
+  if grep -q '<target-project-name>\|<absolute-target-project-path>' "${active_ctx}" 2>/dev/null; then
+    warn "Active Context:" "Template only — project binding is incomplete"
   else
-    warn "Active Context:" "Template only"
+    ok "Active Context:" "Populated"
   fi
 else
   warn "Active Context:" "activeContext.md not found"
 fi
 
 # 7. Tests
-if [[ -d "app" ]]; then
-  test_files=$(find app -type f \( -name '*test*' -o -name '*spec*' -o -path '*/tests/*' -o -path '*/test/*' \) 2>/dev/null | wc -l | tr -d ' ')
-  if [[ "${test_files}" -gt 0 ]]; then
-    ok "Tests:" "${test_files} test file(s) found"
-  else
-    fail "Tests:" "No test files found under app/"
-  fi
+test_files=$(
+  find . -type f \
+    ! -path './.git/*' \
+    ! -path './.spectra/*' \
+    ! -path './sdd/*' \
+    ! -path './docs/*' \
+    ! -path '*/node_modules/*' \
+    ! -path '*/vendor/*' \
+    ! -path '*/target/*' \
+    ! -path '*/build/*' \
+    ! -path '*/dist/*' \
+    ! -path '*/.gradle/*' \
+    \( -path '*/src/test/*' -o -path '*/test/*' -o -path '*/tests/*' \
+       -o -name '*.test.*' -o -name '*.spec.*' -o -name '*Test.*' -o -name '*Tests.*' \
+       -o -name 'test_*.py' -o -name '*_test.*' -o -name '*_spec.*' -o -name '*IT.java' \) \
+    2>/dev/null | wc -l | tr -d ' '
+)
+if [[ "${test_files}" -gt 0 ]]; then
+  ok "Tests:" "${test_files} test file(s) found across repository"
 else
-  warn "Tests:" "No app/ directory yet"
+  install_mode="$(awk -F'"' '/"installMode"[[:space:]]*:/ { print $4; exit }' .spectra/install.json 2>/dev/null || true)"
+  if [[ "${install_mode}" == "adopt" ]]; then
+    warn "Tests:" "No test files detected by repository scan"
+  else
+    fail "Tests:" "No test files detected in repository"
+  fi
 fi
 
 # 8. Spec freshness
-brief="sdd/memory-bank/core/projectbrief.md"
-if [[ -f "${brief}" ]] && git log -1 --format="%ar" -- "${brief}" 2>/dev/null | grep -q .; then
-  spec_age=$(git log -1 --format="%ar" -- "${brief}" 2>/dev/null)
-  ok "Spec Freshness:" "projectbrief.md updated ${spec_age}"
+spec_file="$(find sdd/features -mindepth 2 -maxdepth 2 -type f -name 'feature.spec.yaml' 2>/dev/null | sort | head -1 || true)"
+if [[ -z "${spec_file}" ]]; then
+  spec_file="sdd/memory-bank/core/projectbrief.md"
+fi
+
+if [[ ! -f "${spec_file}" ]]; then
+  fail "Spec Freshness:" "No canonical feature spec found"
+elif ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  warn "Spec Freshness:" "Cannot determine outside a Git repository"
+elif ! git ls-files --error-unmatch -- "${spec_file}" >/dev/null 2>&1; then
+  warn "Spec Freshness:" "${spec_file} is new and not committed yet"
+elif git log -1 --format="%ar" -- "${spec_file}" 2>/dev/null | grep -q .; then
+  spec_age=$(git log -1 --format="%ar" -- "${spec_file}" 2>/dev/null)
+  ok "Spec Freshness:" "${spec_file} updated ${spec_age}"
 else
-  warn "Spec Freshness:" "Cannot determine (no git history or file missing)"
+  warn "Spec Freshness:" "${spec_file} has no commit history"
 fi
 
 # 9. Validation
