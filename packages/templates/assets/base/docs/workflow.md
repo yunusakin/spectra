@@ -4,6 +4,8 @@ Spectra v2 has one default loop:
 
 `define -> validate -> approve -> implement -> eval -> verify -> release`
 
+The examples use `spectra`. If the repository was bootstrapped with `npx` and no global command was installed, use `./.spectra/bin/spectra` instead.
+
 ## Define
 
 `spectra init` and `spectra adopt` create the core executable spec bundle. Start by loading planning context:

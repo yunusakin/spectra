@@ -6,24 +6,31 @@ Spectra is a CLI-first operating system for AI-assisted product development. It 
 
 ## Install
 
+New project:
+
 ```bash
 npx spectra-pack@latest init my-product
 cd my-product
-spectra validate
-spectra status
+./.spectra/bin/spectra validate
+./.spectra/bin/spectra status
 ```
 
-Brownfield adoption:
+Existing project:
 
 ```bash
+cd existing-project
 npx spectra-pack@latest adopt .
-spectra validate
-spectra diff semantic
+./.spectra/bin/spectra status
+./.spectra/bin/spectra validate
 ```
 
-Native no-Node install is documented in the repository: [Native Install](https://github.com/yunusakin/spectra/blob/main/docs/native-install.md).
+`npx` bootstraps the repository but does not create a global command. Continue with `./.spectra/bin/spectra`, or install the standalone native binary for a global `spectra` command.
+
+Node/npm-free macOS and Linux installation is documented in [Native Install](https://github.com/yunusakin/spectra/blob/main/docs/native-install.md).
 
 ## Commands
+
+The examples below use `spectra`. Replace it with `./.spectra/bin/spectra` when using only the repo-local launcher.
 
 Setup:
 

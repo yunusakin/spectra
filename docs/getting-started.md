@@ -1,76 +1,128 @@
 # Getting Started
 
-This guide explains the end-to-end Spectra v2 workflow in the order teams should use it.
+This guide explains how to introduce Spectra to a new or existing repository and move from product intent to release confidence.
 
-## 1. Install and Initialize
+## 1. Choose a Distribution Path
 
-New repo:
+Spectra has one CLI with two supported distribution paths.
+
+### npm / npx
+
+Create a new repository:
 
 ```bash
 npx spectra-pack@latest init my-product
 cd my-product
 ```
 
-Brownfield repo:
+Adopt an existing repository:
 
 ```bash
+cd existing-project
+git switch -c chore/spectra-adoption
 npx spectra-pack@latest adopt .
 ```
 
-Native no-Node path:
+`npx` is a one-time bootstrap command. It does not make `spectra` globally available. Use the generated repo-local launcher:
+
+```bash
+./.spectra/bin/spectra status
+./.spectra/bin/spectra validate
+```
+
+### Native installation without Node/npm
+
+On macOS or Linux:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+spectra version
+```
+
+Initialize a new repository:
+
+```bash
 spectra init my-product
 cd my-product
 ```
 
-The npm path is the primary supported distribution. The native path depends on GitHub Release artifacts.
+Or adopt an existing repository:
 
-## 2. Understand the Generated Bundle
+```bash
+cd existing-project
+spectra adopt .
+```
 
-`spectra init` and `spectra adopt` create the first executable spec bundle automatically.
+The native installer downloads the matching release artifact and verifies its SHA-256 checksum. See [Native Install](native-install.md) for permanent PATH configuration and troubleshooting.
 
-For `my-product`, the generated bundle is:
+The remaining examples use `spectra`. In an npm/npx-only repository, replace it with `./.spectra/bin/spectra`.
 
-- `sdd/features/my-product-core/feature.spec.yaml`
-- `sdd/features/my-product-core/ai-behavior-spec.yaml`
-- `sdd/features/my-product-core/telemetry-contract.yaml`
-- `sdd/features/my-product-core/technical-decisions.yaml`
-- `sdd/features/my-product-core/release-thresholds.yaml`
-- `sdd/features/my-product-core/evals/*`
-- `sdd/features/my-product-core/brief.md`
-- `sdd/features/my-product-core/release-checklist.md`
+## 2. Review Bootstrap Changes
 
-YAML is canonical. Markdown is support context.
+Run bootstrap on a clean branch and inspect the resulting diff before committing:
 
-## 3. Plan with Minimum Context
+```bash
+git status --short
+git diff
+```
+
+Spectra adds a repo-local operating layer rather than replacing application code. Existing files are preserved; generated Spectra files should still be reviewed as normal source changes.
+
+## 3. Understand the Generated State
+
+The first feature bundle is created under `sdd/features/<feature-id>/`:
+
+- `feature.spec.yaml`: requirements and acceptance criteria
+- `ai-behavior-spec.yaml`: model, tool, fallback, escalation, and refusal behavior
+- `telemetry-contract.yaml`: requirement-to-event and metric traceability
+- `technical-decisions.yaml`: architecture decisions and evidence
+- `release-thresholds.yaml`: feature release gates
+- `evals/`: golden scenarios, regressions, and failure modes
+- `brief.md`: supporting human-readable product context
+- `release-checklist.md`: human release procedure
+
+Repository-level governance lives under `sdd/governance/`. YAML contracts are canonical; Markdown is supporting context.
+
+## 4. Review Brownfield Analysis
+
+`spectra adopt` maps the existing codebase and creates:
+
+- `sdd/adoption/current-state.summary.yaml`
+- `sdd/adoption/gap-analysis.yaml`
+- `sdd/adoption/review-queue.yaml`
+
+Treat `matches`, `partial`, `missing`, `conflict`, and `unknown` as review classifications, not automatic proof that implementation is correct. Resolve low-confidence and unknown items with human review, then update the executable specs to reflect the intended target state.
+
+## 5. Load Minimum Planning Context
 
 ```bash
 spectra context --role planner --goal discover
 ```
 
-Use context packs by role and goal instead of opening the whole repository.
-
 Recommended role and goal pairs:
 
-- `planner + discover`
-- `planner + decide`
-- `implementer + implement`
-- `reviewer + verify`
-- `verifier + verify`
-- `release-manager + ship`
+| Role | Goals |
+| --- | --- |
+| `planner` | `discover`, `decide` |
+| `architect` | `decide`, `verify` |
+| `implementer` | `implement` |
+| `reviewer` | `verify` |
+| `verifier` | `verify` |
+| `release-manager` | `ship` |
 
-## 4. Validate Before Approval
+Context packs load compact contracts and summaries before long-form narrative files.
+
+## 6. Validate Before Approval
 
 ```bash
-spectra validate
 spectra status
+spectra validate
 ```
 
-Validation should pass before any approval stage moves forward.
+Validation should pass after bootstrap, after meaningful spec changes, and before every approval transition.
 
-## 5. Advance Staged Approvals
+## 7. Advance Staged Approvals
 
 ```bash
 spectra approve --stage product-approved
@@ -78,64 +130,63 @@ spectra approve --stage technical-approved
 spectra approve --stage implementation-approved
 ```
 
-Meaning:
-
-- `product-approved`: product intent and scope are accepted
+- `product-approved`: product intent, scope, and acceptance criteria are accepted
 - `technical-approved`: architecture and technical boundaries are accepted
-- `implementation-approved`: implementation can start
-- `release-approved`: release signoff is complete
+- `implementation-approved`: implementation work may begin
+- `release-approved`: verified release signoff is complete
 
-## 6. Create Implementation Intent
+## 8. Capture Implementation Intent
 
 ```bash
 spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
-```
-
-This writes the implementation brief used during execution and review.
-
-## 7. Implement with Role-Aware Context
-
-```bash
 spectra context --role implementer --goal implement
 ```
 
-Agents should read compact YAML contracts and generated summaries before long-form Markdown.
+The task command records intended work for implementation and review traceability.
 
-## 8. Evaluate Behavior
+## 9. Evaluate Product Behavior
 
 ```bash
-spectra eval my-product-core --suite smoke
+spectra eval <feature-id> --suite smoke
+spectra eval <feature-id> --suite release
 ```
 
-This checks eval contracts, golden scenarios, regression suites, failure modes, and release thresholds.
+Eval suites exercise golden scenarios, regression cases, failure modes, refusal behavior, and release thresholds declared in the feature bundle.
 
-## 9. Verify Release Confidence
+## 10. Verify Release Confidence
 
 ```bash
 spectra verify --profile release
 ```
 
-Verify answers:
+Release verification aggregates structure, policy, tests, eval readiness, telemetry coverage, approval state, and release thresholds.
 
-- is the repo structurally valid?
-- is policy current?
-- are tests, evals, and telemetry contracts present?
-- is approval state valid?
-- is release confidence high enough?
-
-## 10. Mark Release Approval
+After verification passes:
 
 ```bash
 spectra approve --stage release-approved
 ```
 
+## 11. Handle Later Spec Changes
+
+Do not rerun `adopt` for normal spec evolution. Inspect semantic impact and revalidate:
+
+```bash
+spectra diff semantic
+spectra validate
+spectra status
+```
+
+Re-approve any stage invalidated by the semantic diff.
+
 ## Common Mistakes
 
-- treating Spectra as a binary `approved / not approved` system
+- assuming `npx` created a global `spectra` command
+- implementing before `implementation-approved`
+- treating generated brownfield analysis as a complete code audit
 - duplicating canonical YAML state in Markdown
-- skipping `spectra validate`
-- starting implementation before `implementation-approved`
-- treating `verify` like a plain test runner instead of a release-confidence gate
+- skipping validation after spec changes
+- treating `verify` as only a build/test command
 
 ## Next
 

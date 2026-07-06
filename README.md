@@ -40,31 +40,55 @@ Spectra is not a code generator. It is governance and operating infrastructure f
 
 ## Install
 
-Primary path:
+Choose one distribution path. Both provide the same CLI and project structure.
+
+### npm / npx
+
+New project:
 
 ```bash
 npx spectra-pack@latest init my-product
 cd my-product
-spectra validate
-spectra status
+./.spectra/bin/spectra validate
+./.spectra/bin/spectra status
 ```
 
-Brownfield path:
+Existing project:
 
 ```bash
+cd existing-project
 npx spectra-pack@latest adopt .
-spectra validate
-spectra diff semantic
+./.spectra/bin/spectra status
+./.spectra/bin/spectra validate
 ```
 
-Native no-Node path:
+`npx` bootstraps Spectra but does not install a global command. Use the generated repo-local launcher for subsequent commands.
+
+### Native, without Node or npm
+
+macOS and Linux:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
-spectra init my-product
+export PATH="$HOME/.local/bin:$PATH"
+spectra version
 ```
 
-Native install uses GitHub Release artifacts for macOS and Linux. If release assets are not attached for a version yet, use the npm path. See [Native Install](docs/native-install.md).
+Initialize a new project:
+
+```bash
+spectra init my-product
+cd my-product
+```
+
+Or adopt an existing project:
+
+```bash
+cd existing-project
+spectra adopt .
+```
+
+The installer selects the correct GitHub Release artifact and verifies its SHA-256 checksum. See [Native Install](docs/native-install.md) for PATH setup, supported platforms, version pinning, and troubleshooting.
 
 ## What You Get
 
@@ -111,6 +135,8 @@ The YAML files are the canonical machine-readable contracts. Markdown files prov
 | Verify v2 | Structure, policy, tests, evals, telemetry, and release readiness checks in one release-confidence pipeline |
 
 ## CLI Overview
+
+The examples below use `spectra`. In an npm/npx-bootstrapped repository without a global install, replace it with `./.spectra/bin/spectra`.
 
 Setup:
 
@@ -170,13 +196,13 @@ What works today:
 - `init` and `adopt` workflows
 - executable v2 spec bundle generation
 - staged approval state and decision graph
-- validation, semantic diff, eval, verify, status, and context-pack commands
+- validation, semantic diff, eval, verify, status, and role-aware `context` commands
 - repo-local launcher under `.spectra/bin/spectra`
 - native installer script and GitHub Release artifact workflow
 
 Known limitation:
 
-- Native install depends on release archives being present on GitHub Releases. The npm path is the primary supported installation path.
+- Native install supports macOS and Linux on arm64 and x64. Windows native distribution is not available yet.
 - Some internal runtime checks still call packaged shell scripts. The user-facing product surface is the `spectra` CLI.
 
 ## Documentation

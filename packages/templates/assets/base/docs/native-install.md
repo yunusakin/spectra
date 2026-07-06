@@ -1,8 +1,26 @@
 # Native Install
 
-Use this path when `npm`, `npx`, or Node are unavailable on the target machine.
+Use the native distribution when npm, npx, or Node are unavailable. It provides the same `spectra` CLI as the npm package through a standalone macOS/Linux executable.
 
-The npm package remains the primary distribution path. The native installer depends on GitHub Release artifacts being attached for the requested version.
+## Supported Platforms
+
+- macOS arm64 (Apple Silicon)
+- macOS x64 (Intel)
+- Linux arm64
+- Linux x64
+
+Windows native distribution is not available yet.
+
+## Requirements
+
+The installer requires:
+
+- POSIX shell
+- `curl`
+- `tar`
+- `shasum` or `sha256sum`
+
+Some packaged runtime checks still invoke `bash`. Node and npm are not required.
 
 ## Install
 
@@ -10,24 +28,103 @@ The npm package remains the primary distribution path. The native installer depe
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
 ```
 
-Then use Spectra normally:
+The installer:
+
+1. detects the operating system and CPU architecture
+2. downloads the matching artifact from the latest GitHub Release
+3. downloads and verifies the SHA-256 checksum
+4. installs the versioned runtime under `$HOME/.local/share/spectra/`
+5. links the command at `$HOME/.local/bin/spectra`
+
+Make the command available in the current shell:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+spectra version
+```
+
+For zsh, make the PATH change permanent:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+## Use with a New Project
 
 ```bash
 spectra init my-product
 cd my-product
+spectra status
 spectra validate
 ```
 
+## Use with an Existing Project
+
+Run adoption on a clean branch so the generated operating layer can be reviewed:
+
+```bash
+cd existing-project
+git switch -c chore/spectra-adoption
+spectra adopt .
+spectra status
+spectra validate
+```
+
+Review the generated brownfield outputs under `sdd/adoption/` before advancing approvals.
+
+## Install Locations
+
+Defaults:
+
+- runtime: `$HOME/.local/share/spectra/<version>/`
+- command: `$HOME/.local/bin/spectra`
+
+Override them for a local or CI installation:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | \
+  SPECTRA_HOME="$HOME/tools/spectra" SPECTRA_BIN="$HOME/bin" sh
+```
+
+## Install a Specific Version
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | \
+  SPECTRA_VERSION=v2.0.1 sh
+```
+
+Version values use the Git tag form, such as `v2.0.1`.
+
+## Repo-Local Launcher
+
+Both `spectra init` and `spectra adopt` create:
+
+```text
+.spectra/bin/spectra
+```
+
+Use it when global PATH setup is unavailable or when a repository should invoke its recorded Spectra installation:
+
+```bash
+./.spectra/bin/spectra status
+./.spectra/bin/spectra validate
+./.spectra/bin/spectra verify --profile release
+```
+
+The launcher tries the recorded native binary first, then a local Node CLI fallback if present, then `spectra` on PATH. It contains no product logic.
+
 ## Release Artifacts
 
-The installer downloads the matching archive for your platform:
+Each release provides an archive and checksum for every supported target:
 
 - `spectra-darwin-arm64.tar.gz`
 - `spectra-darwin-x64.tar.gz`
 - `spectra-linux-arm64.tar.gz`
 - `spectra-linux-x64.tar.gz`
+- matching `.tar.gz.sha256` files
 
-Each archive is expected to contain:
+Each archive contains:
 
 - `bin/spectra`
 - `assets/runtime/`
@@ -35,68 +132,24 @@ Each archive is expected to contain:
 - `VERSION`
 - `LICENSE`
 
-If a release exists but has no native assets, the installer cannot complete. Use the npm path or rerun the native release workflow for that tag.
+## Troubleshooting
 
-## Install Locations
+### `spectra: command not found`
 
-Default locations:
+Add `$HOME/.local/bin` to PATH, then open a new shell or source the shell profile.
 
-- runtime: `$HOME/.local/share/spectra/<version>/`
-- command: `$HOME/.local/bin/spectra`
+### HTTP 404 while downloading
 
-Override locations:
+The requested release does not contain an artifact for the detected platform. Check [GitHub Releases](https://github.com/yunusakin/spectra/releases) or install a known version with `SPECTRA_VERSION`.
 
-```bash
-SPECTRA_HOME="$HOME/tools/spectra" SPECTRA_BIN="$HOME/bin" sh install.sh
-```
+### Checksum verification failed
 
-Install a specific release from a downloaded installer:
+Do not run the downloaded binary. Retry the installation; if it fails again, report the release and platform in a [GitHub issue](https://github.com/yunusakin/spectra/issues).
 
-```bash
-SPECTRA_VERSION=v2.0.1 sh install.sh
-```
+### Unsupported operating system or architecture
 
-Install a specific release through `curl`:
+Native installation currently supports only the four targets listed above. Use the npm package on other Node-capable environments.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | SPECTRA_VERSION=v2.0.1 sh
-```
+## Maintainer Notes
 
-## Repo-Local Launcher
-
-`spectra init` and `spectra adopt` also create:
-
-```text
-.spectra/bin/spectra
-```
-
-Use it when global PATH setup is unavailable:
-
-```bash
-./.spectra/bin/spectra validate
-./.spectra/bin/spectra verify --profile release
-```
-
-The launcher tries:
-
-1. recorded native binary path
-2. local Node CLI fallback if available
-3. `spectra` on PATH
-
-The launcher is intentionally thin. It does not duplicate Spectra logic.
-
-## Requirements
-
-The native installer requires:
-
-- POSIX shell
-- `curl`
-- `tar`
-
-The first native MVP still expects `bash` for some internal runtime scripts. Node and npm are not required for the native binary path.
-
-## Maintainer Release Notes
-
-Native artifacts are built by `.github/workflows/native-release.yml` on version tags such as `v2.0.1`.
-
-The build uses Node SEA and should run with an official Node.js binary that includes the SEA fuse. If a local Homebrew or distro Node binary fails with a sentinel error, use the GitHub Actions release workflow or install Node from nodejs.org for artifact builds.
+Native artifacts are built by `.github/workflows/native-release.yml` on version tags. Builds use Node 22 and Node SEA; release jobs smoke-test `help`, `version`, `init`, and the repo-local launcher before uploading artifacts.

@@ -2,21 +2,33 @@
 
 This is the current public command surface for Spectra `2.0.1`.
 
-## Install
+## Install and Bootstrap
 
-Primary npm path:
+npm/npx, new project:
 
 ```bash
 npx spectra-pack@latest init my-product
 ```
 
-Native macOS/Linux path:
+npm/npx, existing project:
+
+```bash
+cd existing-project
+npx spectra-pack@latest adopt .
+./.spectra/bin/spectra status
+```
+
+`npx` does not install a global command. Use `./.spectra/bin/spectra` after bootstrap.
+
+Native macOS/Linux installation without Node/npm:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+spectra version
 ```
 
-The native path requires GitHub Release artifacts. See [Native Install](native-install.md).
+The remaining examples use `spectra`. Substitute `./.spectra/bin/spectra` when using only the repo-local launcher. See [Native Install](native-install.md) for supported platforms and troubleshooting.
 
 ## Setup Commands
 
