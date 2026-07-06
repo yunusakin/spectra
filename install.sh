@@ -49,9 +49,19 @@ if [ "$VERSION" = "latest" ]; then
 else
   URL="https://github.com/${REPO}/releases/download/${VERSION}/${ASSET}"
 fi
+CHECKSUM_URL="${URL}.sha256"
 
 echo "Downloading ${ASSET} from ${REPO}..."
 curl -fsSL "$URL" -o "$TMP_DIR/$ASSET"
+curl -fsSL "$CHECKSUM_URL" -o "$TMP_DIR/$ASSET.sha256"
+
+if command -v shasum >/dev/null 2>&1; then
+  (cd "$TMP_DIR" && shasum -a 256 -c "$ASSET.sha256")
+elif command -v sha256sum >/dev/null 2>&1; then
+  (cd "$TMP_DIR" && sha256sum -c "$ASSET.sha256")
+else
+  fail "missing checksum command: install shasum or sha256sum"
+fi
 
 mkdir -p "$TMP_DIR/extract"
 tar -xzf "$TMP_DIR/$ASSET" -C "$TMP_DIR/extract"

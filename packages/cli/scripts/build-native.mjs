@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 
@@ -45,11 +46,6 @@ function tryRun(command, args, options = {}) {
   }
 
   return result.status ?? 1;
-}
-
-function commandOutput(command, args) {
-  const result = run(command, args, { stdio: "pipe" });
-  return String(result.stdout).trim();
 }
 
 function supportsBuildSea() {
@@ -223,7 +219,7 @@ const archiveName = `${target}.tar.gz`;
 const archivePath = path.join(distRoot, archiveName);
 run("tar", ["-czf", archivePath, "-C", archiveRoot, "."]);
 
-const shasum = commandOutput("shasum", ["-a", "256", archivePath]);
-fs.writeFileSync(`${archivePath}.sha256`, `${shasum}\n`);
+const digest = createHash("sha256").update(fs.readFileSync(archivePath)).digest("hex");
+fs.writeFileSync(`${archivePath}.sha256`, `${digest}  ${archiveName}\n`);
 
 console.log(archivePath);
