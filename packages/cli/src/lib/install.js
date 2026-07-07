@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { checkAgentsHealth, normalizeAgents } from "./agent-health.js";
 import {
   copyDirectory,
   copyFile,
@@ -175,6 +176,21 @@ function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "shar
       scriptName: "generate-adapters.sh",
       args: ["--agents", agents, "--target", absoluteTarget]
     });
+
+    const agentHealth = checkAgentsHealth(absoluteTarget, normalizeAgents(agents));
+    const unhealthyAgents = agentHealth.filter((result) => !result.healthy);
+    if (unhealthyAgents.length > 0) {
+      const details = unhealthyAgents
+        .map(
+          (result) =>
+            `${result.displayName}: ${result.checks
+              .filter((check) => check.status !== "ok")
+              .map((check) => check.detail)
+              .join("; ")}`
+        )
+        .join(" | ");
+      throw new Error(`Agent setup is unhealthy: ${details}`);
+    }
   }
 
   let ownedPaths = [];

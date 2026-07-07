@@ -1,4 +1,5 @@
 import path from "node:path";
+import { checkAgentsHealth, normalizeAgents } from "../lib/agent-health.js";
 import { getAdapterOutputPaths } from "../lib/adapter-paths.js";
 import { assertPathsUntracked, beginLocalGitPolicy, finishLocalGitPolicy } from "../lib/git-policy.js";
 import {
@@ -56,6 +57,23 @@ function adaptersGenerateCommand(argv) {
       ownedPaths: result.ownedPaths,
       excludePatterns: result.excludePatterns
     });
+  }
+
+  if (status === 0) {
+    const agentHealth = checkAgentsHealth(target, normalizeAgents(options["--agents"]));
+    const unhealthyAgents = agentHealth.filter((result) => !result.healthy);
+    if (unhealthyAgents.length > 0) {
+      const details = unhealthyAgents
+        .map(
+          (result) =>
+            `${result.displayName}: ${result.checks
+              .filter((check) => check.status !== "ok")
+              .map((check) => check.detail)
+              .join("; ")}`
+        )
+        .join(" | ");
+      throw new Error(`Agent setup is unhealthy: ${details}`);
+    }
   }
 
   return status;

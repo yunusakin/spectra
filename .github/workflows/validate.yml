@@ -12,6 +12,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Validate repo (strict)
         run: bash scripts/validate-repo.sh --strict
 
@@ -35,3 +43,9 @@ jobs:
 
       - name: Adapter generation smoke check
         run: bash scripts/generate-adapters.sh --agents claude,cursor,windsurf,copilot,codex,antigravity --target /tmp/spectra-adapters
+
+      - name: CLI smoke tests
+        run: |
+          node --test packages/cli/src/lib/agent-health.test.js
+          node --test packages/cli/src/lib/install.test.js
+          node --test packages/cli/src/commands/adapters-generate.test.js

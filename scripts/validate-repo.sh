@@ -418,6 +418,29 @@ if [[ -d "${generated_a}" && -d "${generated_b}" ]] && ! diff -qr "${generated_a
   add_error "scripts/generate-adapters.sh: generation is not deterministic"
 fi
 
+agent_health_repo="${tmp_dir}/agent-health-repo"
+fake_codex_bin="${tmp_dir}/fake-codex-bin"
+mkdir -p "${fake_codex_bin}"
+cat > "${fake_codex_bin}/codex" <<'EOF'
+#!/usr/bin/env sh
+exit 0
+EOF
+chmod +x "${fake_codex_bin}/codex"
+if ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js init "${agent_health_repo}" >/dev/null 2>&1; then
+  add_error "spectra init: failed agent readiness smoke repo bootstrap"
+elif ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js adapters --cwd "${agent_health_repo}" --agents claude,cursor,windsurf,copilot,codex,antigravity --target "${agent_health_repo}" >/dev/null 2>&1; then
+  add_error "spectra adapters: failed agent readiness smoke adapter generation"
+elif ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js doctor --cwd "${agent_health_repo}" >/tmp/spectra-agent-doctor.log 2>&1; then
+  add_error "spectra doctor: agent readiness smoke check failed"
+elif ! grep -q "Claude: healthy" /tmp/spectra-agent-doctor.log \
+  || ! grep -q "Cursor: healthy" /tmp/spectra-agent-doctor.log \
+  || ! grep -q "Windsurf: healthy" /tmp/spectra-agent-doctor.log \
+  || ! grep -q "Copilot: healthy" /tmp/spectra-agent-doctor.log \
+  || ! grep -q "Codex: healthy" /tmp/spectra-agent-doctor.log \
+  || ! grep -q "Antigravity: healthy" /tmp/spectra-agent-doctor.log; then
+  add_error "spectra doctor: agent readiness smoke check did not report all configured agents as healthy"
+fi
+
 adapter_outputs=(
   "AGENTS.md"
   "CLAUDE.md"
