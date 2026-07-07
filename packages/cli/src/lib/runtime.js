@@ -124,6 +124,14 @@ function writeInstallMetadata(targetRoot, metadata) {
   fs.writeFileSync(path.join(installDir, "install.json"), JSON.stringify(metadata, null, 2));
 }
 
+function readInstallMetadata(targetRoot) {
+  const metadataPath = path.join(targetRoot, ".spectra", "install.json");
+  if (!fs.existsSync(metadataPath)) {
+    return null;
+  }
+  return JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+}
+
 function findSpectraRoot(startDir = process.cwd()) {
   let current = path.resolve(startDir);
 
@@ -222,6 +230,7 @@ export {
   hasCommand,
   mergeGitignore,
   removeFinderArtifacts,
+  readInstallMetadata,
   runInstalledScript,
   updateManifestRepoMode,
   writeInstallMetadata
