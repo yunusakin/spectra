@@ -24,6 +24,11 @@ Use it:
 - before approvals
 - before verify
 
+CI note:
+
+- the GitHub `validate` workflow prepares a Node 22 runtime and runs `npm ci` before invoking CLI-based validation smoke checks
+- this is required because the validation path executes `node packages/cli/bin/spectra.js ...` and depends on packaged CLI dependencies being installed
+
 ## `spectra eval`
 
 Purpose:
@@ -94,3 +99,14 @@ The runtime still uses internal deterministic scripts under the packaged runtime
 - `spectra validate`
 - `spectra eval`
 - `spectra verify`
+
+For GitHub Actions, mirror the repository workflow pattern:
+
+```yaml
+- uses: actions/setup-node@v4
+  with:
+    node-version: 22
+    cache: npm
+
+- run: npm ci
+```

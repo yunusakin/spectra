@@ -126,6 +126,8 @@ spectra validate
 
 Validation should pass after bootstrap, after meaningful spec changes, and before every approval transition.
 
+If you wire the same checks into GitHub Actions, prepare the Node environment first. Spectra's own `validate` workflow uses Node 22 and runs `npm ci` before calling CLI-based validation smoke checks.
+
 ## 7. Advance Staged Approvals
 
 ```bash

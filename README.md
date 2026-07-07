@@ -47,7 +47,7 @@ Choose one distribution path. Both provide the same CLI and project structure.
 New project:
 
 ```bash
-npx spectra-pack@latest init my-product
+npx spectra-pack@latest init my-product --agents codex,cursor
 cd my-product
 ./.spectra/bin/spectra validate
 ./.spectra/bin/spectra status
@@ -57,7 +57,7 @@ Existing project:
 
 ```bash
 cd existing-project
-npx spectra-pack@latest adopt .
+npx spectra-pack@latest adopt . --git-mode local
 ./.spectra/bin/spectra status
 ./.spectra/bin/spectra validate
 ```
@@ -77,7 +77,7 @@ spectra version
 Initialize a new project:
 
 ```bash
-spectra init my-product
+spectra init my-product --agents codex,cursor
 cd my-product
 ```
 
@@ -85,7 +85,7 @@ Or adopt an existing project:
 
 ```bash
 cd existing-project
-spectra adopt .
+spectra adopt . --git-mode local
 ```
 
 The installer selects the correct GitHub Release artifact and verifies its SHA-256 checksum. See [Native Install](docs/native-install.md) for PATH setup, supported platforms, version pinning, and troubleshooting.
@@ -141,8 +141,8 @@ The examples below use `spectra`. In an npm/npx-bootstrapped repository without 
 Setup:
 
 ```bash
-spectra init [path]
-spectra adopt [path]
+spectra init [path] [--agents <csv>]
+spectra adopt [path] [--agents <csv>] [--git-mode <local|shared>]
 ```
 
 Daily workflow:

@@ -33,11 +33,11 @@ The remaining examples use `spectra`. Substitute `./.spectra/bin/spectra` when u
 ## Setup Commands
 
 ```bash
-spectra init [path]
+spectra init [path] [--agents <csv>]
 spectra adopt [path] [--agents <csv>] [--git-mode <local|shared>]
 ```
 
-`init` creates a new Spectra-managed project.
+`init` creates a new Spectra-managed project and can generate agent adapters during bootstrap with `--agents`.
 
 `adopt` adds Spectra to an existing codebase and creates brownfield adoption outputs.
 
