@@ -190,7 +190,7 @@ This keeps product decisions, AI behavior, implementation work, evals, telemetry
 
 ## Project Status
 
-Current version: `2.0.2`
+Current version: `2.0.3`
 
 What works today:
 
@@ -235,7 +235,7 @@ node packages/cli/scripts/check-versions.mjs
 npm_config_cache=/tmp/spectra-npm-cache npm pack --workspace packages/cli --dry-run --json
 ```
 
-Native artifacts are built by `.github/workflows/native-release.yml` on version tags such as `v2.0.2`.
+Native artifacts are built by `.github/workflows/native-release.yml` on version tags such as `v2.0.3`.
 
 ## License
 
