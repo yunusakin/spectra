@@ -38,6 +38,6 @@ jobs:
 
       - name: CLI smoke tests
         run: |
-          node --test packages/cli/src/lib/codex-health.test.js
+          node --test packages/cli/src/lib/agent-health.test.js
           node --test packages/cli/src/lib/install.test.js
           node --test packages/cli/src/commands/adapters-generate.test.js

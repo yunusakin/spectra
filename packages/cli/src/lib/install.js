@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
-import { checkCodexHealth } from "./codex-health.js";
+import { checkAgentsHealth, normalizeAgents } from "./agent-health.js";
 import {
   copyDirectory,
   copyFile,
@@ -17,14 +17,6 @@ import {
 } from "./runtime.js";
 import { getBaseTemplateDir } from "./runtime.js";
 import { buildAdoptionArtifacts, ensureV2Scaffolding } from "./specs.js";
-
-function includesAgent(agents, expectedAgent) {
-  return agents
-    .split(",")
-    .map((agent) => agent.trim())
-    .filter(Boolean)
-    .includes(expectedAgent);
-}
 
 function replaceDirectory(sourceDir, targetDir) {
   if (!fs.existsSync(sourceDir)) {
@@ -174,15 +166,19 @@ function installSpectra({ targetDir, adopt = false, agents = "" }) {
       args: ["--agents", agents, "--target", absoluteTarget]
     });
 
-    if (includesAgent(agents, "codex")) {
-      const codexHealth = checkCodexHealth(absoluteTarget);
-      if (!codexHealth.healthy) {
-        const details = codexHealth.checks
-          .filter((check) => check.status !== "ok" && check.status !== "skipped")
-          .map((check) => check.detail)
-          .join("; ");
-        throw new Error(`Codex setup is unhealthy: ${details}`);
-      }
+    const agentHealth = checkAgentsHealth(absoluteTarget, normalizeAgents(agents));
+    const unhealthyAgents = agentHealth.filter((result) => !result.healthy);
+    if (unhealthyAgents.length > 0) {
+      const details = unhealthyAgents
+        .map(
+          (result) =>
+            `${result.displayName}: ${result.checks
+              .filter((check) => check.status !== "ok")
+              .map((check) => check.detail)
+              .join("; ")}`
+        )
+        .join(" | ");
+      throw new Error(`Agent setup is unhealthy: ${details}`);
     }
   }
 

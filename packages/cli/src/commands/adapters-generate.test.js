@@ -35,7 +35,7 @@ test("adaptersGenerateCommand fails fast when codex adapter is unhealthy", () =>
   try {
     assert.throws(
       () => adaptersGenerateCommand(["--cwd", process.cwd(), "--agents", "codex", "--target", targetDir]),
-      /Codex setup is unhealthy: .*missing from PATH/
+      /Agent setup is unhealthy: Codex: .*missing from PATH/
     );
   } finally {
     if (previousCommand === undefined) {
@@ -54,4 +54,16 @@ test("adaptersGenerateCommand succeeds when codex adapter is healthy", () => {
     assert.equal(status, 0);
     assert.equal(fs.existsSync(path.join(targetDir, "AGENTS.md")), true);
   });
+});
+
+test("adaptersGenerateCommand succeeds for multi-agent non-Codex output", () => {
+  const targetDir = makeTempDir("spectra-adapters-multi-pass-");
+  const status = adaptersGenerateCommand(["--cwd", process.cwd(), "--agents", "claude,cursor,windsurf,copilot,antigravity", "--target", targetDir]);
+
+  assert.equal(status, 0);
+  assert.equal(fs.existsSync(path.join(targetDir, "CLAUDE.md")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, ".cursor", "rules", "spectra-core.mdc")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, ".windsurf", "rules", "spectra-core.md")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, ".github", "copilot-instructions.md")), true);
+  assert.equal(fs.existsSync(path.join(targetDir, ".agent", "rules", "spectra-core.md")), true);
 });

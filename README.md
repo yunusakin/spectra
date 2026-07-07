@@ -170,7 +170,7 @@ spectra adapters --agents codex,cursor --target .
 spectra quick --type docs --task "refresh docs"
 ```
 
-After generating the Codex adapter, run `spectra doctor` and confirm it reports `Codex: healthy`.
+After generating agent adapters, run `spectra doctor` and confirm each configured agent reports `healthy`.
 
 See [CLI Reference](docs/cli-reference.md) for the full command surface.
 

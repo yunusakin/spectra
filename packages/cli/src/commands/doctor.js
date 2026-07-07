@@ -1,5 +1,5 @@
 import path from "node:path";
-import { checkCodexHealth } from "../lib/codex-health.js";
+import { AGENT_DEFINITIONS, checkAgentsHealth } from "../lib/agent-health.js";
 import { findSpectraRoot, getRuntimeAssetsDir, hasCommand } from "../lib/runtime.js";
 import { fail, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
@@ -33,19 +33,21 @@ function doctorCommand(argv) {
     ok(`Spectra runtime found at ${repoRoot}`);
     ok(`Packaged runtime scripts resolved from ${path.join(getRuntimeAssetsDir(), "scripts")}`);
 
-    const codexHealth = checkCodexHealth(repoRoot);
-    if (!codexHealth.detected) {
-      warn("Codex: not configured (AGENTS.md is missing)");
-    } else if (codexHealth.healthy) {
-      ok("Codex: healthy");
-    } else {
-      fail("Codex: unhealthy");
-      for (const check of codexHealth.checks) {
-        if (check.status !== "ok" && check.status !== "skipped") {
-          fail(`Codex ${check.name}: ${check.detail}`);
+    const agentResults = checkAgentsHealth(repoRoot, Object.keys(AGENT_DEFINITIONS));
+    for (const agentResult of agentResults) {
+      if (!agentResult.detected) {
+        warn(`${agentResult.displayName}: not configured`);
+      } else if (agentResult.healthy) {
+        ok(`${agentResult.displayName}: healthy`);
+      } else {
+        fail(`${agentResult.displayName}: unhealthy`);
+        for (const check of agentResult.checks) {
+          if (check.status !== "ok") {
+            fail(`${agentResult.displayName} ${check.name}: ${check.detail}`);
+          }
         }
+        hasFailure = true;
       }
-      hasFailure = true;
     }
   } else {
     warn(`No Spectra runtime found from ${startDir}`);
