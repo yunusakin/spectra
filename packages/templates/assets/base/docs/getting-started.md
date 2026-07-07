@@ -20,8 +20,10 @@ Adopt an existing repository:
 ```bash
 cd existing-project
 git switch -c chore/spectra-adoption
-npx spectra-pack@latest adopt .
+npx spectra-pack@latest adopt . --git-mode local
 ```
+
+Choose `local` when Spectra is personal tooling for a company repository. Spectra records only the files it creates in `.git/info/exclude`; normal application changes remain commit candidates. Choose `shared` when the team intends to version the Spectra operating layer.
 
 `npx` is a one-time bootstrap command. It does not make `spectra` globally available. Use the generated repo-local launcher:
 
@@ -51,7 +53,7 @@ Or adopt an existing repository:
 
 ```bash
 cd existing-project
-spectra adopt .
+spectra adopt . --git-mode local
 ```
 
 The native installer downloads the matching release artifact and verifies its SHA-256 checksum. See [Native Install](native-install.md) for permanent PATH configuration and troubleshooting.
@@ -68,6 +70,8 @@ git diff
 ```
 
 Spectra adds a repo-local operating layer rather than replacing application code. Existing files are preserved; generated Spectra files should still be reviewed as normal source changes.
+
+In `local` mode, `git status --ignored` shows the generated paths with `!!`, while plain `git status --short` continues to show only project changes. Do not use `git clean -fdx` if the local Spectra files must be retained.
 
 ## 3. Understand the Generated State
 

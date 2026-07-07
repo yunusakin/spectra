@@ -147,9 +147,9 @@ function dispatch(argv) {
   }
 }
 
-function main(argv) {
+async function main(argv) {
   try {
-    const status = dispatch(argv);
+    const status = await dispatch(argv);
     process.exit(status);
   } catch (error) {
     fail(error.message);

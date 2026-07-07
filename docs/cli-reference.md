@@ -34,12 +34,16 @@ The remaining examples use `spectra`. Substitute `./.spectra/bin/spectra` when u
 
 ```bash
 spectra init [path]
-spectra adopt [path]
+spectra adopt [path] [--agents <csv>] [--git-mode <local|shared>]
 ```
 
 `init` creates a new Spectra-managed project.
 
 `adopt` adds Spectra to an existing codebase and creates brownfield adoption outputs.
+
+When run interactively without `--git-mode`, `adopt` asks whether Spectra's generated operating files should be local or shared; `local` is the default. Local mode requires a Git worktree, leaves `.gitignore` unchanged, and writes exact generated paths to Git's repository-local exclude file. Project code created later under mixed directories such as `app/` and `docs/` remains visible to Git.
+
+Use `--git-mode shared` when the generated Spectra layer should be reviewed and committed with the repository. Non-interactive calls without the flag retain the existing `shared` behavior for compatibility; scripts that require local-only files should pass `--git-mode local` explicitly.
 
 ## Workflow Commands
 
