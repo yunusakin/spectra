@@ -63,11 +63,23 @@ jobs:
           brownfield_dir="$(mktemp -d)"
           mkdir -p "$brownfield_dir/src/test/java"
           printf 'class BalanceServiceTest {}\n' > "$brownfield_dir/src/test/java/BalanceServiceTest.java"
-          /tmp/spectra-native/bin/spectra adopt "$brownfield_dir"
+          /tmp/spectra-native/bin/spectra adopt "$brownfield_dir" --git-mode shared
           brownfield_status="$("$brownfield_dir/.spectra/bin/spectra" status --cwd "$brownfield_dir")"
           printf '%s\n' "$brownfield_status"
           grep -F '1 test file(s) found across repository' <<< "$brownfield_status"
           grep -F 'No requirement rows mapped yet' <<< "$brownfield_status"
+          local_dir="$(mktemp -d)"
+          git -C "$local_dir" init -q
+          git -C "$local_dir" config user.email spectra@example.test
+          git -C "$local_dir" config user.name 'Spectra Test'
+          mkdir -p "$local_dir/src"
+          printf 'class BalanceService {}\n' > "$local_dir/src/BalanceService.java"
+          git -C "$local_dir" add src/BalanceService.java
+          git -C "$local_dir" commit -qm 'initial source'
+          /tmp/spectra-native/bin/spectra adopt "$local_dir" --git-mode local
+          test -z "$(git -C "$local_dir" status --short)"
+          git -C "$local_dir" check-ignore -q .spectra/install.json
+          grep -F '"gitMode": "local"' "$local_dir/.spectra/install.json"
 
       - uses: actions/upload-artifact@v4
         with:

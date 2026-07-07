@@ -10,7 +10,9 @@
   },
   "scripts": {
     "build:native": "node ./scripts/check-versions.mjs && node ./scripts/build-native.mjs",
-    "prepack": "node ./scripts/check-versions.mjs && node ./scripts/sync-assets.mjs"
+    "prepack": "node ./scripts/check-versions.mjs && node ./scripts/sync-assets.mjs",
+    "pretest": "node ./scripts/sync-assets.mjs",
+    "test": "node --test test/*.test.js"
   },
   "files": [
     "bin",
