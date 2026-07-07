@@ -170,6 +170,8 @@ spectra adapters --agents codex,cursor --target .
 spectra quick --type docs --task "refresh docs"
 ```
 
+After generating the Codex adapter, run `spectra doctor` and confirm it reports `Codex: healthy`.
+
 See [CLI Reference](docs/cli-reference.md) for the full command surface.
 
 ## Golden Path

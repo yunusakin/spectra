@@ -65,6 +65,14 @@ spectra version
 spectra help
 ```
 
+For Codex-enabled repos, run `spectra doctor` after adapter generation. A healthy setup requires:
+
+- `AGENTS.md` exists
+- `AGENTS.md` matches the Spectra Codex adapter
+- `codex` is available on `PATH`
+
+When all three checks pass, `spectra doctor` reports `Codex: healthy`.
+
 ## Recommended Role and Goal Pairs
 
 | Role | Goals |

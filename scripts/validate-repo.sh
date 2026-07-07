@@ -418,6 +418,24 @@ if [[ -d "${generated_a}" && -d "${generated_b}" ]] && ! diff -qr "${generated_a
   add_error "scripts/generate-adapters.sh: generation is not deterministic"
 fi
 
+codex_health_repo="${tmp_dir}/codex-health-repo"
+fake_codex_bin="${tmp_dir}/fake-codex-bin"
+mkdir -p "${fake_codex_bin}"
+cat > "${fake_codex_bin}/codex" <<'EOF'
+#!/usr/bin/env sh
+exit 0
+EOF
+chmod +x "${fake_codex_bin}/codex"
+if ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js init "${codex_health_repo}" >/dev/null 2>&1; then
+  add_error "spectra init: failed Codex readiness smoke repo bootstrap"
+elif ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js adapters --cwd "${codex_health_repo}" --agents codex --target "${codex_health_repo}" >/dev/null 2>&1; then
+  add_error "spectra adapters: failed Codex readiness smoke adapter generation"
+elif ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js doctor --cwd "${codex_health_repo}" >/tmp/spectra-codex-doctor.log 2>&1; then
+  add_error "spectra doctor: codex readiness smoke check failed"
+elif ! grep -q "Codex: healthy" /tmp/spectra-codex-doctor.log; then
+  add_error "spectra doctor: codex readiness smoke check did not report healthy"
+fi
+
 adapter_outputs=(
   "AGENTS.md"
   "CLAUDE.md"

@@ -35,3 +35,9 @@ jobs:
 
       - name: Adapter generation smoke check
         run: bash scripts/generate-adapters.sh --agents claude,cursor,windsurf,copilot,codex,antigravity --target /tmp/spectra-adapters
+
+      - name: CLI smoke tests
+        run: |
+          node --test packages/cli/src/lib/codex-health.test.js
+          node --test packages/cli/src/lib/install.test.js
+          node --test packages/cli/src/commands/adapters-generate.test.js
