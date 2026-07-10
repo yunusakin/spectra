@@ -53,8 +53,8 @@ async function adoptCommand(argv) {
 
   ok(`Adopted Spectra in ${result.targetDir}`);
   title(`Git mode: ${result.gitMode}`);
-  next("spectra status");
-  next("spectra check");
+  next("./spectra/bin/spectra status");
+  next("./spectra/bin/spectra check");
   return 0;
 }
 

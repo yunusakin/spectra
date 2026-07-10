@@ -192,7 +192,7 @@ npm run validate
 npm run verify
 ```
 
-Current release: `3.0.0`.
+Current release: `3.0.1`.
 
 ## License
 

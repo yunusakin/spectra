@@ -27,7 +27,7 @@ async function initCommand(argv) {
 
   ok(`Installed Spectra runtime in ${result.targetDir}`);
   next(`cd ${result.targetDir}`);
-  next("spectra check");
+  next("./spectra/bin/spectra check");
   return 0;
 }
 

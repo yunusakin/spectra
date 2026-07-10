@@ -19,7 +19,7 @@ function run(cwd, args, options = {}) {
     env: {
       ...process.env,
       SPECTRA_ASSETS_DIR: path.join(cliRoot, "assets"),
-      SPECTRA_LATEST_VERSION: "3.0.0",
+      SPECTRA_LATEST_VERSION: "3.0.1",
       ...options.env
     }
   });

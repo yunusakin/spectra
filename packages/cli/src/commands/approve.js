@@ -27,9 +27,9 @@ function approveCommand(argv) {
   const updated = approveStage(repoRoot, options["--stage"]);
 
   ok(`Approval stage updated: ${previous} -> ${updated.current_state}`);
-  next("spectra validate");
+  next("./spectra/bin/spectra check");
   if (updated.current_state === "release-approved") {
-    next("spectra verify --profile release");
+    next("./spectra/bin/spectra verify --profile release");
   }
   return 0;
 }

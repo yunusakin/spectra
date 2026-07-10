@@ -58,7 +58,7 @@ jobs:
           tar -xzf "$archive" -C /tmp/spectra-native
           /tmp/spectra-native/bin/spectra --help
           /tmp/spectra-native/bin/spectra version
-          bash packages/cli/scripts/smoke-native.sh /tmp/spectra-native/bin/spectra 3.0.0
+          bash packages/cli/scripts/smoke-native.sh /tmp/spectra-native/bin/spectra 3.0.1
           smoke_dir="$(mktemp -d)"
           git -C "$smoke_dir" init -q
           git -C "$smoke_dir" config user.email spectra@example.test
