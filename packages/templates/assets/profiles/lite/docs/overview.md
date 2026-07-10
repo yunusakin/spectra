@@ -49,7 +49,7 @@ Implementation is blocked until `implementation-approved`. Release signoff is bl
 
 ### Eval and verify
 
-`spectra eval` checks behavior contracts and scenario suites.
+In Full, `spectra admin eval` checks behavior contracts and scenario suites.
 
 `spectra verify` aggregates structure, policy, tests, eval readiness, telemetry coverage, approval state, and release confidence.
 

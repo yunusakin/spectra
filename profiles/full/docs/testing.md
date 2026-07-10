@@ -29,7 +29,7 @@ CI note:
 - the GitHub `validate` workflow prepares a Node 22 runtime and runs `npm ci` before invoking CLI-based validation smoke checks
 - this is required because the validation path executes `node packages/cli/bin/spectra.js ...` and depends on packaged CLI dependencies being installed
 
-## `spectra eval`
+## `spectra admin eval` (Full)
 
 Purpose:
 

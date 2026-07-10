@@ -1,6 +1,8 @@
 # Getting Started
 
-This guide explains how to introduce Spectra to a new or existing repository and move from product intent to release confidence.
+This guide explains how to introduce Spectra without changing your application’s folder structure or forcing governance on every project.
+
+Start with Lite. Move to Full only when a team needs formal specs, approvals, and release gates.
 
 ## 1. Choose a Distribution Path
 
@@ -24,7 +26,7 @@ git switch -c chore/spectra-adoption
 npx spectra-pack@latest adopt . --git-mode local
 ```
 
-Choose `local` when Spectra is personal tooling for a company repository. Spectra records only the files it creates in `.git/info/exclude`; normal application changes remain commit candidates. Choose `shared` when the team intends to version the Spectra operating layer.
+Choose `local` when Spectra is personal tooling for a company repository. It adds only `/spectra/` to `.git/info/exclude`; your application changes remain normal commit candidates. Choose `shared` when the team intends to version the Spectra operating layer.
 
 `npx` is a one-time bootstrap command. It does not make `spectra` globally available. Use the generated repo-local launcher:
 
@@ -79,14 +81,25 @@ In `local` mode, `git status --ignored` shows the generated paths with `!!`, whi
 
 Lite creates an isolated SDD workspace under `spectra/`:
 
-- `spectra/sdd/memory-bank/`: project context and active work state
-- `spectra/sdd/system/`: rules, prompts, and context manifests
-- `spectra/docs/`: Spectra-specific reference material
-- `spectra/cache/`: generated summaries
+- `spectra/sdd/memory-bank/`: active context, progress, and implementation intent
+- `spectra/sdd/system/`: minimal runtime context needed by Lite
+- `spectra/docs/`: Spectra reference material
+- `spectra/cache/`: disposable generated summaries
 
-Full adds feature bundles and governance under `spectra/sdd/features/` and `spectra/sdd/governance/`. YAML contracts are canonical; Markdown is supporting context.
+Full adds feature bundles, governance, evaluation contracts, and adoption analysis under `spectra/sdd/`. YAML contracts are canonical; Markdown is supporting context.
 
-## 4. Review Brownfield Analysis
+## 4. Use the Lite Daily Loop
+
+```bash
+spectra context --role planner --goal discover
+spectra task --item TASK-001 --task-type feature --goal "Describe the intended change"
+spectra check
+spectra status
+```
+
+`status` is the command to run when you return to a project. `check` confirms the Spectra layer is healthy. Neither command requires a time window or a Full profile.
+
+## 5. Review Brownfield Analysis (Full only)
 
 Full `spectra adopt --profile full` maps the existing codebase and creates:
 
@@ -96,7 +109,7 @@ Full `spectra adopt --profile full` maps the existing codebase and creates:
 
 Treat `matches`, `partial`, `missing`, `conflict`, and `unknown` as review classifications, not automatic proof that implementation is correct. Resolve low-confidence and unknown items with human review, then update the executable specs to reflect the intended target state.
 
-## 5. Load Minimum Planning Context
+## 6. Load Minimum Planning Context
 
 ```bash
 spectra context --role planner --goal discover
@@ -115,7 +128,7 @@ Recommended role and goal pairs:
 
 Context packs load compact contracts and summaries before long-form narrative files.
 
-## 6. Validate Before Approval
+## 7. Validate Before Approval (Full only)
 
 ```bash
 spectra status
@@ -126,12 +139,12 @@ Validation should pass after bootstrap, after meaningful spec changes, and befor
 
 If you wire the same checks into GitHub Actions, prepare the Node environment first. Spectra's own `validate` workflow uses Node 22 and runs `npm ci` before calling CLI-based validation smoke checks.
 
-## 7. Advance Staged Approvals
+## 8. Advance Staged Approvals (Full only)
 
 ```bash
-spectra approve --stage product-approved
-spectra approve --stage technical-approved
-spectra approve --stage implementation-approved
+spectra admin approve --stage product-approved
+spectra admin approve --stage technical-approved
+spectra admin approve --stage implementation-approved
 ```
 
 - `product-approved`: product intent, scope, and acceptance criteria are accepted
@@ -139,7 +152,7 @@ spectra approve --stage implementation-approved
 - `implementation-approved`: implementation work may begin
 - `release-approved`: verified release signoff is complete
 
-## 8. Capture Implementation Intent
+## 9. Capture Implementation Intent
 
 ```bash
 spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
@@ -148,16 +161,16 @@ spectra context --role implementer --goal implement
 
 The task command records intended work for implementation and review traceability.
 
-## 9. Evaluate Product Behavior
+## 10. Evaluate Product Behavior (Full only)
 
 ```bash
-spectra eval <feature-id> --suite smoke
-spectra eval <feature-id> --suite release
+spectra admin eval <feature-id> --suite smoke
+spectra admin eval <feature-id> --suite release
 ```
 
 Eval suites exercise golden scenarios, regression cases, failure modes, refusal behavior, and release thresholds declared in the feature bundle.
 
-## 10. Verify Release Confidence
+## 11. Verify Release Confidence (Full only)
 
 ```bash
 spectra verify --profile release
@@ -168,15 +181,15 @@ Release verification aggregates structure, policy, tests, eval readiness, teleme
 After verification passes:
 
 ```bash
-spectra approve --stage release-approved
+spectra admin approve --stage release-approved
 ```
 
-## 11. Handle Later Spec Changes
+## 12. Handle Later Spec Changes
 
 Do not rerun `adopt` for normal spec evolution. Inspect semantic impact and revalidate:
 
 ```bash
-spectra diff semantic
+spectra admin diff semantic
 spectra check
 spectra status
 ```
@@ -186,7 +199,8 @@ Re-approve any stage invalidated by the semantic diff.
 ## Common Mistakes
 
 - assuming `npx` created a global `spectra` command
-- implementing before `implementation-approved`
+- using Full approvals when Lite is enough
+- implementing Full-profile work before `implementation-approved`
 - treating generated brownfield analysis as a complete code audit
 - duplicating canonical YAML state in Markdown
 - skipping validation after spec changes

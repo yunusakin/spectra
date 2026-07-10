@@ -81,13 +81,13 @@ spectra version
 spectra help
 ```
 
-For agent-enabled repos, run `spectra doctor` after adapter generation. A healthy setup requires:
+For Full-profile agent-enabled repos, run `spectra admin doctor` after adapter generation. A healthy setup requires:
 
 - each configured agent's adapter files exist
 - each adapter file matches the Spectra-generated template
 - any agent with a runtime prerequisite also has its command available on `PATH`
 
-When those checks pass, `spectra doctor` reports each configured agent as `healthy`.
+When those checks pass, `spectra admin doctor` reports each configured agent as `healthy`.
 
 ## Recommended Role and Goal Pairs
 

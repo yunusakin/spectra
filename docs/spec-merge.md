@@ -23,7 +23,7 @@ Use Markdown only as supporting narrative.
 ## Recommended Commands
 
 ```bash
-spectra diff semantic
+spectra admin diff semantic
 spectra check
 spectra status
 ```
@@ -48,4 +48,4 @@ Best when:
 
 - do not merge implementation that violates staged approval
 - do not treat narrative Markdown as canonical if YAML says otherwise
-- always run `spectra diff semantic` after a non-trivial spec merge
+- in Full, always run `spectra admin diff semantic` after a non-trivial spec merge
