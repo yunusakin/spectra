@@ -37,9 +37,12 @@ function runSelfUpdate(latest, projectRoot, { spawn = spawnSync, execPath = proc
   if (path.basename(execPath).toLowerCase().startsWith("node")) {
     return spawn("npx", ["-y", `spectra-pack@${latest}`, "__update-project", "--cwd", projectRoot], { stdio: "inherit" }).status ?? 1;
   }
-  const install = spawn("sh", ["-c", "curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh"], { stdio: "inherit", env: { ...env, SPECTRA_VERSION: `v${latest}` } });
+  const install = spawn("sh", ["-c", "curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh"], {
+    stdio: "inherit",
+    env: { ...env, SPECTRA_VERSION: `v${latest}`, SPECTRA_BIN: path.dirname(execPath) }
+  });
   if (install.status !== 0) return install.status ?? 1;
-  return spawn(resolveInstalledNativeCommand(env), ["__update-project", "--cwd", projectRoot], { stdio: "inherit" }).status ?? 1;
+  return spawn(execPath, ["__update-project", "--cwd", projectRoot], { stdio: "inherit" }).status ?? 1;
 }
 
 export { compareVersions, latestVersion, resolveInstalledNativeCommand, runSelfUpdate };
