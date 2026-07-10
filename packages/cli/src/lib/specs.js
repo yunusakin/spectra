@@ -1024,7 +1024,7 @@ function syncLegacyApprovalStatus(repoRoot, stage) {
   }
 
   const nextStatus = stage === "draft" ? "not approved" : stage;
-  const lines = fs.readFileSync(stateFile, "utf8").split(/\r?\n/);
+  const lines = fs.readFileSync(stateFile, "utf8").replace(/(?:\r?\n)+$/, "").split(/\r?\n/);
   let inComment = false;
   let inApprovalSection = false;
 
