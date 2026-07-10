@@ -1,6 +1,8 @@
 # Quick Start
 
-This is the shortest supported path through Spectra v2.
+This is the fastest way to start using Spectra. It defaults to **Lite**: private, project-local working context with no approval workflow to manage.
+
+Choose **Full** only when you need executable feature specs, staged approvals, evaluations, or shared team governance.
 
 ## 1. Bootstrap the Repository
 
@@ -78,54 +80,40 @@ spectra/sdd/governance/
 spectra/sdd/adoption/
 ```
 
-YAML is canonical machine-readable state. Markdown provides supporting human context and should not duplicate YAML contracts.
+Everything Spectra owns is inside `spectra/`. Your code, tests, existing documentation, and normal repository layout stay where they are.
 
-## 3. Load Planning Context
+By default, local Git mode keeps `spectra/` out of your company repository through `.git/info/exclude`. Use `--git-mode shared` only when the team wants to commit Spectra files.
+
+## 3. Start the Daily Loop
 
 ```bash
 spectra context --role planner --goal discover
-```
-
-## 4. Validate the Repository
-
-```bash
-spectra status
+spectra task --item TASK-001 --task-type feature --goal "Describe the change"
 spectra check
+spectra status
 ```
 
-Resolve validation errors and brownfield review items before approval.
+Use `status` when returning after a break. It shows current project changes and the next suggested action. Use `check` before or after meaningful work.
 
-## 5. Advance Approvals
+## 4. Use Full Only When You Need Governance
+
+Start Full explicitly:
 
 ```bash
-spectra approve --stage product-approved
-spectra approve --stage technical-approved
-spectra approve --stage implementation-approved
+spectra init . --profile full
 ```
 
-Implementation should not begin before `implementation-approved`.
-
-## 6. Capture and Implement the Work
+Full adds `spectra/sdd/features/`, `governance/`, and `adoption/`. Its advanced operations live under `spectra admin`:
 
 ```bash
-spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
-spectra context --role implementer --goal implement
-```
-
-## 7. Evaluate and Verify
-
-```bash
-spectra eval <feature-id> --suite smoke
+spectra admin approve --stage product-approved
+spectra admin approve --stage technical-approved
+spectra admin approve --stage implementation-approved
+spectra admin eval <feature-id> --suite smoke
 spectra verify --profile release
 ```
 
-## 8. Approve the Release
-
-After release verification passes:
-
-```bash
-spectra approve --stage release-approved
-```
+Top-level `approve`, `eval`, and similar advanced commands remain available for compatibility, but new documentation uses `spectra admin`.
 
 ## Next
 

@@ -36,11 +36,11 @@ adoption/
 
 ### `spectra/sdd/memory-bank/`
 
-Long-lived project context: active context, progress, implementation briefs, discovery notes, review findings, and traceability.
+Long-lived project context. Lite uses active context, progress, project brief, and implementation brief; Full adds discovery, review, and traceability material.
 
 ### `spectra/sdd/system/`
 
-Runtime rules, prompts, scaffolds, skills, and minimal context manifests used by the CLI.
+Lite contains only the manifest and minimal runtime context. Full adds rules, prompts, scaffolds, skills, and adapters.
 
 ### `spectra/docs/`
 
