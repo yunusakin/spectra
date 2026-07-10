@@ -5,6 +5,7 @@ const COMMANDS = {
   init: "Create a new Spectra project",
   adopt: "Add Spectra to an existing project",
   update: "Update Spectra and the project runtime",
+  upgrade: "Change the installed Lite or Full profile",
   context: "Load project context",
   task: "Prepare an implementation task",
   check: "Validate project health",

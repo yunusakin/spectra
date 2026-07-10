@@ -16,6 +16,7 @@ import { adminCommand } from "./commands/admin.js";
 import { verifyCommand } from "./commands/verify.js";
 import { printHelp as printCommandHelp } from "./commands/help.js";
 import { internalUpdateProjectCommand, updateCommand } from "./commands/update.js";
+import { upgradeCommand } from "./commands/upgrade.js";
 import { fail, title } from "./lib/output.js";
 import { getCliVersion } from "./lib/version.js";
 
@@ -80,6 +81,8 @@ function dispatch(argv) {
       return checkCommand([subcommand, ...rest].filter(Boolean));
     case "update":
       return updateCommand([subcommand, ...rest].filter(Boolean));
+    case "upgrade":
+      return upgradeCommand([subcommand, ...rest].filter(Boolean));
     case "__update-project":
       return internalUpdateProjectCommand([subcommand, ...rest].filter(Boolean));
     case "admin":

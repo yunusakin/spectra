@@ -41,6 +41,7 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 | `spectra check [--base <sha> --head <sha>]` | after spec changes | runs the public validation entry point | `validate` remains a compatibility alias |
 | `spectra status` | resuming work | summarizes current project and Spectra changes | recommends the next action |
 | `spectra update` | checking or upgrading Spectra | checks the latest CLI version, asks once when changes are needed, refreshes runtime files, and migrates legacy layouts | reports `Spectra is already up to date.` when no work is needed |
+| `spectra upgrade --profile <lite\|full>` | changing the installed profile | promotes Lite to Full while preserving existing project memory and updates runtime metadata | `--agents <csv>` optionally generates Full agent adapters; asks once for confirmation |
 | `spectra help [command\|advanced]` | learning the CLI | shows the everyday workflow or Full commands | supports `--help` too |
 | `spectra admin <approve\|eval\|diff\|adapters\|doctor\|skills\|quick>` | using Full features | groups advanced operations | top-level forms remain compatibility aliases |
 | `spectra version` | confirming install state | prints the installed CLI version | no additional modes |
@@ -66,6 +67,7 @@ spectra task --item <id> --task-type <type> --goal "<goal>"
 spectra check [--base <sha> --head <sha>]
 spectra status
 spectra update
+spectra upgrade --profile full
 ```
 
 ## Utility Commands

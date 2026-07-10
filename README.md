@@ -95,7 +95,13 @@ spectra init . --git-mode shared
 spectra adopt . --git-mode shared
 ```
 
-You cannot change profile or Git mode by repeating `init`; use the documented migration/update path instead.
+You cannot change profile or Git mode by repeating `init`. To promote an existing Lite installation to Full, run:
+
+```bash
+spectra upgrade --profile full
+```
+
+Spectra asks for confirmation, preserves existing memory-bank files, and adds the Full profile files. Add `--agents codex,claude` if you also want agent adapters generated.
 
 ## The daily Lite workflow
 

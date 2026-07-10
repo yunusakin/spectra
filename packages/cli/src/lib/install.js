@@ -121,16 +121,16 @@ function writeRepoLocalLauncher(targetRoot, nativeBinaryPath) {
   );
 }
 
-function writeProjectConfig(targetRoot, { profile, gitMode }) {
+function writeProjectConfig(targetRoot, { profile, gitMode, overwrite = false }) {
   const configPath = getProjectLayout(targetRoot).config;
-  if (fs.existsSync(configPath)) {
+  if (fs.existsSync(configPath) && !overwrite) {
     return;
   }
   ensureDirectory(path.dirname(configPath));
   fs.writeFileSync(configPath, `profile: ${profile}\ngitMode: ${gitMode}\nschemaVersion: ${SCHEMA_VERSION}\n`);
 }
 
-function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "local", profile = "lite", refresh = false }) {
+function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "local", profile = "lite", refresh = false, upgrade = false }) {
   const absoluteTarget = path.resolve(targetDir);
   const normalizedProfile = normalizeProfile(profile);
   const layout = getProjectLayout(absoluteTarget);
@@ -139,7 +139,7 @@ function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "loca
     throw new Error("Agent adapters require --profile full because they create tool integration files outside spectra/.");
   }
   const existingMetadata = readInstallMetadata(absoluteTarget);
-  if (existingMetadata?.profile && existingMetadata.profile !== normalizedProfile) {
+  if (!upgrade && existingMetadata?.profile && existingMetadata.profile !== normalizedProfile) {
     throw new Error("profile changes require an explicit upgrade command.");
   }
   if (existingMetadata?.gitMode && existingMetadata.gitMode !== gitMode) {
@@ -162,7 +162,7 @@ function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "loca
   }
 
   copyDirectory(path.join(profileAssetsDir, "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
-  writeProjectConfig(absoluteTarget, { profile: normalizedProfile, gitMode });
+  writeProjectConfig(absoluteTarget, { profile: normalizedProfile, gitMode, overwrite: upgrade });
   updateManifestRepoMode(absoluteTarget, "consumer");
   if (normalizedProfile === "full") {
     ensureV2Scaffolding(layout.root, { adopt });
@@ -172,7 +172,7 @@ function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "loca
   writeRepoLocalLauncher(absoluteTarget, nativeBinaryPath);
   removeFinderArtifacts(absoluteTarget);
   writeInstallMetadata(absoluteTarget, {
-    ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: adopt ? "adopt" : "init" }),
+    ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
     installedAt: new Date().toISOString(),
     binaryPath: nativeBinaryPath,
     localLauncher: "spectra/bin/spectra"
@@ -222,7 +222,7 @@ function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "loca
     ownedPaths = localResult.ownedPaths;
     excludePatterns = localResult.excludePatterns;
     writeInstallMetadata(absoluteTarget, {
-      ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: adopt ? "adopt" : "init" }),
+      ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
       installedAt: new Date().toISOString(),
       binaryPath: nativeBinaryPath,
       localLauncher: "spectra/bin/spectra",
