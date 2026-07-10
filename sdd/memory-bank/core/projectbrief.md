@@ -1,18 +1,18 @@
 # Project Brief
 
-> Filled by intake.
+> Maintained project context for Spectra itself.
 
 ## Project Name
-<!-- Filled by intake -->
+Spectra
 
 ## Purpose
-<!-- Filled by intake -->
+Provide a native, CLI-first spec-driven development framework that keeps product intent, working context, validation, and release governance in a portable project-local layer.
 
 ## App Type
-<!-- Filled by intake -->
+Developer CLI and reusable project runtime
 
 ## Product Context
-> Filled by intake.
+Spectra is distributed through npm and standalone macOS/Linux binaries. It supports Lite and Full profiles, keeps generated state under `spectra/`, and can be used privately through Git local-exclude mode or committed through shared mode.
 
 <!--
 Example:
@@ -30,7 +30,17 @@ Example:
 -->
 
 ## Requirements
-> Filled by intake.
+
+### Functional Requirements
+- Initialize and adopt repositories with Lite or Full profiles.
+- Keep all Spectra-owned generated content under `spectra/`.
+- Provide concise context, task, check, status, help, and update workflows.
+- Support safe legacy-layout migration and native installation without Node or npm.
+
+### Non-Functional Requirements
+- Preserve company files and Git policies during local-mode installation and migration.
+- Keep npm, native, runtime, and profile versions synchronized.
+- Verify behavior through automated CLI and native smoke tests.
 
 <!--
 Example:
@@ -45,7 +55,17 @@ Example:
 -->
 
 ## Constraints
-> Filled by intake.
+
+### Technical Constraints
+- Node.js ESM powers the npm CLI; native macOS/Linux builds use Node SEA.
+- Generated runtime must work from the repository-local launcher.
+
+### Security & Compliance
+- Local mode must not modify `.gitignore` and must use Git's repository-local exclude file.
+- Updates and migrations must require confirmation before mutating a project.
+
+### Organizational
+- Spectra documentation must not be committed to company projects by default.
 
 <!--
 Example:

@@ -1,8 +1,8 @@
-import { runInstalledScript } from "../lib/runtime.js";
+import { findSpectraRoot, getInstalledProfile } from "../lib/runtime.js";
 import { title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
-import { findSpectraRoot } from "../lib/runtime.js";
 import { computeApprovalState } from "../lib/specs.js";
+import { buildStatusReport } from "../lib/status-report.js";
 
 function statusCommand(argv) {
   const { options } = parseOptions(argv, {
@@ -17,18 +17,27 @@ function statusCommand(argv) {
 
   const cwd = options["--cwd"] ?? process.cwd();
   const repoRoot = findSpectraRoot(cwd);
-  if (repoRoot) {
-    computeApprovalState(repoRoot);
+  if (!repoRoot) {
+    throw new Error(`Could not find a Spectra runtime from ${cwd}`);
+  }
+  const profile = getInstalledProfile(repoRoot);
+  const report = buildStatusReport(repoRoot);
+
+  title("Spectra Project Status");
+  title(`Profile: ${profile}`);
+  title("");
+  title("Recent updates:");
+  if (report.recentUpdates.length === 0) {
+    title("- No recent project changes found.");
+  } else {
+    for (const update of report.recentUpdates) {
+      title(`- ${update}`);
+    }
   }
 
-  const status = runInstalledScript({
-    cwd,
-    scriptName: "health-check.sh",
-    args: []
-  });
-
-  if (repoRoot) {
+  if (profile === "full") {
     const approval = computeApprovalState(repoRoot);
+    title("");
     title(`Approval State: ${approval.current_state}`);
     title(`Highest Valid: ${approval.highest_valid_state}`);
     if (approval.invalidations.length > 0) {
@@ -36,7 +45,10 @@ function statusCommand(argv) {
     }
   }
 
-  return status;
+  title("");
+  title("Next recommended action:");
+  title("  spectra check");
+  return 0;
 }
 
 export { statusCommand };

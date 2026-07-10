@@ -1,8 +1,21 @@
-import { runInstalledScript } from "../lib/runtime.js";
+import fs from "node:fs";
+import path from "node:path";
+import { getInstalledProfile, runInstalledScript } from "../lib/runtime.js";
 import { fail, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { findSpectraRoot } from "../lib/runtime.js";
 import { validateSpectraV2 } from "../lib/specs.js";
+import { getProjectLayout } from "../lib/project-layout.js";
+
+function validateLiteProject(repoRoot) {
+  const layout = getProjectLayout(repoRoot);
+  const requiredPaths = [
+    path.join(layout.sdd, "system", "manifest.env"),
+    path.join(layout.sdd, "system", "runtime", "minimal.md"),
+    path.join(layout.sdd, "memory-bank", "core", "projectbrief.md")
+  ];
+  return requiredPaths.filter((filePath) => !fs.existsSync(filePath));
+}
 
 function validateCommand(argv) {
   const { options } = parseOptions(argv, {
@@ -16,6 +29,24 @@ function validateCommand(argv) {
   }
 
   const cwd = options["--cwd"] ?? process.cwd();
+  const repoRoot = findSpectraRoot(cwd);
+  if (!repoRoot) {
+    fail(`Could not find a Spectra runtime from ${cwd}`);
+    return 1;
+  }
+
+  if (getInstalledProfile(repoRoot) === "lite") {
+    const missingPaths = validateLiteProject(repoRoot);
+    if (missingPaths.length > 0) {
+      for (const filePath of missingPaths) {
+        fail(`Missing required Lite file: ${filePath}`);
+      }
+      return 1;
+    }
+    ok("Lite project checks passed");
+    return 0;
+  }
+
   const validateStatus = runInstalledScript({
     cwd,
     scriptName: "validate-repo.sh",
@@ -41,12 +72,6 @@ function validateCommand(argv) {
   if (policyStatus !== 0) {
     fail("Policy checks failed");
     return policyStatus;
-  }
-
-  const repoRoot = findSpectraRoot(cwd);
-  if (!repoRoot) {
-    fail(`Could not find a Spectra runtime from ${cwd}`);
-    return 1;
   }
 
   const v2 = validateSpectraV2(repoRoot);

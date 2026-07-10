@@ -1,0 +1,20 @@
+name: lite
+description: Minimal spec-driven development workflow for individual developers and small teams.
+includes:
+  - sdd/system
+  - sdd/memory-bank
+  - docs
+commands:
+  - init
+  - adopt
+  - help
+  - status
+  - context
+  - task
+  - check
+excludes:
+  - governance
+  - feature-bundles
+  - evaluations
+  - adoption-analysis
+  - agent-adapters

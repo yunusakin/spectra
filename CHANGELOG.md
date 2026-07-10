@@ -2,8 +2,21 @@
 
 ## [Unreleased]
 
-### Planned
-- (none)
+This work is intended for `v3.0.0` because the generated project layout changes from root-level Spectra directories to the single `spectra/` boundary.
+
+### Added
+- Lite and Full installation profiles with Lite as the default.
+- Simplified `help`, `check`, `status`, and `update` workflow commands.
+- `spectra admin` grouping for Full-profile advanced commands while retaining compatibility aliases.
+- Project schema and runtime version metadata.
+
+### Changed
+- Generated Spectra-owned content now lives beneath one `spectra/` directory.
+- Local Git mode is now the default and excludes `/spectra/` through `.git/info/exclude`.
+- Native and npm installations share the same profile assets and update behavior.
+
+### Migration
+- `spectra update` safely migrates legacy `.spectra/`, root `sdd/`, and known Spectra-generated documentation while preserving company files and working context.
 
 ## [v2.0.2] - 2026-07-06
 

@@ -11,38 +11,13 @@ import { specDiffCommand } from "./commands/spec-diff.js";
 import { skillsResolveCommand } from "./commands/skills-resolve.js";
 import { statusCommand } from "./commands/status.js";
 import { validateCommand } from "./commands/validate.js";
+import { checkCommand } from "./commands/check.js";
+import { adminCommand } from "./commands/admin.js";
 import { verifyCommand } from "./commands/verify.js";
+import { printHelp as printCommandHelp } from "./commands/help.js";
+import { internalUpdateProjectCommand, updateCommand } from "./commands/update.js";
 import { fail, title } from "./lib/output.js";
 import { getCliVersion } from "./lib/version.js";
-
-function printHelp() {
-  title("Spectra CLI");
-  title("");
-  title("Usage:");
-  title("  spectra <command> [options]");
-  title("");
-  title("Setup:");
-  title("  init [path]                Bootstrap a new Spectra project");
-  title("  adopt [path]               Add Spectra to an existing repo");
-  title("");
-  title("Workflow:");
-  title("  context                    Print a role/goal-aware context pack");
-  title("  task                       Create an implementation brief");
-  title("  approve                    Advance the staged approval state");
-  title("  validate                   Run validation and policy checks");
-  title("  verify                     Run release confidence verification");
-  title("  status                     Show repo health plus staged approval status");
-  title("  doctor                     Check environment and local runtime health");
-  title("  quick                      Run the non-app quick lane");
-  title("  skills                     Resolve or validate skill order");
-  title("  eval                       Run contract-driven eval suites");
-  title("");
-  title("Utilities:");
-  title("  adapters                   Generate AI tool adapters");
-  title("  diff <init|update|semantic>  Run spec diff reporting");
-  title("");
-  title("Single-word commands are the default UX.");
-}
 
 function normalizeCommand(command, subcommand, ...rest) {
   switch (command) {
@@ -96,12 +71,19 @@ function dispatch(argv) {
     case undefined:
     case "--help":
     case "help":
-      printHelp();
-      return 0;
+      return printCommandHelp(subcommand);
     case "--version":
     case "version":
       title(`spectra ${getCliVersion()}`);
       return 0;
+    case "check":
+      return checkCommand([subcommand, ...rest].filter(Boolean));
+    case "update":
+      return updateCommand([subcommand, ...rest].filter(Boolean));
+    case "__update-project":
+      return internalUpdateProjectCommand([subcommand, ...rest].filter(Boolean));
+    case "admin":
+      return adminCommand(subcommand, rest);
     case "init":
       return initCommand([subcommand, ...rest].filter(Boolean));
     case "adopt":

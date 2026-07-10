@@ -1,0 +1,44 @@
+apiVersion: spectra/v2
+kind: TelemetryContract
+metadata:
+  id: demo-intake-telemetry
+  version: 1.0.0
+  status: draft
+feature_id: demo-intake
+tracked_events:
+  - name: demo_intake_started
+    trigger: the first intake prompt is shown
+    requirement_ids:
+      - FR-1
+    required: true
+  - name: demo_intake_submitted
+    trigger: the request is successfully created
+    requirement_ids:
+      - FR-1
+      - FR-2
+    required: true
+success_signals:
+  - id: intake_completion_rate
+    requirement_ids:
+      - FR-1
+    expression: completed / started
+    source_events:
+      - demo_intake_started
+      - demo_intake_submitted
+    target: ">= 0.75"
+    window: 24h
+    release_gate: true
+failure_signals:
+  - id: premature_submit_rate
+    requirement_ids:
+      - FR-2
+    expression: premature_submits / total_submits
+    source_events:
+      - demo_intake_submitted
+    threshold: "== 0"
+    severity: critical
+    release_gate: true
+ownership:
+  product_owner: growth
+  engineering_owner: platform
+  oncall_team: platform

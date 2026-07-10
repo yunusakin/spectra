@@ -54,11 +54,10 @@ test("adopt local keeps Spectra files local while project code remains visible",
   const status = runOk(root, "git", ["status", "--short", "--untracked-files=all"]).stdout.trim();
   assert.equal(status, "?? app/project.js");
 
-  const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
   assert.equal(metadata.gitMode, "local");
-  assert.ok(metadata.ownedPaths.includes("docs/workflow.md"));
-  assert.ok(metadata.excludePatterns.includes("/.spectra/"));
-  assert.ok(metadata.excludePatterns.includes("/app/README.md"));
+  assert.ok(metadata.ownedPaths.includes("spectra/docs/workflow.md"));
+  assert.ok(metadata.excludePatterns.includes("/spectra/"));
 });
 
 test("adopt local rejects a non-git target without writing installation files", () => {
@@ -70,34 +69,34 @@ test("adopt local rejects a non-git target without writing installation files", 
   assert.deepEqual(fs.readdirSync(root), []);
 });
 
-test("adopt shared retains the existing gitignore merge behavior", () => {
+test("adopt shared leaves company gitignore rules unchanged", () => {
   const root = createRepo();
   const result = run(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "shared"]);
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const gitignore = fs.readFileSync(path.join(root, ".gitignore"), "utf8");
   assert.match(gitignore, /company-secret\.txt/);
-  assert.match(gitignore, /node_modules\//);
-  const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
+  assert.doesNotMatch(gitignore, /node_modules\//);
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
   assert.equal(metadata.gitMode, "shared");
 });
 
 test("repeated local adoption preserves the existing ownership policy", () => {
   const root = createRepo();
-  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local"]);
+  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local", "--profile", "full"]);
   const before = fs.readFileSync(path.join(root, ".git", "info", "exclude"), "utf8");
 
-  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local"]);
+  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local", "--profile", "full"]);
 
   assert.equal(fs.readFileSync(path.join(root, ".git", "info", "exclude"), "utf8"), before);
-  const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.ok(metadata.ownedPaths.includes("docs/workflow.md"));
-  assert.ok(metadata.excludePatterns.includes("/sdd/"));
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
+  assert.ok(metadata.ownedPaths.includes("spectra/docs/workflow.md"));
+  assert.ok(metadata.excludePatterns.includes("/spectra/"));
 });
 
 test("adapters extend a persistent local policy", () => {
   const root = createRepo();
-  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local"]);
+  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local", "--profile", "full"]);
 
   const result = run(root, process.execPath, [
     cliPath,
@@ -111,12 +110,12 @@ test("adapters extend a persistent local policy", () => {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const status = runOk(root, "git", ["status", "--short", "--untracked-files=all"]).stdout.trim();
   assert.equal(status, "?? app/project.js");
-  const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
   assert.ok(metadata.ownedPaths.includes("AGENTS.md"));
   assert.ok(metadata.ownedPaths.includes(".github/copilot-instructions.md"));
   assert.ok(metadata.excludePatterns.includes("/AGENTS.md"));
   assert.ok(metadata.excludePatterns.includes("/.github/copilot-instructions.md"));
-  assert.ok(metadata.excludePatterns.includes("/sdd/"));
+  assert.ok(metadata.excludePatterns.includes("/spectra/"));
 });
 
 test("local adopt refuses a tracked adapter collision before installing", () => {
@@ -131,12 +130,14 @@ test("local adopt refuses a tracked adapter collision before installing", () => 
     ".",
     "--git-mode",
     "local",
+    "--profile",
+    "full",
     "--agents",
     "codex"
   ]);
 
   assert.equal(result.status, 1);
   assert.match(result.stdout, /tracked adapter path.*AGENTS\.md/s);
-  assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
+  assert.equal(fs.existsSync(path.join(root, "spectra")), false);
   assert.equal(fs.readFileSync(path.join(root, "AGENTS.md"), "utf8"), "company instructions\n");
 });

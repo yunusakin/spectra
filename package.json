@@ -1,11 +1,12 @@
 {
   "name": "spectra-workspace",
   "private": true,
-  "version": "2.0.3",
+  "version": "3.0.0",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
+    "test": "npm test --workspaces --if-present",
     "spectra": "node packages/cli/bin/spectra.js",
     "doctor": "node packages/cli/bin/spectra.js doctor",
     "validate": "node packages/cli/bin/spectra.js validate",

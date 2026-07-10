@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { ensureDirectory, findSpectraRoot } from "./runtime.js";
+import { getProjectLayout } from "./project-layout.js";
 import YAML from "yaml";
 
 const STAGES = [
@@ -33,6 +34,18 @@ const STAGE_INVALIDATION = {
     "infra-only"
   ])
 };
+
+function getSddRoot(repoRoot) {
+  const canonicalRoot = getProjectLayout(repoRoot).sdd;
+  return fs.existsSync(path.join(canonicalRoot, "system", "manifest.env")) ? canonicalRoot : path.join(repoRoot, "sdd");
+}
+
+function getCacheRoot(repoRoot) {
+  const canonicalRoot = getProjectLayout(repoRoot).root;
+  return fs.existsSync(path.join(canonicalRoot, "install.json"))
+    ? path.join(canonicalRoot, "cache")
+    : path.join(repoRoot, ".spectra", "cache");
+}
 
 function slugify(value) {
   return String(value ?? "project-core")
@@ -661,7 +674,8 @@ function buildFeatureBundle(projectName) {
 function ensureV2Scaffolding(targetRoot, { adopt = false } = {}) {
   const projectName = path.basename(path.resolve(targetRoot));
   const bundle = buildFeatureBundle(projectName);
-  const featureDir = path.join(targetRoot, "sdd", "features", bundle.featureId);
+  const sddRoot = getSddRoot(targetRoot);
+  const featureDir = path.join(sddRoot, "features", bundle.featureId);
   const evalDir = path.join(featureDir, "evals");
 
   writeJsonContract(path.join(featureDir, "feature.spec.yaml"), bundle.featureSpec);
@@ -676,18 +690,18 @@ function ensureV2Scaffolding(targetRoot, { adopt = false } = {}) {
   ensureFile(path.join(featureDir, "brief.md"), bundle.briefMarkdown);
   ensureFile(path.join(featureDir, "release-checklist.md"), bundle.releaseChecklistMarkdown);
 
-  writeJsonContract(path.join(targetRoot, "sdd", "governance", "approval-state.yaml"), bundle.approvalState);
-  writeJsonContract(path.join(targetRoot, "sdd", "governance", "decision-graph.yaml"), bundle.decisionGraph);
+  writeJsonContract(path.join(sddRoot, "governance", "approval-state.yaml"), bundle.approvalState);
+  writeJsonContract(path.join(sddRoot, "governance", "decision-graph.yaml"), bundle.decisionGraph);
 
   if (adopt) {
-    writeJsonContract(path.join(targetRoot, "sdd", "adoption", "current-state.summary.yaml"), bundle.adoption.currentState);
-    writeJsonContract(path.join(targetRoot, "sdd", "adoption", "gap-analysis.yaml"), bundle.adoption.gapAnalysis);
-    writeJsonContract(path.join(targetRoot, "sdd", "adoption", "review-queue.yaml"), bundle.adoption.reviewQueue);
+    writeJsonContract(path.join(sddRoot, "adoption", "current-state.summary.yaml"), bundle.adoption.currentState);
+    writeJsonContract(path.join(sddRoot, "adoption", "gap-analysis.yaml"), bundle.adoption.gapAnalysis);
+    writeJsonContract(path.join(sddRoot, "adoption", "review-queue.yaml"), bundle.adoption.reviewQueue);
   }
 }
 
 function getFeatureDirs(repoRoot) {
-  const featuresRoot = path.join(repoRoot, "sdd", "features");
+  const featuresRoot = path.join(getSddRoot(repoRoot), "features");
   if (!fs.existsSync(featuresRoot)) {
     return [];
   }
@@ -842,14 +856,15 @@ function validateSpectraV2(repoRoot) {
   const errors = [];
   const warnings = [];
 
-  const approvalStatePath = path.join(repoRoot, "sdd", "governance", "approval-state.yaml");
-  const decisionGraphPath = path.join(repoRoot, "sdd", "governance", "decision-graph.yaml");
+  const sddRoot = getSddRoot(repoRoot);
+  const approvalStatePath = path.join(sddRoot, "governance", "approval-state.yaml");
+  const decisionGraphPath = path.join(sddRoot, "governance", "decision-graph.yaml");
 
   if (!fs.existsSync(approvalStatePath)) {
-    errors.push("Missing sdd/governance/approval-state.yaml");
+    errors.push("Missing spectra/sdd/governance/approval-state.yaml");
   }
   if (!fs.existsSync(decisionGraphPath)) {
-    errors.push("Missing sdd/governance/decision-graph.yaml");
+    errors.push("Missing spectra/sdd/governance/decision-graph.yaml");
   }
 
   if (fs.existsSync(approvalStatePath)) {
@@ -982,7 +997,7 @@ function buildSemanticDiff(repoRoot, { base = null, head = null, includeWorktree
 }
 
 function loadApprovalState(repoRoot) {
-  const approvalStatePath = path.join(repoRoot, "sdd", "governance", "approval-state.yaml");
+  const approvalStatePath = path.join(getSddRoot(repoRoot), "governance", "approval-state.yaml");
   const state = readJsonContract(approvalStatePath, null);
   if (!state) {
     throw new Error(`Missing approval state at ${approvalStatePath}`);
@@ -1003,13 +1018,13 @@ function stageOrder(stage) {
 }
 
 function syncLegacyApprovalStatus(repoRoot, stage) {
-  const stateFile = path.join(repoRoot, "sdd", "memory-bank", "core", "intake-state.md");
+  const stateFile = path.join(getSddRoot(repoRoot), "memory-bank", "core", "intake-state.md");
   if (!fs.existsSync(stateFile)) {
     return;
   }
 
   const nextStatus = stage === "draft" ? "not approved" : stage;
-  const lines = fs.readFileSync(stateFile, "utf8").split(/\r?\n/);
+  const lines = fs.readFileSync(stateFile, "utf8").replace(/(?:\r?\n)+$/, "").split(/\r?\n/);
   let inComment = false;
   let inApprovalSection = false;
 
@@ -1110,7 +1125,7 @@ function approveStage(repoRoot, stage) {
     throw new Error(`Cannot skip stages. Highest valid stage is ${currentHighest}.`);
   }
 
-  if (stage === "product-approved" && !hasRealMarkdownContent(path.join(repoRoot, "sdd", "memory-bank", "core", "projectbrief.md"))) {
+  if (stage === "product-approved" && !hasRealMarkdownContent(path.join(getSddRoot(repoRoot), "memory-bank", "core", "projectbrief.md"))) {
     throw new Error("Cannot approve product stage: projectbrief.md is still template-only.");
   }
 
@@ -1303,10 +1318,11 @@ function runEvalSuite(repoRoot, { featureId = null, suiteId = "smoke" } = {}) {
 }
 
 function buildAdoptionArtifacts(repoRoot) {
-  const discoveryDir = path.join(repoRoot, "sdd", "memory-bank", "discovery");
-  const summaryPath = path.join(repoRoot, "sdd", "adoption", "current-state.summary.yaml");
-  const gapPath = path.join(repoRoot, "sdd", "adoption", "gap-analysis.yaml");
-  const reviewPath = path.join(repoRoot, "sdd", "adoption", "review-queue.yaml");
+  const sddRoot = getSddRoot(repoRoot);
+  const discoveryDir = path.join(sddRoot, "memory-bank", "discovery");
+  const summaryPath = path.join(sddRoot, "adoption", "current-state.summary.yaml");
+  const gapPath = path.join(sddRoot, "adoption", "gap-analysis.yaml");
+  const reviewPath = path.join(sddRoot, "adoption", "review-queue.yaml");
 
   const discoveryFiles = fs.existsSync(discoveryDir)
     ? fs
@@ -1315,9 +1331,9 @@ function buildAdoptionArtifacts(repoRoot) {
         .map((name) => path.join(discoveryDir, name))
     : [];
 
-  const hasTraceability = hasRealMarkdownContent(path.join(repoRoot, "sdd", "memory-bank", "core", "traceability.md"));
+  const hasTraceability = hasRealMarkdownContent(path.join(sddRoot, "memory-bank", "core", "traceability.md"));
   const hasImplementationBrief = hasRealMarkdownContent(
-    path.join(repoRoot, "sdd", "memory-bank", "core", "implementation-brief.md")
+    path.join(sddRoot, "memory-bank", "core", "implementation-brief.md")
   );
   const featureDirs = getFeatureDirs(repoRoot);
   const items = [
@@ -1397,7 +1413,7 @@ function buildAdoptionArtifacts(repoRoot) {
 function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", legacyStatus = 0 } = {}) {
   const validation = validateSpectraV2(repoRoot);
   const approvalState = computeApprovalState(repoRoot);
-  const reviewSummary = readJsonContract(path.join(repoRoot, ".spectra", "cache", "context", "review.summary.json"), {
+  const reviewSummary = readJsonContract(path.join(getCacheRoot(repoRoot), "context", "review.summary.json"), {
     findings: { openCritical: 0, openWarning: 0, blocking: false }
   });
   const stages = [];
@@ -1481,7 +1497,7 @@ function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", 
   };
 
   const missingImplementationBrief =
-    !hasRealMarkdownContent(path.join(repoRoot, "sdd", "memory-bank", "core", "implementation-brief.md")) &&
+    !hasRealMarkdownContent(path.join(getSddRoot(repoRoot), "memory-bank", "core", "implementation-brief.md")) &&
     (scope === "app" || item);
   const legacyTestsScore = legacyStatus === 0 ? (missingImplementationBrief ? 0.4 : 1) : 0.2;
   stages.splice(2, 0, {

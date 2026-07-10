@@ -21,6 +21,12 @@ function readSourceCliVersion() {
   return match[1];
 }
 
+function readManifestVersion(filePath) {
+  const match = fs.readFileSync(filePath, "utf8").match(/^spectra_version=(.+)$/m);
+  if (!match) throw new Error(`Could not read spectra_version from ${filePath}`);
+  return match[1].trim();
+}
+
 const expectedVersion = readJson(path.join(repoRoot, "package.json")).version;
 const versions = [
   ["root package.json", expectedVersion],
@@ -32,6 +38,17 @@ const versions = [
   ],
   ["packages/cli/src/lib/version.js", readSourceCliVersion()]
 ];
+
+for (const profile of ["lite", "full"]) {
+  versions.push([
+    `profiles/${profile}/sdd/system/manifest.env`,
+    readManifestVersion(path.join(repoRoot, "profiles", profile, "sdd", "system", "manifest.env"))
+  ]);
+}
+versions.push([
+  "packages/core/assets/runtime/sdd/system/manifest.env",
+  readManifestVersion(path.join(repoRoot, "packages", "core", "assets", "runtime", "sdd", "system", "manifest.env"))
+]);
 
 const packageLockPath = path.join(repoRoot, "package-lock.json");
 if (fs.existsSync(packageLockPath)) {
