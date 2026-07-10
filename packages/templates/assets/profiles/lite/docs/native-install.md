@@ -128,7 +128,7 @@ Each archive contains:
 
 - `bin/spectra`
 - `assets/runtime/`
-- `assets/base/`
+- `assets/profiles/`
 - `VERSION`
 - `LICENSE`
 

@@ -43,7 +43,6 @@ function resolveAssetDir(localRelativePath, devFallbackRelativePath) {
 }
 
 const runtimeDir = resolveAssetDir(path.join("assets", "runtime"), path.join("..", "..", "core", "assets", "runtime"));
-const baseTemplateDir = resolveAssetDir(path.join("assets", "base"), path.join("..", "..", "templates", "assets", "base"));
 const profilesDir = resolveAssetDir(path.join("assets", "profiles"), path.join("..", "..", "profiles"));
 
 function ensureDirectory(dirPath) {
@@ -242,10 +241,6 @@ function getRuntimeAssetsDir() {
   return runtimeDir;
 }
 
-function getBaseTemplateDir() {
-  return baseTemplateDir;
-}
-
 function getProfileAssetsDir(profile) {
   return path.join(profilesDir, profile);
 }
@@ -260,7 +255,6 @@ export {
   ensureDirectory,
   findSpectraRoot,
   getInstalledProfile,
-  getBaseTemplateDir,
   getProfileAssetsDir,
   getCliPackageRoot,
   getExecutablePath,
