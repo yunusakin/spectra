@@ -13,3 +13,6 @@ function replaceDirectory(sourceDir, targetDir) {
 
 replaceDirectory(path.resolve(cliRoot, "../core/assets/runtime"), path.join(cliRoot, "assets", "runtime"));
 replaceDirectory(path.resolve(cliRoot, "../templates/assets/base"), path.join(cliRoot, "assets", "base"));
+const profilesSource = path.resolve(cliRoot, "..", "..", "profiles");
+replaceDirectory(profilesSource, path.join(cliRoot, "assets", "profiles"));
+replaceDirectory(profilesSource, path.resolve(cliRoot, "../templates/assets/profiles"));

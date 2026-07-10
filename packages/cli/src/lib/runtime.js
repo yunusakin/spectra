@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { getProjectLayout } from "./project-layout.js";
 
 function getExecutablePath() {
   try {
@@ -43,6 +44,7 @@ function resolveAssetDir(localRelativePath, devFallbackRelativePath) {
 
 const runtimeDir = resolveAssetDir(path.join("assets", "runtime"), path.join("..", "..", "core", "assets", "runtime"));
 const baseTemplateDir = resolveAssetDir(path.join("assets", "base"), path.join("..", "..", "templates", "assets", "base"));
+const profilesDir = resolveAssetDir(path.join("assets", "profiles"), path.join("..", "..", "profiles"));
 
 function ensureDirectory(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -107,7 +109,10 @@ function mergeGitignore(sourcePath, targetPath) {
 }
 
 function updateManifestRepoMode(targetRoot, repoMode) {
-  const manifestPath = path.join(targetRoot, "sdd", "system", "manifest.env");
+  const canonicalManifestPath = path.join(getProjectLayout(targetRoot).sdd, "system", "manifest.env");
+  const manifestPath = fs.existsSync(canonicalManifestPath)
+    ? canonicalManifestPath
+    : path.join(targetRoot, "sdd", "system", "manifest.env");
 
   if (!fs.existsSync(manifestPath)) {
     return;
@@ -119,26 +124,49 @@ function updateManifestRepoMode(targetRoot, repoMode) {
 }
 
 function writeInstallMetadata(targetRoot, metadata) {
-  const installDir = path.join(targetRoot, ".spectra");
-  ensureDirectory(installDir);
-  fs.writeFileSync(path.join(installDir, "install.json"), JSON.stringify(metadata, null, 2));
+  const metadataPath = getProjectLayout(targetRoot).installMetadata;
+  ensureDirectory(path.dirname(metadataPath));
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
 }
 
 function readInstallMetadata(targetRoot) {
-  const metadataPath = path.join(targetRoot, ".spectra", "install.json");
-  if (!fs.existsSync(metadataPath)) {
-    return null;
+  const metadataPaths = [
+    getProjectLayout(targetRoot).installMetadata,
+    path.join(targetRoot, ".spectra", "install.json")
+  ];
+  for (const metadataPath of metadataPaths) {
+    if (fs.existsSync(metadataPath)) {
+      return JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+    }
   }
-  return JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+  return null;
+}
+
+function getInstalledProfile(targetRoot) {
+  const metadata = readInstallMetadata(targetRoot);
+  if (metadata?.profile === "lite" || metadata?.profile === "full") {
+    return metadata.profile;
+  }
+
+  const canonicalManifestPath = path.join(getProjectLayout(targetRoot).sdd, "system", "manifest.env");
+  return fs.existsSync(canonicalManifestPath) ? "lite" : "full";
 }
 
 function findSpectraRoot(startDir = process.cwd()) {
   let current = path.resolve(startDir);
 
   while (true) {
-    const manifestPath = path.join(current, "sdd", "system", "manifest.env");
+    const canonicalManifestPath = path.join(getProjectLayout(current).sdd, "system", "manifest.env");
+    const nestedCanonicalManifestPath = path.join(current, "sdd", "system", "manifest.env");
+    const nestedCanonicalMetadataPath = path.join(current, "install.json");
+    const manifestPath = fs.existsSync(canonicalManifestPath)
+      ? canonicalManifestPath
+      : path.join(current, "sdd", "system", "manifest.env");
 
     if (fs.existsSync(manifestPath)) {
+      if (fs.existsSync(nestedCanonicalManifestPath) && fs.existsSync(nestedCanonicalMetadataPath)) {
+        return path.dirname(current);
+      }
       return current;
     }
 
@@ -163,11 +191,15 @@ function runInstalledScript({ cwd, scriptName, args = [] }) {
     throw new Error(`Missing installed script: ${scriptPath}`);
   }
 
+  const spectraRoot = getProjectLayout(repoRoot).root;
+  const isCanonicalLayout = fs.existsSync(path.join(spectraRoot, "sdd", "system", "manifest.env"));
+
   const result = spawnSync("bash", [scriptPath, ...args], {
-    cwd: repoRoot,
+    cwd: isCanonicalLayout ? spectraRoot : repoRoot,
     env: {
       ...process.env,
-      SPECTRA_REPO_ROOT: repoRoot,
+      SPECTRA_REPO_ROOT: isCanonicalLayout ? spectraRoot : repoRoot,
+      SPECTRA_PROJECT_ROOT: repoRoot,
       SPECTRA_RUNTIME_ROOT: runtimeDir
     },
     stdio: "inherit"
@@ -214,6 +246,10 @@ function getBaseTemplateDir() {
   return baseTemplateDir;
 }
 
+function getProfileAssetsDir(profile) {
+  return path.join(profilesDir, profile);
+}
+
 function getCliPackageRoot() {
   return packageRoot;
 }
@@ -223,7 +259,9 @@ export {
   copyFile,
   ensureDirectory,
   findSpectraRoot,
+  getInstalledProfile,
   getBaseTemplateDir,
+  getProfileAssetsDir,
   getCliPackageRoot,
   getExecutablePath,
   getRuntimeAssetsDir,

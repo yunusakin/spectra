@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { ensureDirectory, findSpectraRoot } from "./runtime.js";
 import { getFeatureDirs, readJsonContract } from "./specs.js";
+import { getProjectLayout } from "./project-layout.js";
 
 const contextModuleFile = typeof import.meta.url === "string" ? fileURLToPath(import.meta.url) : null;
 
@@ -829,8 +830,19 @@ const SUMMARY_BUILDERS = {
   "shared-core.summary.json": parseSharedCoreSummary
 };
 
+function isCanonicalDataRoot(repoRoot) {
+  return fs.existsSync(path.join(repoRoot, "install.json")) && fs.existsSync(path.join(repoRoot, "sdd", "system", "manifest.env"));
+}
+
+function getContextRoot(projectRoot) {
+  const canonicalRoot = getProjectLayout(projectRoot).root;
+  return isCanonicalDataRoot(canonicalRoot) ? canonicalRoot : projectRoot;
+}
+
 function getCacheDir(repoRoot) {
-  return path.join(repoRoot, ".spectra", "cache", "context");
+  return isCanonicalDataRoot(repoRoot)
+    ? path.join(repoRoot, "cache", "context")
+    : path.join(repoRoot, ".spectra", "cache", "context");
 }
 
 function needsRebuild(outputPath, sourcePaths) {
@@ -867,8 +879,8 @@ function resolveTask(task) {
   return TASK_ALIASES[task] ?? {};
 }
 
-function readSummary(repoRoot, relativePath) {
-  const absolutePath = path.join(repoRoot, relativePath);
+function readSummary(repoRoot, fileName) {
+  const absolutePath = path.join(getCacheDir(repoRoot), fileName);
   if (!fs.existsSync(absolutePath)) {
     return null;
   }
@@ -1031,11 +1043,12 @@ function buildContextPack({
   base = null,
   head = null
 }) {
-  const repoRoot = findSpectraRoot(cwd);
+  const projectRoot = findSpectraRoot(cwd);
 
-  if (!repoRoot) {
+  if (!projectRoot) {
     throw new Error(`Could not find a Spectra runtime from ${cwd}`);
   }
+  const repoRoot = getContextRoot(projectRoot);
 
   const taskResolution = resolveTask(task);
   const resolvedRole = normalizeRole(role ?? taskResolution.role);
@@ -1052,11 +1065,11 @@ function buildContextPack({
   ensureContextSummaries(repoRoot);
 
   const summaries = {
-    project: readSummary(repoRoot, ".spectra/cache/context/project.summary.json"),
-    intake: readSummary(repoRoot, ".spectra/cache/context/intake.summary.json"),
-    progress: readSummary(repoRoot, ".spectra/cache/context/progress.summary.json"),
-    review: readSummary(repoRoot, ".spectra/cache/context/review.summary.json"),
-    implementation: readSummary(repoRoot, ".spectra/cache/context/implementation.summary.json")
+    project: readSummary(repoRoot, "project.summary.json"),
+    intake: readSummary(repoRoot, "intake.summary.json"),
+    progress: readSummary(repoRoot, "progress.summary.json"),
+    review: readSummary(repoRoot, "review.summary.json"),
+    implementation: readSummary(repoRoot, "implementation.summary.json")
   };
   const changedFiles = getChangedFiles(repoRoot, { changed, base, head });
 

@@ -14,6 +14,7 @@ on:
       - "packages/cli/**"
       - "packages/core/**"
       - "packages/templates/**"
+      - "profiles/**"
 
 permissions:
   contents: write
@@ -57,17 +58,22 @@ jobs:
           tar -xzf "$archive" -C /tmp/spectra-native
           /tmp/spectra-native/bin/spectra --help
           /tmp/spectra-native/bin/spectra version
+          bash packages/cli/scripts/smoke-native.sh /tmp/spectra-native/bin/spectra 3.0.0
           smoke_dir="$(mktemp -d)"
-          /tmp/spectra-native/bin/spectra init "$smoke_dir"
-          "$smoke_dir/.spectra/bin/spectra" status
+          git -C "$smoke_dir" init -q
+          git -C "$smoke_dir" config user.email spectra@example.test
+          git -C "$smoke_dir" config user.name 'Spectra Test'
+          touch "$smoke_dir/README.md"
+          git -C "$smoke_dir" add README.md
+          git -C "$smoke_dir" commit -qm 'initial project'
           brownfield_dir="$(mktemp -d)"
           mkdir -p "$brownfield_dir/src/test/java"
           printf 'class BalanceServiceTest {}\n' > "$brownfield_dir/src/test/java/BalanceServiceTest.java"
           /tmp/spectra-native/bin/spectra adopt "$brownfield_dir" --git-mode shared
-          brownfield_status="$("$brownfield_dir/.spectra/bin/spectra" status --cwd "$brownfield_dir")"
+          brownfield_status="$("$brownfield_dir/spectra/bin/spectra" status --cwd "$brownfield_dir")"
           printf '%s\n' "$brownfield_status"
-          grep -F '1 test file(s) found across repository' <<< "$brownfield_status"
-          grep -F 'No requirement rows mapped yet' <<< "$brownfield_status"
+          grep -F 'Spectra Project Status' <<< "$brownfield_status"
+          grep -F 'Profile: lite' <<< "$brownfield_status"
           local_dir="$(mktemp -d)"
           git -C "$local_dir" init -q
           git -C "$local_dir" config user.email spectra@example.test
@@ -78,8 +84,8 @@ jobs:
           git -C "$local_dir" commit -qm 'initial source'
           /tmp/spectra-native/bin/spectra adopt "$local_dir" --git-mode local
           test -z "$(git -C "$local_dir" status --short)"
-          git -C "$local_dir" check-ignore -q .spectra/install.json
-          grep -F '"gitMode": "local"' "$local_dir/.spectra/install.json"
+          git -C "$local_dir" check-ignore -q spectra/install.json
+          grep -F '"gitMode": "local"' "$local_dir/spectra/install.json"
 
       - uses: actions/upload-artifact@v4
         with:

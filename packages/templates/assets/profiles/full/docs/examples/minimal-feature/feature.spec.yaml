@@ -1,0 +1,45 @@
+apiVersion: spectra/v2
+kind: FeatureSpec
+metadata:
+  id: demo-intake
+  name: Demo Intake Assistant
+  version: 1.0.0
+  owner: product
+  status: draft
+summary:
+  problem: Inbound demo requests are incomplete and hard to route.
+  outcome: Users can complete a valid demo request through an AI-guided intake flow.
+scope:
+  in:
+    - collect contact details
+    - capture company and use case
+    - confirm before submit
+  out:
+    - CRM enrichment
+    - lead scoring
+requirements:
+  functional:
+    - id: FR-1
+      statement: The assistant collects the minimum required demo request fields.
+      priority: must
+    - id: FR-2
+      statement: The assistant never submits a request before explicit confirmation.
+      priority: must
+  nonFunctional:
+    - id: NFR-1
+      statement: The feature must be verifiable through evals, telemetry, and release thresholds.
+      priority: must
+acceptance:
+  scenarios:
+    - id: AC-1
+      covers:
+        - FR-1
+      given: A user starts a demo request
+      when: The user answers the intake questions
+      then: The required fields are captured
+    - id: AC-2
+      covers:
+        - FR-2
+      given: Confirmation has not been given
+      when: The assistant reaches the submit step
+      then: Submission is blocked

@@ -1,5 +1,20 @@
 # Release Summary
 
+## Unreleased
+
+### Simpler Product Surface
+- Adds Lite and Full profiles, defaulting to Lite for everyday SDD work.
+- Keeps core commands focused on `init`, `adopt`, `context`, `task`, `check`, `status`, `update`, and `help`.
+- Groups Full workflows beneath `spectra admin` while preserving old command aliases.
+
+### One Project Boundary
+- Stores launchers, metadata, generated docs, SDD runtime, and working context beneath `spectra/`.
+- Defaults to local Git mode so company repositories can use Spectra without committing its files.
+
+### Versioning and Updates
+- Synchronizes CLI, npm, native, and runtime release versions while tracking project schema separately.
+- Adds one-confirmation updates, already-current reporting, runtime refresh, and conflict-safe legacy migration.
+
 ## v2.0.2
 
 ### Brownfield Status Accuracy

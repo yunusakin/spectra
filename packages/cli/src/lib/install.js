@@ -8,18 +8,18 @@ import {
   ensureDirectory,
   getExecutablePath,
   getCliPackageRoot,
-  getRuntimeAssetsDir,
-  mergeGitignore,
+  getProfileAssetsDir,
   readInstallMetadata,
   removeFinderArtifacts,
   runInstalledScript,
   updateManifestRepoMode,
   writeInstallMetadata
 } from "./runtime.js";
-import { getBaseTemplateDir } from "./runtime.js";
 import { buildAdoptionArtifacts, ensureV2Scaffolding } from "./specs.js";
 import { assertPathsUntracked, beginLocalGitPolicy, finishLocalGitPolicy } from "./git-policy.js";
 import { getAdapterOutputPaths } from "./adapter-paths.js";
+import { getProjectLayout } from "./project-layout.js";
+import { SCHEMA_VERSION, createInstallMetadata, normalizeProfile } from "./profile.js";
 
 function replaceDirectory(sourceDir, targetDir) {
   if (!fs.existsSync(sourceDir)) {
@@ -50,7 +50,7 @@ function detectNativeBinaryPath() {
 
 function materializeLocalNodeCli(targetRoot) {
   const cliPackageRoot = getCliPackageRoot();
-  const localCliRoot = path.join(targetRoot, ".spectra", "cli");
+  const localCliRoot = getProjectLayout(targetRoot).cli;
 
   if (!fs.existsSync(path.join(cliPackageRoot, "bin", "spectra.js"))) {
     return;
@@ -81,7 +81,7 @@ function shellQuote(value) {
 }
 
 function writeRepoLocalLauncher(targetRoot, nativeBinaryPath) {
-  const launcherDir = path.join(targetRoot, ".spectra", "bin");
+  const launcherDir = getProjectLayout(targetRoot).bin;
   ensureDirectory(launcherDir);
 
   const launcherPath = path.join(launcherDir, "spectra");
@@ -121,11 +121,31 @@ function writeRepoLocalLauncher(targetRoot, nativeBinaryPath) {
   );
 }
 
-function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "shared" }) {
+function writeProjectConfig(targetRoot, { profile, gitMode }) {
+  const configPath = getProjectLayout(targetRoot).config;
+  if (fs.existsSync(configPath)) {
+    return;
+  }
+  ensureDirectory(path.dirname(configPath));
+  fs.writeFileSync(configPath, `profile: ${profile}\ngitMode: ${gitMode}\nschemaVersion: ${SCHEMA_VERSION}\n`);
+}
+
+function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "local", profile = "lite", refresh = false }) {
   const absoluteTarget = path.resolve(targetDir);
-  const runtimeDir = getRuntimeAssetsDir();
-  const templateDir = getBaseTemplateDir();
-  const localPolicy = adopt && gitMode === "local" ? beginLocalGitPolicy(absoluteTarget) : null;
+  const normalizedProfile = normalizeProfile(profile);
+  const layout = getProjectLayout(absoluteTarget);
+  const profileAssetsDir = getProfileAssetsDir(normalizedProfile);
+  if (normalizedProfile === "lite" && agents) {
+    throw new Error("Agent adapters require --profile full because they create tool integration files outside spectra/.");
+  }
+  const existingMetadata = readInstallMetadata(absoluteTarget);
+  if (existingMetadata?.profile && existingMetadata.profile !== normalizedProfile) {
+    throw new Error("profile changes require an explicit upgrade command.");
+  }
+  if (existingMetadata?.gitMode && existingMetadata.gitMode !== gitMode) {
+    throw new Error("Git mode changes require an explicit migration command.");
+  }
+  const localPolicy = gitMode === "local" ? beginLocalGitPolicy(absoluteTarget) : null;
   const previousMetadata = localPolicy ? readInstallMetadata(absoluteTarget) : null;
   if (localPolicy && agents) {
     assertPathsUntracked(absoluteTarget, getAdapterOutputPaths(agents), "adapter path");
@@ -133,41 +153,40 @@ function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "shar
 
   ensureDirectory(absoluteTarget);
 
-  copyDirectory(path.join(runtimeDir, "sdd", "system"), path.join(absoluteTarget, "sdd", "system"));
-
-  copyDirectory(path.join(templateDir, "sdd", "memory-bank"), path.join(absoluteTarget, "sdd", "memory-bank"));
-  copyDirectory(path.join(templateDir, "docs"), path.join(absoluteTarget, "docs"));
-  copyDirectory(path.join(templateDir, ".github"), path.join(absoluteTarget, ".github"));
-  copyDirectory(path.join(templateDir, "app"), path.join(absoluteTarget, "app"));
-
-  for (const fileName of [".editorconfig", "CHANGELOG.md", "RELEASE_SUMMARY.md", "LICENSE"]) {
-    copyFile(path.join(templateDir, fileName), path.join(absoluteTarget, fileName));
+  if (refresh) {
+    replaceDirectory(path.join(profileAssetsDir, "sdd", "system"), path.join(layout.sdd, "system"));
+    replaceDirectory(path.join(profileAssetsDir, "docs"), layout.docs);
+  } else {
+    copyDirectory(path.join(profileAssetsDir, "sdd", "system"), path.join(layout.sdd, "system"));
+    copyDirectory(path.join(profileAssetsDir, "docs"), layout.docs);
   }
 
-  if (gitMode === "shared") {
-    mergeGitignore(path.join(templateDir, ".gitignore"), path.join(absoluteTarget, ".gitignore"));
-  }
+  copyDirectory(path.join(profileAssetsDir, "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
+  writeProjectConfig(absoluteTarget, { profile: normalizedProfile, gitMode });
   updateManifestRepoMode(absoluteTarget, "consumer");
-  ensureV2Scaffolding(absoluteTarget, { adopt });
+  if (normalizedProfile === "full") {
+    ensureV2Scaffolding(layout.root, { adopt });
+  }
   const nativeBinaryPath = detectNativeBinaryPath();
   materializeLocalNodeCli(absoluteTarget);
   writeRepoLocalLauncher(absoluteTarget, nativeBinaryPath);
   removeFinderArtifacts(absoluteTarget);
   writeInstallMetadata(absoluteTarget, {
+    ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: adopt ? "adopt" : "init" }),
     installedAt: new Date().toISOString(),
-    installMode: adopt ? "adopt" : "init",
-    gitMode,
     binaryPath: nativeBinaryPath,
-    localLauncher: ".spectra/bin/spectra"
+    localLauncher: "spectra/bin/spectra"
   });
 
-  if (adopt) {
+  if (adopt && !refresh) {
     runInstalledScript({
       cwd: absoluteTarget,
       scriptName: "map-codebase.sh",
-      args: ["--root", absoluteTarget]
+      args: ["--root", absoluteTarget, "--spectra-root", layout.root]
     });
-    buildAdoptionArtifacts(absoluteTarget);
+    if (normalizedProfile === "full") {
+      buildAdoptionArtifacts(layout.root);
+    }
   }
 
   if (agents) {
@@ -203,11 +222,10 @@ function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "shar
     ownedPaths = localResult.ownedPaths;
     excludePatterns = localResult.excludePatterns;
     writeInstallMetadata(absoluteTarget, {
+      ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: adopt ? "adopt" : "init" }),
       installedAt: new Date().toISOString(),
-      installMode: "adopt",
-      gitMode,
       binaryPath: nativeBinaryPath,
-      localLauncher: ".spectra/bin/spectra",
+      localLauncher: "spectra/bin/spectra",
       ownedPaths,
       excludePatterns
     });
@@ -215,7 +233,7 @@ function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "shar
 
   return {
     targetDir: absoluteTarget,
-    installed: fs.existsSync(path.join(absoluteTarget, ".spectra", "install.json")),
+    installed: fs.existsSync(layout.installMetadata),
     gitMode,
     ownedPaths,
     excludePatterns

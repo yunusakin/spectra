@@ -4,15 +4,20 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  bash scripts/map-codebase.sh --root <project-root>
+  bash scripts/map-codebase.sh --root <project-root> --spectra-root <spectra-root>
 USAGE
 }
 
 ROOT=""
+SPECTRA_ROOT=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --root)
       ROOT="${2:-}"
+      shift 2
+      ;;
+    --spectra-root)
+      SPECTRA_ROOT="${2:-}"
       shift 2
       ;;
     -h|--help)
@@ -27,14 +32,15 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "${ROOT}" ]]; then
-  echo "Error: --root is required." >&2
+if [[ -z "${ROOT}" || -z "${SPECTRA_ROOT}" ]]; then
+  echo "Error: --root and --spectra-root are required." >&2
   usage
   exit 2
 fi
 
 ROOT="$(cd "${ROOT}" && pwd)"
-DISCOVERY_DIR="${ROOT}/sdd/memory-bank/discovery"
+SPECTRA_ROOT="$(cd "${SPECTRA_ROOT}" && pwd)"
+DISCOVERY_DIR="${SPECTRA_ROOT}/sdd/memory-bank/discovery"
 ARCHIVE_ROOT="${DISCOVERY_DIR}/archive"
 timestamp="$(date +%Y%m%d-%H%M%S)"
 

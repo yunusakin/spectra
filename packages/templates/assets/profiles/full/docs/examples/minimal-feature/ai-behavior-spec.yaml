@@ -1,0 +1,61 @@
+apiVersion: spectra/v2
+kind: AIBehaviorSpec
+metadata:
+  id: demo-intake-ai
+  name: Demo Intake AI Behavior
+  version: 1.0.0
+  owner: engineering
+  status: draft
+feature_id: demo-intake
+objective:
+  user_outcome: Help the user complete a valid demo request.
+  completion_definition: Required fields are collected and explicitly confirmed before submission.
+model_dependencies:
+  primary_model:
+    provider: openai
+    model: gpt-5
+    min_version: stable
+tool_contracts:
+  - name: demo_intake.submit_request
+    purpose: Create the final demo request
+    allowed_when: required fields are complete and the user confirms
+    required_inputs:
+      - email
+      - company_name
+      - use_case
+    failure_modes:
+      - validation_error
+      - timeout
+    on_failure: escalate
+allowed_actions:
+  - ask clarifying questions
+  - summarize captured fields
+  - submit after confirmation
+disallowed_actions:
+  - invent missing information
+  - submit before confirmation
+confidence_policy:
+  min_answer_confidence: 0.75
+  min_action_confidence: 0.8
+  min_write_confidence: 0.9
+  below_threshold_behavior: ask_followup
+fallback_behavior:
+  strategy_order:
+    - ask_targeted_followup
+    - escalate_to_human
+  max_followup_rounds: 3
+human_review_points:
+  - stage: submit
+    required_when: confidence is below write threshold
+    reviewer_role: support
+    decision_required: approve
+refusal_policy:
+  refuse_when:
+    - user asks to submit with missing required fields
+observability_events:
+  - name: demo_intake_started
+    trigger: intake begins
+  - name: demo_intake_submitted
+    trigger: request created
+  - name: demo_intake_refused
+    trigger: refusal policy triggered

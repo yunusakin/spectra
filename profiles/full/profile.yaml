@@ -1,0 +1,19 @@
+name: full
+description: Spec-driven development with governance, feature bundles, evaluations, and adoption analysis.
+includes:
+  - lite
+  - governance
+  - feature-bundles
+  - evaluations
+  - adoption-analysis
+  - agent-adapters
+commands:
+  - approve
+  - eval
+  - diff
+  - doctor
+  - skills
+  - adapters
+  - quick
+external_integration_files:
+  - Agent adapter files may be generated at the project root when required by the selected AI tool.

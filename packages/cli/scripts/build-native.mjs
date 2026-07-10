@@ -101,6 +101,11 @@ fs.mkdirSync(buildRoot, { recursive: true });
 fs.mkdirSync(packageRoot, { recursive: true });
 
 run("node", [path.join(scriptDir, "sync-assets.mjs")]);
+for (const profile of ["lite", "full"]) {
+  if (!fs.existsSync(path.join(cliRoot, "assets", "profiles", profile, "profile.yaml"))) {
+    throw new Error(`Missing packaged ${profile} profile assets.`);
+  }
+}
 
 const bundledEntry = path.join(buildRoot, "spectra.cjs");
 await build({

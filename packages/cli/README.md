@@ -11,8 +11,8 @@ New project:
 ```bash
 npx spectra-pack@latest init my-product
 cd my-product
-./.spectra/bin/spectra validate
-./.spectra/bin/spectra status
+./spectra/bin/spectra check
+./spectra/bin/spectra status
 ```
 
 Existing project:
@@ -20,23 +20,23 @@ Existing project:
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
-./.spectra/bin/spectra status
-./.spectra/bin/spectra validate
+./spectra/bin/spectra status
+./spectra/bin/spectra check
 ```
 
-`npx` bootstraps the repository but does not create a global command. Continue with `./.spectra/bin/spectra`, or install the standalone native binary for a global `spectra` command.
+`npx` bootstraps the repository but does not create a global command. Continue with `./spectra/bin/spectra`, or install the standalone native binary for a global `spectra` command.
 
 Node/npm-free macOS and Linux installation is documented in [Native Install](https://github.com/yunusakin/spectra/blob/main/docs/native-install.md).
 
 ## Commands
 
-The examples below use `spectra`. Replace it with `./.spectra/bin/spectra` when using only the repo-local launcher.
+The examples below use `spectra`. Replace it with `./spectra/bin/spectra` when using only the repo-local launcher.
 
 Setup:
 
 ```bash
-spectra init [path]
-spectra adopt [path]
+spectra init [path] [--profile <lite|full>] [--git-mode <local|shared>]
+spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>]
 ```
 
 Workflow:
@@ -44,31 +44,30 @@ Workflow:
 ```bash
 spectra context --role planner --goal discover
 spectra task --item TASK-001 --task-type feature --goal "Describe intended change"
-spectra approve --stage implementation-approved
-spectra validate
-spectra eval <feature-id> --suite smoke
-spectra verify --profile release
+spectra check
 spectra status
+spectra update
 ```
 
 Utilities:
 
 ```bash
-spectra adapters --agents codex,cursor --target .
-spectra diff semantic
-spectra doctor
-spectra quick --type docs --task "refresh docs"
+spectra help
+spectra help advanced
+spectra admin doctor
+spectra admin diff semantic
 ```
 
 ## What It Installs
 
 Spectra initializes a repository with:
 
-- `.spectra/` install metadata and repo-local launcher
-- `sdd/features/` executable spec bundles created during `init` or `adopt`
-- `sdd/governance/` approval and decision graph state
-- `sdd/system/` runtime rules, prompts, adapters, and scaffolds
-- `sdd/memory-bank/` optional human-readable working context
+- `spectra/bin/` repo-local launcher
+- `spectra/install.json` profile, Git mode, CLI/runtime version, and schema metadata
+- `spectra/docs/` generated Spectra reference material
+- `spectra/sdd/` profile runtime and working context
+
+Lite is the default. Full adds executable specs, governance, adoption, and advanced admin workflows. Local Git mode is the default and excludes `/spectra/` through `.git/info/exclude`; shared mode makes it commit-ready.
 
 ## Documentation
 

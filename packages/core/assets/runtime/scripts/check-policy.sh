@@ -352,6 +352,35 @@ collect_changed_files() {
   return 0
 }
 
+collect_project_changed_files() {
+  local project_root="${SPECTRA_PROJECT_ROOT:-${REPO_ROOT}}"
+
+  if git -C "${project_root}" rev-parse --verify HEAD >/dev/null 2>&1; then
+    {
+      git -C "${project_root}" diff --name-only HEAD 2>/dev/null || true
+      git -C "${project_root}" ls-files --others --exclude-standard 2>/dev/null || true
+    } | sed '/^$/d' | sort -u
+    return 0
+  fi
+
+  git -C "${project_root}" ls-files -m -o --exclude-standard 2>/dev/null || true
+}
+
+is_project_source_file() {
+  local file="$1"
+  case "${file}" in
+    spectra/*|sdd/*|.spectra/*|docs/*|*.md|*.txt|*.yaml|*.yml|*.json)
+      return 1
+      ;;
+    src/*|lib/*|app/*|packages/*|services/*|server/*|client/*|*.js|*.jsx|*.ts|*.tsx|*.mjs|*.cjs|*.py|*.go|*.rs|*.java|*.kt|*.rb|*.php|*.cs)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 validate_skill_run_row() {
   local map_file="$1"
   local skill_runs_file="$2"
@@ -505,6 +534,7 @@ approval_status="$(parse_approval_status "${state_file}")"
 open_questions="$(parse_open_technical_questions "${state_file}")"
 blocking_findings="$(parse_blocking_review_findings "${review_gate_file}")"
 changed_files="$(collect_changed_files)"
+project_changed_files="$(collect_project_changed_files)"
 project_name_value="$(parse_project_name "${project_brief_file}")"
 repo_mode="$(read_manifest_value "repo_mode")"
 
@@ -525,6 +555,17 @@ if [[ -d "app" ]]; then
   fi
 fi
 
+project_source_changed=false
+if [[ -n "${project_changed_files}" ]]; then
+  while IFS= read -r file; do
+    [[ -n "${file}" ]] || continue
+    if is_project_source_file "${file}"; then
+      project_source_changed=true
+      break
+    fi
+  done <<< "${project_changed_files}"
+fi
+
 ###################################
 # 1. Approval gate: no app/ code without approval evidence
 ###################################
@@ -533,6 +574,12 @@ if "${app_has_code}"; then
     add_error "app/ contains code but ${state_file} does not exist."
   elif [[ "${approval_status}" != "implementation-approved" && "${approval_status}" != "release-approved" && "${approval_status}" != "approved" ]]; then
     add_error "app/ contains code but Approval Status is not implementation-approved or release-approved in ${state_file}."
+  fi
+fi
+
+if "${project_source_changed}"; then
+  if [[ "${approval_status}" != "implementation-approved" && "${approval_status}" != "release-approved" && "${approval_status}" != "approved" ]]; then
+    add_error "Project code contains changes without implementation approval in ${state_file}."
   fi
 fi
 

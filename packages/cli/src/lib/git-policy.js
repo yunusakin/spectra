@@ -31,7 +31,7 @@ async function resolveGitMode({ requestedMode, isTTY = false, ask } = {}) {
   }
 
   if (!isTTY) {
-    return "shared";
+    return "local";
   }
 
   if (typeof ask !== "function") {
@@ -69,7 +69,7 @@ function listFiles(rootDir) {
 }
 
 function assertNoTrackedSpectraRoots(targetRoot) {
-  const result = runGit(targetRoot, ["ls-files", "--", "sdd", ".spectra"]);
+  const result = runGit(targetRoot, ["ls-files", "--", "spectra", "sdd", ".spectra"]);
   const tracked = result.stdout
     .split(/\r?\n/)
     .map((line) => line.trim())
@@ -127,8 +127,7 @@ function beginLocalGitPolicy(targetDir) {
     excludePath: resolveExcludePath(targetRoot),
     beforeFiles: listFiles(targetRoot),
     rootsExisted: {
-      ".spectra": fs.existsSync(path.join(targetRoot, ".spectra")),
-      sdd: fs.existsSync(path.join(targetRoot, "sdd"))
+      spectra: fs.existsSync(path.join(targetRoot, "spectra"))
     }
   };
 }
@@ -139,7 +138,7 @@ function patternFor(relativeTarget, relativePath, directory = false) {
 }
 
 function buildExcludePatterns(policy, ownedPaths) {
-  const broadRoots = [".spectra", "sdd"].filter(
+  const broadRoots = ["spectra"].filter(
     (root) => !policy.rootsExisted[root] && ownedPaths.some((filePath) => filePath.startsWith(`${root}/`))
   );
   const exactPaths = ownedPaths.filter(

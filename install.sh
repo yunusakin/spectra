@@ -100,3 +100,4 @@ case ":$PATH:" in
 esac
 
 "$SPECTRA_BIN/spectra" version
+"$SPECTRA_BIN/spectra" help >/dev/null
