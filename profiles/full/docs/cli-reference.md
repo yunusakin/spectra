@@ -1,6 +1,6 @@
 # CLI Reference
 
-This is the current public command surface for Spectra `3.0.4`.
+This is the current public command surface for Spectra `3.0.5`.
 
 ## Install and Bootstrap
 

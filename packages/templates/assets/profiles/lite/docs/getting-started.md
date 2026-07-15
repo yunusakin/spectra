@@ -4,6 +4,13 @@ This guide explains how to introduce Spectra without changing your applicationâ€
 
 Start with Lite. Move to Full only when a team needs formal specs, approvals, and release gates.
 
+## Quick decision
+
+- New repository: `spectra init .`
+- Existing repository: `spectra adopt .`
+- No Node/npm: install the native macOS/Linux binary.
+- Existing Lite project that needs governance: `spectra upgrade --profile full`
+
 ## 1. Choose a Distribution Path
 
 Spectra has one CLI with two supported distribution paths.
@@ -63,6 +70,14 @@ spectra adopt . --git-mode local
 The native installer downloads the matching release artifact and verifies its SHA-256 checksum. See [Native Install](native-install.md) for permanent PATH configuration and troubleshooting.
 
 The remaining examples use `spectra`. In an npm/npx-only repository, replace it with `./spectra/bin/spectra`.
+
+To change an existing Lite project to Full:
+
+```bash
+spectra upgrade --profile full
+```
+
+The upgrade preserves existing memory-bank files and adds Full profile files.
 
 ## 2. Review Bootstrap Changes
 

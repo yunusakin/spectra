@@ -6,6 +6,12 @@ Choose **Full** only when you need executable feature specs, staged approvals, e
 
 ## 1. Bootstrap the Repository
 
+Choose the path that matches your project:
+
+- New project: use `init`.
+- Existing project: use `adopt`.
+- No Node/npm: use the native installation.
+
 Choose one distribution path.
 
 ### With npm / npx
@@ -57,6 +63,14 @@ spectra adopt .
 ```
 
 The remaining examples use `spectra`. If you used only `npx`, replace `spectra` with `./spectra/bin/spectra`.
+
+To promote an existing Lite project to Full:
+
+```bash
+spectra upgrade --profile full
+```
+
+Use `spectra update` for CLI/runtime updates. Use `spectra upgrade` for profile changes.
 
 ## 2. Review What Spectra Created
 

@@ -91,10 +91,10 @@ curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh |
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | \
-  SPECTRA_VERSION=v3.0.1 sh
+  SPECTRA_VERSION=v3.0.5 sh
 ```
 
-Version values use the Git tag form, such as `v3.0.1`.
+Version values use the Git tag form, such as `v3.0.5`.
 
 ## Repo-Local Launcher
 
@@ -113,6 +113,14 @@ Use it when global PATH setup is unavailable or when a repository should invoke 
 ```
 
 The launcher tries the recorded native binary first, then a local Node CLI fallback if present, then `spectra` on PATH. It contains no product logic. `spectra update` checks for a newer release, asks once before changing anything, and also refreshes or migrates the project runtime.
+
+To change the project profile after installation:
+
+```bash
+spectra upgrade --profile full
+```
+
+`update` changes the CLI/runtime version; `upgrade` changes the project profile.
 
 ## Release Artifacts
 

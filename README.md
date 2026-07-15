@@ -21,6 +21,15 @@ Most projects should start with Lite. You can select Full during setup:
 spectra init . --profile full
 ```
 
+## Choose your setup
+
+```text
+New project?              spectra init .
+Existing project?         spectra adopt .
+No Node or npm?           Use the native installation.
+Lite → Full?              spectra upgrade --profile full
+```
+
 ## Five-minute setup
 
 ### New project with npm/npx
@@ -55,6 +64,13 @@ spectra status
 ```
 
 See [Native Install](docs/native-install.md) for permanent PATH setup and troubleshooting.
+
+After native installation, verify the command:
+
+```bash
+spectra version
+which spectra
+```
 
 ## What setup creates
 
@@ -102,6 +118,8 @@ spectra upgrade --profile full
 ```
 
 Spectra asks for confirmation, preserves existing memory-bank files, and adds the Full profile files. Add `--agents codex,claude` if you also want agent adapters generated.
+
+`spectra update` updates the CLI and project runtime. `spectra upgrade` changes the installed Lite or Full profile.
 
 ## The daily Lite workflow
 
@@ -198,7 +216,7 @@ npm run validate
 npm run verify
 ```
 
-Current release: `3.0.1`.
+Current release: `3.0.5`.
 
 ## License
 
