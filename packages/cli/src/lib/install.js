@@ -35,6 +35,10 @@ function detectNativeBinaryPath() {
     return process.env.SPECTRA_BINARY_PATH;
   }
 
+  if (!path.basename(process.execPath).toLowerCase().startsWith("node")) {
+    return getExecutablePath();
+  }
+
   try {
     const requireFromCli = createRequire(path.join(getCliPackageRoot(), "package.json"));
     const sea = requireFromCli("node:sea");
