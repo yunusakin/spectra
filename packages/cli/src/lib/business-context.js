@@ -172,4 +172,31 @@ function promoteBusinessRule({ cwd, id }) {
   throw new Error(`Unresolved business rule not found: ${id}`);
 }
 
-export { addBusinessRule, buildRoute, normalize, promoteBusinessRule, readMarkdownTable };
+function validateBusinessContext(repoRoot) {
+  const businessRoot = path.join(repoRoot, "spectra", "sdd", "memory-bank", "business");
+  const indexPath = path.join(businessRoot, "INDEX.md");
+  const errors = [];
+  const ids = new Set();
+  for (const row of readMarkdownTable(indexPath)) {
+    if (!row.domain || !row.rules || !row.unresolved) {
+      errors.push("Business domain index rows require Domain, Rules, and Unresolved paths.");
+      continue;
+    }
+    for (const relativePath of [row.rules, row.unresolved]) {
+      const filePath = path.join(businessRoot, relativePath.replace(/^business\//, ""));
+      if (!fs.existsSync(filePath)) {
+        errors.push(`Business domain '${row.domain}' references missing file: ${relativePath}`);
+        continue;
+      }
+      const content = fs.readFileSync(filePath, "utf8");
+      for (const match of content.matchAll(/^##\s+(RULE-[A-Z0-9-]+)\s+—[\s\S]*?^Status:\s+(\S+)/gm)) {
+        if (ids.has(match[1])) errors.push(`Duplicate business rule ID: ${match[1]}`);
+        ids.add(match[1]);
+        if (!["active", "unresolved", "superseded", "deprecated"].includes(match[2])) errors.push(`Invalid business-rule status for ${match[1]}: ${match[2]}`);
+      }
+    }
+  }
+  return errors;
+}
+
+export { addBusinessRule, buildRoute, normalize, promoteBusinessRule, readMarkdownTable, validateBusinessContext };

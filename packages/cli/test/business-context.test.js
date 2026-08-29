@@ -102,3 +102,16 @@ test("route expands a selected module into its linked multi-word business domain
   assert.deepEqual(route.domains, ["loyalty-program"]);
   assert.ok(route.entries.some((entry) => entry.path.endsWith("loyalty-program/rules.md")));
 });
+
+test("check rejects duplicate business rule IDs introduced by manual edits", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
+  fs.mkdirSync(domain);
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.writeFileSync(path.join(domain, "rules.md"), "# Rules\n\n## RULE-LOY-001 — One\n\nRule one.\n\nStatus: active\n");
+  fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n\n## RULE-LOY-001 — Two\n\nRule two.\n\nStatus: unresolved\n");
+  const result = run(root, ["check"]);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /Duplicate business rule ID/);
+});
