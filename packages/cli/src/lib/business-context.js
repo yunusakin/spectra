@@ -183,7 +183,11 @@ function validateBusinessContext(repoRoot) {
       continue;
     }
     for (const relativePath of [row.rules, row.unresolved]) {
-      const filePath = path.join(businessRoot, relativePath.replace(/^business\//, ""));
+      const filePath = path.resolve(businessRoot, relativePath.replace(/^business\//, ""));
+      if (filePath !== businessRoot && !filePath.startsWith(`${businessRoot}${path.sep}`)) {
+        errors.push(`Business domain '${row.domain}' references a path outside business memory: ${relativePath}`);
+        continue;
+      }
       if (!fs.existsSync(filePath)) {
         errors.push(`Business domain '${row.domain}' references missing file: ${relativePath}`);
         continue;

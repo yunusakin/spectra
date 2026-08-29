@@ -128,3 +128,12 @@ test("check rejects a business rule without a status", () => {
   assert.equal(result.status, 1);
   assert.match(result.stdout, /must contain exactly one valid Status/);
 });
+
+test("check rejects a business index path outside the business-memory root", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | ../../package.json | business/loyalty/unresolved.md | |\n");
+  const result = run(root, ["check"]);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /outside business memory/);
+});
