@@ -1,0 +1,88 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import test from "node:test";
+import { fileURLToPath } from "node:url";
+
+const testDir = path.dirname(fileURLToPath(import.meta.url));
+const cliRoot = path.resolve(testDir, "..");
+const cliPath = path.join(cliRoot, "bin", "spectra.js");
+
+function run(cwd, args) {
+  return spawnSync(process.execPath, [cliPath, ...args], {
+    cwd,
+    encoding: "utf8",
+    env: { ...process.env, SPECTRA_ASSETS_DIR: path.join(cliRoot, "assets") }
+  });
+}
+
+function createProject() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-business-context-"));
+  assert.equal(spawnSync("git", ["init", "-q"], { cwd: root }).status, 0);
+  return root;
+}
+
+test("Lite installation includes agent-neutral module and business indexes", () => {
+  const root = createProject();
+  const result = run(root, ["init", "."]);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "tech", "modules.md")), true);
+  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md")), true);
+  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "README.md")), true);
+});
+
+test("route returns only the named domain context and defers unrelated domains", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  fs.mkdirSync(path.join(businessRoot, "loyalty"), { recursive: true });
+  fs.mkdirSync(path.join(businessRoot, "payments"), { recursive: true });
+  fs.writeFileSync(
+    path.join(businessRoot, "INDEX.md"),
+    [
+      "# Business Domain Index",
+      "",
+      "| Domain | Rules | Unresolved | Related Modules |",
+      "| --- | --- | --- | --- |",
+      "| loyalty | business/loyalty/rules.md | business/loyalty/unresolved.md | orders |",
+      "| payments | business/payments/rules.md | business/payments/unresolved.md | payments |",
+      ""
+    ].join("\n")
+  );
+  fs.writeFileSync(path.join(businessRoot, "loyalty", "rules.md"), "# Loyalty Rules\n");
+  fs.writeFileSync(path.join(businessRoot, "loyalty", "unresolved.md"), "# Unresolved Loyalty Rules\n");
+  fs.writeFileSync(path.join(businessRoot, "payments", "rules.md"), "# Payment Rules\n");
+  fs.writeFileSync(path.join(businessRoot, "payments", "unresolved.md"), "# Unresolved Payment Rules\n");
+
+  const result = run(root, ["route", "--task", "Change loyalty expiration in the order flow", "--format", "json"]);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const route = JSON.parse(result.stdout);
+  assert.equal(route.classification, "business");
+  assert.deepEqual(route.domains, ["loyalty"]);
+  assert.ok(route.entries.some((entry) => entry.path === "sdd/memory-bank/business/loyalty/rules.md"));
+  assert.ok(!route.entries.some((entry) => entry.path === "sdd/memory-bank/business/payments/rules.md"));
+  assert.ok(route.deferred.includes("sdd/memory-bank/business/payments/rules.md"));
+});
+
+test("knowledge creates one canonical unresolved rule and promotes it without duplication", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+
+  const add = run(root, [
+    "knowledge", "add", "--domain", "loyalty", "--title", "Expired point consumption",
+    "--statement", "Expired points cannot pay for an order.", "--status", "unresolved"
+  ]);
+  assert.equal(add.status, 0, add.stderr || add.stdout);
+  assert.match(add.stdout, /RULE-LOY-001/);
+
+  const promote = run(root, ["knowledge", "promote", "--id", "RULE-LOY-001"]);
+  assert.equal(promote.status, 0, promote.stderr || promote.stdout);
+  const rules = fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "rules.md"), "utf8");
+  const unresolved = fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "unresolved.md"), "utf8");
+  assert.match(rules, /RULE-LOY-001/);
+  assert.doesNotMatch(unresolved, /RULE-LOY-001/);
+});
