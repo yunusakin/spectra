@@ -189,10 +189,23 @@ function validateBusinessContext(repoRoot) {
         continue;
       }
       const content = fs.readFileSync(filePath, "utf8");
-      for (const match of content.matchAll(/^##\s+(RULE-[A-Z0-9-]+)\s+—[\s\S]*?^Status:\s+(\S+)/gm)) {
-        if (ids.has(match[1])) errors.push(`Duplicate business rule ID: ${match[1]}`);
-        ids.add(match[1]);
-        if (!["active", "unresolved", "superseded", "deprecated"].includes(match[2])) errors.push(`Invalid business-rule status for ${match[1]}: ${match[2]}`);
+      const sections = content.split(/^##\s+/m).slice(1);
+      for (const section of sections) {
+        const [heading, ...body] = section.split("\n");
+        const rule = heading.match(/^(RULE-[A-Z0-9-]+)\s+—\s+.+$/);
+        if (!rule) {
+          errors.push(`Malformed business rule heading in ${relativePath}: ${heading}`);
+          continue;
+        }
+        const statuses = body.join("\n").match(/^Status:\s+(\S+)\s*$/gm) ?? [];
+        if (statuses.length !== 1) {
+          errors.push(`Business rule ${rule[1]} must contain exactly one valid Status line.`);
+          continue;
+        }
+        const status = statuses[0].replace(/^Status:\s+/, "").trim();
+        if (ids.has(rule[1])) errors.push(`Duplicate business rule ID: ${rule[1]}`);
+        ids.add(rule[1]);
+        if (!["active", "unresolved", "superseded", "deprecated"].includes(status)) errors.push(`Invalid business-rule status for ${rule[1]}: ${status}`);
       }
     }
   }

@@ -115,3 +115,16 @@ test("check rejects duplicate business rule IDs introduced by manual edits", () 
   assert.equal(result.status, 1);
   assert.match(result.stdout, /Duplicate business rule ID/);
 });
+
+test("check rejects a business rule without a status", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
+  fs.mkdirSync(domain);
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.writeFileSync(path.join(domain, "rules.md"), "# Rules\n\n## RULE-LOY-001 — Expiration\n\nExpired points cannot pay.\n");
+  fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n");
+  const result = run(root, ["check"]);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /must contain exactly one valid Status/);
+});
