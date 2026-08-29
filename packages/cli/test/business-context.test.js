@@ -32,6 +32,7 @@ test("Lite installation includes agent-neutral module and business indexes", () 
   assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "tech", "modules.md")), true);
   assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md")), true);
   assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "README.md")), true);
+  assert.doesNotMatch(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "utf8"), /\*\*\* Add File/);
 });
 
 test("route returns only the named domain context and defers unrelated domains", () => {
@@ -85,4 +86,19 @@ test("knowledge creates one canonical unresolved rule and promotes it without du
   const unresolved = fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "unresolved.md"), "utf8");
   assert.match(rules, /RULE-LOY-001/);
   assert.doesNotMatch(unresolved, /RULE-LOY-001/);
+});
+
+test("route expands a selected module into its linked multi-word business domain", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const memory = path.join(root, "spectra", "sdd", "memory-bank");
+  fs.writeFileSync(path.join(memory, "tech", "modules.md"), "| Module | Responsibility | Paths | Business Domains |\n| --- | --- | --- | --- |\n| order-service | orders | services/orders | loyalty-program |\n");
+  fs.mkdirSync(path.join(memory, "business", "loyalty-program"));
+  fs.writeFileSync(path.join(memory, "business", "INDEX.md"), "| Domain | Rules | Unresolved | Related Modules |\n| --- | --- | --- | --- |\n| loyalty-program | business/loyalty-program/rules.md | business/loyalty-program/unresolved.md | order-service |\n");
+  fs.writeFileSync(path.join(memory, "business", "loyalty-program", "rules.md"), "# Rules\n");
+  fs.writeFileSync(path.join(memory, "business", "loyalty-program", "unresolved.md"), "# Unresolved\n");
+  const result = run(root, ["route", "--task", "Change loyalty program expiration", "--format", "json"]);
+  const route = JSON.parse(result.stdout);
+  assert.deepEqual(route.domains, ["loyalty-program"]);
+  assert.ok(route.entries.some((entry) => entry.path.endsWith("loyalty-program/rules.md")));
 });

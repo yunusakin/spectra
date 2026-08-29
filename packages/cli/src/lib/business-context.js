@@ -59,18 +59,25 @@ function buildRoute({ cwd, task, domains = [], modules = [] }) {
   const moduleIndexPath = path.join(memoryRoot, "tech", "modules.md");
   const domainRows = readMarkdownTable(businessIndexPath);
   const moduleRows = readMarkdownTable(moduleIndexPath);
-  const taskTerms = normalize(task).split("-").filter((term) => term.length > 2);
+  const taskText = normalize(task);
   const explicitDomains = new Set(domains.map(normalize));
   const explicitModules = new Set(modules.map(normalize));
 
   const selectedDomains = domainRows.filter((row) => {
     const domain = normalize(row.domain);
-    return explicitDomains.has(domain) || taskTerms.includes(domain);
+    return explicitDomains.has(domain) || taskText.includes(domain);
   });
   const selectedModules = moduleRows.filter((row) => {
     const module = normalize(row.module);
-    return explicitModules.has(module) || taskTerms.includes(module);
+    return explicitModules.has(module) || taskText.includes(module);
   });
+  const linkedDomains = new Set(selectedModules.flatMap((row) => String(row.business_domains ?? "").split(",").map(normalize)));
+  for (const row of domainRows) {
+    const relatedModules = String(row.related_modules ?? "").split(",").map(normalize);
+    if (linkedDomains.has(normalize(row.domain)) || relatedModules.some((module) => selectedModules.some((row) => normalize(row.module) === module))) {
+      if (!selectedDomains.includes(row)) selectedDomains.push(row);
+    }
+  }
 
   const entries = [
     { path: "sdd/system/runtime/minimal.md", mode: "full", reason: "routing policy" },
@@ -108,7 +115,10 @@ function ruleFile(root, domain, status) {
 
 function nextRuleId(root, domain) {
   const prefix = `RULE-${normalize(domain).slice(0, 3).toUpperCase()}-`;
-  const files = [ruleFile(root, domain, "active"), ruleFile(root, domain, "unresolved")];
+  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  const files = fs.readdirSync(businessRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .flatMap((entry) => [ruleFile(root, entry.name, "active"), ruleFile(root, entry.name, "unresolved")]);
   const ids = files.flatMap((filePath) => fs.existsSync(filePath) ? [...fs.readFileSync(filePath, "utf8").matchAll(new RegExp(`${prefix}(\\d{3})`, "g"))].map((match) => Number(match[1])) : []);
   return `${prefix}${String((Math.max(0, ...ids) + 1)).padStart(3, "0")}`;
 }
@@ -136,7 +146,9 @@ function addBusinessRule({ cwd, domain, title, statement, status = "unresolved" 
   if (!root) throw new Error(`Could not find a Spectra runtime from ${cwd}`);
   const normalizedDomain = ensureDomain(root, domain);
   const target = ruleFile(root, normalizedDomain, status);
-  const content = fs.readFileSync(target, "utf8");
+  const content = [ruleFile(root, normalizedDomain, "active"), ruleFile(root, normalizedDomain, "unresolved")]
+    .map((filePath) => fs.readFileSync(filePath, "utf8"))
+    .join("\n");
   if (content.includes(statement)) throw new Error("A matching business-rule statement already exists in this domain.");
   const id = nextRuleId(root, normalizedDomain);
   fs.appendFileSync(target, `\n## ${id} — ${title}\n\n${statement}\n\nStatus: ${status}\n\n`);
