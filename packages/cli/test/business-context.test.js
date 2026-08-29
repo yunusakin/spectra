@@ -137,3 +137,12 @@ test("check rejects a business index path outside the business-memory root", () 
   assert.equal(result.status, 1);
   assert.match(result.stdout, /outside business memory/);
 });
+
+test("route rejects a business index path outside the business-memory root", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | ../../package.json | business/loyalty/unresolved.md | |\n");
+  const result = run(root, ["route", "--task", "loyalty", "--format", "json"]);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /outside business memory/);
+});

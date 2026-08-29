@@ -42,6 +42,14 @@ function getContextRoot(projectRoot) {
   return path.join(projectRoot, "spectra");
 }
 
+function resolveBusinessPath(businessRoot, relativePath) {
+  const resolved = path.resolve(businessRoot, String(relativePath).replace(/^business\//, ""));
+  if (resolved === businessRoot || !resolved.startsWith(`${businessRoot}${path.sep}`)) {
+    throw new Error(`Business index references a path outside business memory: ${relativePath}`);
+  }
+  return resolved;
+}
+
 function classifyRoute({ domains, modules }) {
   if (domains.length > 0 && modules.length > 0) return "mixed";
   if (domains.length > 0) return "business";
@@ -89,6 +97,7 @@ function buildRoute({ cwd, task, domains = [], modules = [] }) {
   for (const row of domainRows) {
     const selected = selectedDomains.includes(row);
     for (const rulePath of [row.rules, row.unresolved].filter(Boolean)) {
+      resolveBusinessPath(path.join(memoryRoot, "business"), rulePath);
       const normalizedPath = `sdd/memory-bank/${rulePath.replace(/^sdd\/memory-bank\//, "")}`;
       if (selected) {
         entries.push({ path: normalizedPath, mode: "full", reason: `domain: ${row.domain}` });
@@ -183,8 +192,10 @@ function validateBusinessContext(repoRoot) {
       continue;
     }
     for (const relativePath of [row.rules, row.unresolved]) {
-      const filePath = path.resolve(businessRoot, relativePath.replace(/^business\//, ""));
-      if (filePath !== businessRoot && !filePath.startsWith(`${businessRoot}${path.sep}`)) {
+      let filePath;
+      try {
+        filePath = resolveBusinessPath(businessRoot, relativePath);
+      } catch {
         errors.push(`Business domain '${row.domain}' references a path outside business memory: ${relativePath}`);
         continue;
       }
