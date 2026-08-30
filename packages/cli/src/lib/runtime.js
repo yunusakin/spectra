@@ -42,7 +42,7 @@ function resolveAssetDir(localRelativePath, devFallbackRelativePath) {
   return path.resolve(packageRoot, devFallbackRelativePath);
 }
 
-const runtimeDir = resolveAssetDir(path.join("assets", "runtime"), path.join("..", "..", "core", "assets", "runtime"));
+const runtimeDir = resolveAssetDir(path.join("assets", "runtime"), path.join("..", "core", "assets", "runtime"));
 const profilesDir = resolveAssetDir(path.join("assets", "profiles"), path.join("..", "..", "profiles"));
 
 function ensureDirectory(dirPath) {
