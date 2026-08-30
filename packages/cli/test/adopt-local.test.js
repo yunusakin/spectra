@@ -58,6 +58,8 @@ test("adopt local keeps Spectra files local while project code remains visible",
   assert.equal(metadata.gitMode, "local");
   assert.ok(metadata.ownedPaths.includes("spectra/docs/workflow.md"));
   assert.ok(metadata.excludePatterns.includes("/spectra/"));
+  assert.match(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "tech", "modules.md"), "utf8"), /Unconfirmed/);
+  assert.match(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "utf8"), /Candidate domains/);
 });
 
 test("adopt local rejects a non-git target without writing installation files", () => {

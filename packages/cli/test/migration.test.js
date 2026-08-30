@@ -35,7 +35,7 @@ test("legacy migration moves Spectra-owned state into spectra and preserves comp
 
   const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
   assert.equal(metadata.profile, "full");
-  assert.equal(metadata.schemaVersion, 1);
+  assert.equal(metadata.schemaVersion, 2);
   assert.equal(metadata.localLauncher, "spectra/bin/spectra");
   assert.ok(metadata.excludePatterns.includes("/spectra/"));
 
@@ -93,4 +93,19 @@ test("shared migration leaves repository-local exclusions unchanged", () => {
   migrateLegacyLayout(root);
 
   assert.equal(fs.readFileSync(path.resolve(root, excludePath), "utf8"), "/company-secret/\n");
+});
+
+test("legacy migration adds business context scaffolding without replacing existing memory", () => {
+  const root = createLegacyProject();
+  fs.mkdirSync(path.join(root, "sdd", "memory-bank", "core"), { recursive: true });
+  fs.writeFileSync(path.join(root, "sdd", "memory-bank", "core", "project.md"), "Existing project memory\n");
+
+  migrateLegacyLayout(root);
+
+  assert.equal(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "core", "project.md"), "utf8"), "Existing project memory\n");
+  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "tech", "modules.md")), true);
+  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md")), true);
+
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
+  assert.equal(metadata.schemaVersion, 2);
 });

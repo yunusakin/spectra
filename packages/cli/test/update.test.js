@@ -60,6 +60,26 @@ test("update confirms and migrates a legacy layout", () => {
   assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
 });
 
+test("update refreshes an installed project when only the schema is outdated", () => {
+  const root = createGitProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const metadataPath = path.join(root, "spectra", "install.json");
+  const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+  metadata.schemaVersion = 1;
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
+  fs.rmSync(path.join(root, "spectra", "sdd", "memory-bank", "business"), { recursive: true, force: true });
+  fs.rmSync(path.join(root, "spectra", "sdd", "memory-bank", "tech"), { recursive: true, force: true });
+
+  const result = run(root, ["update"], { input: "y\n" });
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /Update complete/);
+  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md")), true);
+  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "tech", "modules.md")), true);
+  const updated = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+  assert.equal(updated.schemaVersion, 2);
+});
+
 test("declining update leaves a legacy layout untouched", () => {
   const root = createGitProject();
   fs.mkdirSync(path.join(root, ".spectra"), { recursive: true });

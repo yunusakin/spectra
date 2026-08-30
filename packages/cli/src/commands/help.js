@@ -6,6 +6,8 @@ const COMMANDS = {
   adopt: "Add Spectra to an existing project",
   update: "Update Spectra and the project runtime",
   upgrade: "Change the installed Lite or Full profile",
+  route: "Route a task to the smallest relevant business and module context",
+  knowledge: "Record and promote durable business rules",
   context: "Load project context",
   task: "Prepare an implementation task",
   check: "Validate project health",

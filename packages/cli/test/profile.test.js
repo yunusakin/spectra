@@ -13,7 +13,7 @@ test("profile metadata records profile, runtime, schema, and Git mode", () => {
       profile: "full",
       cliVersion: "2.0.3",
       runtimeVersion: "2.0.3",
-      schemaVersion: 1,
+      schemaVersion: 2,
       gitMode: "local"
     }
   );

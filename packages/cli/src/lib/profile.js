@@ -1,7 +1,7 @@
 import { getCliVersion } from "./version.js";
 
 const PROFILES = new Set(["lite", "full"]);
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 function normalizeProfile(profile) {
   const normalized = profile ?? "lite";

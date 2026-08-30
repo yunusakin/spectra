@@ -6,7 +6,9 @@ import { doctorCommand } from "./commands/doctor.js";
 import { discussTaskCommand } from "./commands/discuss-task.js";
 import { evalRunCommand } from "./commands/eval-run.js";
 import { initCommand } from "./commands/init.js";
+import { knowledgeCommand } from "./commands/knowledge.js";
 import { quickCommand } from "./commands/quick.js";
+import { routeCommand } from "./commands/route.js";
 import { specDiffCommand } from "./commands/spec-diff.js";
 import { skillsResolveCommand } from "./commands/skills-resolve.js";
 import { statusCommand } from "./commands/status.js";
@@ -97,6 +99,10 @@ function dispatch(argv) {
       return approveCommand([subcommand, ...rest].filter(Boolean));
     case "context-pack":
       return contextPackCommand([subcommand, ...rest].filter(Boolean));
+    case "route":
+      return routeCommand([subcommand, ...rest].filter(Boolean));
+    case "knowledge":
+      return knowledgeCommand([subcommand, ...rest].filter(Boolean));
     case "discuss-task":
       return discussTaskCommand([subcommand, ...rest].filter(Boolean));
     case "verify":

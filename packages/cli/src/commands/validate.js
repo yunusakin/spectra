@@ -6,6 +6,7 @@ import { parseOptions } from "../lib/options.js";
 import { findSpectraRoot } from "../lib/runtime.js";
 import { validateSpectraV2 } from "../lib/specs.js";
 import { getProjectLayout } from "../lib/project-layout.js";
+import { validateBusinessContext } from "../lib/business-context.js";
 
 function validateLiteProject(repoRoot) {
   const layout = getProjectLayout(repoRoot);
@@ -32,6 +33,11 @@ function validateCommand(argv) {
   const repoRoot = findSpectraRoot(cwd);
   if (!repoRoot) {
     fail(`Could not find a Spectra runtime from ${cwd}`);
+    return 1;
+  }
+  const businessErrors = validateBusinessContext(repoRoot);
+  if (businessErrors.length > 0) {
+    for (const error of businessErrors) fail(error);
     return 1;
   }
 
