@@ -1,6 +1,15 @@
 # Scripts
 
-Helper scripts for development and maintenance.
+Helper scripts for repository development, validation, and maintenance.
+
+For users installing Spectra into another project, use the CLI:
+
+```bash
+spectra init .
+spectra adopt .
+```
+
+The supported generated layout is `spectra/`. These repository scripts are not the primary consumer setup interface.
 
 ## Conventions
 - Small, single-purpose scripts.
@@ -11,9 +20,9 @@ Helper scripts for development and maintenance.
 
 | Script | Purpose | When to use |
 |--------|---------|-------------|
-| `init.sh` | Installs Spectra core into a consumer repo, with optional `--adopt` discovery and `--agents` adapter generation | Once — when starting or adopting a project |
+| `init.sh` | Legacy shell bootstrap kept for compatibility with older workflows; prefer `spectra init` or `spectra adopt` | Avoid for new consumer installs |
 | `generate-adapters.sh` | Generates adapter files for Claude, Cursor, Windsurf, Copilot, Codex, and Antigravity | After install, or when adapter instructions change |
-| `map-codebase.sh` | Produces unconfirmed brownfield discovery notes under `sdd/memory-bank/discovery/` | Before intake on an existing repo |
+| `map-codebase.sh` | Produces unconfirmed brownfield discovery notes under the installed Spectra memory bank | Before intake on an existing repo |
 | `context-pack.sh` | Prints the ordered file list for a named Spectra task/context pack | Before reading context for a task |
 | `discuss-task.sh` | Creates `implementation-brief.md` before coding | Before post-approval implementation |
 | `validate-repo.sh` | Validates canonical system paths, manifests, skill metadata, prompt indexes, docs links, and adapter generation | Every push (runs in CI) |
@@ -60,6 +69,14 @@ This enforces:
 - skill graph hard-fail for `app/*` changes
 
 ## New Workflow Helpers
+
+Run these through the repo-local launcher in installed projects when possible:
+
+```bash
+./spectra/bin/spectra status
+./spectra/bin/spectra check
+./spectra/bin/spectra context --role planner --goal discover
+```
 
 Generate adapters:
 

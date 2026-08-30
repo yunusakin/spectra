@@ -4,7 +4,9 @@
 
 # Spectra
 
-Spectra is a CLI for spec-driven development. It keeps project context, implementation intent, validation, and—when needed—approval and evaluation state together in a project-local `spectra/` directory.
+Spectra is a CLI for spec-driven development. It keeps project context, implementation intent, validation, business knowledge, and—when needed—approval and evaluation state together in a project-local `spectra/` directory.
+
+The main rule is simple: Spectra owns `spectra/`. Your product code, company docs, and existing repository layout stay yours.
 
 ## Start here
 
@@ -13,7 +15,7 @@ Spectra has one CLI and two profiles:
 | Profile | Use it when | What it gives you |
 | --- | --- | --- |
 | **Lite** (default) | You want a small personal or project-local SDD workflow | context, tasks, status, health checks, and updates |
-| **Full** | You need team governance | Lite plus executable feature specs, approvals, evaluations, adoption analysis, and agent adapters |
+| **Full** | You need team governance or agent adapters | Lite plus executable feature specs, approvals, evaluations, adoption analysis, and agent adapters |
 
 Most projects should start with Lite. You can select Full during setup:
 
@@ -74,7 +76,7 @@ which spectra
 
 ## What setup creates
 
-Spectra owns one directory in your project:
+Modern `spectra init` and `spectra adopt` create one Spectra-owned directory in your project:
 
 ```text
 your-project/
@@ -84,7 +86,7 @@ your-project/
     ├── config.yaml       # profile, Git mode, and schema
     ├── install.json      # installation and version metadata
     ├── docs/             # Spectra guides
-    └── sdd/              # context and profile runtime
+    └── sdd/              # context, business memory, and profile runtime
 ```
 
 Spectra does not create a root `app/`, `docs/`, `sdd/`, `.spectra/`, or `.github/` directory for its own files.
@@ -99,6 +101,8 @@ spectra/sdd/
 ```
 
 Your application code and company documentation remain in their existing locations.
+
+If you see older instructions that mention copying Spectra files to root-level `docs/`, `sdd/`, `scripts/`, or `.github/`, treat them as legacy implementation details. The supported setup surface is the CLI (`spectra init`, `spectra adopt`, `spectra upgrade`, and `spectra update`) and the canonical generated layout is `spectra/`.
 
 ## Git mode: private or shared
 
@@ -187,6 +191,12 @@ If Spectra says `Spectra is already up to date.`, no changes are needed. If an u
 
 See [CLI Reference](docs/cli-reference.md) for every option and compatibility alias.
 
+## Business context and token efficiency
+
+Spectra keeps durable product knowledge under `spectra/sdd/memory-bank/business/`. The business index maps each domain to its active rules, unresolved questions, and related technical modules. `spectra context` and `spectra route` use that index to load only the relevant business context for a task instead of dumping every rule into every agent session.
+
+This keeps the system agent-agnostic: Codex, Claude, Cursor, Copilot, Windsurf, Antigravity, or another tool can read the same canonical Spectra context. Agent-specific files are adapters; the source of truth stays inside `spectra/`.
+
 ## Migrating an older Spectra project
 
 Run the new CLI from the old project root:
@@ -215,6 +225,15 @@ npm test
 npm run validate
 npm run verify
 ```
+
+Repository layout for maintainers:
+
+- `packages/cli/` — npm CLI and repo-local launcher implementation
+- `packages/core/assets/runtime/` — runtime scripts copied into installed projects
+- `profiles/lite/` and `profiles/full/` — source profile templates
+- `packages/templates/` — published profile template package
+- `docs/` — contributor/user documentation for this repository
+- `scripts/` — repository maintenance scripts, not the supported consumer setup interface
 
 Current release: `3.0.6`.
 
