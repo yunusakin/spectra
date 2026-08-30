@@ -34,7 +34,7 @@ test("installSpectra fails fast when codex adapter is requested without codex on
 
   try {
     assert.throws(
-      () => installSpectra({ targetDir, agents: "codex" }),
+      () => installSpectra({ targetDir, profile: "full", gitMode: "shared", agents: "codex" }),
       /Agent setup is unhealthy: Codex: .*missing from PATH/
     );
   } finally {
@@ -50,7 +50,7 @@ test("installSpectra succeeds when codex adapter is requested and codex is avail
   const targetDir = makeTempDir("spectra-install-pass-");
 
   withFakeCodex(() => {
-    const result = installSpectra({ targetDir, agents: "codex" });
+    const result = installSpectra({ targetDir, profile: "full", gitMode: "shared", agents: "codex" });
     assert.equal(result.installed, true);
     assert.equal(fs.existsSync(path.join(targetDir, "AGENTS.md")), true);
   });
@@ -58,7 +58,7 @@ test("installSpectra succeeds when codex adapter is requested and codex is avail
 
 test("installSpectra succeeds for non-Codex agents when adapter files are generated", () => {
   const targetDir = makeTempDir("spectra-install-claude-pass-");
-  const result = installSpectra({ targetDir, agents: "claude,copilot" });
+  const result = installSpectra({ targetDir, profile: "full", gitMode: "shared", agents: "claude,copilot" });
 
   assert.equal(result.installed, true);
   assert.equal(fs.existsSync(path.join(targetDir, "CLAUDE.md")), true);
