@@ -187,6 +187,24 @@ function promoteBusinessRule({ cwd, id }) {
   throw new Error(`Unresolved business rule not found: ${id}`);
 }
 
+function transitionBusinessRule({ cwd, id, status }) {
+  if (!["superseded", "deprecated"].includes(status)) throw new Error(`Unsupported business-rule transition: ${status}`);
+  const root = findSpectraRoot(cwd);
+  if (!root) throw new Error(`Could not find a Spectra runtime from ${cwd}`);
+  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  for (const domain of fs.readdirSync(businessRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name)) {
+    for (const filePath of [ruleFile(root, domain, "active"), ruleFile(root, domain, "unresolved")]) {
+      if (!fs.existsSync(filePath)) continue;
+      const content = fs.readFileSync(filePath, "utf8");
+      const match = content.match(new RegExp(`\\n## ${id}[^]*?(?=\\n## |$)`));
+      if (!match) continue;
+      fs.writeFileSync(filePath, content.replace(match[0], match[0].replace(/^Status:\s+\S+$/m, `Status: ${status}`)));
+      return { id, domain, status };
+    }
+  }
+  throw new Error(`Business rule not found: ${id}`);
+}
+
 function validateBusinessContext(repoRoot) {
   const businessRoot = path.join(repoRoot, "spectra", "sdd", "memory-bank", "business");
   const indexPath = path.join(businessRoot, "INDEX.md");
@@ -233,4 +251,4 @@ function validateBusinessContext(repoRoot) {
   return errors;
 }
 
-export { addBusinessRule, buildRoute, normalize, promoteBusinessRule, readMarkdownTable, validateBusinessContext };
+export { addBusinessRule, buildRoute, normalize, promoteBusinessRule, readMarkdownTable, transitionBusinessRule, validateBusinessContext };

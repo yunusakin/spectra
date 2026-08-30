@@ -1,4 +1,4 @@
-import { addBusinessRule, promoteBusinessRule } from "../lib/business-context.js";
+import { addBusinessRule, promoteBusinessRule, transitionBusinessRule } from "../lib/business-context.js";
 import { parseOptions } from "../lib/options.js";
 import { ok, title } from "../lib/output.js";
 
@@ -9,7 +9,7 @@ function knowledgeCommand(argv) {
     stringFlags: ["--confidence", "--cwd", "--domain", "--evidence", "--id", "--modules", "--statement", "--status", "--title"]
   });
   if (options["--help"] || !action) {
-    title("Usage: spectra knowledge <add|promote> [options]");
+    title("Usage: spectra knowledge <add|promote|supersede|deprecate> [options]");
     return 0;
   }
   if (action === "add") {
@@ -24,7 +24,13 @@ function knowledgeCommand(argv) {
     ok(`Business rule promoted: ${result.id} (${result.domain})`);
     return 0;
   }
-  throw new Error("Usage: spectra knowledge <add|promote> [options]");
+  if (action === "supersede" || action === "deprecate") {
+    if (!options["--id"]) throw new Error("--id is required.");
+    const result = transitionBusinessRule({ cwd: options["--cwd"] ?? process.cwd(), id: options["--id"], status: action === "supersede" ? "superseded" : "deprecated" });
+    ok(`Business rule ${result.status}: ${result.id} (${result.domain})`);
+    return 0;
+  }
+  throw new Error("Usage: spectra knowledge <add|promote|supersede|deprecate> [options]");
 }
 
 export { knowledgeCommand };
