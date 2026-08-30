@@ -110,6 +110,21 @@ test("Full init adds governance and feature scaffolding under spectra", () => {
   assert.equal(metadata.profile, "full");
 });
 
+test("Full shared init materializes repo-local runtime assets for adapter commands", () => {
+  const root = createGitProject();
+  const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "full", "--git-mode", "shared"]);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.equal(fs.existsSync(path.join(root, "spectra", "cli", "assets", "runtime", "scripts", "generate-adapters.sh")), true);
+  assert.equal(fs.existsSync(path.join(root, "spectra", "cli", "assets", "profiles", "lite", "profile.yaml")), true);
+  const adapters = run(root, process.execPath, [
+    path.join(root, "spectra", "cli", "bin", "spectra.js"),
+    "adapters", "--cwd", root, "--agents", "claude,cursor,windsurf,copilot,antigravity", "--target", root
+  ]);
+  assert.equal(adapters.status, 0, adapters.stderr || adapters.stdout);
+});
+
+
 test("Full status and check resolve governance from spectra", () => {
   const root = createGitProject();
   const init = run(root, process.execPath, [cliPath, "init", ".", "--profile", "full"]);

@@ -9,6 +9,7 @@ import {
   getExecutablePath,
   getCliPackageRoot,
   getProfileAssetsDir,
+  getRuntimeAssetsDir,
   readInstallMetadata,
   removeFinderArtifacts,
   runInstalledScript,
@@ -66,6 +67,8 @@ function materializeLocalNodeCli(targetRoot) {
   for (const dirName of ["bin", "src", "assets"]) {
     replaceDirectory(path.join(cliPackageRoot, dirName), path.join(localCliRoot, dirName));
   }
+  replaceDirectory(getRuntimeAssetsDir(), path.join(localCliRoot, "assets", "runtime"));
+  replaceDirectory(path.dirname(getProfileAssetsDir("lite")), path.join(localCliRoot, "assets", "profiles"));
 
   for (const fileName of ["package.json", "README.md", "LICENSE"]) {
     copyFile(path.join(cliPackageRoot, fileName), path.join(localCliRoot, fileName));
