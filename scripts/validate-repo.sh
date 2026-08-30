@@ -429,11 +429,11 @@ cat > "${fake_codex_bin}/codex" <<'EOF'
 exit 0
 EOF
 chmod +x "${fake_codex_bin}/codex"
-if ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js init "${agent_health_repo}" --profile full --git-mode shared >/dev/null 2>&1; then
+if ! SPECTRA_CODEX_COMMAND="${fake_codex_bin}/codex" PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js init "${agent_health_repo}" --profile full --git-mode shared >/dev/null 2>&1; then
   add_error "spectra init: failed agent readiness smoke repo bootstrap"
-elif ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js adapters --cwd "${agent_health_repo}" --agents claude,cursor,windsurf,copilot,codex,antigravity --target "${agent_health_repo}" >/dev/null 2>&1; then
+elif ! SPECTRA_CODEX_COMMAND="${fake_codex_bin}/codex" PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js adapters --cwd "${agent_health_repo}" --agents claude,cursor,windsurf,copilot,codex,antigravity --target "${agent_health_repo}" >/dev/null 2>&1; then
   add_error "spectra adapters: failed agent readiness smoke adapter generation"
-elif ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js doctor --cwd "${agent_health_repo}" >/tmp/spectra-agent-doctor.log 2>&1; then
+elif ! SPECTRA_CODEX_COMMAND="${fake_codex_bin}/codex" PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js doctor --cwd "${agent_health_repo}" >/tmp/spectra-agent-doctor.log 2>&1; then
   add_error "spectra doctor: agent readiness smoke check failed"
 elif ! grep -q "Claude: healthy" /tmp/spectra-agent-doctor.log \
   || ! grep -q "Cursor: healthy" /tmp/spectra-agent-doctor.log \
