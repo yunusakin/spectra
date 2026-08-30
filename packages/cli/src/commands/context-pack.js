@@ -1,5 +1,7 @@
 import fs from "node:fs";
+import path from "node:path";
 import { buildContextPack } from "../lib/context.js";
+import { buildRoute } from "../lib/business-context.js";
 import { next, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 
@@ -62,7 +64,7 @@ function printInline(pack) {
 function contextPackCommand(argv) {
   const { options } = parseOptions(argv, {
     booleanFlags: ["--help", "--changed"],
-    stringFlags: ["--base", "--cwd", "--format", "--goal", "--head", "--role", "--task"]
+    stringFlags: ["--base", "--cwd", "--domain", "--format", "--goal", "--head", "--module", "--role", "--route-task", "--task"]
   });
 
   if (options["--help"]) {
@@ -83,6 +85,17 @@ function contextPackCommand(argv) {
     base: options["--base"] ?? null,
     head: options["--head"] ?? null
   });
+  if (options["--route-task"]) {
+    const route = buildRoute({
+      cwd: options["--cwd"] ?? process.cwd(),
+      task: options["--route-task"],
+      domains: String(options["--domain"] ?? "").split(",").filter(Boolean),
+      modules: String(options["--module"] ?? "").split(",").filter(Boolean)
+    });
+    pack.route = route;
+    pack.entries.push(...route.entries.map((entry) => ({ ...entry, absolutePath: path.join(route.repoRoot, entry.path), exists: true, changed: false, changedRefs: [], estimatedTokens: 0, source: "route" })));
+    pack.avoid.push(...route.deferred);
+  }
 
   switch (options["--format"] ?? "refs") {
     case "refs":

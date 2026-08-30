@@ -149,7 +149,7 @@ function ensureDomain(root, domain) {
   return normalized;
 }
 
-function addBusinessRule({ cwd, domain, title, statement, status = "unresolved" }) {
+function addBusinessRule({ cwd, domain, title, statement, status = "unresolved", evidence = null, modules = null, confidence = null }) {
   if (status !== "unresolved" && status !== "active") throw new Error("--status must be unresolved or active.");
   const root = findSpectraRoot(cwd);
   if (!root) throw new Error(`Could not find a Spectra runtime from ${cwd}`);
@@ -160,7 +160,13 @@ function addBusinessRule({ cwd, domain, title, statement, status = "unresolved" 
     .join("\n");
   if (content.includes(statement)) throw new Error("A matching business-rule statement already exists in this domain.");
   const id = nextRuleId(root, normalizedDomain);
-  fs.appendFileSync(target, `\n## ${id} — ${title}\n\n${statement}\n\nStatus: ${status}\n\n`);
+  const metadata = [
+    `Status: ${status}`,
+    modules ? `Affected Modules: ${modules}` : null,
+    evidence ? `Evidence: ${evidence}` : null,
+    confidence ? `Confidence: ${confidence}` : null
+  ].filter(Boolean).join("\n");
+  fs.appendFileSync(target, `\n## ${id} — ${title}\n\n${statement}\n\n${metadata}\n\n`);
   return { id, domain: normalizedDomain, status };
 }
 
