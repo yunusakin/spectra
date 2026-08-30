@@ -255,6 +255,9 @@ required_paths=(
   "sdd/memory-bank/core/activeContext-archive.md"
   "sdd/memory-bank/core/progress-archive.md"
   "sdd/memory-bank/discovery/README.md"
+  "sdd/memory-bank/tech/modules.md"
+  "sdd/memory-bank/business/INDEX.md"
+  "sdd/memory-bank/business/README.md"
 )
 
 for p in "${required_paths[@]}"; do
@@ -426,7 +429,7 @@ cat > "${fake_codex_bin}/codex" <<'EOF'
 exit 0
 EOF
 chmod +x "${fake_codex_bin}/codex"
-if ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js init "${agent_health_repo}" >/dev/null 2>&1; then
+if ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js init "${agent_health_repo}" --profile full --git-mode shared >/dev/null 2>&1; then
   add_error "spectra init: failed agent readiness smoke repo bootstrap"
 elif ! PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js adapters --cwd "${agent_health_repo}" --agents claude,cursor,windsurf,copilot,codex,antigravity --target "${agent_health_repo}" >/dev/null 2>&1; then
   add_error "spectra adapters: failed agent readiness smoke adapter generation"
