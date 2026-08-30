@@ -1126,6 +1126,7 @@ function buildContextPack({
 export {
   buildContextPack,
   ensureContextSummaries,
+  estimateTokensFromFile,
   normalizeGoal,
   normalizeRole
 };

@@ -38,6 +38,13 @@ function readMarkdownTable(filePath) {
   }, []);
 }
 
+function splitList(value) {
+  return String(value ?? "")
+    .split(",")
+    .map(normalize)
+    .filter(Boolean);
+}
+
 function getContextRoot(projectRoot) {
   return path.join(projectRoot, "spectra");
 }
@@ -70,6 +77,15 @@ function buildRoute({ cwd, task, domains = [], modules = [] }) {
   const taskText = normalize(task);
   const explicitDomains = new Set(domains.map(normalize));
   const explicitModules = new Set(modules.map(normalize));
+  const knownDomains = new Set(domainRows.map((row) => normalize(row.domain)).filter(Boolean));
+  const knownModules = new Set(moduleRows.map((row) => normalize(row.module)).filter(Boolean));
+
+  for (const domain of explicitDomains) {
+    if (!knownDomains.has(domain)) throw new Error(`Unknown business domain: ${domain}`);
+  }
+  for (const module of explicitModules) {
+    if (!knownModules.has(module)) throw new Error(`Unknown technical module: ${module}`);
+  }
 
   const selectedDomains = domainRows.filter((row) => {
     const domain = normalize(row.domain);
@@ -79,9 +95,9 @@ function buildRoute({ cwd, task, domains = [], modules = [] }) {
     const module = normalize(row.module);
     return explicitModules.has(module) || taskText.includes(module);
   });
-  const linkedDomains = new Set(selectedModules.flatMap((row) => String(row.business_domains ?? "").split(",").map(normalize)));
+  const linkedDomains = new Set(selectedModules.flatMap((row) => splitList(row.business_domains)));
   for (const row of domainRows) {
-    const relatedModules = String(row.related_modules ?? "").split(",").map(normalize);
+    const relatedModules = splitList(row.related_modules);
     if (linkedDomains.has(normalize(row.domain)) || relatedModules.some((module) => selectedModules.some((row) => normalize(row.module) === module))) {
       if (!selectedDomains.includes(row)) selectedDomains.push(row);
     }
@@ -198,6 +214,9 @@ function transitionBusinessRule({ cwd, id, status }) {
       const content = fs.readFileSync(filePath, "utf8");
       const match = content.match(new RegExp(`\\n## ${id}[^]*?(?=\\n## |$)`));
       if (!match) continue;
+      if (path.basename(filePath) === "unresolved.md") {
+        throw new Error(`Business rule ${id} is unresolved. Promote it before changing it to ${status}.`);
+      }
       fs.writeFileSync(filePath, content.replace(match[0], match[0].replace(/^Status:\s+\S+$/m, `Status: ${status}`)));
       return { id, domain, status };
     }
@@ -205,15 +224,55 @@ function transitionBusinessRule({ cwd, id, status }) {
   throw new Error(`Business rule not found: ${id}`);
 }
 
+function parseRuleStatement(body) {
+  return body
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !/^[A-Za-z][A-Za-z ]*:\s+/.test(line))[0] ?? "";
+}
+
 function validateBusinessContext(repoRoot) {
   const businessRoot = path.join(repoRoot, "spectra", "sdd", "memory-bank", "business");
   const indexPath = path.join(businessRoot, "INDEX.md");
+  const moduleIndexPath = path.join(repoRoot, "spectra", "sdd", "memory-bank", "tech", "modules.md");
   const errors = [];
   const ids = new Set();
-  for (const row of readMarkdownTable(indexPath)) {
+  const domainRows = readMarkdownTable(indexPath);
+  const moduleRows = readMarkdownTable(moduleIndexPath);
+  const domains = new Set();
+  const modules = new Set(moduleRows.map((row) => normalize(row.module)).filter(Boolean));
+  const activeStatements = new Map();
+
+  for (const row of domainRows) {
+    const domain = normalize(row.domain);
+    if (domain) {
+      if (domains.has(domain)) errors.push(`Duplicate business domain in index: ${domain}`);
+      domains.add(domain);
+    }
+  }
+
+  for (const row of moduleRows) {
+    const module = normalize(row.module);
+    if (!module) continue;
+    for (const domain of splitList(row.business_domains)) {
+      if (!domains.has(domain)) errors.push(`Technical module '${module}' references unknown business domain: ${domain}`);
+    }
+  }
+
+  for (const entry of fs.existsSync(businessRoot) ? fs.readdirSync(businessRoot, { withFileTypes: true }) : []) {
+    if (entry.isDirectory() && !domains.has(normalize(entry.name))) {
+      errors.push(`Business domain folder is not listed in INDEX.md: ${entry.name}`);
+    }
+  }
+
+  for (const row of domainRows) {
     if (!row.domain || !row.rules || !row.unresolved) {
       errors.push("Business domain index rows require Domain, Rules, and Unresolved paths.");
       continue;
+    }
+    const domain = normalize(row.domain);
+    for (const module of splitList(row.related_modules)) {
+      if (modules.size > 0 && !modules.has(module)) errors.push(`Business domain '${domain}' references unknown technical module: ${module}`);
     }
     for (const relativePath of [row.rules, row.unresolved]) {
       let filePath;
@@ -245,6 +304,20 @@ function validateBusinessContext(repoRoot) {
         if (ids.has(rule[1])) errors.push(`Duplicate business rule ID: ${rule[1]}`);
         ids.add(rule[1]);
         if (!["active", "unresolved", "superseded", "deprecated"].includes(status)) errors.push(`Invalid business-rule status for ${rule[1]}: ${status}`);
+        const fileName = path.basename(relativePath);
+        if (fileName === "rules.md" && status === "unresolved") errors.push(`Business rule ${rule[1]} cannot be unresolved in rules.md.`);
+        if (fileName === "unresolved.md" && status !== "unresolved") errors.push(`Business rule ${rule[1]} must be unresolved in unresolved.md.`);
+        if (status === "active") {
+          const statement = normalize(parseRuleStatement(body.join("\n")));
+          if (statement) {
+            const statementKey = `${domain}:${statement}`;
+            if (activeStatements.has(statementKey)) {
+              errors.push(`Duplicate active business-rule statement: ${activeStatements.get(statementKey)} and ${rule[1]}`);
+            } else {
+              activeStatements.set(statementKey, rule[1]);
+            }
+          }
+        }
       }
     }
   }

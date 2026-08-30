@@ -52,11 +52,11 @@ test("Lite init keeps all generated files under spectra", () => {
   const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
   assert.equal(metadata.profile, "lite");
   assert.equal(metadata.gitMode, "local");
-  assert.equal(metadata.schemaVersion, 1);
+  assert.equal(metadata.schemaVersion, 2);
   const config = fs.readFileSync(path.join(root, "spectra", "config.yaml"), "utf8");
   assert.match(config, /^profile: lite$/m);
   assert.match(config, /^gitMode: local$/m);
-  assert.match(config, /^schemaVersion: 1$/m);
+  assert.match(config, /^schemaVersion: 2$/m);
   assert.equal(run(root, "git", ["check-ignore", "spectra/install.json"]).status, 0);
 });
 

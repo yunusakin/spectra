@@ -6,6 +6,7 @@ import { getProjectLayout } from "../lib/project-layout.js";
 import { getCliVersion } from "../lib/version.js";
 import { migrateLegacyLayout } from "../lib/migration.js";
 import { installSpectra } from "../lib/install.js";
+import { SCHEMA_VERSION } from "../lib/profile.js";
 import { ok, title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { validateCommand } from "./validate.js";
@@ -65,9 +66,10 @@ async function updateCommand(argv) {
   const metadata = readInstallMetadata(projectRoot);
   const migrationRequired = needsLegacyMigration(projectRoot);
   const runtimeOutdated = metadata?.runtimeVersion && compareVersions(metadata.runtimeVersion, current) < 0;
+  const schemaOutdated = Number(metadata?.schemaVersion ?? 0) < SCHEMA_VERSION;
   const cliOutdated = compareVersions(current, latest) < 0;
 
-  if (!migrationRequired && !runtimeOutdated && !cliOutdated) {
+  if (!migrationRequired && !runtimeOutdated && !schemaOutdated && !cliOutdated) {
     ok("Spectra is already up to date.");
     return 0;
   }

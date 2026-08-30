@@ -3,7 +3,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { getProjectLayout } from "./project-layout.js";
 import { createInstallMetadata, SCHEMA_VERSION } from "./profile.js";
-import { ensureDirectory, getProfileAssetsDir } from "./runtime.js";
+import { copyDirectory, ensureDirectory, getProfileAssetsDir } from "./runtime.js";
 
 function movePath(sourcePath, targetPath) {
   if (!fs.existsSync(sourcePath)) {
@@ -118,6 +118,7 @@ function migrateLegacyLayout(projectRoot) {
   for (const [sourcePath, targetPath] of knownDocMoves(absoluteRoot, profile, layout.docs)) {
     movePath(sourcePath, targetPath);
   }
+  copyDirectory(path.join(getProfileAssetsDir(profile), "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
 
   if (gitMode === "local") {
     normalizeLocalExclusions(absoluteRoot);
