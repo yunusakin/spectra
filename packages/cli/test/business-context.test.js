@@ -35,6 +35,18 @@ test("Lite installation includes agent-neutral module and business indexes", () 
   assert.doesNotMatch(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "utf8"), /\*\*\* Add File/);
 });
 
+test("check rejects missing canonical business context indexes", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  fs.rmSync(path.join(root, "spectra", "sdd", "memory-bank", "business"), { recursive: true, force: true });
+  fs.rmSync(path.join(root, "spectra", "sdd", "memory-bank", "tech"), { recursive: true, force: true });
+
+  const result = run(root, ["check"]);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /Missing canonical business context file/);
+});
+
 test("route returns only the named domain context and defers unrelated domains", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);

@@ -237,6 +237,12 @@ function validateBusinessContext(repoRoot) {
   const moduleIndexPath = path.join(repoRoot, "spectra", "sdd", "memory-bank", "tech", "modules.md");
   const errors = [];
   const ids = new Set();
+  for (const filePath of [moduleIndexPath, indexPath]) {
+    if (!fs.existsSync(filePath)) {
+      errors.push(`Missing canonical business context file: ${path.relative(path.join(repoRoot, "spectra"), filePath)}`);
+    }
+  }
+  if (errors.length > 0) return errors;
   const domainRows = readMarkdownTable(indexPath);
   const moduleRows = readMarkdownTable(moduleIndexPath);
   const domains = new Set();
