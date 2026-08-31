@@ -193,7 +193,21 @@ See [CLI Reference](docs/cli-reference.md) for every option and compatibility al
 
 ## Business context and token efficiency
 
-Spectra keeps durable product knowledge under `spectra/sdd/memory-bank/business/`. The business index maps each domain to its active rules, unresolved questions, and related technical modules. `spectra context` and `spectra route` use that index to load only the relevant business context for a task instead of dumping every rule into every agent session.
+Spectra keeps durable product knowledge under `spectra/sdd/memory-bank/business/`. The business index maps each domain to keywords, active rules, unresolved questions, and related technical modules. `spectra context` and `spectra route` use that index to load only the relevant business context for a task instead of dumping every rule into every agent session.
+
+Example domain index:
+
+```markdown
+| Domain | Keywords | Rules | Unresolved | Related Modules |
+| --- | --- | --- | --- | --- |
+| loyalty | point,points,reward,expiration | business/loyalty/rules.md | business/loyalty/unresolved.md | order-service |
+```
+
+`spectra route --format json` includes match explanations such as `matchedBy: "keyword"` and `matchedValue: "points"` so routing stays inspectable. New knowledge defaults to unresolved; direct active creation requires explicit verified evidence:
+
+```bash
+spectra knowledge add --domain loyalty --title "Expiration" --statement "Expired points cannot pay." --status active --verified --evidence "Product policy"
+```
 
 This keeps the system agent-agnostic: Codex, Claude, Cursor, Copilot, Windsurf, Antigravity, or another tool can read the same canonical Spectra context. Agent-specific files are adapters; the source of truth stays inside `spectra/`.
 

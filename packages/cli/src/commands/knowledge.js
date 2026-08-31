@@ -5,16 +5,17 @@ import { ok, title } from "../lib/output.js";
 function knowledgeCommand(argv) {
   const [action, ...rest] = argv;
   const { options } = parseOptions(rest, {
-    booleanFlags: ["--help"],
+    booleanFlags: ["--help", "--verified"],
     stringFlags: ["--confidence", "--cwd", "--domain", "--evidence", "--id", "--modules", "--statement", "--status", "--title"]
   });
   if (options["--help"] || !action) {
     title("Usage: spectra knowledge <add|promote|resolve|supersede|deprecate> [options]");
+    title("Add defaults to --status unresolved. Direct --status active requires --verified.");
     return 0;
   }
   if (action === "add") {
     for (const flag of ["--domain", "--title", "--statement"]) if (!options[flag]) throw new Error(`${flag} is required.`);
-    const result = addBusinessRule({ cwd: options["--cwd"] ?? process.cwd(), domain: options["--domain"], title: options["--title"], statement: options["--statement"], status: options["--status"] ?? "unresolved", evidence: options["--evidence"], modules: options["--modules"], confidence: options["--confidence"] });
+    const result = addBusinessRule({ cwd: options["--cwd"] ?? process.cwd(), domain: options["--domain"], title: options["--title"], statement: options["--statement"], status: options["--status"] ?? "unresolved", evidence: options["--evidence"], modules: options["--modules"], confidence: options["--confidence"], verified: Boolean(options["--verified"]) });
     ok(`Business rule recorded: ${result.id} (${result.status})`);
     return 0;
   }

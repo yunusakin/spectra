@@ -76,6 +76,16 @@ normalize_csv() {
 common_body="$(cat "${common_file}")"
 ignore_lines="$(sed 's/^/- `/;s/$/`/' "${ignore_file}")"
 
+business_memory_policy() {
+  cat <<'EOF'
+- Use route-first context before broad exploration.
+- Unresolved is the default for new business claims.
+- Require verified evidence before active business knowledge.
+- Do not infer business truth from code alone.
+- Avoid duplicate business rules by checking existing domain rules first.
+EOF
+}
+
 render_common_block() {
   local tool_name="$1"
   cat <<EOF
@@ -121,6 +131,7 @@ EOF
 
 - Ask Spectra for role/goal context with \`spectra context --role <role> --goal <goal>\`.
 - Do not preload unrelated files when a pack exists.
+$(business_memory_policy)
 EOF
       ;;
     windsurf)
@@ -139,6 +150,7 @@ EOF
 # Spectra Context
 
 - Resolve the required pack with \`spectra context --role <role> --goal <goal>\`.
+$(business_memory_policy)
 EOF
       ;;
     copilot)
@@ -171,6 +183,7 @@ EOF
 # Spectra Context
 
 - Resolve task context via \`spectra context --role <role> --goal <goal>\`.
+$(business_memory_policy)
 EOF
       ;;
     *)

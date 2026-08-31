@@ -36,7 +36,7 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 | --- | --- | --- | --- |
 | `spectra init [path] [--profile <lite\|full>] [--git-mode <local\|shared>]` | starting a new Git repository | bootstraps a Spectra-managed project under `spectra/` | defaults: `lite`, `local` |
 | `spectra adopt [path] [--profile <lite\|full>] [--git-mode <local\|shared>]` | adding Spectra to an existing repository | installs the selected profile under `spectra/` | `local`: private via Git exclude; `shared`: commit-ready |
-| `spectra route --task "<task>"` | before work that may touch business behavior | selects the smallest relevant module and business-domain context | use `--format json`, `--domain`, or `--module` for explicit routing |
+| `spectra route --task "<task>"` | before work that may touch business behavior | selects the smallest relevant module and business-domain context with deterministic match explanations | use `--format json`, `--domain`, or `--module` for explicit routing |
 | `spectra context --role <role> --goal <goal>` | before planning, architecture, implementation, or review work | loads the minimum role-aware and goal-aware context pack | add `--route-task "<task>"` to compose business routing into the pack |
 | `spectra knowledge <add\|promote\|resolve\|supersede\|deprecate>` | recording durable business knowledge | creates stable rule IDs and manages unresolved-to-active lifecycle | direct markdown edits remain valid; `spectra check` verifies integrity |
 | `spectra task --item <id> --task-type <type> --goal "<goal>"` | before implementation work starts | records implementation intent for a tracked item | `--task-type`: use the relevant work type for the item being implemented |
@@ -61,13 +61,25 @@ spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>]
 
 Use `--git-mode shared` when the generated Spectra layer should be reviewed and committed with the repository.
 
+Business-domain indexes may include explicit routing keywords:
+
+```markdown
+| Domain | Keywords | Rules | Unresolved | Related Modules |
+| --- | --- | --- | --- | --- |
+| loyalty | point,points,reward,expiration | business/loyalty/rules.md | business/loyalty/unresolved.md | order-service |
+```
+
+`spectra route --format json` preserves `domains` and `modules` and adds `domainMatches` / `moduleMatches` entries that explain `matchedBy` and `matchedValue`.
+
+`spectra knowledge add` defaults to unresolved. `--status active` requires `--verified`; `--verified` is invalid for unresolved rules.
+
 ## Workflow Commands
 
 ```bash
 spectra context --role <role> --goal <goal>
 spectra context --role <role> --goal <goal> --route-task "<task>"
 spectra route --task "<task>" [--format refs|json]
-spectra knowledge add --domain <domain> --title "<title>" --statement "<rule>" [--status unresolved|active]
+spectra knowledge add --domain <domain> --title "<title>" --statement "<rule>" [--status unresolved|active] [--verified]
 spectra knowledge promote --id <rule-id>
 spectra knowledge resolve --id <rule-id>
 spectra task --item <id> --task-type <type> --goal "<goal>"

@@ -67,3 +67,38 @@ test("adaptersGenerateCommand succeeds for multi-agent non-Codex output", () => 
   assert.equal(fs.existsSync(path.join(targetDir, ".github", "copilot-instructions.md")), true);
   assert.equal(fs.existsSync(path.join(targetDir, ".agent", "rules", "spectra-core.md")), true);
 });
+
+test("generated adapters include the core business-memory policy", () => {
+  const targetDir = makeTempDir("spectra-adapters-policy-");
+
+  withFakeCodex(() => {
+    const status = adaptersGenerateCommand(["--cwd", process.cwd(), "--agents", "claude,cursor,windsurf,copilot,codex,antigravity", "--target", targetDir]);
+    assert.equal(status, 0);
+  });
+
+  const adapterPaths = [
+    "CLAUDE.md",
+    "AGENTS.md",
+    ".github/copilot-instructions.md",
+    ".cursor/rules/spectra-core.mdc",
+    ".cursor/rules/spectra-context.mdc",
+    ".windsurf/rules/spectra-core.md",
+    ".windsurf/rules/spectra-context.md",
+    ".agent/rules/spectra-core.md",
+    ".agent/rules/spectra-context.md"
+  ];
+  const requiredMarkers = [
+    /route-first context/i,
+    /unresolved.*default/i,
+    /verified evidence before active/i,
+    /avoid duplicate business rules/i,
+    /do not infer business truth from code alone/i
+  ];
+
+  for (const adapterPath of adapterPaths) {
+    const content = fs.readFileSync(path.join(targetDir, adapterPath), "utf8");
+    for (const marker of requiredMarkers) {
+      assert.match(content, marker, `${adapterPath} is missing ${marker}`);
+    }
+  }
+});
