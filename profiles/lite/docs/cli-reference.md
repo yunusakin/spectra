@@ -39,6 +39,7 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 | `spectra context --role <role> --goal <goal>` | before planning, architecture, implementation, or review work | loads the minimum role-aware and goal-aware context pack | common roles: `planner`, `architect`, `implementer`, `reviewer`, `verifier`, `release-manager`; common goals: `discover`, `decide`, `implement`, `verify`, `ship` |
 | `spectra task --item <id> --task-type <type> --goal "<goal>"` | before implementation work starts | records implementation intent for a tracked item | `--task-type`: use the relevant work type for the item being implemented |
 | `spectra check [--base <sha> --head <sha>]` | after spec changes | runs the public validation entry point | `validate` remains a compatibility alias |
+| `spectra doctor [--fix]` | checking local tool/runtime/adapter health | reports doctor checks; with `--fix`, repairs safe generated Spectra files and re-runs validation | does not rewrite business memory or application code |
 | `spectra status` | resuming work | summarizes current project and Spectra changes | recommends the next action |
 | `spectra update` | checking or upgrading Spectra | checks the latest CLI version, asks once when changes are needed, refreshes runtime files, and migrates legacy layouts | reports `Spectra is already up to date.` when no work is needed |
 | `spectra help [command\|advanced]` | learning the CLI | shows the everyday workflow or Full commands | supports `--help` too |

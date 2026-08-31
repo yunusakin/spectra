@@ -137,7 +137,17 @@ function writeProjectConfig(targetRoot, { profile, gitMode, overwrite = false })
   fs.writeFileSync(configPath, `profile: ${profile}\ngitMode: ${gitMode}\nschemaVersion: ${SCHEMA_VERSION}\n`);
 }
 
-function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "local", profile = "lite", refresh = false, upgrade = false }) {
+function installSpectra({
+  targetDir,
+  adopt = false,
+  agents = "",
+  gitMode = "local",
+  profile = "lite",
+  refresh = false,
+  upgrade = false,
+  refreshMemoryBank = true,
+  refreshV2Scaffolding = true
+}) {
   const absoluteTarget = path.resolve(targetDir);
   const normalizedProfile = normalizeProfile(profile);
   const layout = getProjectLayout(absoluteTarget);
@@ -168,10 +178,12 @@ function installSpectra({ targetDir, adopt = false, agents = "", gitMode = "loca
     copyDirectory(path.join(profileAssetsDir, "docs"), layout.docs);
   }
 
-  copyDirectory(path.join(profileAssetsDir, "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
+  if (refreshMemoryBank) {
+    copyDirectory(path.join(profileAssetsDir, "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
+  }
   writeProjectConfig(absoluteTarget, { profile: normalizedProfile, gitMode, overwrite: upgrade });
   updateManifestRepoMode(absoluteTarget, "consumer");
-  if (normalizedProfile === "full") {
+  if (normalizedProfile === "full" && refreshV2Scaffolding) {
     ensureV2Scaffolding(layout.root, { adopt });
   }
   const nativeBinaryPath = detectNativeBinaryPath();
