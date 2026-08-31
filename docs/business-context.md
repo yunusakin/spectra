@@ -12,12 +12,12 @@ Spectra stores durable product and business knowledge under `spectra/sdd/memory-
 Business rules use stable IDs and short metadata:
 
 ```markdown
-## RULE-LOY-001 — Expiration
+## RULE-CUS-001 — Eligibility window
 
-Expired points cannot pay for an order.
+Requests outside the eligibility window require manual approval.
 
 Status: active
-Affected Modules: order-service
+Affected Modules: account-service
 Evidence: Product policy, 2026-08-30
 Confidence: high
 ```
@@ -27,8 +27,8 @@ Confidence: high
 Use route-first context for business behavior:
 
 ```bash
-spectra route --task "Change loyalty expiration" --format json
-spectra context --role implementer --goal implement --route-task "Change loyalty expiration"
+spectra route --task "Change customer eligibility handling" --format json
+spectra context --role implementer --goal implement --route-task "Change customer eligibility handling"
 ```
 
 `spectra route` selects matching domains and modules, includes only their mapped files, and lists unrelated domain files as deferred. `spectra context` composes that route with the existing role and goal context pack, including token estimates for the routed files.
@@ -38,13 +38,13 @@ The business index supports both the legacy format and the keyword-aware format:
 ```markdown
 | Domain | Keywords | Rules | Unresolved | Related Modules |
 | --- | --- | --- | --- | --- |
-| loyalty | point,points,reward,rewards,balance,expiration,expire | business/loyalty/rules.md | business/loyalty/unresolved.md | order-service |
+| customer-policy | eligibility,limit,approval,manual-review | business/customer-policy/rules.md | business/customer-policy/unresolved.md | account-service |
 ```
 
 Keywords are explicit configuration, not inferred by AI. Routing is deterministic and considers explicit domain/module hints first, then exact task matches, configured keywords, and module/domain relationships. JSON output remains backward compatible and adds explainability:
 
 ```json
-{"domains":["loyalty"],"domainMatches":[{"name":"loyalty","matchedBy":"keyword","matchedValue":"points"}]}
+{"domains":["customer-policy"],"domainMatches":[{"name":"customer-policy","matchedBy":"keyword","matchedValue":"eligibility"}]}
 ```
 
 ## Knowledge Lifecycle
@@ -52,11 +52,11 @@ Keywords are explicit configuration, not inferred by AI. Routing is deterministi
 Use the CLI when possible:
 
 ```bash
-spectra knowledge add --domain loyalty --title "Expiration" --statement "Expired points cannot pay." --status unresolved
-spectra knowledge add --domain loyalty --title "Expiration" --statement "Expired points cannot pay." --status active --verified --evidence "Product policy"
-spectra knowledge promote --id RULE-LOY-001
-spectra knowledge supersede --id RULE-LOY-001
-spectra knowledge deprecate --id RULE-LOY-001
+spectra knowledge add --domain customer-policy --title "Eligibility window" --statement "Requests outside the eligibility window require manual approval." --status unresolved
+spectra knowledge add --domain customer-policy --title "Eligibility window" --statement "Requests outside the eligibility window require manual approval." --status active --verified --evidence "Product policy"
+spectra knowledge promote --id RULE-CUS-001
+spectra knowledge supersede --id RULE-CUS-001
+spectra knowledge deprecate --id RULE-CUS-001
 ```
 
 Unresolved is the safe default. Direct active creation requires `--verified` and should be used only for authoritative evidence such as product documentation, approved specifications, existing verified rules, or explicit product-owner statements. Code behavior alone should normally be recorded as unresolved.

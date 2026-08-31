@@ -78,7 +78,7 @@ Business knowledge lives under `spectra/sdd/memory-bank/business/` and is indexe
 ```markdown
 | Domain | Keywords | Rules | Unresolved | Related Modules |
 | --- | --- | --- | --- | --- |
-| loyalty | point,points,reward,expiration | business/loyalty/rules.md | business/loyalty/unresolved.md | order-service |
+| customer-policy | eligibility,limit,approval | business/customer-policy/rules.md | business/customer-policy/unresolved.md | account-service |
 ```
 
 `spectra route --format json` explains each match with fields such as `domainMatches` and `moduleMatches`.

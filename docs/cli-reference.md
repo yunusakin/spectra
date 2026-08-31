@@ -66,7 +66,7 @@ Business-domain indexes may include explicit routing keywords:
 ```markdown
 | Domain | Keywords | Rules | Unresolved | Related Modules |
 | --- | --- | --- | --- | --- |
-| loyalty | point,points,reward,expiration | business/loyalty/rules.md | business/loyalty/unresolved.md | order-service |
+| customer-policy | eligibility,limit,approval | business/customer-policy/rules.md | business/customer-policy/unresolved.md | account-service |
 ```
 
 `spectra route --format json` preserves `domains` and `modules` and adds `domainMatches` / `moduleMatches` entries that explain `matchedBy` and `matchedValue`.

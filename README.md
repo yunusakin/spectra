@@ -89,7 +89,7 @@ your-project/
     └── sdd/              # context, business memory, and profile runtime
 ```
 
-Spectra does not create a root `app/`, `docs/`, `sdd/`, `.spectra/`, or `.github/` directory for its own files.
+Spectra keeps its own generated project layer under the root `spectra/` directory. It does not use root `app/`, `docs/`, `sdd/`, `.spectra/`, or `.github/` directories as the canonical location for Spectra-owned files.
 
 Full adds these inside the same boundary:
 
@@ -200,13 +200,13 @@ Example domain index:
 ```markdown
 | Domain | Keywords | Rules | Unresolved | Related Modules |
 | --- | --- | --- | --- | --- |
-| loyalty | point,points,reward,expiration | business/loyalty/rules.md | business/loyalty/unresolved.md | order-service |
+| customer-policy | eligibility,limit,approval | business/customer-policy/rules.md | business/customer-policy/unresolved.md | account-service |
 ```
 
-`spectra route --format json` includes match explanations such as `matchedBy: "keyword"` and `matchedValue: "points"` so routing stays inspectable. New knowledge defaults to unresolved; direct active creation requires explicit verified evidence:
+`spectra route --format json` includes match explanations such as `matchedBy: "keyword"` and `matchedValue: "eligibility"` so routing stays inspectable. New knowledge defaults to unresolved; direct active creation requires explicit verified evidence:
 
 ```bash
-spectra knowledge add --domain loyalty --title "Expiration" --statement "Expired points cannot pay." --status active --verified --evidence "Product policy"
+spectra knowledge add --domain customer-policy --title "Eligibility window" --statement "Requests outside the eligibility window require manual approval." --status active --verified --evidence "Product policy"
 ```
 
 This keeps the system agent-agnostic: Codex, Claude, Cursor, Copilot, Windsurf, Antigravity, or another tool can read the same canonical Spectra context. Agent-specific files are adapters; the source of truth stays inside `spectra/`.
