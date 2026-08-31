@@ -249,7 +249,7 @@ Repository layout for maintainers:
 - `docs/` — contributor/user documentation for this repository
 - `scripts/` — repository maintenance scripts, not the supported consumer setup interface
 
-Current release: `3.0.6`.
+Current release: `3.0.7`.
 
 ## License
 
