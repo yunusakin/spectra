@@ -81,6 +81,122 @@ test("route returns only the named domain context and defers unrelated domains",
   assert.ok(route.deferred.includes("sdd/memory-bank/business/payments/rules.md"));
 });
 
+test("route selects a domain from configured keywords and explains the match", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  fs.mkdirSync(path.join(businessRoot, "loyalty"), { recursive: true });
+  fs.mkdirSync(path.join(businessRoot, "payments"), { recursive: true });
+  fs.writeFileSync(
+    path.join(businessRoot, "INDEX.md"),
+    [
+      "# Business Domain Index",
+      "",
+      "| Domain | Keywords | Rules | Unresolved | Related Modules |",
+      "| --- | --- | --- | --- | --- |",
+      "| loyalty | point,points,reward,rewards,balance,expiration,expire | business/loyalty/rules.md | business/loyalty/unresolved.md | orders |",
+      "| payments | payment,pay,charge,refund,card | business/payments/rules.md | business/payments/unresolved.md | payments |",
+      ""
+    ].join("\n")
+  );
+  fs.writeFileSync(path.join(businessRoot, "loyalty", "rules.md"), "# Loyalty Rules\n");
+  fs.writeFileSync(path.join(businessRoot, "loyalty", "unresolved.md"), "# Unresolved Loyalty Rules\n");
+  fs.writeFileSync(path.join(businessRoot, "payments", "rules.md"), "# Payment Rules\n");
+  fs.writeFileSync(path.join(businessRoot, "payments", "unresolved.md"), "# Unresolved Payment Rules\n");
+
+  const result = run(root, ["route", "--task", "Expired points are usable during checkout", "--format", "json"]);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const route = JSON.parse(result.stdout);
+  assert.deepEqual(route.domains, ["loyalty"]);
+  assert.deepEqual(route.domainMatches, [{ name: "loyalty", matchedBy: "keyword", matchedValue: "points" }]);
+  assert.ok(route.entries.some((entry) => entry.path === "sdd/memory-bank/business/loyalty/rules.md"));
+  assert.ok(route.deferred.includes("sdd/memory-bank/business/payments/rules.md"));
+});
+
+test("route explains explicit and module-derived matches without duplicating selected domains", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const memory = path.join(root, "spectra", "sdd", "memory-bank");
+  fs.writeFileSync(
+    path.join(memory, "tech", "modules.md"),
+    "| Module | Responsibility | Paths | Business Domains |\n| --- | --- | --- | --- |\n| order-service | orders | services/orders | loyalty |\n| payment-service | payments | services/payments | payments |\n"
+  );
+  const businessRoot = path.join(memory, "business");
+  for (const domain of ["loyalty", "payments"]) {
+    fs.mkdirSync(path.join(businessRoot, domain), { recursive: true });
+    fs.writeFileSync(path.join(businessRoot, domain, "rules.md"), `# ${domain} Rules\n`);
+    fs.writeFileSync(path.join(businessRoot, domain, "unresolved.md"), `# ${domain} Unresolved\n`);
+  }
+  fs.writeFileSync(
+    path.join(businessRoot, "INDEX.md"),
+    [
+      "| Domain | Keywords | Rules | Unresolved | Related Modules |",
+      "| --- | --- | --- | --- | --- |",
+      "| loyalty | points | business/loyalty/rules.md | business/loyalty/unresolved.md | order-service |",
+      "| payments | refund | business/payments/rules.md | business/payments/unresolved.md | payment-service |",
+      ""
+    ].join("\n")
+  );
+
+  const result = run(root, ["route", "--task", "checkout change", "--domain", "loyalty", "--module", "payment-service", "--format", "json"]);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const route = JSON.parse(result.stdout);
+  assert.deepEqual(route.domains, ["loyalty", "payments"]);
+  assert.deepEqual(route.modules, ["payment-service", "order-service"]);
+  assert.ok(route.domainMatches.some((match) => match.name === "loyalty" && match.matchedBy === "explicit-domain"));
+  assert.ok(route.domainMatches.some((match) => match.name === "payments" && match.matchedBy === "module-business-domain" && match.matchedValue === "payment-service"));
+  assert.ok(route.moduleMatches.some((match) => match.name === "payment-service" && match.matchedBy === "explicit-module"));
+  assert.ok(route.moduleMatches.some((match) => match.name === "order-service" && match.matchedBy === "business-related-module" && match.matchedValue === "loyalty"));
+});
+
+test("route does not select sibling domains through domain-related module expansion", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const memory = path.join(root, "spectra", "sdd", "memory-bank");
+  fs.writeFileSync(
+    path.join(memory, "tech", "modules.md"),
+    "| Module | Responsibility | Paths | Business Domains |\n| --- | --- | --- | --- |\n| checkout-service | checkout | services/checkout | loyalty,payments |\n"
+  );
+  const businessRoot = path.join(memory, "business");
+  for (const domain of ["loyalty", "payments"]) {
+    fs.mkdirSync(path.join(businessRoot, domain), { recursive: true });
+    fs.writeFileSync(path.join(businessRoot, domain, "rules.md"), `# ${domain} Rules\n`);
+    fs.writeFileSync(path.join(businessRoot, domain, "unresolved.md"), `# ${domain} Unresolved\n`);
+  }
+  fs.writeFileSync(
+    path.join(businessRoot, "INDEX.md"),
+    [
+      "| Domain | Keywords | Rules | Unresolved | Related Modules |",
+      "| --- | --- | --- | --- | --- |",
+      "| loyalty | points | business/loyalty/rules.md | business/loyalty/unresolved.md | checkout-service |",
+      "| payments | card | business/payments/rules.md | business/payments/unresolved.md | checkout-service |",
+      ""
+    ].join("\n")
+  );
+
+  const result = run(root, ["route", "--task", "Expired points are usable during checkout", "--format", "json"]);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const route = JSON.parse(result.stdout);
+  assert.deepEqual(route.domains, ["loyalty"]);
+  assert.deepEqual(route.modules, ["checkout-service"]);
+  assert.ok(route.deferred.includes("sdd/memory-bank/business/payments/rules.md"));
+});
+
+test("route with no domain match returns only baseline routing context", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const result = run(root, ["route", "--task", "rename local variable", "--format", "json"]);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const route = JSON.parse(result.stdout);
+  assert.deepEqual(route.domains, []);
+  assert.deepEqual(route.modules, []);
+  assert.ok(route.entries.every((entry) => !entry.path.includes("/business/") || entry.path.endsWith("business/INDEX.md")));
+});
+
 test("knowledge creates one canonical unresolved rule and promotes it without duplication", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
@@ -98,6 +214,45 @@ test("knowledge creates one canonical unresolved rule and promotes it without du
   const unresolved = fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "unresolved.md"), "utf8");
   assert.match(rules, /RULE-LOY-001/);
   assert.doesNotMatch(unresolved, /RULE-LOY-001/);
+});
+
+test("knowledge add defaults to unresolved status", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+
+  const add = run(root, [
+    "knowledge", "add", "--domain", "loyalty", "--title", "Default lifecycle",
+    "--statement", "Unverified business claims remain pending by default."
+  ]);
+
+  assert.equal(add.status, 0, add.stderr || add.stdout);
+  assert.match(add.stdout, /unresolved/);
+  assert.match(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "unresolved.md"), "utf8"), /Status: unresolved/);
+});
+
+test("knowledge direct active creation requires explicit verification", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+
+  const missingVerified = run(root, [
+    "knowledge", "add", "--domain", "loyalty", "--title", "Active without verification",
+    "--statement", "Expired points cannot pay.", "--status", "active"
+  ]);
+  const invalidVerified = run(root, [
+    "knowledge", "add", "--domain", "loyalty", "--title", "Verified unresolved",
+    "--statement", "Observed code needs confirmation.", "--verified"
+  ]);
+  const verified = run(root, [
+    "knowledge", "add", "--domain", "loyalty", "--title", "Verified active",
+    "--statement", "Expired points cannot pay.", "--status", "active", "--verified", "--evidence", "Product policy"
+  ]);
+
+  assert.equal(missingVerified.status, 1);
+  assert.match(missingVerified.stdout, /--status active requires --verified/);
+  assert.equal(invalidVerified.status, 1);
+  assert.match(invalidVerified.stdout, /--verified can only be used with --status active/);
+  assert.equal(verified.status, 0, verified.stderr || verified.stdout);
+  assert.match(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "rules.md"), "utf8"), /Status: active/);
 });
 
 test("knowledge resolve is an alias for promoting an unresolved rule", () => {
@@ -150,7 +305,7 @@ test("check rejects duplicate business rule IDs introduced by manual edits", () 
   assert.equal(run(root, ["init", "."]).status, 0);
   const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
   fs.mkdirSync(domain);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
   fs.writeFileSync(path.join(domain, "rules.md"), "# Rules\n\n## RULE-LOY-001 — One\n\nRule one.\n\nStatus: active\n");
   fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n\n## RULE-LOY-001 — Two\n\nRule two.\n\nStatus: unresolved\n");
   const result = run(root, ["check"]);
@@ -163,7 +318,7 @@ test("check rejects a business rule without a status", () => {
   assert.equal(run(root, ["init", "."]).status, 0);
   const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
   fs.mkdirSync(domain);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
   fs.writeFileSync(path.join(domain, "rules.md"), "# Rules\n\n## RULE-LOY-001 — Expiration\n\nExpired points cannot pay.\n");
   fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n");
   const result = run(root, ["check"]);
@@ -174,7 +329,7 @@ test("check rejects a business rule without a status", () => {
 test("check rejects a business index path outside the business-memory root", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | ../../package.json | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | ../../package.json | business/loyalty/unresolved.md | |\n");
   const result = run(root, ["check"]);
   assert.equal(result.status, 1);
   assert.match(result.stdout, /outside business memory/);
@@ -183,7 +338,7 @@ test("check rejects a business index path outside the business-memory root", () 
 test("route rejects a business index path outside the business-memory root", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | ../../package.json | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | ../../package.json | business/loyalty/unresolved.md | |\n");
   const result = run(root, ["route", "--task", "loyalty", "--format", "json"]);
   assert.equal(result.status, 1);
   assert.match(result.stdout, /outside business memory/);
@@ -240,7 +395,7 @@ test("check rejects lifecycle statuses in the wrong business rule file", () => {
   assert.equal(run(root, ["init", "."]).status, 0);
   const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
   fs.mkdirSync(domain);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
   fs.writeFileSync(path.join(domain, "rules.md"), "# Rules\n\n## RULE-LOY-001 — Pending\n\nNeed a decision.\n\nStatus: unresolved\n");
   fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n");
 
@@ -255,7 +410,7 @@ test("check rejects duplicate active business rule statements from direct edits"
   assert.equal(run(root, ["init", "."]).status, 0);
   const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
   fs.mkdirSync(domain);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
   fs.writeFileSync(
     path.join(domain, "rules.md"),
     [
@@ -281,6 +436,61 @@ test("check rejects duplicate active business rule statements from direct edits"
 
   assert.equal(result.status, 1);
   assert.match(result.stdout, /Duplicate active business-rule statement/);
+});
+
+test("check rejects malformed and ambiguous business routing keywords", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  for (const domain of ["loyalty", "payments"]) {
+    fs.mkdirSync(path.join(businessRoot, domain), { recursive: true });
+    fs.writeFileSync(path.join(businessRoot, domain, "rules.md"), "# Rules\n");
+    fs.writeFileSync(path.join(businessRoot, domain, "unresolved.md"), "# Unresolved\n");
+  }
+  fs.writeFileSync(
+    path.join(businessRoot, "INDEX.md"),
+    [
+      "| Domain | Keywords | Rules | Unresolved | Related Modules |",
+      "| --- | --- | --- | --- | --- |",
+      "| loyalty | points,,points,refund | business/loyalty/rules.md | business/loyalty/unresolved.md | |",
+      "| payments | refund | business/payments/rules.md | business/payments/unresolved.md | |",
+      ""
+    ].join("\n")
+  );
+
+  const result = run(root, ["check"]);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /empty routing keyword/);
+  assert.match(result.stdout, /duplicate routing keyword 'points'/);
+  assert.match(result.stdout, /ambiguous routing keyword 'refund'/);
+});
+
+test("check rejects non-comma business routing keyword delimiters", () => {
+  const root = createProject();
+  assert.equal(run(root, ["init", "."]).status, 0);
+  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  for (const domain of ["loyalty", "payments"]) {
+    fs.mkdirSync(path.join(businessRoot, domain), { recursive: true });
+    fs.writeFileSync(path.join(businessRoot, domain, "rules.md"), "# Rules\n");
+    fs.writeFileSync(path.join(businessRoot, domain, "unresolved.md"), "# Unresolved\n");
+  }
+  fs.writeFileSync(
+    path.join(businessRoot, "INDEX.md"),
+    [
+      "| Domain | Keywords | Rules | Unresolved | Related Modules |",
+      "| --- | --- | --- | --- | --- |",
+      "| loyalty | points;rewards | business/loyalty/rules.md | business/loyalty/unresolved.md | |",
+      "| payments | card/refund | business/payments/rules.md | business/payments/unresolved.md | |",
+      ""
+    ].join("\n")
+  );
+
+  const result = run(root, ["check"]);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /invalid routing keyword delimiter.*points;rewards/);
+  assert.match(result.stdout, /invalid routing keyword delimiter.*card\/refund/);
 });
 
 test("knowledge rejects superseding an unresolved rule before promotion", () => {

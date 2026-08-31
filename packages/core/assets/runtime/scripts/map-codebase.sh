@@ -209,8 +209,8 @@ cat > "${SPECTRA_ROOT}/sdd/memory-bank/business/INDEX.md" <<EOF
 
 > Candidate domains are intentionally empty at bootstrap. Add only reviewed business domains; do not infer business truth from directory names.
 
-| Domain | Rules | Unresolved | Related Modules |
-| --- | --- | --- | --- |
+| Domain | Keywords | Rules | Unresolved | Related Modules |
+| --- | --- | --- | --- | --- |
 EOF
 
 echo "Codebase mapping: OK"

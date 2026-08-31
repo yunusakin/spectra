@@ -73,7 +73,17 @@ Lite is the default. Full adds executable specs, governance, adoption, agent ada
 
 ## Business Context
 
-Business knowledge lives under `spectra/sdd/memory-bank/business/` and is indexed by domain. Context routing uses that index to include only task-relevant business rules and unresolved questions, which keeps prompts smaller while preserving durable project knowledge.
+Business knowledge lives under `spectra/sdd/memory-bank/business/` and is indexed by domain. Context routing uses domain names, related modules, and explicit configured keywords to include only task-relevant business rules and unresolved questions, which keeps prompts smaller while preserving durable project knowledge.
+
+```markdown
+| Domain | Keywords | Rules | Unresolved | Related Modules |
+| --- | --- | --- | --- | --- |
+| loyalty | point,points,reward,expiration | business/loyalty/rules.md | business/loyalty/unresolved.md | order-service |
+```
+
+`spectra route --format json` explains each match with fields such as `domainMatches` and `moduleMatches`.
+
+New business claims default to unresolved. Use `--status active --verified` only when evidence is authoritative; code behavior alone should normally be recorded as unresolved.
 
 Agent adapters such as `AGENTS.md` or `CLAUDE.md` are generated only when requested with a Full profile. They point agents back to the same Spectra source of truth instead of duplicating project knowledge per agent.
 

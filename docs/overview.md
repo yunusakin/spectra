@@ -57,7 +57,7 @@ In Full, `spectra admin eval` checks behavior contracts and scenario suites.
 
 `spectra context --role <role> --goal <goal>` loads the minimum useful context instead of dumping the whole repo into every agent.
 
-Add `--route-task "<task>"` when the task touches business behavior. Spectra then uses `sdd/memory-bank/tech/modules.md` and `sdd/memory-bank/business/INDEX.md` to include only the relevant module and domain files, while unrelated domain rules stay deferred.
+Add `--route-task "<task>"` when the task touches business behavior. Spectra then uses `sdd/memory-bank/tech/modules.md` and `sdd/memory-bank/business/INDEX.md` to include only the relevant module and domain files, while unrelated domain rules stay deferred. Domain keywords are explicit index configuration, and JSON route output explains why each domain or module matched.
 
 ## Canonical State
 

@@ -86,4 +86,4 @@ Human-readable support context:
 6. [Examples](examples/README.md)
 # Business context routing
 
-Use `spectra route --task "<task description>"` before a normal development task. Spectra returns the smallest relevant technical-module and business-domain context and defers unrelated rule files. Business rules live once under `sdd/memory-bank/business/`; use `spectra knowledge add` for reusable evidence-backed rules and `spectra knowledge promote` after resolving uncertainty.
+Use `spectra route --task "<task description>"` before a normal development task. Spectra returns the smallest relevant technical-module and business-domain context and defers unrelated rule files. Business indexes may include explicit keywords, and JSON output explains the match reason. Business rules live once under `sdd/memory-bank/business/`; use `spectra knowledge add` for unresolved claims, `spectra knowledge add --status active --verified` only for authoritative rules, and `spectra knowledge promote` after resolving uncertainty.
