@@ -169,6 +169,22 @@ function writeManagedExclude(policy, excludePatterns) {
   fs.writeFileSync(policy.excludePath, next);
 }
 
+function ensureLocalSpectraExclude(targetDir) {
+  const requestedTarget = path.resolve(targetDir);
+  const rootResult = runGit(requestedTarget, ["rev-parse", "--show-toplevel"]);
+  const gitRoot = fs.realpathSync(rootResult.stdout.trim());
+  const targetRoot = fs.realpathSync(requestedTarget);
+  const relativeTarget = toPosix(path.relative(gitRoot, targetRoot)) || ".";
+  const excludePath = resolveExcludePath(targetRoot);
+  const spectraPattern = patternFor(relativeTarget, "spectra", true);
+  const current = fs.existsSync(excludePath) ? fs.readFileSync(excludePath, "utf8") : "";
+  if (current.includes(spectraPattern)) {
+    return { changed: false, excludePath, excludePatterns: [spectraPattern] };
+  }
+  writeManagedExclude({ excludePath, relativeTarget }, [spectraPattern]);
+  return { changed: true, excludePath, excludePatterns: [spectraPattern] };
+}
+
 function finishLocalGitPolicy(policy, existing = {}) {
   const before = new Set(policy.beforeFiles);
   const newOwnedPaths = listFiles(policy.targetRoot).filter((filePath) => !before.has(filePath));
@@ -194,6 +210,7 @@ export {
   assertPathsUntracked,
   beginLocalGitPolicy,
   buildExcludePatterns,
+  ensureLocalSpectraExclude,
   finishLocalGitPolicy,
   resolveGitMode
 };

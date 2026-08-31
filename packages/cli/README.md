@@ -87,6 +87,10 @@ New business claims default to unresolved. Use `--status active --verified` only
 
 Agent adapters such as `AGENTS.md` or `CLAUDE.md` are generated only when requested with a Full profile. They point agents back to the same Spectra source of truth instead of duplicating project knowledge per agent.
 
+## Doctor repair
+
+`spectra doctor` checks local tool, runtime, and adapter health. `spectra doctor --fix` repairs safe generated Spectra files such as launchers, runtime/profile files, version metadata, local Git exclude policy, and detected adapter files. It does not rewrite business memory or application code.
+
 ## Documentation
 
 - [Repository README](https://github.com/yunusakin/spectra#readme)

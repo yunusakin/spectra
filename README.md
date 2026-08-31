@@ -184,6 +184,7 @@ If Spectra says `Spectra is already up to date.`, no changes are needed. If an u
 | `spectra context` | Load focused planning or implementation context |
 | `spectra task` | Record implementation intent |
 | `spectra check` | Validate the installed project layer |
+| `spectra doctor --fix` | Repair safe generated Spectra files, then re-run validation |
 | `spectra status` | Resume work and see recent updates |
 | `spectra update` | Check for updates and migrate old layouts |
 | `spectra help` | Learn the everyday command surface |

@@ -11,6 +11,7 @@ const COMMANDS = {
   context: "Load project context",
   task: "Prepare an implementation task",
   check: "Validate project health",
+  doctor: "Check local tools, runtime, adapters, and optionally repair generated files",
   status: "Show project status"
 };
 
