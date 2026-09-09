@@ -1,0 +1,13 @@
+{
+  "name": "@fixture/web",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "vitest run",
+    "build": "vite build",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "react": "^18.3.0",
+    "vite": "^5.0.0"
+  }
+}
