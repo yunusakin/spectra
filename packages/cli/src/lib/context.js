@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { ensureDirectory, findSpectraRoot } from "./runtime.js";
 import { getFeatureDirs, readJsonContract } from "./specs.js";
 import { getProjectLayout } from "./project-layout.js";
+import { readIndex as readRepoIndex } from "./index/cache.js";
 
 const contextModuleFile = typeof import.meta.url === "string" ? fileURLToPath(import.meta.url) : null;
 
@@ -1034,6 +1035,41 @@ function resolveEntry(repoRoot, entryId, changedFiles, source) {
   };
 }
 
+const MAX_REPO_INDEX_MODULES = 25;
+
+// Minimal, additive bridge into the repo index (see `spectra index`): it never
+// participates in token budgets or entry selection, so a project that has not
+// run `spectra index` yet keeps producing exactly the same context pack as
+// before. It only surfaces what the index already knows, never inferring
+// business meaning of its own.
+function buildRepoIndexSummary(projectRoot) {
+  const index = readRepoIndex(projectRoot);
+  if (!index) {
+    return { available: false };
+  }
+
+  const modules = index.records
+    .filter((record) => record.kind === "module")
+    .slice(0, MAX_REPO_INDEX_MODULES)
+    .map((record) => ({
+      id: record.id,
+      name: record.name,
+      path: record.path,
+      ecosystem: record.ecosystem,
+      confidence: record.confidence,
+      status: record.status
+    }));
+
+  return {
+    available: true,
+    generatedAt: index.generatedAt,
+    ecosystems: index.ecosystems,
+    stats: index.stats,
+    modules,
+    hint: "Run `spectra index --explain` for full module/build/test/dependency evidence; `spectra index --check` to verify it is still current."
+  };
+}
+
 function buildContextPack({
   cwd,
   role,
@@ -1119,7 +1155,8 @@ function buildContextPack({
     avoid: rolePolicy.avoid.filter((candidate) => !entries.some((entry) => entry.path === candidate)),
     escalation: goalPolicy.escalation.map((entryId) => ENTRY_DEFS[entryId].path),
     entries,
-    totals
+    totals,
+    repoIndex: buildRepoIndexSummary(projectRoot)
   };
 }
 
