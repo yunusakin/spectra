@@ -129,3 +129,149 @@ test("e2e: gradle-multi-module fixture is indexed as candidate/low-to-medium con
   assert.match(explain.stdout, /settings\.gradle\.kts/);
 });
 
+test("e2e: maven-multi-module fixture builds a confirmed parent/child module graph", () => {
+  const root = materializeFixture("maven-multi-module");
+
+  runOk(root, ["adopt", ".", "--git-mode", "local"]);
+  const index = readIndex(root);
+
+  assert.deepEqual(index.ecosystems, ["maven"]);
+
+  const parentModule = index.records.find((r) => r.kind === "module" && r.name === "parent");
+  assert.ok(parentModule);
+  assert.equal(parentModule.attributes.isParent, true);
+  assert.equal(parentModule.confidence, "high");
+  assert.equal(parentModule.status, "confirmed");
+  assert.equal(parentModule.relationships.dependsOn.length, 2);
+
+  const orderModule = index.records.find((r) => r.kind === "module" && r.name === "order-service");
+  assert.ok(orderModule);
+  assert.equal(orderModule.path, "services/order");
+  assert.equal(orderModule.attributes.parent.artifactId, "parent");
+
+  const commonModule = index.records.find((r) => r.kind === "module" && r.name === "common");
+  assert.ok(commonModule);
+  assert.equal(commonModule.path, "libs/common");
+
+  const commonDep = index.records.find((r) => r.kind === "dependency" && r.name === "com.acme:common");
+  assert.ok(commonDep);
+
+  const springDep = index.records.find(
+    (r) => r.kind === "dependency" && r.name === "org.springframework.boot:spring-boot-starter-web"
+  );
+  assert.ok(springDep);
+
+  const springRuntime = index.records.find((r) => r.kind === "runtime" && r.name === "Spring Boot");
+  assert.ok(springRuntime, "expected Spring Boot runtime hint from spring-boot-maven-plugin");
+
+  const testTarget = index.records.find((r) => r.kind === "test-target" && r.name === "order-service:test");
+  assert.ok(testTarget, "expected order-service test target from src/test/java presence");
+
+  for (const record of index.records) {
+    assert.ok(record.evidence.length > 0, `record ${record.id} missing evidence`);
+  }
+
+  runOk(root, ["index", "--check"]);
+
+  const explain = runOk(root, ["index", "--explain"]);
+  assert.match(explain.stdout, /services\/order\/pom\.xml/);
+  assert.match(explain.stdout, /libs\/common\/pom\.xml/);
+});
+
+test("e2e: go-workspace fixture reads go.work modules, cmd entrypoints and requires", () => {
+  const root = materializeFixture("go-workspace");
+
+  runOk(root, ["adopt", ".", "--git-mode", "local"]);
+  const index = readIndex(root);
+
+  assert.deepEqual(index.ecosystems, ["go"]);
+
+  const svcModule = index.records.find((r) => r.kind === "module" && r.name === "example.com/svc");
+  assert.ok(svcModule);
+  assert.equal(svcModule.path, "svc");
+  assert.equal(svcModule.confidence, "high");
+  assert.equal(svcModule.status, "confirmed");
+
+  const libModule = index.records.find((r) => r.kind === "module" && r.name === "example.com/pkg-lib");
+  assert.ok(libModule);
+  assert.equal(libModule.path, "pkg-lib");
+
+  const ginDep = index.records.find((r) => r.kind === "dependency" && r.name === "github.com/gin-gonic/gin");
+  assert.ok(ginDep);
+
+  const entrypoint = index.records.find((r) => r.kind === "entrypoint" && r.name === "example.com/svc:cmd:server");
+  assert.ok(entrypoint);
+  assert.equal(entrypoint.path, "svc/cmd/server");
+
+  const testTarget = index.records.find((r) => r.kind === "test-target" && r.name === "example.com/svc:test");
+  assert.ok(testTarget);
+  assert.equal(testTarget.attributes.testFileCount, 1);
+
+  runOk(root, ["index", "--check"]);
+
+  const explain = runOk(root, ["index", "--explain"]);
+  assert.match(explain.stdout, /svc\/go\.mod/);
+  assert.match(explain.stdout, /pkg-lib\/go\.mod/);
+});
+
+test("e2e: dotnet-solution fixture resolves project references and test/runtime markers", () => {
+  const root = materializeFixture("dotnet-solution");
+
+  runOk(root, ["adopt", ".", "--git-mode", "local"]);
+  const index = readIndex(root);
+
+  assert.deepEqual(index.ecosystems, ["dotnet"]);
+
+  const apiModule = index.records.find((r) => r.kind === "module" && r.name === "Api");
+  assert.ok(apiModule);
+  assert.equal(apiModule.attributes.outputType, "Exe");
+  assert.equal(apiModule.attributes.targetFramework, "net8.0");
+
+  const testModule = index.records.find((r) => r.kind === "module" && r.name === "Api.Tests");
+  assert.ok(testModule);
+  assert.equal(testModule.attributes.isTestProject, true);
+  assert.ok(testModule.relationships.dependsOn.length > 0, "Api.Tests should depend on Api via ProjectReference");
+
+  const testTarget = index.records.find((r) => r.kind === "test-target");
+  assert.ok(testTarget);
+
+  const entrypoint = index.records.find((r) => r.kind === "entrypoint");
+  assert.ok(entrypoint, "expected an entrypoint for the Exe output type project");
+
+  const aspnetRuntime = index.records.find((r) => r.kind === "runtime" && r.name === "ASP.NET Core");
+  assert.ok(aspnetRuntime);
+
+  const testSdkDep = index.records.find((r) => r.kind === "dependency" && r.name === "Microsoft.NET.Test.Sdk");
+  assert.ok(testSdkDep);
+
+  runOk(root, ["index", "--check"]);
+
+  const explain = runOk(root, ["index", "--explain"]);
+  assert.match(explain.stdout, /Api\.csproj/);
+  assert.match(explain.stdout, /Api\.Tests\.csproj/);
+});
+
+test("e2e: frontend-simple fixture confirms Next.js via dependency + config file combo", () => {
+  const root = materializeFixture("frontend-simple");
+
+  runOk(root, ["adopt", ".", "--git-mode", "local"]);
+  const index = readIndex(root);
+
+  assert.deepEqual(index.ecosystems, ["node"]);
+
+  const appModule = index.records.find((r) => r.kind === "module" && r.name === "frontend-simple-fixture");
+  assert.ok(appModule);
+
+  const buildTarget = index.records.find((r) => r.kind === "build-target");
+  assert.equal(buildTarget.attributes.command, "next build");
+
+  const testTarget = index.records.find((r) => r.kind === "test-target");
+  assert.equal(testTarget.attributes.command, "jest");
+
+  const nextRuntime = index.records.find((r) => r.kind === "runtime" && r.attributes.framework === "Next.js");
+  assert.ok(nextRuntime, "expected Next.js runtime confirmed via dependency + next.config.js");
+  assert.equal(nextRuntime.confidence, "high");
+  assert.equal(nextRuntime.status, "confirmed");
+
+  runOk(root, ["index", "--check"]);
+});
