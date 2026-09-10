@@ -164,8 +164,11 @@ test("e2e: maven-multi-module fixture builds a confirmed parent/child module gra
   const springRuntime = index.records.find((r) => r.kind === "runtime" && r.name === "Spring Boot");
   assert.ok(springRuntime, "expected Spring Boot runtime hint from spring-boot-maven-plugin");
 
+  // This fixture only carries pom.xml files (no src/ tree), so the Maven
+  // scanner — which detects a test-target purely from src/test/java
+  // presence, not from parsed source content — correctly reports none.
   const testTarget = index.records.find((r) => r.kind === "test-target" && r.name === "order-service:test");
-  assert.ok(testTarget, "expected order-service test target from src/test/java presence");
+  assert.equal(testTarget, undefined);
 
   for (const record of index.records) {
     assert.ok(record.evidence.length > 0, `record ${record.id} missing evidence`);
