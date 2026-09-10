@@ -1541,6 +1541,7 @@ export {
   computeApprovalState,
   ensureV2Scaffolding,
   getFeatureDirs,
+  hasRealMarkdownContent,
   readYamlContract,
   readJsonContract,
   runEvalSuite,
