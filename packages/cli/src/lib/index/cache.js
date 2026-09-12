@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getProjectLayout } from "../project-layout.js";
+import { buildRepoIndex } from "./engine.js";
 
 function getIndexCacheDir(projectRoot) {
   return path.join(getProjectLayout(projectRoot).root, "cache", "index");
@@ -41,4 +42,17 @@ function readIndex(projectRoot) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
-export { getIndexCacheDir, getIndexFilePath, writeIndex, readIndex };
+// Shared by `spectra index --check` and the `repo-index` verify stage: never
+// writes, just reports whether a cached index exists and whether a fresh
+// rebuild's signature still matches it.
+function checkIndexFreshness(projectRoot) {
+  const cached = readIndex(projectRoot);
+  if (!cached) {
+    return { status: "missing", cached: null, fresh: null };
+  }
+  const fresh = buildRepoIndex(projectRoot);
+  const stale = cached.signature.hash !== fresh.signature.hash || cached.ecosystems.join(",") !== fresh.ecosystems.join(",");
+  return { status: stale ? "stale" : "fresh", cached, fresh };
+}
+
+export { getIndexCacheDir, getIndexFilePath, writeIndex, readIndex, checkIndexFreshness };

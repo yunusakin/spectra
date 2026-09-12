@@ -3,6 +3,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { ensureDirectory, findSpectraRoot } from "./runtime.js";
 import { getProjectLayout } from "./project-layout.js";
+import { checkIndexFreshness } from "./index/cache.js";
 import YAML from "yaml";
 
 const STAGES = [
@@ -1487,13 +1488,33 @@ function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", 
     detail: profile === "release" ? `current stage: ${approvalState.highest_valid_state}` : "profile standard"
   });
 
+  const indexFreshness = checkIndexFreshness(repoRoot);
+  stages.push({
+    name: "repo-index",
+    blocking: false,
+    warnings:
+      indexFreshness.status === "missing"
+        ? ['No repo index found. Run "spectra index".']
+        : indexFreshness.status === "stale"
+          ? ['Repo index is stale. Run "spectra index" to refresh it.']
+          : [],
+    score: indexFreshness.status === "fresh" ? 1 : indexFreshness.status === "stale" ? 0.5 : 0.7,
+    detail:
+      indexFreshness.status === "missing"
+        ? "not built yet"
+        : indexFreshness.status === "stale"
+          ? "stale, needs refresh"
+          : `fresh (${indexFreshness.cached.ecosystems.join(", ") || "no ecosystem detected"})`
+  });
+
   const weights = {
     structure: 10,
     policy: 20,
     tests: 20,
-    evals: 25,
+    evals: 20,
     telemetry: 10,
-    "release-readiness": 15
+    "release-readiness": 15,
+    "repo-index": 5
   };
 
   const missingImplementationBrief =

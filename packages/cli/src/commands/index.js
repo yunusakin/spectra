@@ -2,7 +2,7 @@ import { findSpectraRoot } from "../lib/runtime.js";
 import { parseOptions } from "../lib/options.js";
 import { fail, ok, title, warn } from "../lib/output.js";
 import { buildRepoIndex } from "../lib/index/engine.js";
-import { writeIndex, readIndex, getIndexFilePath } from "../lib/index/cache.js";
+import { writeIndex, getIndexFilePath, checkIndexFreshness } from "../lib/index/cache.js";
 
 function resolveRepoRoot(cwd) {
   return findSpectraRoot(cwd) ?? cwd;
@@ -46,11 +46,11 @@ async function indexCommand(argv) {
 
   const cwd = options["--cwd"] ?? process.cwd();
   const repoRoot = resolveRepoRoot(cwd);
-  const index = buildRepoIndex(repoRoot);
 
   if (options["--check"]) {
-    const existing = readIndex(repoRoot);
-    if (!existing) {
+    const { status, cached, fresh } = checkIndexFreshness(repoRoot);
+
+    if (status === "missing") {
       if (format === "json") {
         process.stdout.write(`${JSON.stringify({ status: "missing", indexPath: getIndexFilePath(repoRoot) })}\n`);
       } else {
@@ -59,29 +59,29 @@ async function indexCommand(argv) {
       return 1;
     }
 
-    const stale = existing.signature.hash !== index.signature.hash || existing.ecosystems.join(",") !== index.ecosystems.join(",");
-    if (stale) {
+    if (status === "stale") {
       if (format === "json") {
         process.stdout.write(
-          `${JSON.stringify({ status: "stale", storedSignature: existing.signature, currentSignature: index.signature })}\n`
+          `${JSON.stringify({ status: "stale", storedSignature: cached.signature, currentSignature: fresh.signature })}\n`
         );
       } else {
         fail("Repo index is stale. Run \"spectra index\" to refresh it.");
         if (options["--explain"]) {
-          printExplain(index);
+          printExplain(fresh);
         }
       }
       return 1;
     }
 
     if (format === "json") {
-      process.stdout.write(`${JSON.stringify({ status: "up-to-date", signature: existing.signature })}\n`);
+      process.stdout.write(`${JSON.stringify({ status: "up-to-date", signature: cached.signature })}\n`);
     } else {
       ok("Repo index is up to date.");
     }
     return 0;
   }
 
+  const index = buildRepoIndex(repoRoot);
   const filePath = writeIndex(repoRoot, index);
 
   if (format === "json") {
