@@ -163,6 +163,26 @@ test("adopt runs map-codebase.sh with valid arguments and produces discovery out
   );
 });
 
+test("source map-codebase.sh accepts the installed spectra root argument", () => {
+  const root = createRepo();
+  const spectraRoot = path.join(root, "spectra");
+  fs.mkdirSync(spectraRoot, { recursive: true });
+
+  const result = run(workspaceRoot, "bash", [
+    path.join(workspaceRoot, "scripts", "map-codebase.sh"),
+    "--root",
+    root,
+    "--spectra-root",
+    spectraRoot
+  ]);
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.equal(
+    fs.existsSync(path.join(spectraRoot, "sdd", "memory-bank", "discovery", "structure.md")),
+    true
+  );
+});
+
 function makeBrokenAssetsDir() {
   const assetsDir = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-broken-assets-"));
   const sourceAssetsDir = path.join(cliRoot, "assets");

@@ -37,6 +37,19 @@ function printRefs(pack) {
   for (const escalationPath of pack.escalation) {
     title(`- ${escalationPath}`);
   }
+  printRepoIndexSection(pack);
+}
+
+function printRepoIndexSection(pack) {
+  title("");
+  title("Repo Index:");
+  if (!pack.repoIndex?.available) {
+    title('- Not available yet. Run "spectra index" to build it.');
+    return;
+  }
+  title(`- Ecosystems: ${pack.repoIndex.ecosystems.join(", ") || "none"}`);
+  title(`- Modules known: ${pack.repoIndex.stats.byKind.module ?? 0}`);
+  title(`- ${pack.repoIndex.hint}`);
 }
 
 function printInline(pack) {
@@ -59,6 +72,7 @@ function printInline(pack) {
     }
     title("");
   }
+  printRepoIndexSection(pack);
 }
 
 function recomputeTotals(entries) {

@@ -14,6 +14,8 @@ import { skillsResolveCommand } from "./commands/skills-resolve.js";
 import { statusCommand } from "./commands/status.js";
 import { validateCommand } from "./commands/validate.js";
 import { checkCommand } from "./commands/check.js";
+import { indexCommand } from "./commands/index.js";
+import { onboardCommand } from "./commands/onboard.js";
 import { adminCommand } from "./commands/admin.js";
 import { verifyCommand } from "./commands/verify.js";
 import { printHelp as printCommandHelp } from "./commands/help.js";
@@ -81,6 +83,10 @@ function dispatch(argv) {
       return 0;
     case "check":
       return checkCommand([subcommand, ...rest].filter(Boolean));
+    case "index":
+      return indexCommand([subcommand, ...rest].filter(Boolean));
+    case "onboard":
+      return onboardCommand([subcommand, ...rest].filter(Boolean));
     case "update":
       return updateCommand([subcommand, ...rest].filter(Boolean));
     case "upgrade":

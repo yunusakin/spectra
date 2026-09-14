@@ -21,6 +21,9 @@ import { assertPathsUntracked, beginLocalGitPolicy, finishLocalGitPolicy } from 
 import { getAdapterOutputPaths } from "./adapter-paths.js";
 import { getProjectLayout } from "./project-layout.js";
 import { SCHEMA_VERSION, createInstallMetadata, normalizeProfile } from "./profile.js";
+import { buildRepoIndex } from "./index/engine.js";
+import { writeIndex } from "./index/cache.js";
+import { warn } from "./output.js";
 
 function replaceDirectory(sourceDir, targetDir) {
   if (!fs.existsSync(sourceDir)) {
@@ -206,6 +209,12 @@ function installSpectra({
     });
     if (normalizedProfile === "full") {
       buildAdoptionArtifacts(layout.root);
+    }
+    try {
+      const repoIndex = buildRepoIndex(absoluteTarget);
+      writeIndex(absoluteTarget, repoIndex);
+    } catch (error) {
+      warn(`Repo indexing failed during adopt: ${error.message}. Run "spectra index" manually once fixed.`);
     }
   }
 
