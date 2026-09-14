@@ -50,17 +50,50 @@ function gradlePathToDir(gradlePath) {
 function scanGradle(ctx) {
   const { repoRoot, touch } = ctx;
   const settingsFile = findSettingsFile(repoRoot);
-  if (!settingsFile) {
-    return [];
-  }
-  touch(settingsFile);
-  const relSettings = toPosixRelative(repoRoot, settingsFile);
-  const included = extractIncludedProjectPaths(readTextFile(settingsFile));
-  const records = [];
-
   const rootBuildFile = ["build.gradle.kts", "build.gradle"]
     .map((name) => path.join(repoRoot, name))
     .find((p) => fs.existsSync(p));
+  const records = [];
+
+  if (!settingsFile) {
+    if (!rootBuildFile) {
+      return [];
+    }
+    touch(rootBuildFile);
+    const relBuild = toPosixRelative(repoRoot, rootBuildFile);
+    records.push(
+      createRecord({
+        kind: "module",
+        name: path.basename(repoRoot),
+        path: ".",
+        ecosystem: ECOSYSTEM,
+        confidence: "medium",
+        status: "candidate",
+        evidence: [evidenceEntry(relBuild)],
+        attributes: { isRoot: true, includedProjects: [] }
+      })
+    );
+
+    if (/test/i.test(readTextFile(rootBuildFile))) {
+      records.push(
+        createRecord({
+          kind: "test-target",
+          name: `${path.basename(repoRoot)}:test`,
+          path: ".",
+          ecosystem: ECOSYSTEM,
+          confidence: "low",
+          status: "candidate",
+          evidence: [evidenceEntry(relBuild)]
+        })
+      );
+    }
+
+    return records;
+  }
+
+  touch(settingsFile);
+  const relSettings = toPosixRelative(repoRoot, settingsFile);
+  const included = extractIncludedProjectPaths(readTextFile(settingsFile));
 
   records.push(
     createRecord({

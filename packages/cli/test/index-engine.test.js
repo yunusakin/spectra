@@ -75,6 +75,57 @@ test("node scanner extracts npm workspace modules, scripts, deps and entrypoints
   assert.equal(reactRuntime.status, "candidate");
 });
 
+test("node scanner indexes devDependencies and frontend runtime hints from dev tooling", () => {
+  const root = tmpRepo("spectra-index-node-devdeps-");
+  fs.writeFileSync(
+    path.join(root, "package.json"),
+    JSON.stringify(
+      {
+        name: "web-app",
+        scripts: { build: "vite build" },
+        dependencies: { react: "^18.0.0" },
+        devDependencies: { vite: "^5.0.0" }
+      },
+      null,
+      2
+    )
+  );
+  fs.writeFileSync(path.join(root, "vite.config.js"), "export default {};\n");
+
+  const index = buildRepoIndex(root);
+
+  const viteDep = findRecords(index, (r) => r.kind === "dependency" && r.name === "vite")[0];
+  assert.ok(viteDep);
+  assert.equal(viteDep.attributes.dev, true);
+  assert.ok(viteDep.evidence.some((e) => e.field === "devDependencies.vite"));
+
+  const viteRuntime = findRecords(index, (r) => r.kind === "runtime" && r.attributes.framework === "Vite")[0];
+  assert.ok(viteRuntime);
+  assert.equal(viteRuntime.confidence, "high");
+  assert.equal(viteRuntime.status, "confirmed");
+});
+
+test("gradle scanner indexes single-module builds without settings.gradle", () => {
+  const root = tmpRepo("spectra-index-gradle-single-");
+  fs.writeFileSync(
+    path.join(root, "build.gradle.kts"),
+    "plugins { java }\n\ntasks.test { useJUnitPlatform() }\n"
+  );
+
+  const index = buildRepoIndex(root);
+  assert.deepEqual(index.ecosystems, ["gradle"]);
+
+  const moduleRecord = findRecords(index, (r) => r.kind === "module" && r.path === ".")[0];
+  assert.ok(moduleRecord);
+  assert.equal(moduleRecord.confidence, "medium");
+  assert.equal(moduleRecord.status, "candidate");
+  assert.ok(moduleRecord.evidence.some((e) => e.file === "build.gradle.kts"));
+
+  const testTarget = findRecords(index, (r) => r.kind === "test-target")[0];
+  assert.ok(testTarget);
+  assert.equal(testTarget.path, ".");
+});
+
 test("go scanner reads go.work modules, cmd entrypoints and require dependencies", () => {
   const root = tmpRepo("spectra-index-go-");
   fs.writeFileSync(path.join(root, "go.work"), "go 1.22\n\nuse (\n\t./svc\n)\n");

@@ -215,26 +215,37 @@ function scanNode(ctx) {
       }
     }
 
-    const deps = pkg.dependencies ?? {};
-    for (const [depName, depRange] of Object.entries(deps)) {
-      records.push(
-        createRecord({
-          kind: "dependency",
-          name: depName,
-          path: null,
-          ecosystem: ECOSYSTEM,
-          confidence: "high",
-          status: "confirmed",
-          evidence: [evidenceEntry(relPkg, `dependencies.${depName}`)],
-          attributes: { range: depRange },
-          relationships: { dependsOn: [] }
-        })
-      );
+    const dependencyGroups = [
+      { field: "dependencies", values: pkg.dependencies ?? {}, dev: false },
+      { field: "devDependencies", values: pkg.devDependencies ?? {}, dev: true }
+    ];
+    for (const { field, values, dev } of dependencyGroups) {
+      for (const [depName, depRange] of Object.entries(values)) {
+        records.push(
+          createRecord({
+            kind: "dependency",
+            name: depName,
+            path: null,
+            ecosystem: ECOSYSTEM,
+            confidence: "high",
+            status: "confirmed",
+            evidence: [evidenceEntry(relPkg, `${field}.${depName}`)],
+            attributes: { range: depRange, dev },
+            relationships: { dependsOn: [] }
+          })
+        );
+      }
     }
 
-    const depNames = new Set(Object.keys(deps));
+    const depNames = new Set([
+      ...Object.keys(pkg.dependencies ?? {}),
+      ...Object.keys(pkg.devDependencies ?? {})
+    ]);
     for (const [dep, framework] of Object.entries(FRONTEND_DEP_HINTS)) {
       if (depNames.has(dep)) {
+        const depField = Object.prototype.hasOwnProperty.call(pkg.dependencies ?? {}, dep)
+          ? "dependencies"
+          : "devDependencies";
         const configHit = Object.entries(FRONTEND_CONFIG_HINTS).find(
           ([file, fw]) => fw === framework && fs.existsSync(path.join(dir, file))
         );
@@ -247,8 +258,8 @@ function scanNode(ctx) {
             confidence: configHit ? "high" : "medium",
             status: configHit ? "confirmed" : "candidate",
             evidence: configHit
-              ? [evidenceEntry(relPkg, `dependencies.${dep}`), evidenceEntry(toPosixRelative(repoRoot, path.join(dir, configHit[0])))]
-              : [evidenceEntry(relPkg, `dependencies.${dep}`)],
+              ? [evidenceEntry(relPkg, `${depField}.${dep}`), evidenceEntry(toPosixRelative(repoRoot, path.join(dir, configHit[0])))]
+              : [evidenceEntry(relPkg, `${depField}.${dep}`)],
             attributes: { framework }
           })
         );
