@@ -240,6 +240,7 @@ After confirmation, legacy `.spectra/`, root `sdd/`, and known Spectra-generated
 - [Workflow](docs/workflow.md) — Full governance lifecycle
 - [Native Install](docs/native-install.md) — macOS/Linux installation
 - [Testing and Verification](docs/testing.md) — quality checks
+- [Website](https://yunusakin.github.io/spectra/) — project overview
 
 ## Development
 
