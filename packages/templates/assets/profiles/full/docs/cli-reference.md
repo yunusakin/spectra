@@ -15,6 +15,8 @@ npm/npx, existing project:
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
+./spectra/bin/spectra onboard
+./spectra/bin/spectra check
 ./spectra/bin/spectra status
 ```
 
@@ -36,12 +38,17 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 | --- | --- | --- | --- |
 | `spectra init [path] [--profile <lite\|full>] [--git-mode <local\|shared>]` | starting a new Git repository | bootstraps a Spectra-managed project under `spectra/` | defaults: `lite`, `local` |
 | `spectra adopt [path] [--profile <lite\|full>] [--git-mode <local\|shared>]` | adding Spectra to an existing repository | installs the selected profile under `spectra/` | `local`: private via Git exclude; `shared`: commit-ready |
-| `spectra context --role <role> --goal <goal>` | before planning, architecture, implementation, or review work | loads the minimum role-aware and goal-aware context pack | common roles: `planner`, `architect`, `implementer`, `reviewer`, `verifier`, `release-manager`; common goals: `discover`, `decide`, `implement`, `verify`, `ship` |
+| `spectra index [--check] [--explain] [--format <text\|json>]` | after bootstrap or manifest changes | builds or checks the deterministic repo index used by context, onboard, and verify | `--check` is read-only; `--explain` prints evidence |
+| `spectra onboard [--force]` | after bootstrap when `projectbrief.md` is still a template | drafts the project brief from interactive answers and the repo index | non-interactive runs never rewrite the brief |
+| `spectra route --task "<task>"` | before work that may touch business behavior | selects the smallest relevant module and business-domain context with deterministic match explanations | use `--format json`, `--domain`, or `--module` for explicit routing |
+| `spectra context --role <role> --goal <goal>` | before planning, architecture, implementation, or review work | loads the minimum role-aware and goal-aware context pack | add `--route-task "<task>"` to compose business routing into the pack |
+| `spectra knowledge <add\|promote\|resolve\|supersede\|deprecate>` | recording durable business knowledge | creates stable rule IDs and manages unresolved-to-active lifecycle | direct markdown edits remain valid; `spectra check` verifies integrity |
 | `spectra task --item <id> --task-type <type> --goal "<goal>"` | before implementation work starts | records implementation intent for a tracked item | `--task-type`: use the relevant work type for the item being implemented |
 | `spectra check [--base <sha> --head <sha>]` | after spec changes | runs the public validation entry point | `validate` remains a compatibility alias |
 | `spectra doctor [--fix]` | checking local tool/runtime/adapter health | reports doctor checks; with `--fix`, repairs safe generated Spectra files and re-runs validation | does not rewrite business memory or application code |
 | `spectra status` | resuming work | summarizes current project and Spectra changes | recommends the next action |
 | `spectra update` | checking or upgrading Spectra | checks the latest CLI version, asks once when changes are needed, refreshes runtime files, and migrates legacy layouts | reports `Spectra is already up to date.` when no work is needed |
+| `spectra upgrade --profile <lite\|full>` | changing the installed profile | promotes Lite to Full while preserving existing project memory and updates runtime metadata | `--agents <csv>` optionally generates Full agent adapters; asks once for confirmation |
 | `spectra help [command\|advanced]` | learning the CLI | shows the everyday workflow or Full commands | supports `--help` too |
 | `spectra admin <approve\|eval\|diff\|adapters\|doctor\|skills\|quick>` | using Full features | groups advanced operations | top-level forms remain compatibility aliases |
 | `spectra version` | confirming install state | prints the installed CLI version | no additional modes |
@@ -49,24 +56,48 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 ```bash
 spectra init [path] [--profile <lite|full>] [--git-mode <local|shared>]
 spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>]
+spectra index [--check] [--explain] [--format text|json]
+spectra onboard [--force]
 ```
 
 `init` creates a new Spectra-managed project under `spectra/`. Lite is the default profile.
 
 `adopt` adds Spectra to an existing codebase. Full additionally creates brownfield adoption outputs.
 
+`index` writes `spectra/cache/index/repo-index.json`, a disposable cache of detected modules, build/test targets, dependencies, runtimes, and evidence. `onboard` uses that cache only as technical evidence; it does not infer business intent.
+
 `local` is the default Git mode. It requires a Git worktree, leaves `.gitignore` unchanged, and writes `/spectra/` to Git's repository-local exclude file. Project code and company documentation remain visible to Git.
 
 Use `--git-mode shared` when the generated Spectra layer should be reviewed and committed with the repository.
+
+Business-domain indexes may include explicit routing keywords:
+
+```markdown
+| Domain | Keywords | Rules | Unresolved | Related Modules |
+| --- | --- | --- | --- | --- |
+| customer-policy | eligibility,limit,approval | business/customer-policy/rules.md | business/customer-policy/unresolved.md | account-service |
+```
+
+`spectra route --format json` preserves `domains` and `modules` and adds `domainMatches` / `moduleMatches` entries that explain `matchedBy` and `matchedValue`.
+
+`spectra knowledge add` defaults to unresolved. `--status active` requires `--verified`; `--verified` is invalid for unresolved rules.
 
 ## Workflow Commands
 
 ```bash
 spectra context --role <role> --goal <goal>
+spectra context --role <role> --goal <goal> --route-task "<task>"
+spectra index [--check]
+spectra onboard
+spectra route --task "<task>" [--format refs|json]
+spectra knowledge add --domain <domain> --title "<title>" --statement "<rule>" [--status unresolved|active] [--verified]
+spectra knowledge promote --id <rule-id>
+spectra knowledge resolve --id <rule-id>
 spectra task --item <id> --task-type <type> --goal "<goal>"
 spectra check [--base <sha> --head <sha>]
 spectra status
 spectra update
+spectra upgrade --profile full
 ```
 
 ## Utility Commands
@@ -110,6 +141,7 @@ spectra admin approve --stage implementation-approved
 spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
 spectra context --role implementer --goal implement
 spectra admin eval my-product-core --suite smoke
+spectra verify
 ```
 
 ## Notes
