@@ -48,7 +48,7 @@ Spectra’s generated usage guides, workflow reference, and examples. It never c
 
 ### `spectra/cache/`
 
-Generated context summaries and other disposable runtime data.
+Generated context summaries and disposable repo-index data.
 
 ### `spectra/config.yaml` and `spectra/install.json`
 
@@ -63,6 +63,7 @@ The selected profile, Git mode, project schema, runtime version, launcher metada
 ## Command-to-Structure Mapping
 
 - `spectra init` and `spectra adopt` create the selected profile under `spectra/`
+- `spectra index` writes `spectra/cache/index/repo-index.json`
 - `spectra context` reads `spectra/sdd/` and writes summaries to `spectra/cache/`
 - `spectra task` writes `spectra/sdd/memory-bank/core/implementation-brief.md`
 - `spectra status` summarizes current project and Spectra changes

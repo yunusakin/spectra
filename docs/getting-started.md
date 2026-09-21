@@ -99,7 +99,9 @@ Lite creates an isolated SDD workspace under `spectra/`:
 - `spectra/sdd/memory-bank/`: active context, progress, and implementation intent
 - `spectra/sdd/system/`: minimal runtime context needed by Lite
 - `spectra/docs/`: Spectra reference material
-- `spectra/cache/`: disposable generated summaries
+- `spectra/cache/`: disposable generated summaries and repo-index data
+
+For existing projects, `spectra adopt` writes an initial repo index when possible. Run `spectra onboard` while `projectbrief.md` is still a template, and run `spectra index` again after manifest changes or if adoption reports that indexing failed.
 
 Full adds feature bundles, governance, evaluation contracts, and adoption analysis under `spectra/sdd/`. YAML contracts are canonical; Markdown is supporting context.
 

@@ -10,11 +10,14 @@ The examples use `spectra`. If the repository was bootstrapped with `npx` and no
 
 ## Define
 
-`spectra init` and `spectra adopt` create the core executable spec bundle. Start by loading planning context:
+`spectra init` and `spectra adopt` create the core executable spec bundle. If `projectbrief.md` is still a template, run onboarding first; then load planning context:
 
 ```bash
+spectra onboard
 spectra context --role planner --goal discover
 ```
+
+For existing projects, `adopt` writes an initial repo index when possible. Re-run `spectra index` after manifest changes or if adoption reports that indexing failed.
 
 ## Validate
 
@@ -86,6 +89,7 @@ Verify aggregates:
 - policy
 - tests
 - eval readiness
+- repo-index freshness
 - telemetry contract coverage
 - release readiness
 
@@ -114,6 +118,7 @@ For existing repos:
 
 ```bash
 spectra adopt .
+spectra onboard
 spectra context --role planner --goal discover
 spectra check
 spectra admin diff semantic

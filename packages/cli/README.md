@@ -2,7 +2,7 @@
 
 `spectra-pack` installs the `spectra` CLI.
 
-Spectra is a CLI-first operating system for AI-assisted product development. It bootstraps project-local context, business knowledge, executable specs, staged approvals, eval contracts, telemetry contracts, semantic diff checks, role-aware context packs, and release-confidence verification.
+Spectra is a project-local CLI for AI-assisted development. It bootstraps shared context for humans and agents: business knowledge, implementation intent, executable specs, staged approvals, eval contracts, role-aware context packs, and release-confidence verification.
 
 ## Install
 
@@ -20,8 +20,9 @@ Existing project:
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
-./spectra/bin/spectra status
+./spectra/bin/spectra onboard
 ./spectra/bin/spectra check
+./spectra/bin/spectra status
 ```
 
 `npx` bootstraps the repository but does not create a global command. Continue with `./spectra/bin/spectra`, or install the standalone native binary for a global `spectra` command.
@@ -42,6 +43,7 @@ spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>]
 Workflow:
 
 ```bash
+spectra onboard
 spectra context --role planner --goal discover
 spectra task --item TASK-001 --task-type feature --goal "Describe intended change"
 spectra check

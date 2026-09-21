@@ -1,0 +1,12 @@
+{
+  "name": "@fixture/api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test",
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "express": "^4.19.0"
+  }
+}

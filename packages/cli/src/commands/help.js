@@ -11,6 +11,8 @@ const COMMANDS = {
   context: "Load project context",
   task: "Prepare an implementation task",
   check: "Validate project health",
+  index: "Build the deterministic, ecosystem-aware repo index used for scoped context",
+  onboard: "Fill in projectbrief.md interactively, using the repo index for detected stack facts",
   doctor: "Check local tools, runtime, adapters, and optionally repair generated files",
   status: "Show project status"
 };

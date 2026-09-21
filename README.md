@@ -4,7 +4,7 @@
 
 # Spectra
 
-Spectra is a CLI for spec-driven development. It keeps project context, implementation intent, validation, business knowledge, and—when needed—approval and evaluation state together in a project-local `spectra/` directory.
+Spectra is a project-local CLI for AI-assisted development. It gives agents and humans the same source of truth for project context, task intent, business rules, validation, and—when needed—approval and evaluation state.
 
 The main rule is simple: Spectra owns `spectra/`. Your product code, company docs, and existing repository layout stay yours.
 
@@ -52,6 +52,8 @@ npx spectra-pack@latest init .
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
+./spectra/bin/spectra onboard
+./spectra/bin/spectra check
 ./spectra/bin/spectra status
 ```
 
@@ -62,6 +64,8 @@ curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh |
 export PATH="$HOME/.local/bin:$PATH"
 cd existing-project
 spectra adopt .
+spectra onboard
+spectra check
 spectra status
 ```
 
@@ -86,6 +90,7 @@ your-project/
     ├── config.yaml       # profile, Git mode, and schema
     ├── install.json      # installation and version metadata
     ├── docs/             # Spectra guides
+    ├── cache/            # disposable context and repo-index cache
     └── sdd/              # context, business memory, and profile runtime
 ```
 
@@ -145,6 +150,8 @@ spectra status
 
 `status` is the resume command. It shows recent project/Spectra changes and the next recommended action. `check` is the health command. Neither command needs a time-window option.
 
+For existing projects, `spectra adopt` writes an initial repo index when possible. Run `spectra onboard` while `projectbrief.md` is still a template, and run `spectra index` again after manifest changes or if adoption reports that indexing failed.
+
 ## The Full workflow
 
 Full adds staged governance. The usual sequence is:
@@ -181,6 +188,8 @@ If Spectra says `Spectra is already up to date.`, no changes are needed. If an u
 | --- | --- |
 | `spectra init` | Create a new Spectra project |
 | `spectra adopt` | Add Spectra to an existing project |
+| `spectra index` | Refresh or check the deterministic repo index used by context and verify |
+| `spectra onboard` | Draft `projectbrief.md` from user answers and the repo index |
 | `spectra context` | Load focused planning or implementation context |
 | `spectra task` | Record implementation intent |
 | `spectra check` | Validate the installed project layer |
