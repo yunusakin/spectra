@@ -30,6 +30,8 @@ Existing project:
 cd existing-project
 npx spectra-pack@latest adopt .
 ./spectra/bin/spectra onboard
+./spectra/bin/spectra check
+./spectra/bin/spectra status
 ```
 
 `npx` does not install a global command. Use the generated launcher after bootstrap:
@@ -62,6 +64,8 @@ Or adopt an existing repository:
 cd existing-project
 spectra adopt .
 spectra onboard
+spectra check
+spectra status
 ```
 
 The remaining examples use `spectra`. If you used only `npx`, replace `spectra` with `./spectra/bin/spectra`.

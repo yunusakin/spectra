@@ -20,10 +20,9 @@ Existing project:
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
-./spectra/bin/spectra index
 ./spectra/bin/spectra onboard
-./spectra/bin/spectra status
 ./spectra/bin/spectra check
+./spectra/bin/spectra status
 ```
 
 `npx` bootstraps the repository but does not create a global command. Continue with `./spectra/bin/spectra`, or install the standalone native binary for a global `spectra` command.
@@ -44,7 +43,6 @@ spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>]
 Workflow:
 
 ```bash
-spectra index
 spectra onboard
 spectra context --role planner --goal discover
 spectra task --item TASK-001 --task-type feature --goal "Describe intended change"

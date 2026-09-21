@@ -53,6 +53,7 @@ npx spectra-pack@latest init .
 cd existing-project
 npx spectra-pack@latest adopt .
 ./spectra/bin/spectra onboard
+./spectra/bin/spectra check
 ./spectra/bin/spectra status
 ```
 
@@ -64,6 +65,7 @@ export PATH="$HOME/.local/bin:$PATH"
 cd existing-project
 spectra adopt .
 spectra onboard
+spectra check
 spectra status
 ```
 
