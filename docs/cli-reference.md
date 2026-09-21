@@ -36,6 +36,8 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 | --- | --- | --- | --- |
 | `spectra init [path] [--profile <lite\|full>] [--git-mode <local\|shared>]` | starting a new Git repository | bootstraps a Spectra-managed project under `spectra/` | defaults: `lite`, `local` |
 | `spectra adopt [path] [--profile <lite\|full>] [--git-mode <local\|shared>]` | adding Spectra to an existing repository | installs the selected profile under `spectra/` | `local`: private via Git exclude; `shared`: commit-ready |
+| `spectra index [--check] [--explain] [--format <text\|json>]` | after bootstrap or manifest changes | builds or checks the deterministic repo index used by context, onboard, and verify | `--check` is read-only; `--explain` prints evidence |
+| `spectra onboard [--force]` | after bootstrap when `projectbrief.md` is still a template | drafts the project brief from interactive answers and the repo index | non-interactive runs never rewrite the brief |
 | `spectra route --task "<task>"` | before work that may touch business behavior | selects the smallest relevant module and business-domain context with deterministic match explanations | use `--format json`, `--domain`, or `--module` for explicit routing |
 | `spectra context --role <role> --goal <goal>` | before planning, architecture, implementation, or review work | loads the minimum role-aware and goal-aware context pack | add `--route-task "<task>"` to compose business routing into the pack |
 | `spectra knowledge <add\|promote\|resolve\|supersede\|deprecate>` | recording durable business knowledge | creates stable rule IDs and manages unresolved-to-active lifecycle | direct markdown edits remain valid; `spectra check` verifies integrity |
@@ -52,11 +54,15 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 ```bash
 spectra init [path] [--profile <lite|full>] [--git-mode <local|shared>]
 spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>]
+spectra index [--check] [--explain] [--format text|json]
+spectra onboard [--force]
 ```
 
 `init` creates a new Spectra-managed project under `spectra/`. Lite is the default profile.
 
 `adopt` adds Spectra to an existing codebase. Full additionally creates brownfield adoption outputs.
+
+`index` writes `spectra/cache/index/repo-index.json`, a disposable cache of detected modules, build/test targets, dependencies, runtimes, and evidence. `onboard` uses that cache only as technical evidence; it does not infer business intent.
 
 `local` is the default Git mode. It requires a Git worktree, leaves `.gitignore` unchanged, and writes `/spectra/` to Git's repository-local exclude file. Project code and company documentation remain visible to Git.
 
@@ -79,6 +85,8 @@ Business-domain indexes may include explicit routing keywords:
 ```bash
 spectra context --role <role> --goal <goal>
 spectra context --role <role> --goal <goal> --route-task "<task>"
+spectra index [--check]
+spectra onboard
 spectra route --task "<task>" [--format refs|json]
 spectra knowledge add --domain <domain> --title "<title>" --statement "<rule>" [--status unresolved|active] [--verified]
 spectra knowledge promote --id <rule-id>
@@ -131,6 +139,7 @@ spectra admin approve --stage implementation-approved
 spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
 spectra context --role implementer --goal implement
 spectra admin eval my-product-core --suite smoke
+spectra verify
 ```
 
 ## Notes

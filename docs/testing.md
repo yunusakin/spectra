@@ -54,7 +54,7 @@ Use it:
 Purpose:
 
 - produce release confidence, not just pass/fail test status
-- aggregate validation, policy, legacy verify inputs, eval readiness, telemetry coverage, and release readiness
+- aggregate validation, policy, legacy verify inputs, eval readiness, telemetry coverage, repo-index freshness, and release readiness
 
 Run it:
 
@@ -90,6 +90,7 @@ Warning-only:
 
 - optional docs gaps
 - non-blocking context-pack budget warnings
+- missing or stale repo index; run `spectra index` to refresh it
 - incomplete narrative Markdown when YAML contracts are valid
 
 ## Contributor Note

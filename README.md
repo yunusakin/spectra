@@ -181,6 +181,8 @@ If Spectra says `Spectra is already up to date.`, no changes are needed. If an u
 | --- | --- |
 | `spectra init` | Create a new Spectra project |
 | `spectra adopt` | Add Spectra to an existing project |
+| `spectra index` | Build or check the deterministic repo index used by context and verify |
+| `spectra onboard` | Draft `projectbrief.md` from user answers and the repo index |
 | `spectra context` | Load focused planning or implementation context |
 | `spectra task` | Record implementation intent |
 | `spectra check` | Validate the installed project layer |
