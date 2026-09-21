@@ -63,8 +63,8 @@ code {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  min-height: 72px;
-  padding: 14px clamp(20px, 5vw, 72px);
+  min-height: 88px;
+  padding: 16px clamp(20px, 5vw, 72px);
   background: rgba(15, 15, 26, 0.78);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(18px);
@@ -73,17 +73,17 @@ code {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   color: var(--ink);
-  font-size: 1.06rem;
+  font-size: 1.16rem;
   font-weight: 800;
   text-decoration: none;
 }
 
 .brand img {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
 }
 
 nav {
@@ -108,7 +108,7 @@ nav a:hover {
   grid-template-columns: minmax(0, 0.95fr) minmax(420px, 0.7fr);
   gap: clamp(36px, 6vw, 84px);
   align-items: center;
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 88px);
   padding: clamp(64px, 8vw, 112px) clamp(20px, 6vw, 92px) clamp(52px, 7vw, 88px);
   overflow: hidden;
 }
