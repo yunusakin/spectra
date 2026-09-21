@@ -15,6 +15,8 @@ npm/npx, existing project:
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
+./spectra/bin/spectra onboard
+./spectra/bin/spectra check
 ./spectra/bin/spectra status
 ```
 

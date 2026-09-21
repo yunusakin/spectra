@@ -40,7 +40,7 @@ function printHelp(command = null, cwd = process.cwd()) {
     return 0;
   }
 
-  title("Spectra — Spec-Driven Development");
+  title("Spectra — AI-assisted development context");
   const projectRoot = findSpectraRoot(cwd);
   const profile = projectRoot ? getInstalledProfile(projectRoot) : null;
   if (profile) {
