@@ -447,7 +447,7 @@ pre {
       rgba(108, 92, 231, 0.24),
       transparent 32rem
     ),
-    linear-gradient(180deg, #0f0f1a 0%, #121426 32rem, #f6f8fc 32rem);
+    linear-gradient(180deg, #0f0f1a 0%, #121426 100%);
   color: #121827;
 }
 
@@ -472,6 +472,7 @@ pre {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin-top: 42px;
+  padding-top: 24px;
 }
 
 .doc-card {
@@ -522,6 +523,7 @@ pre {
 .docs-article > .lead {
   max-width: 760px;
   margin-bottom: 42px;
+  color: var(--muted);
 }
 
 .docs-article section {
