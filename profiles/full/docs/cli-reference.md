@@ -36,8 +36,8 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 
 | Command | Use When | What It Does | Options / Modes |
 | --- | --- | --- | --- |
-| `spectra init [path] [--profile <lite\|full>] [--git-mode <local\|shared>]` | starting a new Git repository | bootstraps a Spectra-managed project under `spectra/` | defaults: `lite`, `local` |
-| `spectra adopt [path] [--profile <lite\|full>] [--git-mode <local\|shared>]` | adding Spectra to an existing repository | installs the selected profile under `spectra/` | `local`: private via Git exclude; `shared`: commit-ready |
+| `spectra init [path] [--profile <lite\|full>] [--git-mode <local\|shared>] [--agents <csv>]` | starting a new Git repository | bootstraps a Spectra-managed project under `spectra/` | defaults: `lite`, `local`; `--agents` requires `--profile full` |
+| `spectra adopt [path] [--profile <lite\|full>] [--git-mode <local\|shared>] [--agents <csv>]` | adding Spectra to an existing repository | installs the selected profile under `spectra/` | `local`: private via Git exclude; `shared`: commit-ready; `--agents` requires `--profile full` |
 | `spectra index [--check] [--explain] [--format <text\|json>]` | after bootstrap or manifest changes | builds or checks the deterministic repo index used by context, onboard, and verify | `--check` is read-only; `--explain` prints evidence |
 | `spectra onboard [--force]` | after bootstrap when `projectbrief.md` is still a template | drafts the project brief from interactive answers and the repo index | non-interactive runs never rewrite the brief |
 | `spectra route --task "<task>"` | before work that may touch business behavior | selects the smallest relevant module and business-domain context with deterministic match explanations | use `--format json`, `--domain`, or `--module` for explicit routing |
@@ -54,8 +54,8 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 | `spectra version` | confirming install state | prints the installed CLI version | no additional modes |
 
 ```bash
-spectra init [path] [--profile <lite|full>] [--git-mode <local|shared>]
-spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>]
+spectra init [path] [--profile <lite|full>] [--git-mode <local|shared>] [--agents <csv>]
+spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>] [--agents <csv>]
 spectra index [--check] [--explain] [--format text|json]
 spectra onboard [--force]
 ```
@@ -65,6 +65,8 @@ spectra onboard [--force]
 `adopt` adds Spectra to an existing codebase. Full additionally creates brownfield adoption outputs.
 
 `index` writes `spectra/cache/index/repo-index.json`, a disposable cache of detected modules, build/test targets, dependencies, runtimes, and evidence. `onboard` uses that cache only as technical evidence; it does not infer business intent.
+
+`--agents <csv>` is valid only with `--profile full`; Lite keeps agent adapter files out of the repository root.
 
 `local` is the default Git mode. It requires a Git worktree, leaves `.gitignore` unchanged, and writes `/spectra/` to Git's repository-local exclude file. Project code and company documentation remain visible to Git.
 

@@ -36,9 +36,11 @@ The examples below use `spectra`. Replace it with `./spectra/bin/spectra` when u
 Setup:
 
 ```bash
-spectra init [path] [--profile <lite|full>] [--git-mode <local|shared>]
-spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>]
+spectra init [path] [--profile <lite|full>] [--git-mode <local|shared>] [--agents <csv>]
+spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>] [--agents <csv>]
 ```
+
+`--agents` requires `--profile full`.
 
 Workflow:
 

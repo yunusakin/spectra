@@ -29,6 +29,7 @@ test("help presents the simplified Spectra workflow", () => {
   assert.match(result.stdout, /Spectra — AI-assisted development context/);
   assert.match(result.stdout, /spectra init/);
   assert.match(result.stdout, /spectra check/);
+  assert.match(result.stdout, /spectra verify/);
   assert.match(result.stdout, /spectra status/);
   assert.match(result.stdout, /spectra help <command>/);
 });
@@ -41,6 +42,24 @@ test("advanced help lists available advanced commands", () => {
   assert.match(result.stdout, /spectra admin eval/);
   assert.match(result.stdout, /spectra admin diff/);
   assert.match(result.stdout, /spectra admin doctor/);
+});
+
+test("check and validate help use their invoked command names", () => {
+  const check = spawnSync(process.execPath, [cliPath, "check", "--help"], { encoding: "utf8" });
+  const validate = spawnSync(process.execPath, [cliPath, "validate", "--help"], { encoding: "utf8" });
+
+  assert.equal(check.status, 0, check.stderr);
+  assert.equal(validate.status, 0, validate.stderr);
+  assert.match(check.stdout, /Usage: spectra check/);
+  assert.match(validate.stdout, /Usage: spectra validate/);
+});
+
+test("help exposes documented verify command details", () => {
+  const result = spawnSync(process.execPath, [cliPath, "help", "verify"], { encoding: "utf8" });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /spectra verify/);
+  assert.match(result.stdout, /Run `spectra verify --help`/);
 });
 
 test("admin routes advanced help to existing commands", () => {

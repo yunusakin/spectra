@@ -13,6 +13,7 @@ const COMMANDS = {
   check: "Validate project health",
   index: "Build the deterministic, ecosystem-aware repo index used for scoped context",
   onboard: "Fill in projectbrief.md interactively, using the repo index for detected stack facts",
+  verify: "Aggregate checks into release-confidence status",
   doctor: "Check local tools, runtime, adapters, and optionally repair generated files",
   status: "Show project status"
 };

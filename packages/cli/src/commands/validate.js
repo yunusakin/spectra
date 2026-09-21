@@ -18,14 +18,14 @@ function validateLiteProject(repoRoot) {
   return requiredPaths.filter((filePath) => !fs.existsSync(filePath));
 }
 
-function validateCommand(argv) {
+function validateCommand(argv, { commandName = "validate" } = {}) {
   const { options } = parseOptions(argv, {
     booleanFlags: ["--help"],
     stringFlags: ["--cwd", "--base", "--head"]
   });
 
   if (options["--help"]) {
-    title("Usage: spectra validate [--cwd <path>] [--base <ref> --head <ref>]");
+    title(`Usage: spectra ${commandName} [--cwd <path>] [--base <ref> --head <ref>]`);
     return 0;
   }
 
