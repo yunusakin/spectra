@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Install and update Spectra in a new or existing repository."
+    />
+    <title>Install Spectra</title>
+    <link rel="icon" href="../logo.png" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="docs-page">
+    <header class="site-header">
+      <a class="brand" href="../" aria-label="Spectra home">
+        <img src="../logo.png" alt="" />
+        <span>Spectra</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="./">Docs</a>
+        <a href="./commands.html">Commands</a>
+        <a href="./workflow.html">Workflow</a>
+        <a href="https://github.com/yunusakin/spectra">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="docs-shell docs-article">
+      <p class="eyebrow">Install</p>
+      <h1>Bootstrap once, then use the project-local command.</h1>
+      <p class="lead">
+        <code>npx</code> is only the installer path. After bootstrap, run
+        Spectra through <code>./spectra/bin/spectra</code> unless you installed
+        the native binary.
+      </p>
+
+      <section>
+        <h2>Existing project with npm</h2>
+        <pre><code>cd existing-project
+npx spectra-pack@latest adopt .
+./spectra/bin/spectra onboard
+./spectra/bin/spectra check
+./spectra/bin/spectra status</code></pre>
+        <p>
+          Use <code>adopt</code> for a repository that already has application
+          code. Spectra writes its own layer under <code>spectra/</code> and
+          leaves the product structure alone.
+        </p>
+      </section>
+
+      <section>
+        <h2>New project with npm</h2>
+        <pre><code>mkdir my-product
+cd my-product
+git init
+npx spectra-pack@latest init .
+./spectra/bin/spectra check</code></pre>
+      </section>
+
+      <section>
+        <h2>macOS or Linux without Node</h2>
+        <pre><code>curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+spectra version
+spectra adopt .</code></pre>
+        <p>
+          The native installer downloads the matching release artifact and
+          verifies its checksum. Keep the PATH export in your shell profile if
+          you want <code>spectra</code> available in new terminals.
+        </p>
+      </section>
+
+      <section>
+        <h2>Update flow</h2>
+        <pre><code>./spectra/bin/spectra update
+./spectra/bin/spectra check
+./spectra/bin/spectra status</code></pre>
+        <p>
+          Run <code>update</code> inside a project. It checks the installed
+          CLI/runtime, asks before migrations, refreshes generated runtime
+          files, and preserves project memory files.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Install</span>
+      <a href="./">Docs</a>
+      <a href="./commands.html">Next: Commands</a>
+    </footer>
+  </body>
+</html>
