@@ -29,6 +29,7 @@ Existing project:
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
+./spectra/bin/spectra onboard
 ```
 
 `npx` does not install a global command. Use the generated launcher after bootstrap:
@@ -60,6 +61,7 @@ Or adopt an existing repository:
 ```bash
 cd existing-project
 spectra adopt .
+spectra onboard
 ```
 
 The remaining examples use `spectra`. If you used only `npx`, replace `spectra` with `./spectra/bin/spectra`.
@@ -79,6 +81,7 @@ Lite keeps its SDD system, memory bank, docs, launcher, and metadata inside `spe
 ```text
 spectra/
 ├── docs/
+├── cache/
 ├── sdd/memory-bank/
 ├── sdd/system/
 ├── bin/spectra
@@ -97,6 +100,8 @@ spectra/sdd/adoption/
 Everything Spectra owns is inside `spectra/`. Your code, tests, existing documentation, and normal repository layout stay where they are.
 
 By default, local Git mode keeps `spectra/` out of your company repository through `.git/info/exclude`. Use `--git-mode shared` only when the team wants to commit Spectra files.
+
+For existing projects, `adopt` writes an initial repo index when possible. Run `spectra onboard` while `projectbrief.md` is still a template, and run `spectra index` again after manifest changes or if adoption reports that indexing failed.
 
 ## 3. Start the Daily Loop
 
