@@ -25,62 +25,85 @@
     </header>
 
     <main id="top">
-      <section class="hero">
+      <section class="hero" aria-labelledby="hero-title">
+        <img class="hero-mark" src="./logo.png" alt="" />
         <div class="hero-copy">
-          <p class="eyebrow">Project-local CLI for AI-assisted development</p>
-          <h1>Give humans and agents the same source of truth.</h1>
+          <p class="eyebrow">Project-local AI development runtime</p>
+          <h1 id="hero-title">
+            Context, checks, and release confidence for agentic work.
+          </h1>
           <p class="lead">
-            Spectra keeps project context, business rules, implementation
-            intent, validation, and release confidence inside one
-            repository-local <code>spectra/</code> layer.
+            Spectra gives humans and agents one repository-local source of truth
+            for project context, business rules, task intent, validation, and
+            release readiness.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#install">Get started</a>
+            <a class="button primary" href="#install">Start with Spectra</a>
             <a
               class="button secondary"
-              href="https://www.npmjs.com/package/spectra-pack"
-              >View npm package</a
+              href="https://github.com/yunusakin/spectra"
+              >View GitHub</a
             >
           </div>
         </div>
-        <div class="terminal-panel" aria-label="Spectra command preview">
-          <div class="terminal-bar">
+
+        <aside class="console-shell" aria-label="Spectra command preview">
+          <div class="console-top">
             <span></span>
             <span></span>
             <span></span>
+            <strong>spectra</strong>
           </div>
-          <pre><code>npx spectra-pack@latest adopt .
-./spectra/bin/spectra index
-./spectra/bin/spectra onboard
-./spectra/bin/spectra context --role planner --goal discover
-./spectra/bin/spectra check</code></pre>
+          <pre><code>$ npx spectra-pack@latest adopt .
+$ ./spectra/bin/spectra index
+  ecosystems: maven
+  modules: 20
+  test-targets: 18
+
+$ ./spectra/bin/spectra context --role planner --goal discover
+  loaded focused project context
+
+$ ./spectra/bin/spectra verify
+  release confidence: ready</code></pre>
+        </aside>
+      </section>
+
+      <section class="signal-row" aria-label="Spectra highlights">
+        <div>
+          <strong>Repo-local</strong>
+          <span
+            >Everything Spectra owns lives under <code>spectra/</code>.</span
+          >
+        </div>
+        <div>
+          <strong>Token-aware</strong>
+          <span>Index and route context before loading it into agents.</span>
+        </div>
+        <div>
+          <strong>Agent-neutral</strong>
+          <span>Adapters point back to the same canonical project memory.</span>
         </div>
       </section>
 
-      <section class="strip" aria-label="Core workflow">
-        <span>adopt</span>
-        <span>index</span>
-        <span>onboard</span>
-        <span>context</span>
-        <span>check</span>
-        <span>verify</span>
-      </section>
-
-      <section class="section" id="install">
-        <div class="section-heading">
+      <section class="section install-section" id="install">
+        <div class="section-copy">
           <p class="eyebrow">Install</p>
-          <h2>Start with npm or the native binary.</h2>
+          <h2>Bootstrap once. Keep using the repo-local launcher.</h2>
+          <p>
+            Use npm for Node projects or the native binary when Node is not
+            available. Both flows install the same project-local Spectra layer.
+          </p>
         </div>
         <div class="install-grid">
-          <article class="code-card">
+          <article>
             <h3>Existing project</h3>
             <pre><code>cd existing-project
 npx spectra-pack@latest adopt .
 ./spectra/bin/spectra onboard
 ./spectra/bin/spectra check</code></pre>
           </article>
-          <article class="code-card">
-            <h3>No Node or npm</h3>
+          <article>
+            <h3>macOS / Linux native</h3>
             <pre><code>curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
 export PATH="$HOME/.local/bin:$PATH"
 spectra adopt .
@@ -89,96 +112,83 @@ spectra status</code></pre>
         </div>
       </section>
 
-      <section class="section muted" id="workflow">
-        <div class="section-heading">
-          <p class="eyebrow">Why Spectra</p>
-          <h2>A small operating layer for repeated agent work.</h2>
+      <section class="section workflow-section" id="workflow">
+        <div class="section-copy">
+          <p class="eyebrow">Workflow</p>
+          <h2>A compact loop for repeated AI-assisted changes.</h2>
         </div>
-        <div class="feature-grid">
-          <article>
-            <h3>Repo-aware context</h3>
-            <p>
-              <code>spectra index</code> builds a deterministic map of modules,
-              dependencies, test targets, and evidence so agents do not need to
-              reread the whole repository.
-            </p>
-          </article>
-          <article>
-            <h3>Durable business memory</h3>
-            <p>
-              Business rules and unresolved questions live under
-              <code>spectra/sdd/</code>, with routing that loads only
-              task-relevant context.
-            </p>
-          </article>
-          <article>
-            <h3>Lite or Full</h3>
-            <p>
-              Start with Lite for personal workflows. Upgrade to Full when a
-              team needs approvals, evals, release gates, or generated agent
-              adapters.
-            </p>
-          </article>
-          <article>
-            <h3>Validation and repair</h3>
-            <p>
-              <code>check</code>, <code>verify</code>, and
-              <code>doctor --fix</code> keep generated runtime files, metadata,
-              adapters, and release confidence inspectable.
-            </p>
-          </article>
-        </div>
+        <ol class="workflow-list">
+          <li>
+            <span>01</span>
+            <strong>Adopt</strong>
+            <p>Create the project-local Spectra layer.</p>
+          </li>
+          <li>
+            <span>02</span>
+            <strong>Index</strong>
+            <p>Map modules, dependencies, and test targets.</p>
+          </li>
+          <li>
+            <span>03</span>
+            <strong>Onboard</strong>
+            <p>Draft the project brief from repo facts and answers.</p>
+          </li>
+          <li>
+            <span>04</span>
+            <strong>Context</strong>
+            <p>Load the smallest useful role and goal context.</p>
+          </li>
+          <li>
+            <span>05</span>
+            <strong>Verify</strong>
+            <p>Run checks and aggregate release confidence.</p>
+          </li>
+        </ol>
       </section>
 
-      <section class="section" id="commands">
-        <div class="section-heading">
+      <section class="section commands-section" id="commands">
+        <div class="section-copy">
           <p class="eyebrow">CLI surface</p>
-          <h2>Commands that stay boring on purpose.</h2>
+          <h2>Small commands with clear jobs.</h2>
         </div>
-        <div class="command-list">
-          <div>
-            <code>spectra init</code><span>Create a new Spectra project.</span>
-          </div>
-          <div>
-            <code>spectra adopt</code
-            ><span>Add Spectra to an existing repository.</span>
-          </div>
-          <div>
+        <div class="command-grid">
+          <article>
             <code>spectra index</code
-            ><span>Refresh the repo index used by context and verify.</span>
-          </div>
-          <div>
+            ><span>Build the deterministic repo index.</span>
+          </article>
+          <article>
             <code>spectra onboard</code
-            ><span>Draft the project brief from answers and repo facts.</span>
-          </div>
-          <div>
+            ><span>Draft projectbrief.md from repo facts.</span>
+          </article>
+          <article>
             <code>spectra context</code
-            ><span>Load role-aware and goal-aware context.</span>
-          </div>
-          <div>
+            ><span>Load role-aware context for the task.</span>
+          </article>
+          <article>
             <code>spectra check</code
             ><span>Validate the installed project layer.</span>
-          </div>
-          <div>
+          </article>
+          <article>
             <code>spectra verify</code
-            ><span>Aggregate release-confidence checks.</span>
-          </div>
-          <div>
+            ><span>Aggregate release-confidence signals.</span>
+          </article>
+          <article>
             <code>spectra doctor --fix</code
-            ><span>Repair safe generated Spectra files.</span>
-          </div>
+            ><span>Repair safe generated runtime files.</span>
+          </article>
         </div>
       </section>
 
-      <section class="section cta">
-        <h2>Keep the product code yours. Keep the context findable.</h2>
-        <p>
-          Spectra owns <code>spectra/</code>. Your application, company docs,
-          and repository layout stay in place.
-        </p>
+      <section class="closing">
+        <div>
+          <p class="eyebrow">Spectra 3.0.8</p>
+          <h2>Keep the product code yours. Keep the context findable.</h2>
+        </div>
         <div class="hero-actions">
-          <a class="button primary" href="https://github.com/yunusakin/spectra"
-            >Open GitHub repo</a
+          <a
+            class="button primary"
+            href="https://www.npmjs.com/package/spectra-pack"
+            >Open npm package</a
           >
           <a
             class="button secondary"
@@ -191,7 +201,7 @@ spectra status</code></pre>
     </main>
 
     <footer class="site-footer">
-      <span>Spectra 3.0.8</span>
+      <span>MIT licensed</span>
       <a href="https://github.com/yunusakin/spectra/releases/tag/v3.0.8"
         >Release notes</a
       >
