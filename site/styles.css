@@ -440,6 +440,129 @@ pre {
   color: var(--ink);
 }
 
+.docs-page {
+  background:
+    radial-gradient(
+      circle at 16% 0%,
+      rgba(108, 92, 231, 0.24),
+      transparent 32rem
+    ),
+    linear-gradient(180deg, #0f0f1a 0%, #121426 32rem, #f6f8fc 32rem);
+  color: #121827;
+}
+
+.docs-shell {
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: clamp(54px, 7vw, 84px) 0;
+}
+
+.docs-hero {
+  max-width: 820px;
+  color: var(--ink);
+}
+
+.docs-hero h1,
+.docs-article h1 {
+  font-size: clamp(2.6rem, 5vw, 5rem);
+}
+
+.doc-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 42px;
+}
+
+.doc-card {
+  display: grid;
+  gap: 12px;
+  min-height: 230px;
+  padding: 22px;
+  border: 1px solid #dfe5ef;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #121827;
+  text-decoration: none;
+  box-shadow: 0 18px 60px rgba(18, 24, 39, 0.08);
+}
+
+.doc-card:hover {
+  border-color: rgba(108, 92, 231, 0.42);
+  transform: translateY(-2px);
+}
+
+.doc-card span {
+  color: var(--purple);
+  font-weight: 900;
+}
+
+.doc-card strong {
+  font-size: 1.15rem;
+}
+
+.doc-card p {
+  margin: 0;
+  color: #5c6679;
+}
+
+.docs-article {
+  max-width: 860px;
+}
+
+.docs-article > .eyebrow,
+.docs-article .eyebrow {
+  color: var(--teal);
+}
+
+.docs-article h1 {
+  color: var(--ink);
+}
+
+.docs-article > .lead {
+  max-width: 760px;
+  margin-bottom: 42px;
+}
+
+.docs-article section {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 28px;
+  border: 1px solid #dfe5ef;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 60px rgba(18, 24, 39, 0.06);
+}
+
+.docs-article h2 {
+  color: #121827;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+}
+
+.docs-article p {
+  margin: 0;
+  color: #5c6679;
+}
+
+.docs-article pre {
+  padding: 20px;
+  border-radius: 14px;
+  background: #111426;
+  color: #eef3ff;
+  overflow-x: auto;
+}
+
+.command-reference {
+  display: grid;
+  gap: 18px;
+}
+
+.command-reference article {
+  display: grid;
+  gap: 14px;
+}
+
 @media (max-width: 1060px) {
   .hero {
     grid-template-columns: 1fr;
@@ -454,6 +577,10 @@ pre {
   }
 
   .command-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .doc-card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -501,5 +628,13 @@ pre {
   .closing {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .doc-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-article section {
+    padding: 20px;
   }
 }

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Recommended Spectra workflow for project-local AI-assisted development."
+    />
+    <title>Spectra Workflow</title>
+    <link rel="icon" href="../logo.png" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="docs-page">
+    <header class="site-header">
+      <a class="brand" href="../" aria-label="Spectra home">
+        <img src="../logo.png" alt="" />
+        <span>Spectra</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="./">Docs</a>
+        <a href="./install.html">Install</a>
+        <a href="./commands.html">Commands</a>
+        <a href="https://github.com/yunusakin/spectra">GitHub</a>
+      </nav>
+    </header>
+
+    <main class="docs-shell docs-article">
+      <p class="eyebrow">Workflow</p>
+      <h1>A small loop for repeated agentic work.</h1>
+      <p class="lead">
+        Spectra is not another project-management system. Its job is to keep
+        repo facts, task intent, validation, and release readiness close to the
+        code.
+      </p>
+
+      <section>
+        <h2>Lite flow</h2>
+        <pre><code>spectra index
+spectra onboard
+spectra context --role planner --goal discover
+spectra task --item TASK-001 --task-type feature --goal "Describe the change"
+spectra context --role implementer --goal implement
+spectra check
+spectra status</code></pre>
+        <p>
+          Lite is the right default for personal or project-local use. It gives
+          agents focused context and gives humans a repeatable health check
+          without forcing approval gates.
+        </p>
+      </section>
+
+      <section>
+        <h2>Full flow</h2>
+        <pre><code>spectra context --role planner --goal discover
+spectra check
+spectra admin approve --stage product-approved
+spectra admin approve --stage technical-approved
+spectra admin approve --stage implementation-approved
+spectra task --item FEAT-001 --task-type feature --goal "Implement the flow"
+spectra context --role implementer --goal implement
+spectra admin eval FEAT-001 --suite smoke
+spectra verify --profile release
+spectra admin approve --stage release-approved</code></pre>
+        <p>
+          Full is for teams that want formal specs, approvals, evals, and
+          release gates. Start with Lite unless those controls are already
+          useful.
+        </p>
+      </section>
+
+      <section>
+        <h2>Profile changes</h2>
+        <pre><code>spectra upgrade --profile full
+spectra upgrade --profile full --agents codex,claude</code></pre>
+        <p>
+          <code>upgrade</code> changes the installed profile.
+          <code>update</code> refreshes the installed CLI/runtime. Do not rerun
+          <code>adopt</code> for normal upgrades.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Workflow</span>
+      <a href="./">Docs</a>
+      <a href="./troubleshooting.html">Next: Troubleshooting</a>
+    </footer>
+  </body>
+</html>
