@@ -2,7 +2,7 @@
 
 `spectra-pack` installs the `spectra` CLI.
 
-Spectra is a CLI-first operating system for AI-assisted product development. It bootstraps project-local context, business knowledge, executable specs, staged approvals, eval contracts, telemetry contracts, semantic diff checks, role-aware context packs, and release-confidence verification.
+Spectra is a project-local CLI for AI-assisted development. It bootstraps shared context for humans and agents: business knowledge, implementation intent, executable specs, staged approvals, eval contracts, role-aware context packs, and release-confidence verification.
 
 ## Install
 

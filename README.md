@@ -4,7 +4,7 @@
 
 # Spectra
 
-Spectra is a CLI for spec-driven development. It keeps project context, implementation intent, validation, business knowledge, and—when needed—approval and evaluation state together in a project-local `spectra/` directory.
+Spectra is a project-local CLI for AI-assisted development. It gives agents and humans the same source of truth for project context, task intent, business rules, validation, and—when needed—approval and evaluation state.
 
 The main rule is simple: Spectra owns `spectra/`. Your product code, company docs, and existing repository layout stay yours.
 

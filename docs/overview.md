@@ -1,6 +1,6 @@
 # Spectra Overview
 
-Spectra is a CLI-first operating system for AI-assisted product development.
+Spectra is a project-local CLI for AI-assisted product development.
 
 It gives teams one repository-native way to move from product intent to release confidence:
 
