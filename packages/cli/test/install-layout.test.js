@@ -65,7 +65,7 @@ test("setup rejects an unsupported profile before writing files", () => {
   const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "unsupported"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /--profile must be lite or full/);
+  assert.match(result.stderr, /--profile must be lite or full/);
   assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
 });
 
@@ -76,11 +76,11 @@ test("setup rejects profile or Git-mode changes for an existing installation", (
 
   const profileChange = run(root, process.execPath, [cliPath, "adopt", ".", "--profile", "full"]);
   assert.equal(profileChange.status, 1);
-  assert.match(profileChange.stdout, /profile changes require an explicit upgrade/);
+  assert.match(profileChange.stderr, /profile changes require an explicit upgrade/);
 
   const gitModeChange = run(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "shared"]);
   assert.equal(gitModeChange.status, 1);
-  assert.match(gitModeChange.stdout, /Git mode changes require an explicit migration/);
+  assert.match(gitModeChange.stderr, /Git mode changes require an explicit migration/);
 
   const config = fs.readFileSync(path.join(root, ".spectra", "config.yaml"), "utf8");
   assert.match(config, /^profile: lite$/m);
@@ -92,7 +92,7 @@ test("Lite setup rejects root-level agent adapter generation", () => {
   const result = run(root, process.execPath, [cliPath, "init", ".", "--agents", "codex"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Agent adapters require --profile full/);
+  assert.match(result.stderr, /Agent adapters require --profile full/);
   assert.equal(fs.existsSync(path.join(root, "AGENTS.md")), false);
   assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
 });

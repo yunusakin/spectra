@@ -67,7 +67,7 @@ test("adopt local rejects a non-git target without writing installation files", 
   const result = run(workspaceRoot, process.execPath, [cliPath, "adopt", root, "--git-mode=local"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /requires a Git worktree/);
+  assert.match(result.stderr, /requires a Git worktree/);
   assert.deepEqual(fs.readdirSync(root), []);
 });
 
@@ -139,7 +139,7 @@ test("local adopt refuses a tracked adapter collision before installing", () => 
   ]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /tracked adapter path.*AGENTS\.md/s);
+  assert.match(result.stderr, /tracked adapter path.*AGENTS\.md/s);
   assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
   assert.equal(fs.readFileSync(path.join(root, "AGENTS.md"), "utf8"), "company instructions\n");
 });

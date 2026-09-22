@@ -71,7 +71,7 @@ test("spectra index --check fails with non-zero status when the repo changed", (
 
   const checkResult = run(root, ["index", "--check"]);
   assert.equal(checkResult.status, 1);
-  assert.match(checkResult.stdout, /stale/i);
+  assert.match(checkResult.stderr, /stale/i);
 
   const indexPath = path.join(root, ".spectra", "cache", "index", "repo-index.json");
   const beforeMtime = fs.statSync(indexPath).mtimeMs;

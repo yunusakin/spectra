@@ -66,19 +66,19 @@ test("boolean flags only accept true and false inline values", () => {
 test("spectra verify --unknown fails clearly", () => {
   const result = run(["verify", "--unknown"]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Unknown option: --unknown/);
+  assert.match(result.stderr, /Unknown option: --unknown/);
 });
 
 test("spectra verify --profile fails clearly instead of running", () => {
   const result = run(["verify", "--profile"]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Option --profile requires a value/);
+  assert.match(result.stderr, /Option --profile requires a value/);
 });
 
 test("spectra verify --profile --help reports the missing value", () => {
   const result = run(["verify", "--profile", "--help"]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Option --profile requires a value/);
+  assert.match(result.stderr, /Option --profile requires a value/);
   assert.doesNotMatch(result.stdout, /Usage: spectra verify/);
 });
 
@@ -88,13 +88,13 @@ test("spectra verify --help=false runs without showing help", () => {
 
   assert.equal(result.status, 1);
   assert.doesNotMatch(result.stdout, /Usage: spectra verify/);
-  assert.match(result.stdout, /Could not find a Spectra runtime/);
+  assert.match(result.stderr, /Could not find a Spectra runtime/);
 });
 
 test("spectra verify --help=garbage fails with accepted values", () => {
   const result = run(["verify", "--help=garbage"]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Invalid value for --help: garbage \(accepted: true, false\)/);
+  assert.match(result.stderr, /Invalid value for --help: garbage \(accepted: true, false\)/);
 });
 
 test("spectra verify --help still prints usage and succeeds", () => {

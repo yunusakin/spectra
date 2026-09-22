@@ -171,5 +171,5 @@ test("installed CLI and local launcher expose the same grammar", () => {
 test("unknown commands fail clearly", () => {
   const result = run(["definitely-not-a-command"]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Unknown command: definitely-not-a-command/);
+  assert.match(result.stderr, /Unknown command: definitely-not-a-command/);
 });

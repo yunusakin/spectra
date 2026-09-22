@@ -44,7 +44,7 @@ test("check rejects missing canonical business context indexes", () => {
   const result = run(root, ["check"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Missing canonical business context file/);
+  assert.match(result.stderr, /Missing canonical business context file/);
 });
 
 test("route returns only the named domain context and defers unrelated domains", () => {
@@ -248,9 +248,9 @@ test("knowledge direct active creation requires explicit verification", () => {
   ]);
 
   assert.equal(missingVerified.status, 1);
-  assert.match(missingVerified.stdout, /--status active requires --verified/);
+  assert.match(missingVerified.stderr, /--status active requires --verified/);
   assert.equal(invalidVerified.status, 1);
-  assert.match(invalidVerified.stdout, /--verified can only be used with --status active/);
+  assert.match(invalidVerified.stderr, /--verified can only be used with --status active/);
   assert.equal(verified.status, 0, verified.stderr || verified.stdout);
   assert.match(fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty", "rules.md"), "utf8"), /Status: active/);
 });
@@ -295,9 +295,9 @@ test("route rejects unknown explicit domain and module hints", () => {
   const module = run(root, ["route", "--task", "checkout", "--module", "missing-module"]);
 
   assert.equal(domain.status, 1);
-  assert.match(domain.stdout, /Unknown business domain/);
+  assert.match(domain.stderr, /Unknown business domain/);
   assert.equal(module.status, 1);
-  assert.match(module.stdout, /Unknown technical module/);
+  assert.match(module.stderr, /Unknown technical module/);
 });
 
 test("check rejects duplicate business rule IDs introduced by manual edits", () => {
@@ -310,7 +310,7 @@ test("check rejects duplicate business rule IDs introduced by manual edits", () 
   fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n\n## RULE-LOY-001 — Two\n\nRule two.\n\nStatus: unresolved\n");
   const result = run(root, ["check"]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Duplicate business rule ID/);
+  assert.match(result.stderr, /Duplicate business rule ID/);
 });
 
 test("check rejects a business rule without a status", () => {
@@ -323,7 +323,7 @@ test("check rejects a business rule without a status", () => {
   fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n");
   const result = run(root, ["check"]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /must contain exactly one valid Status/);
+  assert.match(result.stderr, /must contain exactly one valid Status/);
 });
 
 test("check rejects a business index path outside the business-memory root", () => {
@@ -332,7 +332,7 @@ test("check rejects a business index path outside the business-memory root", () 
   fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | ../../package.json | business/loyalty/unresolved.md | |\n");
   const result = run(root, ["check"]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /outside business memory/);
+  assert.match(result.stderr, /outside business memory/);
 });
 
 test("route rejects a business index path outside the business-memory root", () => {
@@ -341,7 +341,7 @@ test("route rejects a business index path outside the business-memory root", () 
   fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | ../../package.json | business/loyalty/unresolved.md | |\n");
   const result = run(root, ["route", "--task", "loyalty", "--format", "json"]);
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /outside business memory/);
+  assert.match(result.stderr, /outside business memory/);
 });
 
 test("context pack composes routed business context and accounts for routed tokens", () => {
@@ -402,7 +402,7 @@ test("check rejects lifecycle statuses in the wrong business rule file", () => {
   const result = run(root, ["check"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /cannot be unresolved in rules.md/);
+  assert.match(result.stderr, /cannot be unresolved in rules.md/);
 });
 
 test("check rejects duplicate active business rule statements from direct edits", () => {
@@ -435,7 +435,7 @@ test("check rejects duplicate active business rule statements from direct edits"
   const result = run(root, ["check"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Duplicate active business-rule statement/);
+  assert.match(result.stderr, /Duplicate active business-rule statement/);
 });
 
 test("check rejects malformed and ambiguous business routing keywords", () => {
@@ -461,9 +461,9 @@ test("check rejects malformed and ambiguous business routing keywords", () => {
   const result = run(root, ["check"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /empty routing keyword/);
-  assert.match(result.stdout, /duplicate routing keyword 'points'/);
-  assert.match(result.stdout, /ambiguous routing keyword 'refund'/);
+  assert.match(result.stderr, /empty routing keyword/);
+  assert.match(result.stderr, /duplicate routing keyword 'points'/);
+  assert.match(result.stderr, /ambiguous routing keyword 'refund'/);
 });
 
 test("check rejects non-comma business routing keyword delimiters", () => {
@@ -489,8 +489,8 @@ test("check rejects non-comma business routing keyword delimiters", () => {
   const result = run(root, ["check"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /invalid routing keyword delimiter.*points;rewards/);
-  assert.match(result.stdout, /invalid routing keyword delimiter.*card\/refund/);
+  assert.match(result.stderr, /invalid routing keyword delimiter.*points;rewards/);
+  assert.match(result.stderr, /invalid routing keyword delimiter.*card\/refund/);
 });
 
 test("knowledge rejects superseding an unresolved rule before promotion", () => {
@@ -504,6 +504,6 @@ test("knowledge rejects superseding an unresolved rule before promotion", () => 
   const result = run(root, ["knowledge", "supersede", "--id", "RULE-LOY-001"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /Promote it before changing it to superseded/);
+  assert.match(result.stderr, /Promote it before changing it to superseded/);
   assert.equal(run(root, ["check"]).status, 0);
 });

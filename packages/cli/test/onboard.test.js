@@ -171,7 +171,7 @@ test("spectra onboard before spectra index has run reports guidance and writes n
   const before = fs.readFileSync(projectBriefPath(root), "utf8");
 
   const result = runOk(root, ["onboard"]);
-  assert.match(result.stdout, /spectra index/);
+  assert.match(result.stderr, /spectra index/);
 
   const after = fs.readFileSync(projectBriefPath(root), "utf8");
   assert.equal(before, after);
