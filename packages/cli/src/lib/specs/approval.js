@@ -1,0 +1,58 @@
+import path from "node:path";
+import { getSddRoot } from "../project-layout.js";
+import { getCurrentCommit, getChangedFiles, isGitRepo } from "../git-diff.js";
+import { stageOrder } from "./stages.js";
+import { computeApprovalState, loadApprovalState, syncLegacyApprovalStatus, ensureStageAllowed } from "./approval-state.js";
+import { validateSpectraV2 } from "./validation.js";
+import { verifyV2 } from "./verification.js";
+import { hasRealMarkdownContent, writeJsonContract } from "./primitives.js";
+
+function approveStage(repoRoot, stage) {
+  ensureStageAllowed(stage);
+
+  const validation = validateSpectraV2(repoRoot);
+  if (!validation.ok) {
+    throw new Error(`Cannot approve ${stage}: v2 validation has ${validation.errors.length} error(s).`);
+  }
+
+  const currentComputed = computeApprovalState(repoRoot);
+  const currentHighest = currentComputed.highest_valid_state;
+  const currentIndex = stageOrder(currentHighest);
+  const targetIndex = stageOrder(stage);
+
+  if (targetIndex > currentIndex + 1 && currentHighest !== "draft") {
+    throw new Error(`Cannot skip stages. Highest valid stage is ${currentHighest}.`);
+  }
+
+  if (stage === "product-approved" && !hasRealMarkdownContent(path.join(getSddRoot(repoRoot), "memory-bank", "core", "projectbrief.md"))) {
+    throw new Error("Cannot approve product stage: projectbrief.md is still template-only.");
+  }
+
+  if (stage === "release-approved") {
+    const releaseReport = verifyV2(repoRoot, { scope: "all", profile: "release" });
+    if (releaseReport.blocked) {
+      throw new Error(`Cannot approve release stage: verify --profile release is ${releaseReport.verdict}.`);
+    }
+  }
+
+  const { path: approvalPath, state } = loadApprovalState(repoRoot);
+  const commit = getCurrentCommit(repoRoot);
+  const dirty = isGitRepo(repoRoot)
+    ? getChangedFiles(repoRoot, { includeWorktree: true }).length > 0
+    : false;
+
+  state.current_state = stage;
+  state.highest_valid_state = stage;
+  state.stages[stage] = {
+    approved_at: new Date().toISOString(),
+    baseline_commit: commit,
+    dirty
+  };
+  state.invalidations = [];
+  writeJsonContract(approvalPath, state);
+  syncLegacyApprovalStatus(repoRoot, stage);
+  return state;
+}
+
+
+export { approveStage };

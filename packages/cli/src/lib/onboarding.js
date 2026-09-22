@@ -39,7 +39,7 @@ function section(heading, value, fallbackBody, extra = "") {
 
 // Pure render function: given optional user answers and an optional repo
 // index, produces the projectbrief.md content. Headings must match exactly
-// what lib/context.js's parseProjectSummary expects, so this stays a drop-in
+// what lib/context/summaries.js's parseProjectSummary expects, so this stays a drop-in
 // replacement for the shipped "Filled by intake" template rather than a
 // parallel format.
 function buildProjectBriefDraft({ answers = {}, repoIndex = null } = {}) {
