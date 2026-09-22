@@ -2,9 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { ensureDirectory, findSpectraRoot } from "./runtime.js";
-import { getProjectLayout } from "./project-layout.js";
+import { getCacheRoot, getSddRoot } from "./project-layout.js";
 import { checkIndexFreshness } from "./index/cache.js";
 import YAML from "yaml";
+
+function toPosix(value) {
+  return value.split(path.sep).join("/");
+}
 
 const STAGES = [
   "draft",
@@ -35,18 +39,6 @@ const STAGE_INVALIDATION = {
     "infra-only"
   ])
 };
-
-function getSddRoot(repoRoot) {
-  const canonicalRoot = getProjectLayout(repoRoot).sdd;
-  return fs.existsSync(path.join(canonicalRoot, "system", "manifest.env")) ? canonicalRoot : path.join(repoRoot, "sdd");
-}
-
-function getCacheRoot(repoRoot) {
-  const canonicalRoot = getProjectLayout(repoRoot).root;
-  return fs.existsSync(path.join(canonicalRoot, "install.json"))
-    ? path.join(canonicalRoot, "cache")
-    : path.join(repoRoot, ".spectra", "cache");
-}
 
 function slugify(value) {
   return String(value ?? "project-core")
@@ -862,10 +854,10 @@ function validateSpectraV2(repoRoot) {
   const decisionGraphPath = path.join(sddRoot, "governance", "decision-graph.yaml");
 
   if (!fs.existsSync(approvalStatePath)) {
-    errors.push("Missing spectra/sdd/governance/approval-state.yaml");
+    errors.push(`Missing ${toPosix(path.relative(repoRoot, approvalStatePath))}`);
   }
   if (!fs.existsSync(decisionGraphPath)) {
-    errors.push("Missing spectra/sdd/governance/decision-graph.yaml");
+    errors.push(`Missing ${toPosix(path.relative(repoRoot, decisionGraphPath))}`);
   }
 
   if (fs.existsSync(approvalStatePath)) {

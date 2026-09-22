@@ -1,10 +1,8 @@
-import fs from "node:fs";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
 import { findSpectraRoot, readInstallMetadata } from "../lib/runtime.js";
-import { getProjectLayout } from "../lib/project-layout.js";
 import { getCliVersion } from "../lib/version.js";
-import { migrateLegacyLayout } from "../lib/migration.js";
+import { migrateLegacyLayout, needsMigration } from "../lib/migration.js";
 import { installSpectra } from "../lib/install.js";
 import { SCHEMA_VERSION } from "../lib/profile.js";
 import { ok, title } from "../lib/output.js";
@@ -13,9 +11,7 @@ import { validateCommand } from "./validate.js";
 import { compareVersions, latestVersion, resolveInstalledNativeCommand, runSelfUpdate } from "../lib/update.js";
 
 function needsLegacyMigration(projectRoot) {
-  const layout = getProjectLayout(projectRoot);
-  return !fs.existsSync(layout.installMetadata) &&
-    (fs.existsSync(path.join(projectRoot, ".spectra", "install.json")) || fs.existsSync(path.join(projectRoot, "sdd")));
+  return needsMigration(projectRoot);
 }
 
 async function confirmUpdate(message) {

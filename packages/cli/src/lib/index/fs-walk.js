@@ -21,7 +21,8 @@ const DEFAULT_IGNORE_DIRS = new Set([
   ".vscode",
   ".gradle",
   ".mvn",
-  "spectra"
+  "spectra",
+  ".spectra"
 ]);
 
 function toPosixRelative(repoRoot, absolutePath) {

@@ -64,21 +64,21 @@ test("local policy records only created files and preserves existing exclude rul
   fs.appendFileSync(path.resolve(root, excludePath), "\n/company-local.txt\n");
 
   const policy = beginLocalGitPolicy(target);
-  fs.mkdirSync(path.join(target, "spectra", "sdd", "system"), { recursive: true });
+  fs.mkdirSync(path.join(target, ".spectra", "sdd", "system"), { recursive: true });
   fs.mkdirSync(path.join(target, "docs"), { recursive: true });
-  fs.writeFileSync(path.join(target, "spectra", "install.json"), "{}\n");
-  fs.writeFileSync(path.join(target, "spectra", "sdd", "system", "manifest.env"), "repo_mode=consumer\n");
+  fs.writeFileSync(path.join(target, ".spectra", "install.json"), "{}\n");
+  fs.writeFileSync(path.join(target, ".spectra", "sdd", "system", "manifest.env"), "repo_mode=consumer\n");
   fs.writeFileSync(path.join(target, "docs", "workflow.md"), "workflow\n");
 
   const result = finishLocalGitPolicy(policy);
   assert.deepEqual(result.ownedPaths, [
-    "docs/workflow.md",
-    "spectra/install.json",
-    "spectra/sdd/system/manifest.env"
+    ".spectra/install.json",
+    ".spectra/sdd/system/manifest.env",
+    "docs/workflow.md"
   ]);
   assert.deepEqual(result.excludePatterns, [
-    "/services/balance api/docs/workflow.md",
-    "/services/balance api/spectra/"
+    "/services/balance api/.spectra/",
+    "/services/balance api/docs/workflow.md"
   ]);
 
   const firstContent = fs.readFileSync(result.excludePath, "utf8");
@@ -90,24 +90,24 @@ test("local policy records only created files and preserves existing exclude rul
   assert.equal(run(root, "git", ["status", "--short"]), "?? services/");
   assert.match(
     run(root, "git", ["status", "--short", "--ignored"]),
-    /!! [\"]?services\/balance api\/spectra\//
+    /!! [\"]?services\/balance api\/\.spectra\//
   );
 });
 
 test("local policy uses exact paths when a Spectra root existed before adoption", () => {
   const root = createGitRepo();
   const target = path.join(root, "consumer");
-  fs.mkdirSync(path.join(target, "spectra"), { recursive: true });
-  fs.writeFileSync(path.join(target, "spectra", "company.md"), "company\n");
+  fs.mkdirSync(path.join(target, ".spectra"), { recursive: true });
+  fs.writeFileSync(path.join(target, ".spectra", "company.md"), "company\n");
 
   const policy = beginLocalGitPolicy(target);
-  fs.writeFileSync(path.join(target, "spectra", "spectra.md"), "spectra\n");
+  fs.writeFileSync(path.join(target, ".spectra", "spectra.md"), "spectra\n");
   const result = finishLocalGitPolicy(policy);
 
-  assert.deepEqual(result.excludePatterns, ["/consumer/spectra/spectra.md"]);
+  assert.deepEqual(result.excludePatterns, ["/consumer/.spectra/spectra.md"]);
   assert.equal(
     run(root, "git", ["status", "--short", "--untracked-files=all"]),
-    "?? consumer/spectra/company.md"
+    "?? consumer/.spectra/company.md"
   );
 });
 
@@ -127,10 +127,10 @@ test("local policy writes to the shared Git exclude file from a linked worktree"
   run(root, "git", ["worktree", "add", "-q", "-b", "local-policy-test", worktree]);
 
   const policy = beginLocalGitPolicy(worktree);
-  fs.mkdirSync(path.join(worktree, "spectra"), { recursive: true });
-  fs.writeFileSync(path.join(worktree, "spectra", "install.json"), "{}\n");
+  fs.mkdirSync(path.join(worktree, ".spectra"), { recursive: true });
+  fs.writeFileSync(path.join(worktree, ".spectra", "install.json"), "{}\n");
   const result = finishLocalGitPolicy(policy);
 
   assert.equal(fs.realpathSync(result.excludePath), fs.realpathSync(path.join(root, ".git", "info", "exclude")));
-  assert.equal(run(worktree, "git", ["check-ignore", "spectra/install.json"]), "spectra/install.json");
+  assert.equal(run(worktree, "git", ["check-ignore", ".spectra/install.json"]), ".spectra/install.json");
 });

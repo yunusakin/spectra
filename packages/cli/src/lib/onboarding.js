@@ -1,11 +1,11 @@
 import path from "node:path";
-import { getProjectLayout } from "./project-layout.js";
+import { getSddRoot } from "./project-layout.js";
 import { hasRealMarkdownContent } from "./specs.js";
 
 const MAX_DETECTED_MODULES = 10;
 
 function getProjectBriefPath(repoRoot) {
-  return path.join(getProjectLayout(repoRoot).sdd, "memory-bank", "core", "projectbrief.md");
+  return path.join(getSddRoot(repoRoot), "memory-bank", "core", "projectbrief.md");
 }
 
 function isProjectBriefTemplateOnly(repoRoot) {

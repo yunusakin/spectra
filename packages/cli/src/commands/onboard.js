@@ -10,6 +10,11 @@ import {
   resolveOnboardingAnswers
 } from "../lib/onboarding.js";
 import fs from "node:fs";
+import path from "node:path";
+
+function toPosix(value) {
+  return value.split(path.sep).join("/");
+}
 
 const QUESTIONS = [
   ["projectName", "Project name (enter to skip): "],
@@ -77,7 +82,7 @@ async function onboardCommand(argv) {
 
   const draft = buildProjectBriefDraft({ answers, repoIndex });
   fs.writeFileSync(getProjectBriefPath(repoRoot), draft);
-  ok("Wrote spectra/sdd/memory-bank/core/projectbrief.md");
+  ok(`Wrote ${toPosix(path.relative(repoRoot, getProjectBriefPath(repoRoot)))}`);
   title("Next: spectra context --role planner --goal discover");
   return 0;
 }

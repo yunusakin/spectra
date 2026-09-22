@@ -29,17 +29,17 @@ test("Lite installation includes agent-neutral module and business indexes", () 
   const result = run(root, ["init", "."]);
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "tech", "modules.md")), true);
-  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md")), true);
-  assert.equal(fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "README.md")), true);
-  assert.doesNotMatch(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "utf8"), /\*\*\* Add File/);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "tech", "modules.md")), true);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md")), true);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "README.md")), true);
+  assert.doesNotMatch(fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "utf8"), /\*\*\* Add File/);
 });
 
 test("check rejects missing canonical business context indexes", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  fs.rmSync(path.join(root, "spectra", "sdd", "memory-bank", "business"), { recursive: true, force: true });
-  fs.rmSync(path.join(root, "spectra", "sdd", "memory-bank", "tech"), { recursive: true, force: true });
+  fs.rmSync(path.join(root, ".spectra", "sdd", "memory-bank", "business"), { recursive: true, force: true });
+  fs.rmSync(path.join(root, ".spectra", "sdd", "memory-bank", "tech"), { recursive: true, force: true });
 
   const result = run(root, ["check"]);
 
@@ -50,7 +50,7 @@ test("check rejects missing canonical business context indexes", () => {
 test("route returns only the named domain context and defers unrelated domains", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  const businessRoot = path.join(root, ".spectra", "sdd", "memory-bank", "business");
   fs.mkdirSync(path.join(businessRoot, "loyalty"), { recursive: true });
   fs.mkdirSync(path.join(businessRoot, "payments"), { recursive: true });
   fs.writeFileSync(
@@ -84,7 +84,7 @@ test("route returns only the named domain context and defers unrelated domains",
 test("route selects a domain from configured keywords and explains the match", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  const businessRoot = path.join(root, ".spectra", "sdd", "memory-bank", "business");
   fs.mkdirSync(path.join(businessRoot, "loyalty"), { recursive: true });
   fs.mkdirSync(path.join(businessRoot, "payments"), { recursive: true });
   fs.writeFileSync(
@@ -117,7 +117,7 @@ test("route selects a domain from configured keywords and explains the match", (
 test("route explains explicit and module-derived matches without duplicating selected domains", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const memory = path.join(root, "spectra", "sdd", "memory-bank");
+  const memory = path.join(root, ".spectra", "sdd", "memory-bank");
   fs.writeFileSync(
     path.join(memory, "tech", "modules.md"),
     "| Module | Responsibility | Paths | Business Domains |\n| --- | --- | --- | --- |\n| order-service | orders | services/orders | loyalty |\n| payment-service | payments | services/payments | payments |\n"
@@ -154,7 +154,7 @@ test("route explains explicit and module-derived matches without duplicating sel
 test("route does not select sibling domains through domain-related module expansion", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const memory = path.join(root, "spectra", "sdd", "memory-bank");
+  const memory = path.join(root, ".spectra", "sdd", "memory-bank");
   fs.writeFileSync(
     path.join(memory, "tech", "modules.md"),
     "| Module | Responsibility | Paths | Business Domains |\n| --- | --- | --- | --- |\n| checkout-service | checkout | services/checkout | loyalty,payments |\n"
@@ -210,8 +210,8 @@ test("knowledge creates one canonical unresolved rule and promotes it without du
 
   const promote = run(root, ["knowledge", "promote", "--id", "RULE-LOY-001"]);
   assert.equal(promote.status, 0, promote.stderr || promote.stdout);
-  const rules = fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "rules.md"), "utf8");
-  const unresolved = fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "unresolved.md"), "utf8");
+  const rules = fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty", "rules.md"), "utf8");
+  const unresolved = fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty", "unresolved.md"), "utf8");
   assert.match(rules, /RULE-LOY-001/);
   assert.doesNotMatch(unresolved, /RULE-LOY-001/);
 });
@@ -227,7 +227,7 @@ test("knowledge add defaults to unresolved status", () => {
 
   assert.equal(add.status, 0, add.stderr || add.stdout);
   assert.match(add.stdout, /unresolved/);
-  assert.match(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "unresolved.md"), "utf8"), /Status: unresolved/);
+  assert.match(fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty", "unresolved.md"), "utf8"), /Status: unresolved/);
 });
 
 test("knowledge direct active creation requires explicit verification", () => {
@@ -252,7 +252,7 @@ test("knowledge direct active creation requires explicit verification", () => {
   assert.equal(invalidVerified.status, 1);
   assert.match(invalidVerified.stdout, /--verified can only be used with --status active/);
   assert.equal(verified.status, 0, verified.stderr || verified.stdout);
-  assert.match(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "rules.md"), "utf8"), /Status: active/);
+  assert.match(fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty", "rules.md"), "utf8"), /Status: active/);
 });
 
 test("knowledge resolve is an alias for promoting an unresolved rule", () => {
@@ -268,14 +268,14 @@ test("knowledge resolve is an alias for promoting an unresolved rule", () => {
   const resolve = run(root, ["knowledge", "resolve", "--id", "RULE-LOY-001"]);
 
   assert.equal(resolve.status, 0, resolve.stderr || resolve.stdout);
-  const rules = fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty", "rules.md"), "utf8");
+  const rules = fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty", "rules.md"), "utf8");
   assert.match(rules, /Status: active/);
 });
 
 test("route expands a selected module into its linked multi-word business domain", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const memory = path.join(root, "spectra", "sdd", "memory-bank");
+  const memory = path.join(root, ".spectra", "sdd", "memory-bank");
   fs.writeFileSync(path.join(memory, "tech", "modules.md"), "| Module | Responsibility | Paths | Business Domains |\n| --- | --- | --- | --- |\n| order-service | orders | services/orders | loyalty-program |\n");
   fs.mkdirSync(path.join(memory, "business", "loyalty-program"));
   fs.writeFileSync(path.join(memory, "business", "INDEX.md"), "| Domain | Rules | Unresolved | Related Modules |\n| --- | --- | --- | --- |\n| loyalty-program | business/loyalty-program/rules.md | business/loyalty-program/unresolved.md | order-service |\n");
@@ -303,9 +303,9 @@ test("route rejects unknown explicit domain and module hints", () => {
 test("check rejects duplicate business rule IDs introduced by manual edits", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
+  const domain = path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty");
   fs.mkdirSync(domain);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
   fs.writeFileSync(path.join(domain, "rules.md"), "# Rules\n\n## RULE-LOY-001 — One\n\nRule one.\n\nStatus: active\n");
   fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n\n## RULE-LOY-001 — Two\n\nRule two.\n\nStatus: unresolved\n");
   const result = run(root, ["check"]);
@@ -316,9 +316,9 @@ test("check rejects duplicate business rule IDs introduced by manual edits", () 
 test("check rejects a business rule without a status", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
+  const domain = path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty");
   fs.mkdirSync(domain);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
   fs.writeFileSync(path.join(domain, "rules.md"), "# Rules\n\n## RULE-LOY-001 — Expiration\n\nExpired points cannot pay.\n");
   fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n");
   const result = run(root, ["check"]);
@@ -329,7 +329,7 @@ test("check rejects a business rule without a status", () => {
 test("check rejects a business index path outside the business-memory root", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | ../../package.json | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | ../../package.json | business/loyalty/unresolved.md | |\n");
   const result = run(root, ["check"]);
   assert.equal(result.status, 1);
   assert.match(result.stdout, /outside business memory/);
@@ -338,7 +338,7 @@ test("check rejects a business index path outside the business-memory root", () 
 test("route rejects a business index path outside the business-memory root", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | ../../package.json | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | ../../package.json | business/loyalty/unresolved.md | |\n");
   const result = run(root, ["route", "--task", "loyalty", "--format", "json"]);
   assert.equal(result.status, 1);
   assert.match(result.stdout, /outside business memory/);
@@ -347,7 +347,7 @@ test("route rejects a business index path outside the business-memory root", () 
 test("context pack composes routed business context and accounts for routed tokens", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  const businessRoot = path.join(root, ".spectra", "sdd", "memory-bank", "business");
   fs.mkdirSync(path.join(businessRoot, "loyalty"), { recursive: true });
   fs.mkdirSync(path.join(businessRoot, "payments"), { recursive: true });
   fs.writeFileSync(
@@ -393,9 +393,9 @@ test("context pack accepts route-task as the first-class task input", () => {
 test("check rejects lifecycle statuses in the wrong business rule file", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
+  const domain = path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty");
   fs.mkdirSync(domain);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
   fs.writeFileSync(path.join(domain, "rules.md"), "# Rules\n\n## RULE-LOY-001 — Pending\n\nNeed a decision.\n\nStatus: unresolved\n");
   fs.writeFileSync(path.join(domain, "unresolved.md"), "# Unresolved\n");
 
@@ -408,9 +408,9 @@ test("check rejects lifecycle statuses in the wrong business rule file", () => {
 test("check rejects duplicate active business rule statements from direct edits", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const domain = path.join(root, "spectra", "sdd", "memory-bank", "business", "loyalty");
+  const domain = path.join(root, ".spectra", "sdd", "memory-bank", "business", "loyalty");
   fs.mkdirSync(domain);
-  fs.appendFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
+  fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | business/loyalty/rules.md | business/loyalty/unresolved.md | |\n");
   fs.writeFileSync(
     path.join(domain, "rules.md"),
     [
@@ -441,7 +441,7 @@ test("check rejects duplicate active business rule statements from direct edits"
 test("check rejects malformed and ambiguous business routing keywords", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  const businessRoot = path.join(root, ".spectra", "sdd", "memory-bank", "business");
   for (const domain of ["loyalty", "payments"]) {
     fs.mkdirSync(path.join(businessRoot, domain), { recursive: true });
     fs.writeFileSync(path.join(businessRoot, domain, "rules.md"), "# Rules\n");
@@ -469,7 +469,7 @@ test("check rejects malformed and ambiguous business routing keywords", () => {
 test("check rejects non-comma business routing keyword delimiters", () => {
   const root = createProject();
   assert.equal(run(root, ["init", "."]).status, 0);
-  const businessRoot = path.join(root, "spectra", "sdd", "memory-bank", "business");
+  const businessRoot = path.join(root, ".spectra", "sdd", "memory-bank", "business");
   for (const domain of ["loyalty", "payments"]) {
     fs.mkdirSync(path.join(businessRoot, domain), { recursive: true });
     fs.writeFileSync(path.join(businessRoot, domain, "rules.md"), "# Rules\n");

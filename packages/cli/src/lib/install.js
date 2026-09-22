@@ -17,6 +17,7 @@ import {
   writeInstallMetadata
 } from "./runtime.js";
 import { buildAdoptionArtifacts, ensureV2Scaffolding } from "./specs.js";
+import { migrateLegacyLayout } from "./migration.js";
 import { assertPathsUntracked, beginLocalGitPolicy, finishLocalGitPolicy } from "./git-policy.js";
 import { getAdapterOutputPaths } from "./adapter-paths.js";
 import { getProjectLayout } from "./project-layout.js";
@@ -155,8 +156,19 @@ function installSpectra({
   const normalizedProfile = normalizeProfile(profile);
   const layout = getProjectLayout(absoluteTarget);
   const profileAssetsDir = getProfileAssetsDir(normalizedProfile);
+
+  // Bring any pre-3.0.9 layout (spectra/ or root sdd/) to the canonical
+  // .spectra root first so init/adopt/doctor-fix can never create a
+  // second, parallel layout. Refuses to touch a Spectra source repo.
+  const migration = migrateLegacyLayout(absoluteTarget);
+  if (migration.reason === "source-repo") {
+    throw new Error(
+      `Refusing to install into a Spectra source repository: ${absoluteTarget} has a root-level sdd/ with repo_mode=canonical.`
+    );
+  }
+
   if (normalizedProfile === "lite" && agents) {
-    throw new Error("Agent adapters require --profile full because they create tool integration files outside spectra/.");
+    throw new Error("Agent adapters require --profile full because they create tool integration files outside .spectra/.");
   }
   const existingMetadata = readInstallMetadata(absoluteTarget);
   if (!upgrade && existingMetadata?.profile && existingMetadata.profile !== normalizedProfile) {
@@ -197,7 +209,7 @@ function installSpectra({
     ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
     installedAt: new Date().toISOString(),
     binaryPath: nativeBinaryPath,
-    localLauncher: "spectra/bin/spectra"
+    localLauncher: ".spectra/bin/spectra"
   });
 
   if (adopt && !refresh) {
@@ -254,7 +266,7 @@ function installSpectra({
       ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
       installedAt: new Date().toISOString(),
       binaryPath: nativeBinaryPath,
-      localLauncher: "spectra/bin/spectra",
+      localLauncher: ".spectra/bin/spectra",
       ownedPaths,
       excludePatterns
     });

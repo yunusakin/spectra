@@ -54,12 +54,12 @@ test("adopt local keeps Spectra files local while project code remains visible",
   const status = runOk(root, "git", ["status", "--short", "--untracked-files=all"]).stdout.trim();
   assert.equal(status, "?? app/project.js");
 
-  const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
   assert.equal(metadata.gitMode, "local");
-  assert.ok(metadata.ownedPaths.includes("spectra/docs/workflow.md"));
-  assert.ok(metadata.excludePatterns.includes("/spectra/"));
-  assert.match(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "tech", "modules.md"), "utf8"), /Unconfirmed/);
-  assert.match(fs.readFileSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md"), "utf8"), /Candidate domains/);
+  assert.ok(metadata.ownedPaths.includes(".spectra/docs/workflow.md"));
+  assert.ok(metadata.excludePatterns.includes("/.spectra/"));
+  assert.match(fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "tech", "modules.md"), "utf8"), /Unconfirmed/);
+  assert.match(fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "utf8"), /Candidate domains/);
 });
 
 test("adopt local rejects a non-git target without writing installation files", () => {
@@ -79,7 +79,7 @@ test("adopt shared leaves company gitignore rules unchanged", () => {
   const gitignore = fs.readFileSync(path.join(root, ".gitignore"), "utf8");
   assert.match(gitignore, /company-secret\.txt/);
   assert.doesNotMatch(gitignore, /node_modules\//);
-  const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
   assert.equal(metadata.gitMode, "shared");
 });
 
@@ -91,9 +91,9 @@ test("repeated local adoption preserves the existing ownership policy", () => {
   runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local", "--profile", "full"]);
 
   assert.equal(fs.readFileSync(path.join(root, ".git", "info", "exclude"), "utf8"), before);
-  const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
-  assert.ok(metadata.ownedPaths.includes("spectra/docs/workflow.md"));
-  assert.ok(metadata.excludePatterns.includes("/spectra/"));
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
+  assert.ok(metadata.ownedPaths.includes(".spectra/docs/workflow.md"));
+  assert.ok(metadata.excludePatterns.includes("/.spectra/"));
 });
 
 test("adapters extend a persistent local policy", () => {
@@ -112,12 +112,12 @@ test("adapters extend a persistent local policy", () => {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const status = runOk(root, "git", ["status", "--short", "--untracked-files=all"]).stdout.trim();
   assert.equal(status, "?? app/project.js");
-  const metadata = JSON.parse(fs.readFileSync(path.join(root, "spectra", "install.json"), "utf8"));
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
   assert.ok(metadata.ownedPaths.includes("AGENTS.md"));
   assert.ok(metadata.ownedPaths.includes(".github/copilot-instructions.md"));
   assert.ok(metadata.excludePatterns.includes("/AGENTS.md"));
   assert.ok(metadata.excludePatterns.includes("/.github/copilot-instructions.md"));
-  assert.ok(metadata.excludePatterns.includes("/spectra/"));
+  assert.ok(metadata.excludePatterns.includes("/.spectra/"));
 });
 
 test("local adopt refuses a tracked adapter collision before installing", () => {
@@ -140,7 +140,7 @@ test("local adopt refuses a tracked adapter collision before installing", () => 
 
   assert.equal(result.status, 1);
   assert.match(result.stdout, /tracked adapter path.*AGENTS\.md/s);
-  assert.equal(fs.existsSync(path.join(root, "spectra")), false);
+  assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
   assert.equal(fs.readFileSync(path.join(root, "AGENTS.md"), "utf8"), "company instructions\n");
 });
 
@@ -150,22 +150,22 @@ test("adopt runs map-codebase.sh with valid arguments and produces discovery out
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.equal(
-    fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "tech", "modules.md")),
+    fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "tech", "modules.md")),
     true
   );
   assert.equal(
-    fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md")),
+    fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md")),
     true
   );
   assert.equal(
-    fs.existsSync(path.join(root, "spectra", "sdd", "memory-bank", "discovery")),
+    fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "discovery")),
     true
   );
 });
 
 test("source map-codebase.sh accepts the installed spectra root argument", () => {
   const root = createRepo();
-  const spectraRoot = path.join(root, "spectra");
+  const spectraRoot = path.join(root, ".spectra");
   fs.mkdirSync(spectraRoot, { recursive: true });
 
   const result = run(workspaceRoot, "bash", [

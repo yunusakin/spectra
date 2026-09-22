@@ -81,20 +81,23 @@ test("context pack surfaces module/ecosystem data once spectra index has run", (
 });
 
 test("context pack budget warnings are unaffected by repo index presence", () => {
-  const withIndexRoot = createGitRepo();
-  fs.writeFileSync(path.join(withIndexRoot, "package.json"), JSON.stringify({ name: "demo" }, null, 2));
-  spawnSync("git", ["add", "."], { cwd: withIndexRoot });
-  spawnSync("git", ["commit", "-qm", "initial"], { cwd: withIndexRoot });
-  runOk(withIndexRoot, ["adopt", ".", "--git-mode", "local"]);
-  const withIndex = runOk(withIndexRoot, ["context", "--role", "planner", "--goal", "discover"]);
+  // Same adopted project (identical memory-bank state), compared with and
+  // without the cached repo index: the index bridge must never change the
+  // token budget accounting.
+  const root = createGitRepo();
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "demo" }, null, 2));
+  spawnSync("git", ["add", "."], { cwd: root });
+  spawnSync("git", ["commit", "-qm", "initial"], { cwd: root });
+  runOk(root, ["adopt", ".", "--git-mode", "local"]);
 
-  const withoutIndexRoot = createGitRepo();
-  fs.writeFileSync(path.join(withoutIndexRoot, "package.json"), JSON.stringify({ name: "demo" }, null, 2));
-  spawnSync("git", ["add", "."], { cwd: withoutIndexRoot });
-  spawnSync("git", ["commit", "-qm", "initial"], { cwd: withoutIndexRoot });
-  runOk(withoutIndexRoot, ["init", "."]);
-  const withoutIndex = runOk(withoutIndexRoot, ["context", "--role", "planner", "--goal", "discover"]);
+  const withIndex = runOk(root, ["context", "--role", "planner", "--goal", "discover"]);
+
+  const indexCacheDir = path.join(root, ".spectra", "cache", "index");
+  fs.rmSync(indexCacheDir, { recursive: true, force: true });
+  const withoutIndex = runOk(root, ["context", "--role", "planner", "--goal", "discover"]);
 
   const tokenLine = (stdout) => stdout.split("\n").find((line) => line.includes("Estimated Tokens:"));
+  assert.match(withIndex.stdout, /Repo Index:/);
+  assert.ok(tokenLine(withIndex.stdout));
   assert.equal(tokenLine(withIndex.stdout), tokenLine(withoutIndex.stdout));
 });

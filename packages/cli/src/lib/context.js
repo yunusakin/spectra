@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { ensureDirectory, findSpectraRoot } from "./runtime.js";
 import { getFeatureDirs, readJsonContract } from "./specs.js";
-import { getProjectLayout } from "./project-layout.js";
+import { detectLayout, getCacheRoot } from "./project-layout.js";
 import { readIndex as readRepoIndex } from "./index/cache.js";
 
 const contextModuleFile = typeof import.meta.url === "string" ? fileURLToPath(import.meta.url) : null;
@@ -831,19 +831,31 @@ const SUMMARY_BUILDERS = {
   "shared-core.summary.json": parseSharedCoreSummary
 };
 
-function isCanonicalDataRoot(repoRoot) {
+// True when repoRoot is itself a data directory (holds both install.json
+// and sdd/system/manifest.env), regardless of layout generation.
+function isDataRoot(repoRoot) {
   return fs.existsSync(path.join(repoRoot, "install.json")) && fs.existsSync(path.join(repoRoot, "sdd", "system", "manifest.env"));
 }
 
+// The directory whose sdd/ and cache/ this project reads from: the data
+// root for canonical and 3.0.8 installs, the project root for pre-3.0
+// root-sdd installs (and not-installed trees).
 function getContextRoot(projectRoot) {
-  const canonicalRoot = getProjectLayout(projectRoot).root;
-  return isCanonicalDataRoot(canonicalRoot) ? canonicalRoot : projectRoot;
+  const layout = detectLayout(projectRoot);
+  if (layout === "canonical") {
+    return path.join(projectRoot, ".spectra");
+  }
+  if (layout === "spectra-dir") {
+    return path.join(projectRoot, "spectra");
+  }
+  return projectRoot;
 }
 
 function getCacheDir(repoRoot) {
-  return isCanonicalDataRoot(repoRoot)
-    ? path.join(repoRoot, "cache", "context")
-    : path.join(repoRoot, ".spectra", "cache", "context");
+  if (isDataRoot(repoRoot)) {
+    return path.join(repoRoot, "cache", "context");
+  }
+  return path.join(getCacheRoot(repoRoot), "context");
 }
 
 function needsRebuild(outputPath, sourcePaths) {
@@ -1017,7 +1029,12 @@ function resolveEntry(repoRoot, entryId, changedFiles, source) {
     return null;
   }
 
-  const absolutePath = path.join(repoRoot, definition.path);
+  // Summary entries live in the layout's cache directory (see getCacheDir);
+  // their ENTRY_DEFS.path stays a canonical .spectra/... display path.
+  // Full-mode entries resolve against the data root.
+  const absolutePath = definition.mode === "summary"
+    ? path.join(getCacheDir(repoRoot), path.basename(definition.path))
+    : path.join(repoRoot, definition.path);
   const exists = fs.existsSync(absolutePath);
   const relatedChanged = definition.sources.filter((candidate) => changedFiles.includes(candidate));
 

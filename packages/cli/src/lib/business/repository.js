@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { findSpectraRoot } from "../runtime.js";
+import { getSddRoot } from "../project-layout.js";
 import { normalize, readMarkdownTableContent } from "./parser.js";
 
 function readMarkdownTable(filePath) {
@@ -10,8 +11,10 @@ function readMarkdownTable(filePath) {
   return readMarkdownTableContent(fs.readFileSync(filePath, "utf8"));
 }
 
+// The data root that owns sdd/ for this project (.spectra, legacy
+// spectra/, or the project root for pre-3.0 installs).
 function getContextRoot(projectRoot) {
-  return path.join(projectRoot, "spectra");
+  return path.dirname(getSddRoot(projectRoot));
 }
 
 function getBusinessPaths(projectRoot) {
@@ -43,7 +46,7 @@ function resolveBusinessPath(businessRoot, relativePath) {
 }
 
 function ruleFile(projectRoot, domain, status) {
-  return path.join(projectRoot, "spectra", "sdd", "memory-bank", "business", normalize(domain), status === "active" ? "rules.md" : "unresolved.md");
+  return path.join(getSddRoot(projectRoot), "memory-bank", "business", normalize(domain), status === "active" ? "rules.md" : "unresolved.md");
 }
 
 function readBusinessIndexes(projectRoot) {

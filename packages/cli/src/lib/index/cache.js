@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getProjectLayout } from "../project-layout.js";
+import { getCacheRoot } from "../project-layout.js";
 import { buildRepoIndex } from "./engine.js";
 
 function getIndexCacheDir(projectRoot) {
-  return path.join(getProjectLayout(projectRoot).root, "cache", "index");
+  return path.join(getCacheRoot(projectRoot), "index");
 }
 
 function getIndexFilePath(projectRoot) {
