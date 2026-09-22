@@ -3,7 +3,7 @@ import { fail, ok, title } from "../lib/output.js";
 import { runEvalSuite } from "../lib/specs.js";
 import { parseOptions } from "../lib/options.js";
 
-function evalRunCommand(argv) {
+function evalCommand(argv) {
   const { options, positional } = parseOptions(argv, {
     booleanFlags: ["--help"],
     stringFlags: ["--cwd", "--feature", "--suite"]
@@ -34,4 +34,4 @@ function evalRunCommand(argv) {
   return 1;
 }
 
-export { evalRunCommand };
+export { evalCommand };

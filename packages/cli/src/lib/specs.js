@@ -361,7 +361,7 @@ function buildFeatureBundle(projectName) {
         ]
       },
       observability_events: [
-        { name: "spectra_context_pack_requested", trigger: "context-pack command runs" },
+        { name: "spectra_context_pack_requested", trigger: "context command runs" },
         { name: "spectra_approval_stage_changed", trigger: "approve command updates stage" },
         { name: "spectra_verify_completed", trigger: "verify command completes" }
       ]

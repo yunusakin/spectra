@@ -2,7 +2,7 @@ import { runInstalledScript } from "../lib/runtime.js";
 import { title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 
-function discussTaskCommand(argv) {
+function taskCommand(argv) {
   const { options } = parseOptions(argv, {
     booleanFlags: ["--help"],
     stringFlags: ["--cwd", "--item", "--task-type", "--goal"]
@@ -26,4 +26,4 @@ function discussTaskCommand(argv) {
   });
 }
 
-export { discussTaskCommand };
+export { taskCommand };

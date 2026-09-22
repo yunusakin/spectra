@@ -1,22 +1,21 @@
-import { adoptCommand } from "./commands/adopt.js";
-import { adaptersGenerateCommand } from "./commands/adapters-generate.js";
+import { adaptersCommand } from "./commands/adapters.js";
 import { approveCommand } from "./commands/approve.js";
-import { contextPackCommand } from "./commands/context-pack.js";
+import { contextCommand } from "./commands/context.js";
 import { doctorCommand } from "./commands/doctor.js";
-import { discussTaskCommand } from "./commands/discuss-task.js";
-import { evalRunCommand } from "./commands/eval-run.js";
+import { taskCommand } from "./commands/task.js";
+import { evalCommand } from "./commands/eval.js";
 import { initCommand } from "./commands/init.js";
+import { adoptCommand } from "./commands/adopt.js";
 import { knowledgeCommand } from "./commands/knowledge.js";
 import { quickCommand } from "./commands/quick.js";
 import { routeCommand } from "./commands/route.js";
-import { specDiffCommand } from "./commands/spec-diff.js";
-import { skillsResolveCommand } from "./commands/skills-resolve.js";
+import { diffCommand } from "./commands/diff.js";
+import { skillsCommand } from "./commands/skills.js";
 import { statusCommand } from "./commands/status.js";
 import { validateCommand } from "./commands/validate.js";
 import { checkCommand } from "./commands/check.js";
 import { indexCommand } from "./commands/index.js";
 import { onboardCommand } from "./commands/onboard.js";
-import { adminCommand } from "./commands/admin.js";
 import { verifyCommand } from "./commands/verify.js";
 import { printHelp as printCommandHelp } from "./commands/help.js";
 import { internalUpdateProjectCommand, updateCommand } from "./commands/update.js";
@@ -24,45 +23,53 @@ import { upgradeCommand } from "./commands/upgrade.js";
 import { fail, title } from "./lib/output.js";
 import { getCliVersion } from "./lib/version.js";
 
+// Compatibility adapter layer. The public vocabulary is canonical
+// internally: context, task, eval, skills, adapters, diff. Legacy forms
+// (context-pack, discuss-task, eval run, skills resolve, adapters
+// generate, spec diff, admin <command>) normalize to their canonical
+// command before dispatch so old documentation and scripts keep working
+// without shaping the architecture.
+const LEGACY_ADMIN_COMMANDS = new Set([
+  "approve",
+  "eval",
+  "diff",
+  "adapters",
+  "doctor",
+  "skills",
+  "quick"
+]);
+
 function normalizeCommand(command, subcommand, ...rest) {
   switch (command) {
-    case "context":
-      return { command: "context-pack", subcommand, rest };
-    case "task":
-      return { command: "discuss-task", subcommand, rest };
-    case "skills":
-      if (subcommand === undefined || subcommand.startsWith("-")) {
-        return {
-          command: "skills",
-          subcommand: "resolve",
-          rest: [subcommand, ...rest].filter(Boolean)
-        };
+    case "context-pack":
+      return { command: "context", subcommand, rest };
+    case "discuss-task":
+      return { command: "task", subcommand, rest };
+    case "spec":
+      if (subcommand === "diff") {
+        return { command: "diff", subcommand: rest[0], rest: rest.slice(1) };
       }
       return { command, subcommand, rest };
     case "eval":
-      if (subcommand === undefined || subcommand !== "run") {
-        return {
-          command: "eval",
-          subcommand: "run",
-          rest: [subcommand, ...rest].filter(Boolean)
-        };
+      if (subcommand === "run") {
+        return { command, subcommand: rest[0], rest: rest.slice(1) };
+      }
+      return { command, subcommand, rest };
+    case "skills":
+      if (subcommand === "resolve") {
+        return { command, subcommand: rest[0], rest: rest.slice(1) };
       }
       return { command, subcommand, rest };
     case "adapters":
-      if (subcommand === undefined || subcommand.startsWith("-")) {
-        return {
-          command: "adapters",
-          subcommand: "generate",
-          rest: [subcommand, ...rest].filter(Boolean)
-        };
+      if (subcommand === "generate") {
+        return { command, subcommand: rest[0], rest: rest.slice(1) };
       }
       return { command, subcommand, rest };
-    case "diff":
-      return {
-        command: "spec",
-        subcommand: "diff",
-        rest: [subcommand, ...rest].filter(Boolean)
-      };
+    case "admin":
+      if (LEGACY_ADMIN_COMMANDS.has(subcommand)) {
+        return { command: subcommand, subcommand: rest[0], rest: rest.slice(1) };
+      }
+      return { command, subcommand, rest };
     default:
       return { command, subcommand, rest };
   }
@@ -71,6 +78,7 @@ function normalizeCommand(command, subcommand, ...rest) {
 function dispatch(argv) {
   const normalized = normalizeCommand(...argv);
   const { command, subcommand, rest } = normalized;
+  const args = [subcommand, ...rest].filter(Boolean);
 
   switch (command) {
     case undefined:
@@ -82,62 +90,52 @@ function dispatch(argv) {
       title(`spectra ${getCliVersion()}`);
       return 0;
     case "check":
-      return checkCommand([subcommand, ...rest].filter(Boolean));
+      return checkCommand(args);
     case "index":
-      return indexCommand([subcommand, ...rest].filter(Boolean));
+      return indexCommand(args);
     case "onboard":
-      return onboardCommand([subcommand, ...rest].filter(Boolean));
+      return onboardCommand(args);
     case "update":
-      return updateCommand([subcommand, ...rest].filter(Boolean));
+      return updateCommand(args);
     case "upgrade":
-      return upgradeCommand([subcommand, ...rest].filter(Boolean));
+      return upgradeCommand(args);
     case "__update-project":
-      return internalUpdateProjectCommand([subcommand, ...rest].filter(Boolean));
-    case "admin":
-      return adminCommand(subcommand, rest);
+      return internalUpdateProjectCommand(args);
     case "init":
-      return initCommand([subcommand, ...rest].filter(Boolean));
+      return initCommand(args);
     case "adopt":
-      return adoptCommand([subcommand, ...rest].filter(Boolean));
+      return adoptCommand(args);
     case "validate":
-      return validateCommand([subcommand, ...rest].filter(Boolean));
+      return validateCommand(args);
     case "approve":
-      return approveCommand([subcommand, ...rest].filter(Boolean));
-    case "context-pack":
-      return contextPackCommand([subcommand, ...rest].filter(Boolean));
+      return approveCommand(args);
+    case "context":
+      return contextCommand(args);
+    case "task":
+      return taskCommand(args);
     case "route":
-      return routeCommand([subcommand, ...rest].filter(Boolean));
+      return routeCommand(args);
     case "knowledge":
-      return knowledgeCommand([subcommand, ...rest].filter(Boolean));
-    case "discuss-task":
-      return discussTaskCommand([subcommand, ...rest].filter(Boolean));
+      return knowledgeCommand(args);
     case "verify":
-      return verifyCommand([subcommand, ...rest].filter(Boolean));
+      return verifyCommand(args);
     case "quick":
-      return quickCommand([subcommand, ...rest].filter(Boolean));
+      return quickCommand(args);
     case "status":
-      return statusCommand([subcommand, ...rest].filter(Boolean));
+      return statusCommand(args);
     case "doctor":
-      return doctorCommand([subcommand, ...rest].filter(Boolean));
-    case "skills":
-      if (subcommand === "resolve") {
-        return skillsResolveCommand(rest);
-      }
-      throw new Error("Usage: spectra skills --task-type <type> [--skills <csv>]");
+      return doctorCommand(args);
     case "eval":
-      if (subcommand === "run") {
-        return evalRunCommand(rest);
-      }
-      throw new Error("Usage: spectra eval [feature-id] [--suite <smoke|release>]");
+      return evalCommand(args);
+    case "skills":
+      return skillsCommand(args);
     case "adapters":
-      if (subcommand === "generate") {
-        return adaptersGenerateCommand(rest);
-      }
-      throw new Error("Usage: spectra adapters --agents <csv> [--target <path>]");
+      return adaptersCommand(args);
+    case "diff":
+      return diffCommand(args);
+    case "admin":
+      throw new Error("Usage: spectra admin <approve|eval|diff|adapters|doctor|skills|quick> [options]");
     case "spec":
-      if (subcommand === "diff") {
-        return specDiffCommand(rest);
-      }
       throw new Error("Usage: spectra diff <init|update|semantic> [options]");
     default:
       throw new Error(`Unknown command: ${command}`);
@@ -154,4 +152,4 @@ async function main(argv) {
   }
 }
 
-export { main };
+export { dispatch, main, normalizeCommand };

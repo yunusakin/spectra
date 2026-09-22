@@ -3,7 +3,7 @@ import { ok, title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { buildSemanticDiff, computeApprovalState } from "../lib/specs.js";
 
-function specDiffCommand(argv) {
+function diffCommand(argv) {
   const mode = argv[0];
 
   if (!mode || mode === "--help") {
@@ -85,4 +85,4 @@ function specDiffCommand(argv) {
   });
 }
 
-export { specDiffCommand };
+export { diffCommand };

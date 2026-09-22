@@ -2,7 +2,7 @@ import { runInstalledScript } from "../lib/runtime.js";
 import { title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 
-function skillsResolveCommand(argv) {
+function skillsCommand(argv) {
   const { options } = parseOptions(argv, {
     booleanFlags: ["--help"],
     stringFlags: ["--cwd", "--task-type", "--skills"]
@@ -29,4 +29,4 @@ function skillsResolveCommand(argv) {
   });
 }
 
-export { skillsResolveCommand };
+export { skillsCommand };
