@@ -5,7 +5,7 @@ import { getCliVersion } from "../lib/version.js";
 import { migrateLegacyLayout, needsMigration } from "../lib/migration.js";
 import { installSpectra } from "../lib/install.js";
 import { SCHEMA_VERSION } from "../lib/profile.js";
-import { ok, title } from "../lib/output.js";
+import { ok, fail, title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { validateCommand } from "./validate.js";
 import { compareVersions, latestVersion, resolveInstalledNativeCommand, runSelfUpdate } from "../lib/update.js";
@@ -41,14 +41,35 @@ function refreshProjectRuntime(projectRoot) {
 
 function finishProjectUpdate(projectRoot) {
   refreshProjectRuntime(projectRoot);
+  // Post-update validation runs before any completion message: success is
+  // only reported once the updated project actually passes its checks, and
+  // a validation failure is clearly distinguished from a migration failure.
+  const validationStatus = validateCommand(["--cwd", projectRoot]);
+  if (validationStatus !== 0) {
+    fail("Update applied, but post-update validation failed. Run `spectra check` to re-validate.");
+    return validationStatus;
+  }
   ok("Update complete.");
-  return validateCommand(["--cwd", projectRoot]);
+  return 0;
+}
+
+function migrateBeforeUpdate(projectRoot) {
+  try {
+    migrateLegacyLayout(projectRoot);
+  } catch (error) {
+    fail(`Update failed during layout migration: ${error.message}`);
+    return false;
+  }
+  return true;
 }
 
 async function updateCommand(argv) {
-  const { options } = parseOptions(argv, { booleanFlags: ["--help"], stringFlags: ["--cwd"] });
+  const { options } = parseOptions(argv, {
+    booleanFlags: ["--help", "--yes"],
+    stringFlags: ["--cwd"]
+  });
   if (options["--help"]) {
-    title("Usage: spectra update [--cwd <path>]");
+    title("Usage: spectra update [--cwd <path>] [--yes]");
     return 0;
   }
   const cwd = options["--cwd"] ?? process.cwd();
@@ -73,7 +94,9 @@ async function updateCommand(argv) {
   const details = cliOutdated
     ? `A newer Spectra version is available: ${latest}. This will update the CLI and project runtime.`
     : "This will update the Spectra project runtime and migrate its layout if needed.";
-  if (!(await confirmUpdate(details))) {
+  if (options["--yes"]) {
+    title(details);
+  } else if (!(await confirmUpdate(details))) {
     title("Update cancelled.");
     return 0;
   }
@@ -81,8 +104,8 @@ async function updateCommand(argv) {
   if (cliOutdated) {
     return runSelfUpdate(latest, projectRoot);
   }
-  if (migrationRequired) {
-    migrateLegacyLayout(projectRoot);
+  if (migrationRequired && !migrateBeforeUpdate(projectRoot)) {
+    return 1;
   }
   return finishProjectUpdate(projectRoot);
 }
@@ -94,8 +117,8 @@ function internalUpdateProjectCommand(argv) {
   if (!projectRoot) {
     throw new Error(`Could not find a Spectra runtime from ${cwd}`);
   }
-  if (needsLegacyMigration(projectRoot)) {
-    migrateLegacyLayout(projectRoot);
+  if (needsLegacyMigration(projectRoot) && !migrateBeforeUpdate(projectRoot)) {
+    return 1;
   }
   return finishProjectUpdate(projectRoot);
 }

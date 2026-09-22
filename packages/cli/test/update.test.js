@@ -56,8 +56,35 @@ test("update confirms and migrates a legacy layout", () => {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(result.stdout, /Update complete/);
   assert.match(result.stdout, /Validation and policy checks passed/);
+  // Completion is reported only after post-update validation succeeds.
+  assert.ok(
+    result.stdout.indexOf("Validation and policy checks passed") < result.stdout.indexOf("Update complete"),
+    "validation must be reported before completion"
+  );
   assert.equal(fs.existsSync(path.join(root, ".spectra", "install.json")), true);
   assert.equal(fs.existsSync(path.join(root, "spectra")), false);
+});
+
+test("update --yes runs non-interactively without a confirmation prompt", () => {
+  const root = createGitProject();
+  fs.mkdirSync(path.join(root, ".spectra"), { recursive: true });
+  fs.mkdirSync(path.join(root, "sdd", "system"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".spectra", "install.json"), JSON.stringify({ gitMode: "local", installMode: "adopt" }));
+  fs.writeFileSync(path.join(root, "sdd", "system", "manifest.env"), "spectra_version=2.0.3\nrepo_mode=consumer\n");
+
+  // No stdin input: a hanging or failing prompt would make this test fail.
+  const result = run(root, ["update", "--yes"], { input: "" });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /Update complete/);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "install.json")), true);
+  assert.equal(fs.existsSync(path.join(root, "sdd", "system", "manifest.env")), false);
+});
+
+test("update --help documents the non-interactive flag", () => {
+  const root = createGitProject();
+  const result = run(root, ["update", "--help"]);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /Usage: spectra update \[--cwd <path>\] \[--yes\]/);
 });
 
 test("update refreshes an installed project when only the schema is outdated", () => {
@@ -132,4 +159,31 @@ test("update returns a failure when the post-migration project check fails", () 
   const result = run(root, ["update"], { input: "y\n" });
   assert.notEqual(result.status, 0);
   assert.match(result.stdout + result.stderr, /Policy checks failed/);
+  // A validation failure must not claim completion.
+  assert.match(result.stdout + result.stderr, /Update applied, but post-update validation failed/);
+  assert.doesNotMatch(result.stdout, /Update complete/);
+});
+
+test("update distinguishes a migration failure from a validation failure", () => {
+  const root = createGitProject();
+  // Legacy root-sdd project (root sdd/ + .spectra/ data dir, no canonical
+  // manifest) whose migration target already exists: the authoritative
+  // conflict preflight must abort before any move.
+  fs.mkdirSync(path.join(root, ".spectra", "sdd", "system"), { recursive: true });
+  fs.mkdirSync(path.join(root, "sdd", "system"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".spectra", "install.json"), JSON.stringify({ gitMode: "local", installMode: "adopt" }));
+  fs.writeFileSync(path.join(root, ".spectra", "sdd", "system", "unrelated.txt"), "target side content\n");
+  fs.writeFileSync(path.join(root, "sdd", "system", "manifest.env"), "spectra_version=2.0.3\nrepo_mode=consumer\n");
+
+  const result = run(root, ["update"], { input: "y\n" });
+  assert.equal(result.status, 1);
+  assert.match(result.stdout + result.stderr, /Update failed during layout migration: Migration conflict/);
+  assert.doesNotMatch(result.stdout, /Update complete/);
+  assert.doesNotMatch(result.stdout, /post-update validation failed/);
+  // Conflict preflight leaves both sides untouched.
+  assert.equal(fs.existsSync(path.join(root, "sdd", "system", "manifest.env")), true);
+  assert.equal(
+    fs.readFileSync(path.join(root, ".spectra", "sdd", "system", "unrelated.txt"), "utf8"),
+    "target side content\n"
+  );
 });
