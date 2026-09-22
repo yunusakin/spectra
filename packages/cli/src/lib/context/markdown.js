@@ -122,9 +122,9 @@ function splitTableRow(line) {
   return line
     .trim()
     .replace(/^\|/, "")
-    .replace(/\|$/, "")
-    .split("|")
-    .map((cell) => normalizeWhitespace(cell));
+    .replace(/(?<!\\)\|$/, "")
+    .split(/(?<!\\)\|/)
+    .map((cell) => normalizeWhitespace(cell).replace(/\\\|/g, "|"));
 }
 
 function normalizeHeader(header) {
