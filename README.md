@@ -4,9 +4,11 @@
 
 # Spectra
 
-Spectra is a project-local CLI for AI-assisted development. It gives agents and humans the same source of truth for project context, task intent, business rules, validation, and—when needed—approval and evaluation state.
+Spectra gives every AI coding agent — Claude, Cursor, Codex, Copilot, or a human — the same persistent memory of a project: what it does, what's been decided, and what's still open. Instead of re-explaining your architecture and business rules in every chat, agents read it from one place.
 
 The main rule is simple: Spectra owns `.spectra/`. Your product code, company docs, and existing repository layout stay yours.
+
+Under the hood, Spectra follows **SDD (Spec-Driven Development)**: intent, context, and decisions live in structured files Spectra manages, not scattered across chat history.
 
 ## Start here
 
@@ -14,8 +16,8 @@ Spectra has one CLI and two profiles:
 
 | Profile | Use it when | What it gives you |
 | --- | --- | --- |
-| **Lite** (default) | You want a small personal or project-local SDD workflow | context, tasks, status, health checks, and updates |
-| **Full** | You need team governance or agent adapters | Lite plus executable feature specs, approvals, evaluations, adoption analysis, and agent adapters |
+| **Lite** (default) | A small personal or project-local memory for one person or agent | context, tasks, status, health checks, and updates |
+| **Full** | Team governance, staged approvals, or agent adapters | Lite, plus specs you can approve stage-by-stage, evaluation suites, brownfield-adoption analysis, and generated agent config files |
 
 Most projects should start with Lite. You can select Full during setup:
 
@@ -80,6 +82,16 @@ which spectra
 
 ## What setup creates
 
+Whichever way you invoke it, Spectra reads and writes the same project state:
+
+```mermaid
+flowchart LR
+    A["spectra command<br/>installed, on PATH"] --> C
+    B["./.spectra/bin/spectra command<br/>local launcher"] --> C
+    C[(".spectra/** project state")]
+    C --> D["your code stays where it is"]
+```
+
 Modern `spectra init` and `spectra adopt` create one Spectra-owned directory in your project:
 
 ```text
@@ -133,6 +145,14 @@ Spectra asks for confirmation, preserves existing memory-bank files, and adds th
 
 ## The daily Lite workflow
 
+```mermaid
+flowchart LR
+    A["spectra context<br/>--role planner"] --> B["spectra task<br/>--item ..."]
+    B --> C["spectra check"]
+    C --> D["spectra status"]
+    D -. "resume later" .-> A
+```
+
 Run these commands from the project root:
 
 ```bash
@@ -155,19 +175,19 @@ For existing projects, `spectra adopt` writes an initial repo index when possibl
 
 ## The Full workflow
 
-Full adds staged governance. The usual sequence is:
+Full adds staged governance: each stage below must be explicitly approved before the next one is allowed, so a feature can't skip from "someone had an idea" straight to "released." The usual sequence is:
 
 ```bash
-spectra context --role planner --goal discover
-spectra check
-spectra approve --stage product-approved
-spectra approve --stage technical-approved
-spectra approve --stage implementation-approved
+spectra context --role planner --goal discover        # load context for planning
+spectra check                                          # confirm the project is healthy first
+spectra approve --stage product-approved               # gate: the "what" is agreed
+spectra approve --stage technical-approved              # gate: the "how" is agreed
+spectra approve --stage implementation-approved          # gate: cleared to start coding
 spectra task --item FEAT-001 --task-type feature --goal "Implement the product flow"
-spectra context --role implementer --goal implement
-spectra eval <feature-id> --suite smoke
-spectra verify --profile release
-spectra approve --stage release-approved
+spectra context --role implementer --goal implement    # load context for coding
+spectra eval <feature-id> --suite smoke                 # run the feature's evaluation suite
+spectra verify --profile release                        # aggregate checks into a release-confidence score
+spectra approve --stage release-approved                # gate: cleared to ship
 ```
 
 Advanced commands are top-level, for example `spectra approve` and `spectra eval`. `spectra admin <command>` remains a compatibility alias.
