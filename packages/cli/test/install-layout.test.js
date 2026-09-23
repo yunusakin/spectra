@@ -150,6 +150,55 @@ test("Full check blocks unapproved company source changes outside .spectra", () 
   assert.match(check.stdout, /Project code contains changes without implementation approval/);
 });
 
+function launcher(root) {
+  return path.join(root, ".spectra", "bin", "spectra");
+}
+
+test("Full: installed CLI and local launcher resolve the same project state and policy verdict", () => {
+  const root = createGitProject();
+  const init = run(root, process.execPath, [cliPath, "init", ".", "--profile", "full"]);
+  assert.equal(init.status, 0, init.stderr || init.stdout);
+
+  const cliClean = run(root, process.execPath, [cliPath, "check", "--cwd", root]);
+  const localClean = run(root, launcher(root), ["check", "--cwd", root]);
+  assert.equal(cliClean.status, 0, cliClean.stderr || cliClean.stdout);
+  assert.equal(localClean.status, cliClean.status, localClean.stderr || localClean.stdout);
+  assert.equal(localClean.stdout, cliClean.stdout);
+
+  fs.mkdirSync(path.join(root, "src"));
+  fs.writeFileSync(path.join(root, "src", "orders.js"), "export const orders = [];\n");
+
+  const cliDirty = run(root, process.execPath, [cliPath, "check", "--cwd", root]);
+  const localDirty = run(path.join(root, "src"), launcher(root), ["check"]);
+  assert.equal(cliDirty.status, 1);
+  assert.equal(localDirty.status, 1, localDirty.stderr || localDirty.stdout);
+  assert.match(localDirty.stdout, /Project code contains changes without implementation approval/);
+  assert.equal(localDirty.stdout, cliDirty.stdout);
+
+  const cliStatus = run(root, process.execPath, [cliPath, "status", "--cwd", root]);
+  const localStatus = run(root, launcher(root), ["status", "--cwd", root]);
+  assert.equal(localStatus.status, cliStatus.status);
+  assert.equal(localStatus.stdout, cliStatus.stdout);
+});
+
+for (const profile of ["lite", "full"]) {
+  test(`${profile}: install, check and status create no Spectra-managed state outside .spectra`, () => {
+    const root = createGitProject();
+    const before = fs.readdirSync(root).sort();
+    assert.equal(run(root, process.execPath, [cliPath, "init", ".", "--profile", profile]).status, 0);
+    assert.equal(run(root, process.execPath, [cliPath, "check", "--cwd", root]).status, 0);
+    assert.equal(run(root, process.execPath, [cliPath, "status", "--cwd", root]).status, 0);
+    assert.equal(run(root, launcher(root), ["check", "--cwd", root]).status, 0);
+
+    assert.deepEqual(fs.readdirSync(root).sort(), [...before, ".spectra"].sort());
+    for (const legacy of ["spectra", "sdd", "docs"]) {
+      assert.equal(fs.existsSync(path.join(root, legacy)), false, `${legacy}/ must not be created`);
+    }
+    const untracked = run(root, "git", ["status", "--porcelain", "--untracked-files=all"]).stdout;
+    assert.equal(untracked.trim(), "", "local Git mode must leave the worktree clean");
+  });
+}
+
 test("Full adopt writes discovery and governance artifacts under .spectra", () => {
   const root = createGitProject();
   fs.writeFileSync(path.join(root, "README.md"), "# Company project\n");
@@ -171,7 +220,18 @@ test("Lite status and check do not require Full governance files", () => {
 
   const check = run(root, process.execPath, [cliPath, "check", "--cwd", root]);
   assert.equal(check.status, 0, check.stderr || check.stdout);
-  assert.match(check.stdout, /Lite project checks passed/);
+  assert.match(check.stdout, /Lite project checks passed \(required files and business context; policy and spec validation are Full-profile checks\)/);
+  assert.doesNotMatch(check.stdout, /Validation and policy checks passed/);
+});
+
+test("Full check reports policy and spec validation, unlike Lite", () => {
+  const root = createGitProject();
+  assert.equal(run(root, process.execPath, [cliPath, "init", ".", "--profile", "full"]).status, 0);
+
+  const check = run(root, process.execPath, [cliPath, "check", "--cwd", root]);
+  assert.equal(check.status, 0, check.stderr || check.stdout);
+  assert.match(check.stdout, /Validation and policy checks passed/);
+  assert.doesNotMatch(check.stdout, /Lite project checks/);
 });
 
 test("status summarizes recent project and Spectra updates", () => {

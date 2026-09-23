@@ -65,6 +65,36 @@ test("update confirms and migrates a legacy layout", () => {
   assert.equal(fs.existsSync(path.join(root, "spectra")), false);
 });
 
+test("update migrates a 3.0.8 spectra/ layout and its scripts still resolve SPECTRA_REPO_ROOT afterward", () => {
+  // Installed-CLI scripts (validate-repo.sh, check-policy.sh, ...) read
+  // $SPECTRA_REPO_ROOT directly rather than relying on cwd alone, so this
+  // exercises runInstalledScript()'s data-root resolution end to end for
+  // the pre-3.0.9 spectra/ layout, not just root-sdd.
+  const root = createGitProject();
+  assert.equal(run(root, ["init", ".", "--profile", "lite"]).status, 0);
+  fs.renameSync(path.join(root, ".spectra"), path.join(root, "spectra"));
+  fs.writeFileSync(
+    path.join(root, "spectra", "install.json"),
+    JSON.stringify({ profile: "lite", gitMode: "local", installMode: "adopt" })
+  );
+
+  const result = run(root, ["update"], { input: "y\n" });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /project checks passed/);
+  assert.equal(fs.existsSync(path.join(root, "spectra")), false);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "manifest.env")), true);
+});
+
+test("update surfaces the same incomplete-migration error as init for a broken canonical layout", () => {
+  const root = createGitProject();
+  fs.mkdirSync(path.join(root, ".spectra", "sdd", "system"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".spectra", "sdd", "system", "manifest.env"), "spectra_version=3.0.9\nrepo_mode=consumer\n");
+
+  const result = run(root, ["update", "--yes"], { input: "" });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Incomplete migration detected/);
+});
+
 test("update --yes runs non-interactively without a confirmation prompt", () => {
   const root = createGitProject();
   fs.mkdirSync(path.join(root, ".spectra"), { recursive: true });
