@@ -9,7 +9,7 @@ import { validateSpectraV2 } from "./validation.js";
 import { computeApprovalState } from "./approval-state.js";
 import { runEvalSuite } from "./evaluation.js";
 
-function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", legacyStatus = 0 } = {}) {
+function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", shellStatus = 0 } = {}) {
   const validation = validateSpectraV2(repoRoot);
   const approvalState = computeApprovalState(repoRoot);
   const reviewSummary = readJsonContract(path.join(getCacheRoot(repoRoot), "context", "review.summary.json"), {
@@ -108,7 +108,7 @@ function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", 
   const weights = {
     structure: 10,
     policy: 20,
-    tests: 20,
+    "verify-work": 20,
     evals: 20,
     telemetry: 10,
     "release-readiness": 15,
@@ -118,23 +118,26 @@ function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", 
   const missingImplementationBrief =
     !hasRealMarkdownContent(path.join(getSddRoot(repoRoot), "memory-bank", "core", "implementation-brief.md")) &&
     (scope === "app" || item);
-  const legacyTestsScore = legacyStatus === 0 ? (missingImplementationBrief ? 0.4 : 1) : 0.2;
+  // This stage does NOT run project tests. It reflects the verify-work.sh
+  // shell checks (manifest, policy and memory-bank files) plus whether the
+  // implementation brief has real content, so it is named for that.
+  const verifyWorkScore = shellStatus === 0 ? (missingImplementationBrief ? 0.4 : 1) : 0.2;
   stages.splice(2, 0, {
-    name: "tests",
-    blocking: legacyStatus !== 0 || (scope === "app" && legacyTestsScore < 1),
+    name: "verify-work",
+    blocking: shellStatus !== 0 || (scope === "app" && verifyWorkScore < 1),
     warnings:
-      legacyStatus !== 0
-        ? ["legacy verify-work checks are failing"]
-        : legacyTestsScore < 1
+      shellStatus !== 0
+        ? ["verify-work.sh checks are failing"]
+        : verifyWorkScore < 1
           ? ["implementation brief is empty or template-only"]
           : [],
-    score: legacyTestsScore,
+    score: verifyWorkScore,
     detail:
-      legacyStatus !== 0
-        ? "legacy verify-work reported blocking issues"
-        : legacyTestsScore < 1
+      shellStatus !== 0
+        ? "verify-work.sh reported blocking issues"
+        : verifyWorkScore < 1
           ? "implementation brief missing"
-          : "legacy verification inputs present"
+          : "verify-work.sh checks passed (project tests are not run)"
   });
 
   const confidenceScore = Math.round(

@@ -49,7 +49,9 @@ function validateCommand(argv, { commandName = "validate" } = {}) {
       }
       return 1;
     }
-    ok("Lite project checks passed");
+    // Lite intentionally skips repo structure, policy and spec validation
+    // (those need Full governance files), so say what was actually checked.
+    ok("Lite project checks passed (required files and business context; policy and spec validation are Full-profile checks)");
     return 0;
   }
 

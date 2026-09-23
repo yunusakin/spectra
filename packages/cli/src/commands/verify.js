@@ -41,11 +41,11 @@ function verifyCommand(argv) {
     scope: options["--scope"] ?? "all",
     item: options["--item"] ?? null,
     profile: options["--profile"] ?? "standard",
-    legacyStatus: status
+    shellStatus: status
   });
 
   title("");
-  title("Spectra Verify v2");
+  title("Spectra Verify");
   for (const stage of report.stages) {
     title(
       `${stage.blocking ? "FAIL" : stage.warnings.length > 0 ? "WARN" : "OK"} ${stage.name}: ${stage.detail}`
