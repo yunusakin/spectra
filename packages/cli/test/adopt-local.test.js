@@ -42,6 +42,20 @@ function createRepo() {
   return root;
 }
 
+function withFakeCodexOnPath(env = {}) {
+  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-codex-bin-"));
+  const codexPath = path.join(binDir, "codex");
+  fs.writeFileSync(codexPath, "#!/usr/bin/env sh\nexit 0\n");
+  fs.chmodSync(codexPath, 0o755);
+  return {
+    binDir,
+    env: {
+      ...env,
+      PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`
+    }
+  };
+}
+
 test("adopt local keeps Spectra files local while project code remains visible", () => {
   const root = createRepo();
   const beforeGitignore = fs.readFileSync(path.join(root, ".gitignore"), "utf8");
@@ -100,14 +114,23 @@ test("adapters extend a persistent local policy", () => {
   const root = createRepo();
   runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local", "--profile", "full"]);
 
-  const result = run(root, process.execPath, [
-    cliPath,
-    "adapters",
-    "--agents",
-    "codex,copilot",
-    "--cwd",
-    root
-  ]);
+  // codex's adapter health check requires the real `codex` CLI on PATH; CI
+  // runners don't have it installed, so a fake one that just exits 0 stands
+  // in (same pattern as adapters.test.js's withFakeCodex helper).
+  const { binDir, env } = withFakeCodexOnPath();
+  let result;
+  try {
+    result = run(root, process.execPath, [
+      cliPath,
+      "adapters",
+      "--agents",
+      "codex,copilot",
+      "--cwd",
+      root
+    ], { env });
+  } finally {
+    fs.rmSync(binDir, { recursive: true, force: true });
+  }
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const status = runOk(root, "git", ["status", "--short", "--untracked-files=all"]).stdout.trim();
