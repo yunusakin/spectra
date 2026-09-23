@@ -4,9 +4,11 @@
 
 # Spectra
 
-Spectra is a project-local CLI for AI-assisted development. It gives agents and humans the same source of truth for project context, task intent, business rules, validation, and—when needed—approval and evaluation state.
+Spectra gives every AI coding agent — Claude, Cursor, Codex, Copilot, or a human — the same persistent memory of a project: what it does, what's been decided, and what's still open. Instead of re-explaining your architecture and business rules in every chat, agents read it from one place.
 
-The main rule is simple: Spectra owns `spectra/`. Your product code, company docs, and existing repository layout stay yours.
+The main rule is simple: Spectra owns `.spectra/`. Your product code, company docs, and existing repository layout stay yours.
+
+Under the hood, Spectra follows **SDD (Spec-Driven Development)**: intent, context, and decisions live in structured files Spectra manages, not scattered across chat history.
 
 ## Start here
 
@@ -14,8 +16,8 @@ Spectra has one CLI and two profiles:
 
 | Profile | Use it when | What it gives you |
 | --- | --- | --- |
-| **Lite** (default) | You want a small personal or project-local SDD workflow | context, tasks, status, health checks, and updates |
-| **Full** | You need team governance or agent adapters | Lite plus executable feature specs, approvals, evaluations, adoption analysis, and agent adapters |
+| **Lite** (default) | A small personal or project-local memory for one person or agent | context, tasks, status, health checks, and updates |
+| **Full** | Team governance, staged approvals, or agent adapters | Lite, plus specs you can approve stage-by-stage, evaluation suites, brownfield-adoption analysis, and generated agent config files |
 
 Most projects should start with Lite. You can select Full during setup:
 
@@ -41,20 +43,20 @@ mkdir my-product
 cd my-product
 git init
 npx spectra-pack@latest init .
-./spectra/bin/spectra check
-./spectra/bin/spectra status
+./.spectra/bin/spectra check
+./.spectra/bin/spectra status
 ```
 
-`npx` is only used for the first setup. It does not install a global command; the generated `./spectra/bin/spectra` launcher is the project-local command.
+`npx` is only used for the first setup. It does not install a global command; the generated `./.spectra/bin/spectra` launcher is the project-local command.
 
 ### Existing project with npm/npx
 
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
-./spectra/bin/spectra onboard
-./spectra/bin/spectra check
-./spectra/bin/spectra status
+./.spectra/bin/spectra onboard
+./.spectra/bin/spectra check
+./.spectra/bin/spectra status
 ```
 
 ### macOS/Linux without Node or npm
@@ -80,26 +82,37 @@ which spectra
 
 ## What setup creates
 
+Whichever way you invoke it, Spectra reads and writes the same project state:
+
+```mermaid
+flowchart LR
+    A["spectra command<br/>installed, on PATH"] --> C
+    B["./.spectra/bin/spectra command<br/>local launcher"] --> C
+    C[(".spectra/** project state")]
+    C --> D["your code stays where it is"]
+```
+
 Modern `spectra init` and `spectra adopt` create one Spectra-owned directory in your project:
 
 ```text
 your-project/
 ├── your-existing-code/
-└── spectra/
+└── .spectra/
     ├── bin/spectra       # project-local launcher
+    ├── cli/              # local Node CLI the launcher falls back to
     ├── config.yaml       # profile, Git mode, and schema
     ├── install.json      # installation and version metadata
     ├── docs/             # Spectra guides
-    ├── cache/            # disposable context and repo-index cache
+    ├── cache/            # disposable context and repo-index cache (created on first use)
     └── sdd/              # context, business memory, and profile runtime
 ```
 
-Spectra keeps its own generated project layer under the root `spectra/` directory. It does not use root `app/`, `docs/`, `sdd/`, `.spectra/`, or `.github/` directories as the canonical location for Spectra-owned files.
+Spectra keeps its own generated project layer under the root `.spectra/` directory. It does not use root `app/`, `docs/`, `spectra/`, `sdd/`, or `.github/` directories as the canonical location for Spectra-owned files.
 
 Full adds these inside the same boundary:
 
 ```text
-spectra/sdd/
+.spectra/sdd/
 ├── features/             # executable feature specifications
 ├── governance/           # approval state and decisions
 └── adoption/             # existing-project analysis
@@ -107,11 +120,11 @@ spectra/sdd/
 
 Your application code and company documentation remain in their existing locations.
 
-If you see older instructions that mention copying Spectra files to root-level `docs/`, `sdd/`, `scripts/`, or `.github/`, treat them as legacy implementation details. The supported setup surface is the CLI (`spectra init`, `spectra adopt`, `spectra upgrade`, and `spectra update`) and the canonical generated layout is `spectra/`.
+If you see older instructions that mention copying Spectra files to root-level `docs/`, `sdd/`, `scripts/`, or `.github/`, treat them as legacy implementation details. The supported setup surface is the CLI (`spectra init`, `spectra adopt`, `spectra upgrade`, and `spectra update`) and the canonical generated layout is `.spectra/`.
 
 ## Git mode: private or shared
 
-`local` is the default. It writes `/spectra/` to `.git/info/exclude`, so Spectra stays private while your source code remains visible to Git. It does not modify `.gitignore`.
+`local` is the default. It writes `/.spectra/` to `.git/info/exclude`, so Spectra stays private while your source code remains visible to Git. It does not modify `.gitignore`.
 
 Use shared mode when the team wants to review and commit Spectra files:
 
@@ -131,6 +144,14 @@ Spectra asks for confirmation, preserves existing memory-bank files, and adds th
 `spectra update` updates the CLI and project runtime. `spectra upgrade` changes the installed Lite or Full profile.
 
 ## The daily Lite workflow
+
+```mermaid
+flowchart LR
+    A["spectra context<br/>--role planner"] --> B["spectra task<br/>--item ..."]
+    B --> C["spectra check"]
+    C --> D["spectra status"]
+    D -. "resume later" .-> A
+```
 
 Run these commands from the project root:
 
@@ -154,22 +175,22 @@ For existing projects, `spectra adopt` writes an initial repo index when possibl
 
 ## The Full workflow
 
-Full adds staged governance. The usual sequence is:
+Full adds staged governance: each stage below must be explicitly approved before the next one is allowed, so a feature can't skip from "someone had an idea" straight to "released." The usual sequence is:
 
 ```bash
-spectra context --role planner --goal discover
-spectra check
-spectra admin approve --stage product-approved
-spectra admin approve --stage technical-approved
-spectra admin approve --stage implementation-approved
+spectra context --role planner --goal discover        # load context for planning
+spectra check                                          # confirm the project is healthy first
+spectra approve --stage product-approved               # gate: the "what" is agreed
+spectra approve --stage technical-approved              # gate: the "how" is agreed
+spectra approve --stage implementation-approved          # gate: cleared to start coding
 spectra task --item FEAT-001 --task-type feature --goal "Implement the product flow"
-spectra context --role implementer --goal implement
-spectra admin eval <feature-id> --suite smoke
-spectra verify --profile release
-spectra admin approve --stage release-approved
+spectra context --role implementer --goal implement    # load context for coding
+spectra eval <feature-id> --suite smoke                 # run the feature's evaluation suite
+spectra verify --profile release                        # aggregate checks into a release-confidence score
+spectra approve --stage release-approved                # gate: cleared to ship
 ```
 
-Advanced commands are grouped under `spectra admin`. Older top-level forms such as `spectra approve` and `spectra eval` remain compatibility aliases.
+Advanced commands are top-level, for example `spectra approve` and `spectra eval`. `spectra admin <command>` remains a compatibility alias.
 
 ## Help and updates
 
@@ -197,13 +218,13 @@ If Spectra says `Spectra is already up to date.`, no changes are needed. If an u
 | `spectra status` | Resume work and see recent updates |
 | `spectra update` | Check for updates and migrate old layouts |
 | `spectra help` | Learn the everyday command surface |
-| `spectra admin ...` | Use Full-profile advanced workflows |
+| `spectra approve`, `eval`, `diff`, `adapters`, `skills`, `quick` | Use Full-profile advanced workflows |
 
 See [CLI Reference](docs/cli-reference.md) for every option and compatibility alias.
 
 ## Business context and token efficiency
 
-Spectra keeps durable product knowledge under `spectra/sdd/memory-bank/business/`. The business index maps each domain to keywords, active rules, unresolved questions, and related technical modules. `spectra context` and `spectra route` use that index to load only the relevant business context for a task instead of dumping every rule into every agent session.
+Spectra keeps durable product knowledge under `.spectra/sdd/memory-bank/business/`. The business index maps each domain to keywords, active rules, unresolved questions, and related technical modules. `spectra context` and `spectra route` use that index to load only the relevant business context for a task instead of dumping every rule into every agent session.
 
 Example domain index:
 
@@ -219,7 +240,7 @@ Example domain index:
 spectra knowledge add --domain customer-policy --title "Eligibility window" --statement "Requests outside the eligibility window require manual approval." --status active --verified --evidence "Product policy"
 ```
 
-This keeps the system agent-agnostic: Codex, Claude, Cursor, Copilot, Windsurf, Antigravity, or another tool can read the same canonical Spectra context. Agent-specific files are adapters; the source of truth stays inside `spectra/`.
+This keeps the system agent-agnostic: Codex, Claude, Cursor, Copilot, Windsurf, Antigravity, or another tool can read the same canonical Spectra context. Agent-specific files are adapters; the source of truth stays inside `.spectra/`.
 
 ## Migrating an older Spectra project
 
@@ -229,7 +250,7 @@ Run the new CLI from the old project root:
 spectra update
 ```
 
-After confirmation, legacy `.spectra/`, root `sdd/`, and known Spectra-generated docs move under `spectra/`. Company files are preserved. See [Structure](docs/structure.md) for the resulting layout.
+After confirmation, the legacy 3.0.8 `spectra/` directory, root `sdd/`, and known Spectra-generated docs move under `.spectra/`. Company files are preserved. See [Structure](docs/structure.md) for the resulting layout.
 
 ## Documentation
 
@@ -260,7 +281,7 @@ Repository layout for maintainers:
 - `docs/` — contributor/user documentation for this repository
 - `scripts/` — repository maintenance scripts, not the supported consumer setup interface
 
-Current release: `3.0.8`.
+Current release: `3.0.9`.
 
 ## License
 

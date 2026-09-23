@@ -1,6 +1,6 @@
 # Validate, Eval, and Verify
 
-Spectra v2 uses three different quality layers. Keep them separate.
+Spectra uses three different quality layers. Keep them separate.
 
 ## `spectra check`
 
@@ -29,7 +29,7 @@ CI note:
 - the GitHub `validate` workflow prepares a Node 22 runtime and runs `npm ci` before invoking CLI-based validation smoke checks
 - this is required because the validation path executes `node packages/cli/bin/spectra.js ...` and depends on packaged CLI dependencies being installed
 
-## `spectra admin eval` (Full)
+## `spectra eval` (Full)
 
 Purpose:
 
@@ -40,8 +40,8 @@ Purpose:
 Run it:
 
 ```bash
-spectra admin eval my-product-core --suite smoke
-spectra admin eval my-product-core --suite release
+spectra eval my-product-core --suite smoke
+spectra eval my-product-core --suite release
 ```
 
 Use it:
@@ -72,7 +72,7 @@ Use it:
 
 ```bash
 spectra check
-spectra admin eval <feature-id> --suite smoke
+spectra eval <feature-id> --suite smoke
 spectra verify --profile release
 ```
 
@@ -98,7 +98,7 @@ Warning-only:
 The runtime still uses internal deterministic scripts under the packaged runtime, but users should reason about quality through:
 
 - `spectra check`
-- `spectra admin eval`
+- `spectra eval`
 - `spectra verify`
 
 For GitHub Actions, mirror the repository workflow pattern:

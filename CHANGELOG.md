@@ -1,5 +1,23 @@
 # Changelog
 
+## [v3.0.9] - 2026-09-23
+
+Consolidation and reliability release. No new product capabilities.
+
+### Changed
+- `.spectra/` is the single canonical project root; everything Spectra manages, including the local launcher (`.spectra/bin/spectra`), lives beneath it. The 3.0.8 `spectra/` layout and the pre-3.0 root `sdd/` layout are migration inputs only.
+- Public commands are canonical internally: `context`, `task`, `eval`, `skills`, `adapters`, `diff`. The old forms (`context-pack`, `discuss-task`, `eval run`, `skills resolve`, `adapters generate`, `spec diff`, `admin <command>`) keep working through a compatibility layer and are no longer taught in help or docs.
+- `spectra help` groups commands by workflow.
+- `spectra verify` reports its shell-check stage as `verify-work` instead of `tests`; it never ran project tests. The report title is now `Spectra Verify`. Scoring is unchanged.
+- Warnings and failures are written to stderr; normal output stays on stdout.
+- `specs.js` and `context.js` are split into focused modules behind unchanged facades.
+
+### Fixed
+- Invalid CLI input fails early: unknown flags, string flags without a value or consuming another flag, and non-boolean values for boolean flags.
+- `spectra update` reports success only after post-update validation passes and distinguishes migration failures from validation failures. Added `--yes` for non-interactive runs.
+- Migration no longer risks partial moves: the legacy `spectra/` directory is removed last, the root-`sdd/` move happens last, half-finished migrations are reported instead of treated as complete, conflicting `spectra/` and `.spectra/` trees are left untouched with an actionable error, and a Spectra source repository is always refused.
+- Test discovery is deterministic and CI runs the suite on Node 20 and 22. Version parity now also covers `init.sh`.
+
 ## [Unreleased]
 
 This work is intended for `v3.0.0` because the generated project layout changes from root-level Spectra directories to the single `spectra/` boundary.

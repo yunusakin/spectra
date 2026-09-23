@@ -30,7 +30,7 @@
       <h1>Bootstrap once, then use the project-local command.</h1>
       <p class="lead">
         <code>npx</code> is only the installer path. After bootstrap, run
-        Spectra through <code>./spectra/bin/spectra</code> unless you installed
+        Spectra through <code>./.spectra/bin/spectra</code> unless you installed
         the native binary.
       </p>
 
@@ -38,12 +38,12 @@
         <h2>Existing project with npm</h2>
         <pre><code>cd existing-project
 npx spectra-pack@latest adopt .
-./spectra/bin/spectra onboard
-./spectra/bin/spectra check
-./spectra/bin/spectra status</code></pre>
+./.spectra/bin/spectra onboard
+./.spectra/bin/spectra check
+./.spectra/bin/spectra status</code></pre>
         <p>
           Use <code>adopt</code> for a repository that already has application
-          code. Spectra writes its own layer under <code>spectra/</code> and
+          code. Spectra writes its own layer under <code>.spectra/</code> and
           leaves the product structure alone.
         </p>
       </section>
@@ -54,7 +54,7 @@ npx spectra-pack@latest adopt .
 cd my-product
 git init
 npx spectra-pack@latest init .
-./spectra/bin/spectra check</code></pre>
+./.spectra/bin/spectra check</code></pre>
       </section>
 
       <section>
@@ -72,9 +72,9 @@ spectra adopt .</code></pre>
 
       <section>
         <h2>Update flow</h2>
-        <pre><code>./spectra/bin/spectra update
-./spectra/bin/spectra check
-./spectra/bin/spectra status</code></pre>
+        <pre><code>./.spectra/bin/spectra update
+./.spectra/bin/spectra check
+./.spectra/bin/spectra status</code></pre>
         <p>
           Run <code>update</code> inside a project. It checks the installed
           CLI/runtime, asks before migrations, refreshes generated runtime

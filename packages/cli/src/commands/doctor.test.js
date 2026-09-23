@@ -33,7 +33,7 @@ function createProject(profile = "lite", extraArgs = []) {
 
 test("doctor remains read-only without fix", () => {
   const root = createProject();
-  const launcherPath = path.join(root, "spectra", "bin", "spectra");
+  const launcherPath = path.join(root, ".spectra", "bin", "spectra");
   fs.rmSync(launcherPath);
 
   const result = run(root, ["doctor", "--cwd", root]);
@@ -44,12 +44,12 @@ test("doctor remains read-only without fix", () => {
 
 test("doctor --fix restores generated files and version metadata without rewriting business memory", () => {
   const root = createProject();
-  const launcherPath = path.join(root, "spectra", "bin", "spectra");
-  const runtimePath = path.join(root, "spectra", "sdd", "system", "runtime", "minimal.md");
-  const docsPath = path.join(root, "spectra", "docs", "workflow.md");
-  const manifestPath = path.join(root, "spectra", "sdd", "system", "manifest.env");
-  const metadataPath = path.join(root, "spectra", "install.json");
-  const businessPath = path.join(root, "spectra", "sdd", "memory-bank", "business", "README.md");
+  const launcherPath = path.join(root, ".spectra", "bin", "spectra");
+  const runtimePath = path.join(root, ".spectra", "sdd", "system", "runtime", "minimal.md");
+  const docsPath = path.join(root, ".spectra", "docs", "workflow.md");
+  const manifestPath = path.join(root, ".spectra", "sdd", "system", "manifest.env");
+  const metadataPath = path.join(root, ".spectra", "install.json");
+  const businessPath = path.join(root, ".spectra", "sdd", "memory-bank", "business", "README.md");
 
   fs.rmSync(launcherPath);
   fs.rmSync(runtimePath);
@@ -75,8 +75,8 @@ test("doctor --fix restores generated files and version metadata without rewriti
 
 test("doctor --fix does not recreate missing memory-bank files", () => {
   const root = createProject();
-  const businessReadmePath = path.join(root, "spectra", "sdd", "memory-bank", "business", "README.md");
-  const activeContextPath = path.join(root, "spectra", "sdd", "memory-bank", "core", "activeContext.md");
+  const businessReadmePath = path.join(root, ".spectra", "sdd", "memory-bank", "business", "README.md");
+  const activeContextPath = path.join(root, ".spectra", "sdd", "memory-bank", "core", "activeContext.md");
   fs.rmSync(businessReadmePath);
   fs.rmSync(activeContextPath);
 
@@ -89,8 +89,8 @@ test("doctor --fix does not recreate missing memory-bank files", () => {
 
 test("doctor --fix does not rewrite Full governance or feature state", () => {
   const root = createProject("full");
-  const approvalPath = path.join(root, "spectra", "sdd", "governance", "approval-state.yaml");
-  const featuresRoot = path.join(root, "spectra", "sdd", "features");
+  const approvalPath = path.join(root, ".spectra", "sdd", "governance", "approval-state.yaml");
+  const featuresRoot = path.join(root, ".spectra", "sdd", "features");
   const featureDir = fs.readdirSync(featuresRoot)[0];
   const featureSpecPath = path.join(featuresRoot, featureDir, "feature.spec.yaml");
   const customApproval = `${fs.readFileSync(approvalPath, "utf8")}# user approval note\n`;
@@ -113,7 +113,7 @@ test("doctor --fix restores local git exclude policy", () => {
   const result = run(root, ["doctor", "--fix", "--cwd", root]);
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  assert.equal(git(root, ["check-ignore", "spectra/install.json"]).status, 0);
+  assert.equal(git(root, ["check-ignore", ".spectra/install.json"]).status, 0);
 });
 
 test("doctor --fix restores missing detected adapter files", () => {
@@ -129,9 +129,9 @@ test("doctor --fix restores missing detected adapter files", () => {
 
 test("doctor --fix reports manual business validation errors without rewriting them", () => {
   const root = createProject();
-  const rulesPath = path.join(root, "spectra", "sdd", "memory-bank", "business", "README.md");
+  const rulesPath = path.join(root, ".spectra", "sdd", "memory-bank", "business", "README.md");
   fs.writeFileSync(rulesPath, "# Broken Business Memory\n\nManual repair required.\n");
-  const indexPath = path.join(root, "spectra", "sdd", "memory-bank", "business", "INDEX.md");
+  const indexPath = path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md");
   fs.writeFileSync(
     indexPath,
     "| Domain | Keywords | Rules | Unresolved | Related Modules |\n| --- | --- | --- | --- | --- |\n| customer-policy | eligibility;approval | business/customer-policy/rules.md | business/customer-policy/unresolved.md | |\n"
@@ -147,7 +147,7 @@ test("doctor --fix reports manual business validation errors without rewriting t
 
 test("admin doctor --fix routes to doctor fix behavior", () => {
   const root = createProject();
-  const launcherPath = path.join(root, "spectra", "bin", "spectra");
+  const launcherPath = path.join(root, ".spectra", "bin", "spectra");
   fs.rmSync(launcherPath);
 
   const result = run(root, ["admin", "doctor", "--fix", "--cwd", root]);

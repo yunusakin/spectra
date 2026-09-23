@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { adaptersGenerateCommand } from "./adapters-generate.js";
+import { adaptersCommand } from "./adapters.js";
 
 function makeTempDir(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
@@ -26,7 +26,7 @@ function withFakeCodex(fn) {
   }
 }
 
-test("adaptersGenerateCommand fails fast when codex adapter is unhealthy", () => {
+test("adaptersCommand fails fast when codex adapter is unhealthy", () => {
   const targetDir = makeTempDir("spectra-adapters-fail-");
 
   const previousCommand = process.env.SPECTRA_CODEX_COMMAND;
@@ -34,7 +34,7 @@ test("adaptersGenerateCommand fails fast when codex adapter is unhealthy", () =>
 
   try {
     assert.throws(
-      () => adaptersGenerateCommand(["--cwd", process.cwd(), "--agents", "codex", "--target", targetDir]),
+      () => adaptersCommand(["--cwd", process.cwd(), "--agents", "codex", "--target", targetDir]),
       /Agent setup is unhealthy: Codex: .*missing from PATH/
     );
   } finally {
@@ -46,19 +46,19 @@ test("adaptersGenerateCommand fails fast when codex adapter is unhealthy", () =>
   }
 });
 
-test("adaptersGenerateCommand succeeds when codex adapter is healthy", () => {
+test("adaptersCommand succeeds when codex adapter is healthy", () => {
   const targetDir = makeTempDir("spectra-adapters-pass-");
 
   withFakeCodex(() => {
-    const status = adaptersGenerateCommand(["--cwd", process.cwd(), "--agents", "codex", "--target", targetDir]);
+    const status = adaptersCommand(["--cwd", process.cwd(), "--agents", "codex", "--target", targetDir]);
     assert.equal(status, 0);
     assert.equal(fs.existsSync(path.join(targetDir, "AGENTS.md")), true);
   });
 });
 
-test("adaptersGenerateCommand succeeds for multi-agent non-Codex output", () => {
+test("adaptersCommand succeeds for multi-agent non-Codex output", () => {
   const targetDir = makeTempDir("spectra-adapters-multi-pass-");
-  const status = adaptersGenerateCommand(["--cwd", process.cwd(), "--agents", "claude,cursor,windsurf,copilot,antigravity", "--target", targetDir]);
+  const status = adaptersCommand(["--cwd", process.cwd(), "--agents", "claude,cursor,windsurf,copilot,antigravity", "--target", targetDir]);
 
   assert.equal(status, 0);
   assert.equal(fs.existsSync(path.join(targetDir, "CLAUDE.md")), true);
@@ -72,7 +72,7 @@ test("generated adapters include the core business-memory policy", () => {
   const targetDir = makeTempDir("spectra-adapters-policy-");
 
   withFakeCodex(() => {
-    const status = adaptersGenerateCommand(["--cwd", process.cwd(), "--agents", "claude,cursor,windsurf,copilot,codex,antigravity", "--target", targetDir]);
+    const status = adaptersCommand(["--cwd", process.cwd(), "--agents", "claude,cursor,windsurf,copilot,codex,antigravity", "--target", targetDir]);
     assert.equal(status, 0);
   });
 

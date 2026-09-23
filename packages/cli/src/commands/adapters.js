@@ -11,7 +11,7 @@ import {
 import { title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 
-function adaptersGenerateCommand(argv) {
+function adaptersCommand(argv) {
   const { options } = parseOptions(argv, {
     booleanFlags: ["--help"],
     stringFlags: ["--cwd", "--agents", "--target"]
@@ -79,4 +79,4 @@ function adaptersGenerateCommand(argv) {
   return status;
 }
 
-export { adaptersGenerateCommand };
+export { adaptersCommand };

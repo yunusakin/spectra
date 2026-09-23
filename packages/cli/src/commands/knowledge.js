@@ -3,11 +3,11 @@ import { parseOptions } from "../lib/options.js";
 import { ok, title } from "../lib/output.js";
 
 function knowledgeCommand(argv) {
-  const [action, ...rest] = argv;
-  const { options } = parseOptions(rest, {
+  const { options, positional } = parseOptions(argv, {
     booleanFlags: ["--help", "--verified"],
     stringFlags: ["--confidence", "--cwd", "--domain", "--evidence", "--id", "--modules", "--statement", "--status", "--title"]
   });
+  const action = positional[0];
   if (options["--help"] || !action) {
     title("Usage: spectra knowledge <add|promote|resolve|supersede|deprecate> [options]");
     title("Add defaults to --status unresolved. Direct --status active requires --verified.");

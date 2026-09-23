@@ -1,12 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { getSddRoot } from "./project-layout.js";
+import { readInstallMetadata } from "./runtime.js";
 
-const RESUME_FILES = new Set([
-  "spectra/sdd/memory-bank/core/activeContext.md",
-  "spectra/sdd/memory-bank/core/implementation-brief.md",
-  "spectra/sdd/memory-bank/core/progress.md"
-]);
+// Resume signals: relative to the sdd root so they resolve for every
+// supported layout (canonical, 3.0.8, pre-3.0).
+const RESUME_FILES = [
+  "memory-bank/core/activeContext.md",
+  "memory-bank/core/implementation-brief.md",
+  "memory-bank/core/progress.md"
+];
 
 function toPosix(value) {
   return value.split(path.sep).join("/");
@@ -14,10 +18,10 @@ function toPosix(value) {
 
 function collectRecentFiles(projectRoot, { limit = 8 } = {}) {
   const files = [];
-  const metadataPath = path.join(projectRoot, "spectra", "install.json");
-  const metadata = fs.existsSync(metadataPath) ? JSON.parse(fs.readFileSync(metadataPath, "utf8")) : {};
+  const metadata = readInstallMetadata(projectRoot) ?? {};
   const installedAt = Date.parse(metadata.installedAt ?? "") || 0;
-  const candidates = [...RESUME_FILES].map((relativePath) => path.join(projectRoot, relativePath));
+  const sddRoot = getSddRoot(projectRoot);
+  const candidates = RESUME_FILES.map((relativePath) => path.join(sddRoot, relativePath));
 
   for (const absolutePath of candidates) {
     if (!fs.existsSync(absolutePath)) {

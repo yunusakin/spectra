@@ -42,7 +42,7 @@ function materializeFixture(fixtureName) {
 }
 
 function readIndex(root) {
-  const indexPath = path.join(root, "spectra", "cache", "index", "repo-index.json");
+  const indexPath = path.join(root, ".spectra", "cache", "index", "repo-index.json");
   return JSON.parse(fs.readFileSync(indexPath, "utf8"));
 }
 

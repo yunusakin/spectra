@@ -1,3 +1,5 @@
+// Normal report output goes to stdout; warnings and failures go to stderr
+// so automation can separate results from diagnostics.
 function line(prefix, message) {
   process.stdout.write(`${prefix} ${message}\n`);
 }
@@ -7,11 +9,11 @@ function ok(message) {
 }
 
 function warn(message) {
-  line("WARN", message);
+  process.stderr.write(`WARN ${message}\n`);
 }
 
 function fail(message) {
-  line("FAIL", message);
+  process.stderr.write(`FAIL ${message}\n`);
 }
 
 function next(message) {

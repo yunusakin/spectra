@@ -86,7 +86,7 @@ function recomputeTotals(entries) {
   );
 }
 
-function contextPackCommand(argv) {
+function contextCommand(argv) {
   const { options } = parseOptions(argv, {
     booleanFlags: ["--help", "--changed"],
     stringFlags: ["--base", "--cwd", "--domain", "--format", "--goal", "--head", "--module", "--role", "--route-task", "--task"]
@@ -169,4 +169,4 @@ function contextPackCommand(argv) {
   return 0;
 }
 
-export { contextPackCommand };
+export { contextCommand };

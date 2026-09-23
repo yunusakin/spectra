@@ -36,7 +36,7 @@ function mergeMetadata(repoRoot, { profile, gitMode, excludePatterns = null }) {
     }),
     installedAt: current.installedAt ?? new Date().toISOString(),
     ...(current.binaryPath ? { binaryPath: current.binaryPath } : {}),
-    localLauncher: current.localLauncher ?? "spectra/bin/spectra",
+    localLauncher: current.localLauncher ?? ".spectra/bin/spectra",
     ...(excludePatterns ? { excludePatterns: [...new Set([...(current.excludePatterns ?? []), ...excludePatterns])].sort() } : {})
   });
 }
@@ -60,7 +60,7 @@ function runFix(repoRoot) {
     const exclude = ensureLocalSpectraExclude(repoRoot);
     mergeMetadata(repoRoot, { profile, gitMode, excludePatterns: exclude.excludePatterns });
     if (exclude.changed) {
-      fixed.push("restored local Git exclude policy for /spectra/");
+      fixed.push("restored local Git exclude policy for /.spectra/");
     }
   } else {
     mergeMetadata(repoRoot, { profile, gitMode });

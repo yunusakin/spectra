@@ -46,13 +46,25 @@ function repoIndexLine(stdout) {
 
 test("verify reports the repo index as not built yet before spectra index has run", () => {
   const root = createFullProfileProject();
-  assert.equal(fs.existsSync(path.join(root, "spectra", "cache", "index", "repo-index.json")), false);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "cache", "index", "repo-index.json")), false);
 
   const result = run(root, ["verify"]);
   const line = repoIndexLine(result.stdout);
   assert.ok(line, `expected a repo-index stage line in:\n${result.stdout}`);
   assert.match(line, /not built yet/);
   assert.doesNotMatch(line, /^FAIL/);
+});
+
+test("verify names its shell stage for what it measures and never claims to run project tests", () => {
+  const root = createFullProfileProject();
+  const result = run(root, ["verify"]);
+
+  assert.match(result.stdout, /^Spectra Verify$/m);
+  assert.doesNotMatch(result.stdout, /Verify v2/);
+  assert.doesNotMatch(result.stdout, /^(OK|WARN|FAIL) tests:/m);
+  const line = result.stdout.split("\n").find((entry) => entry.includes("verify-work:"));
+  assert.ok(line, `expected a verify-work stage line in:\n${result.stdout}`);
+  assert.doesNotMatch(line, /legacy/i);
 });
 
 test("verify reports the repo index as fresh right after spectra index has run", () => {

@@ -31,7 +31,7 @@ function runOk(cwd, args, options = {}) {
 }
 
 function projectBriefPath(root) {
-  return path.join(root, "spectra", "sdd", "memory-bank", "core", "projectbrief.md");
+  return path.join(root, ".spectra", "sdd", "memory-bank", "core", "projectbrief.md");
 }
 
 // ---------------------------------------------------------------------------
@@ -171,7 +171,7 @@ test("spectra onboard before spectra index has run reports guidance and writes n
   const before = fs.readFileSync(projectBriefPath(root), "utf8");
 
   const result = runOk(root, ["onboard"]);
-  assert.match(result.stdout, /spectra index/);
+  assert.match(result.stderr, /spectra index/);
 
   const after = fs.readFileSync(projectBriefPath(root), "utf8");
   assert.equal(before, after);
@@ -205,7 +205,7 @@ test("spectra onboard does not overwrite a brief that already has real content, 
 test("adopt prints a next-step hint pointing at spectra onboard", () => {
   const root = createNodeFixtureRepo();
   const result = runOk(root, ["adopt", ".", "--git-mode", "local"]);
-  assert.match(result.stdout, /spectra\/bin\/spectra onboard/);
+  assert.match(result.stdout, /\.spectra\/bin\/spectra onboard/);
 });
 
 // ---------------------------------------------------------------------------
@@ -225,7 +225,7 @@ test("a wizard-written brief is picked up by spectra context's project summary",
 
   runOk(root, ["context", "--role", "planner", "--goal", "discover", "--format", "json"]);
 
-  const summaryPath = path.join(root, "spectra", "cache", "context", "project.summary.json");
+  const summaryPath = path.join(root, ".spectra", "cache", "context", "project.summary.json");
   const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
   assert.equal(summary.projectName, "Orders API");
   assert.equal(summary.purpose, "Let partners submit bulk orders");

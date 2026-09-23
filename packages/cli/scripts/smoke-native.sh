@@ -13,9 +13,9 @@ for profile in lite full; do
   git -C "$project" add README.md
   git -C "$project" commit -qm initial
   "$binary" init "$project" --profile "$profile"
-  (cd "$project" && ./spectra/bin/spectra help)
-  "$project/spectra/bin/spectra" status --cwd "$project"
-  "$project/spectra/bin/spectra" check --cwd "$project"
-  SPECTRA_LATEST_VERSION="$version" "$project/spectra/bin/spectra" update --cwd "$project"
-  grep -F "\"profile\": \"$profile\"" "$project/spectra/install.json"
+  (cd "$project" && ./.spectra/bin/spectra help)
+  "$project/.spectra/bin/spectra" status --cwd "$project"
+  "$project/.spectra/bin/spectra" check --cwd "$project"
+  SPECTRA_LATEST_VERSION="$version" "$project/.spectra/bin/spectra" update --cwd "$project"
+  grep -F "\"profile\": \"$profile\"" "$project/.spectra/install.json"
 done

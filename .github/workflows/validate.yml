@@ -7,6 +7,11 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+    name: validate (node ${{ matrix.node-version }})
     steps:
       - uses: actions/checkout@v4
         with:
@@ -14,7 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           cache: npm
 
       - name: Install dependencies
@@ -44,8 +49,8 @@ jobs:
       - name: Adapter generation smoke check
         run: bash scripts/generate-adapters.sh --agents claude,cursor,windsurf,copilot,codex,antigravity --target /tmp/spectra-adapters
 
-      - name: CLI smoke tests
-        run: |
-          node --test packages/cli/src/lib/agent-health.test.js
-          node --test packages/cli/src/lib/install.test.js
-          node --test packages/cli/src/commands/adapters-generate.test.js
+      - name: Version parity
+        run: node packages/cli/scripts/check-versions.mjs
+
+      - name: Full test suite
+        run: npm test

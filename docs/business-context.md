@@ -1,6 +1,6 @@
 # Agent-Agnostic Business Context
 
-Spectra stores durable product and business knowledge under `spectra/sdd/memory-bank/` so any agent can route work without depending on a vendor-specific memory system.
+Spectra stores durable product and business knowledge under `.spectra/sdd/memory-bank/` so any agent can route work without depending on a vendor-specific memory system.
 
 ## Canonical Files
 

@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { normalize, readMarkdownTableContent } from "./parser.js";
-import { requireProjectRoot, ruleFile } from "./repository.js";
+import { getBusinessPaths, requireProjectRoot, ruleFile } from "./repository.js";
 
 function nextRuleId(projectRoot, domain) {
   const prefix = `RULE-${normalize(domain).slice(0, 3).toUpperCase()}-`;
-  const businessRoot = path.join(projectRoot, "spectra", "sdd", "memory-bank", "business");
+  const businessRoot = getBusinessPaths(projectRoot).businessRoot;
   const files = fs.readdirSync(businessRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .flatMap((entry) => [ruleFile(projectRoot, entry.name, "active"), ruleFile(projectRoot, entry.name, "unresolved")]);
@@ -19,7 +19,7 @@ function nextRuleId(projectRoot, domain) {
 
 function ensureDomain(projectRoot, domain) {
   const normalized = normalize(domain);
-  const businessRoot = path.join(projectRoot, "spectra", "sdd", "memory-bank", "business");
+  const businessRoot = getBusinessPaths(projectRoot).businessRoot;
   const directory = path.join(businessRoot, normalized);
   fs.mkdirSync(directory, { recursive: true });
   for (const [name, heading] of [["rules.md", "Business Rules"], ["unresolved.md", "Unresolved Business Rules"]]) {
@@ -75,7 +75,7 @@ function addBusinessRule({
 
 function promoteBusinessRule({ cwd, id }) {
   const projectRoot = requireProjectRoot(cwd);
-  const businessRoot = path.join(projectRoot, "spectra", "sdd", "memory-bank", "business");
+  const businessRoot = getBusinessPaths(projectRoot).businessRoot;
   for (const domain of fs.readdirSync(businessRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name)) {
     const unresolved = ruleFile(projectRoot, domain, "unresolved");
     if (!fs.existsSync(unresolved)) continue;
@@ -92,7 +92,7 @@ function promoteBusinessRule({ cwd, id }) {
 function transitionBusinessRule({ cwd, id, status }) {
   if (!["superseded", "deprecated"].includes(status)) throw new Error(`Unsupported business-rule transition: ${status}`);
   const projectRoot = requireProjectRoot(cwd);
-  const businessRoot = path.join(projectRoot, "spectra", "sdd", "memory-bank", "business");
+  const businessRoot = getBusinessPaths(projectRoot).businessRoot;
   for (const domain of fs.readdirSync(businessRoot, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name)) {
     for (const filePath of [ruleFile(projectRoot, domain, "active"), ruleFile(projectRoot, domain, "unresolved")]) {
       if (!fs.existsSync(filePath)) continue;

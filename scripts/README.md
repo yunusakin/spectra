@@ -73,9 +73,9 @@ This enforces:
 Run these through the repo-local launcher in installed projects when possible:
 
 ```bash
-./spectra/bin/spectra status
-./spectra/bin/spectra check
-./spectra/bin/spectra context --role planner --goal discover
+./.spectra/bin/spectra status
+./.spectra/bin/spectra check
+./.spectra/bin/spectra context --role planner --goal discover
 ```
 
 Generate adapters:

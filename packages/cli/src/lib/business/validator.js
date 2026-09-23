@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { normalize, parseRuleStatement, rowValue, splitList, splitRawList } from "./parser.js";
-import { getBusinessPaths, readMarkdownTable, resolveBusinessPath } from "./repository.js";
+import { getBusinessPaths, getContextRoot, readMarkdownTable, resolveBusinessPath } from "./repository.js";
 
 function validateKeywords({ row, domain, keywordOwners, errors }) {
   if (!("keywords" in row)) return;
@@ -39,7 +39,7 @@ function validateBusinessContext(repoRoot) {
   const ids = new Set();
   for (const filePath of [moduleIndexPath, businessIndexPath]) {
     if (!fs.existsSync(filePath)) {
-      errors.push(`Missing canonical business context file: ${path.relative(path.join(repoRoot, "spectra"), filePath)}`);
+      errors.push(`Missing canonical business context file: ${path.relative(getContextRoot(repoRoot), filePath)}`);
     }
   }
   if (errors.length > 0) return errors;

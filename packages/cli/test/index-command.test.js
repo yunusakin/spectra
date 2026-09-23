@@ -43,7 +43,7 @@ test("adopt writes an initial repo index automatically", () => {
   const root = createRepo();
   runOk(root, ["adopt", ".", "--git-mode", "local"]);
 
-  const indexPath = path.join(root, "spectra", "cache", "index", "repo-index.json");
+  const indexPath = path.join(root, ".spectra", "cache", "index", "repo-index.json");
   assert.ok(fs.existsSync(indexPath), "expected repo-index.json to be created by adopt");
 
   const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
@@ -71,9 +71,9 @@ test("spectra index --check fails with non-zero status when the repo changed", (
 
   const checkResult = run(root, ["index", "--check"]);
   assert.equal(checkResult.status, 1);
-  assert.match(checkResult.stdout, /stale/i);
+  assert.match(checkResult.stderr, /stale/i);
 
-  const indexPath = path.join(root, "spectra", "cache", "index", "repo-index.json");
+  const indexPath = path.join(root, ".spectra", "cache", "index", "repo-index.json");
   const beforeMtime = fs.statSync(indexPath).mtimeMs;
   assert.equal(fs.statSync(indexPath).mtimeMs, beforeMtime, "check must not rewrite the index");
 });
@@ -88,7 +88,7 @@ test("spectra index re-run picks up new build script after repo changes", () => 
   );
 
   runOk(root, ["index"]);
-  const indexPath = path.join(root, "spectra", "cache", "index", "repo-index.json");
+  const indexPath = path.join(root, ".spectra", "cache", "index", "repo-index.json");
   const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
   assert.ok(index.records.some((r) => r.kind === "build-target"));
 

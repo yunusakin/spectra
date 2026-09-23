@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { getProjectLayout } from "./project-layout.js";
+import { detectLayout, getInstallMetadataPaths, getProjectLayout, getSddRoot } from "./project-layout.js";
 
 function getExecutablePath() {
   try {
@@ -107,13 +107,18 @@ function mergeGitignore(sourcePath, targetPath) {
   }
 }
 
-function updateManifestRepoMode(targetRoot, repoMode) {
-  const canonicalManifestPath = path.join(getProjectLayout(targetRoot).sdd, "system", "manifest.env");
-  const manifestPath = fs.existsSync(canonicalManifestPath)
-    ? canonicalManifestPath
-    : path.join(targetRoot, "sdd", "system", "manifest.env");
+function findManifestPath(targetRoot) {
+  if (!detectLayout(targetRoot)) {
+    return null;
+  }
+  const manifestPath = path.join(getSddRoot(targetRoot), "system", "manifest.env");
+  return fs.existsSync(manifestPath) ? manifestPath : null;
+}
 
-  if (!fs.existsSync(manifestPath)) {
+function updateManifestRepoMode(targetRoot, repoMode) {
+  const manifestPath = findManifestPath(targetRoot);
+
+  if (!manifestPath) {
     return;
   }
 
@@ -129,11 +134,7 @@ function writeInstallMetadata(targetRoot, metadata) {
 }
 
 function readInstallMetadata(targetRoot) {
-  const metadataPaths = [
-    getProjectLayout(targetRoot).installMetadata,
-    path.join(targetRoot, ".spectra", "install.json")
-  ];
-  for (const metadataPath of metadataPaths) {
+  for (const metadataPath of getInstallMetadataPaths(targetRoot)) {
     if (fs.existsSync(metadataPath)) {
       return JSON.parse(fs.readFileSync(metadataPath, "utf8"));
     }
@@ -147,23 +148,21 @@ function getInstalledProfile(targetRoot) {
     return metadata.profile;
   }
 
-  const canonicalManifestPath = path.join(getProjectLayout(targetRoot).sdd, "system", "manifest.env");
-  return fs.existsSync(canonicalManifestPath) ? "lite" : "full";
+  return findManifestPath(targetRoot) ? "lite" : "full";
 }
 
 function findSpectraRoot(startDir = process.cwd()) {
   let current = path.resolve(startDir);
 
   while (true) {
-    const canonicalManifestPath = path.join(getProjectLayout(current).sdd, "system", "manifest.env");
-    const nestedCanonicalManifestPath = path.join(current, "sdd", "system", "manifest.env");
-    const nestedCanonicalMetadataPath = path.join(current, "install.json");
-    const manifestPath = fs.existsSync(canonicalManifestPath)
-      ? canonicalManifestPath
-      : path.join(current, "sdd", "system", "manifest.env");
+    const layout = detectLayout(current);
 
-    if (fs.existsSync(manifestPath)) {
-      if (fs.existsSync(nestedCanonicalManifestPath) && fs.existsSync(nestedCanonicalMetadataPath)) {
+    if (layout) {
+      // A root-sdd hit inside a directory that also carries install.json
+      // means `current` is itself a data directory (.spectra/ or spectra/);
+      // the project root is its parent.
+      const looksLikeDataDir = layout === "root-sdd" && fs.existsSync(path.join(current, "install.json"));
+      if (looksLikeDataDir && path.dirname(current) !== current) {
         return path.dirname(current);
       }
       return current;
@@ -190,14 +189,18 @@ function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
     throw new Error(`Missing installed script: ${scriptPath}`);
   }
 
-  const spectraRoot = getProjectLayout(repoRoot).root;
-  const isCanonicalLayout = fs.existsSync(path.join(spectraRoot, "sdd", "system", "manifest.env"));
+  // Shell scripts run with the data root (the directory containing sdd/)
+  // as their working directory: canonical and 3.0.8 installs run inside
+  // .spectra/ or spectra/, pre-3.0 and not-installed roots run at the
+  // project root.
+  const layout = detectLayout(repoRoot);
+  const dataRoot = layout ? path.dirname(getSddRoot(repoRoot)) : repoRoot;
 
   const result = spawnSync("bash", [scriptPath, ...args], {
-    cwd: isCanonicalLayout ? spectraRoot : repoRoot,
+    cwd: dataRoot,
     env: {
       ...process.env,
-      SPECTRA_REPO_ROOT: isCanonicalLayout ? spectraRoot : repoRoot,
+      SPECTRA_REPO_ROOT: dataRoot,
       SPECTRA_PROJECT_ROOT: repoRoot,
       SPECTRA_RUNTIME_ROOT: runtimeDir
     },

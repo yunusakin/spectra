@@ -1,6 +1,6 @@
 # CLI Reference
 
-This is the current public command surface for Spectra `3.0.8`.
+This is the current public command surface for Spectra `3.0.9`.
 
 ## Install and Bootstrap
 
@@ -15,12 +15,12 @@ npm/npx, existing project:
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
-./spectra/bin/spectra onboard
-./spectra/bin/spectra check
-./spectra/bin/spectra status
+./.spectra/bin/spectra onboard
+./.spectra/bin/spectra check
+./.spectra/bin/spectra status
 ```
 
-`npx` does not install a global command. Use `./spectra/bin/spectra` after bootstrap.
+`npx` does not install a global command. Use `./.spectra/bin/spectra` after bootstrap.
 
 Native macOS/Linux installation without Node/npm:
 
@@ -30,14 +30,31 @@ export PATH="$HOME/.local/bin:$PATH"
 spectra version
 ```
 
-The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when using only the repo-local launcher. See [Native Install](native-install.md) for supported platforms and troubleshooting.
+The remaining examples use `spectra`. Substitute `./.spectra/bin/spectra` when using only the repo-local launcher. See [Native Install](native-install.md) for supported platforms and troubleshooting.
+
+## Local Execution
+
+The only executable Spectra generates locally is the launcher at
+`.spectra/bin/spectra` (plus a `.spectra/bin/spectra.cmd` wrapper on
+Windows), written by `init`/`adopt` and kept in place by `update`. It
+resolves the installed native binary, falling back to the local Node
+CLI, then a `spectra` on `PATH`. There is no separate per-command local
+bin surface: every `spectra <command>` is available identically through
+`spectra <command>` (installed) and `./.spectra/bin/spectra <command>`
+(local), both operating on the same `.spectra/` project state. The
+shell scripts under the runtime's `scripts/` directory (`validate-repo.sh`,
+`verify-work.sh`, `check-policy.sh`, etc.) are internal implementation
+detail invoked by these commands; they are not a separate user-facing
+interface and were not part of the local bin surface before 3.0.9
+either — moving the canonical root from `spectra/` to `.spectra/` did
+not add, remove, or rename any local command.
 
 ## Setup Commands
 
 | Command | Use When | What It Does | Options / Modes |
 | --- | --- | --- | --- |
-| `spectra init [path] [--profile <lite\|full>] [--git-mode <local\|shared>] [--agents <csv>]` | starting a new Git repository | bootstraps a Spectra-managed project under `spectra/` | defaults: `lite`, `local`; `--agents` requires `--profile full` |
-| `spectra adopt [path] [--profile <lite\|full>] [--git-mode <local\|shared>] [--agents <csv>]` | adding Spectra to an existing repository | installs the selected profile under `spectra/` | `local`: private via Git exclude; `shared`: commit-ready; `--agents` requires `--profile full` |
+| `spectra init [path] [--profile <lite\|full>] [--git-mode <local\|shared>] [--agents <csv>]` | starting a new Git repository | bootstraps a Spectra-managed project under `.spectra/` | defaults: `lite`, `local`; `--agents` requires `--profile full` |
+| `spectra adopt [path] [--profile <lite\|full>] [--git-mode <local\|shared>] [--agents <csv>]` | adding Spectra to an existing repository | installs the selected profile under `.spectra/` | `local`: private via Git exclude; `shared`: commit-ready; `--agents` requires `--profile full` |
 | `spectra index [--check] [--explain] [--format <text\|json>]` | after bootstrap or manifest changes | builds or checks the deterministic repo index used by context, onboard, and verify | `--check` is read-only; `--explain` prints evidence |
 | `spectra onboard [--force]` | after bootstrap when `projectbrief.md` is still a template | drafts the project brief from interactive answers and the repo index | non-interactive runs never rewrite the brief |
 | `spectra route --task "<task>"` | before work that may touch business behavior | selects the smallest relevant module and business-domain context with deterministic match explanations | use `--format json`, `--domain`, or `--module` for explicit routing |
@@ -47,10 +64,10 @@ The remaining examples use `spectra`. Substitute `./spectra/bin/spectra` when us
 | `spectra check [--base <sha> --head <sha>]` | after spec changes | runs the public validation entry point | `validate` remains a compatibility alias |
 | `spectra doctor [--fix]` | checking local tool/runtime/adapter health | reports doctor checks; with `--fix`, repairs safe generated Spectra files and re-runs validation | does not rewrite business memory or application code |
 | `spectra status` | resuming work | summarizes current project and Spectra changes | recommends the next action |
-| `spectra update` | checking or upgrading Spectra | checks the latest CLI version, asks once when changes are needed, refreshes runtime files, and migrates legacy layouts | reports `Spectra is already up to date.` when no work is needed |
+| `spectra update [--yes]` | checking or upgrading Spectra | checks the latest CLI version, asks once when changes are needed, refreshes runtime files, and migrates legacy layouts | reports `Spectra is already up to date.` when no work is needed; `--yes` skips the confirmation prompt |
 | `spectra upgrade --profile <lite\|full>` | changing the installed profile | promotes Lite to Full while preserving existing project memory and updates runtime metadata | `--agents <csv>` optionally generates Full agent adapters; asks once for confirmation |
 | `spectra help [command\|advanced]` | learning the CLI | shows the everyday workflow or Full commands | supports `--help` too |
-| `spectra admin <approve\|eval\|diff\|adapters\|doctor\|skills\|quick>` | using Full features | groups advanced operations | top-level forms remain compatibility aliases |
+| `spectra approve`, `eval`, `diff`, `adapters`, `skills`, `quick` | using Full features | advanced operations, each a top-level command | `spectra admin <command>` remains a compatibility alias |
 | `spectra version` | confirming install state | prints the installed CLI version | no additional modes |
 
 ```bash
@@ -60,15 +77,15 @@ spectra index [--check] [--explain] [--format text|json]
 spectra onboard [--force]
 ```
 
-`init` creates a new Spectra-managed project under `spectra/`. Lite is the default profile.
+`init` creates a new Spectra-managed project under `.spectra/`. Lite is the default profile.
 
 `adopt` adds Spectra to an existing codebase. Full additionally creates brownfield adoption outputs.
 
-`index` writes `spectra/cache/index/repo-index.json`, a disposable cache of detected modules, build/test targets, dependencies, runtimes, and evidence. `onboard` uses that cache only as technical evidence; it does not infer business intent.
+`index` writes `.spectra/cache/index/repo-index.json`, a disposable cache of detected modules, build/test targets, dependencies, runtimes, and evidence. `onboard` uses that cache only as technical evidence; it does not infer business intent.
 
 `--agents <csv>` is valid only with `--profile full`; Lite keeps agent adapter files out of the repository root.
 
-`local` is the default Git mode. It requires a Git worktree, leaves `.gitignore` unchanged, and writes `/spectra/` to Git's repository-local exclude file. Project code and company documentation remain visible to Git.
+`local` is the default Git mode. It requires a Git worktree, leaves `.gitignore` unchanged, and writes `/.spectra/` to Git's repository-local exclude file. Project code and company documentation remain visible to Git.
 
 Use `--git-mode shared` when the generated Spectra layer should be reviewed and committed with the repository.
 
@@ -105,23 +122,23 @@ spectra upgrade --profile full
 ## Utility Commands
 
 ```bash
-spectra admin doctor
-spectra admin quick --type <docs|rules|spec|ops> --task "<task>"
-spectra admin skills --task-type <type> [--skills <csv>]
-spectra admin adapters --agents <csv> --target <path>
-spectra admin diff <init|update|semantic>
+spectra doctor
+spectra quick --type <docs|rules|spec|ops> --task "<task>"
+spectra skills --task-type <type> [--skills <csv>]
+spectra adapters --agents <csv> --target <path>
+spectra diff <init|update|semantic>
 spectra update
 spectra version
 spectra help
 ```
 
-For Full-profile agent-enabled repos, run `spectra admin doctor` after adapter generation. A healthy setup requires:
+For Full-profile agent-enabled repos, run `spectra doctor` after adapter generation. A healthy setup requires:
 
 - each configured agent's adapter files exist
 - each adapter file matches the Spectra-generated template
 - any agent with a runtime prerequisite also has its command available on `PATH`
 
-When those checks pass, `spectra admin doctor` reports each configured agent as `healthy`.
+When those checks pass, `spectra doctor` reports each configured agent as `healthy`.
 
 ## Recommended Role and Goal Pairs
 
@@ -139,10 +156,10 @@ When those checks pass, `spectra admin doctor` reports each configured agent as 
 ```bash
 spectra context --role planner --goal discover
 spectra check
-spectra admin approve --stage implementation-approved
+spectra approve --stage implementation-approved
 spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
 spectra context --role implementer --goal implement
-spectra admin eval my-product-core --suite smoke
+spectra eval my-product-core --suite smoke
 spectra verify
 ```
 
@@ -150,10 +167,10 @@ spectra verify
 
 - There is no public `spectra feature` command. The core executable spec bundle is created by `init` or `adopt`.
 - Prefer single-word commands in user-facing workflows.
-- In Full, use `spectra admin diff semantic` after meaningful spec changes to understand approval impact.
+- In Full, use `spectra diff semantic` after meaningful spec changes to understand approval impact.
 
 ## Versioning and Migration
 
 Spectra uses one synchronized public version for npm, native binaries, the CLI, and packaged runtime assets. Project metadata keeps a separate schema version so compatible runtime upgrades do not imply a project-format break.
 
-Run `spectra update` from a project at any time. Legacy `.spectra/`, root `sdd/`, and known Spectra-generated root documentation are migrated beneath `spectra/`; unrelated company documentation is preserved. A declined confirmation leaves the project unchanged.
+Run `spectra update` from a project at any time. Legacy layouts (the 3.0.8 `spectra/` directory, root `sdd/`, and known Spectra-generated root documentation) are migrated beneath `.spectra/`; unrelated company documentation is preserved. A declined confirmation leaves the project unchanged.

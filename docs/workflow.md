@@ -1,12 +1,12 @@
 # Workflow
 
-Spectra v2 has one default loop:
+Spectra has one default loop:
 
 Lite: `define -> check -> implement -> check -> resume`
 
 Full: `define -> check -> approve -> implement -> eval -> verify -> release`
 
-The examples use `spectra`. If the repository was bootstrapped with `npx` and no global command was installed, use `./spectra/bin/spectra` instead.
+The examples use `spectra`. If the repository was bootstrapped with `npx` and no global command was installed, use `./.spectra/bin/spectra` instead.
 
 ## Define
 
@@ -38,9 +38,9 @@ Validation should happen:
 Advance the staged approval state explicitly:
 
 ```bash
-spectra admin approve --stage product-approved
-spectra admin approve --stage technical-approved
-spectra admin approve --stage implementation-approved
+spectra approve --stage product-approved
+spectra approve --stage technical-approved
+spectra approve --stage implementation-approved
 ```
 
 Rule:
@@ -60,7 +60,7 @@ spectra context --role implementer --goal implement
 If the task is docs/spec-only:
 
 ```bash
-spectra admin quick --type docs --task "refresh docs"
+spectra quick --type docs --task "refresh docs"
 ```
 
 ## Eval
@@ -68,13 +68,13 @@ spectra admin quick --type docs --task "refresh docs"
 Run feature behavior checks:
 
 ```bash
-spectra admin eval my-product-core --suite smoke
+spectra eval my-product-core --suite smoke
 ```
 
 Use release profile checks when preparing to ship:
 
 ```bash
-spectra admin eval my-product-core --suite release
+spectra eval my-product-core --suite release
 ```
 
 ## Verify
@@ -98,7 +98,7 @@ Verify aggregates:
 Once verify is green:
 
 ```bash
-spectra admin approve --stage release-approved
+spectra approve --stage release-approved
 ```
 
 ## Spec Changes After Approval
@@ -106,7 +106,7 @@ spectra admin approve --stage release-approved
 When specs change after approval:
 
 ```bash
-spectra admin diff semantic
+spectra diff semantic
 spectra check
 ```
 
@@ -121,7 +121,7 @@ spectra adopt .
 spectra onboard
 spectra context --role planner --goal discover
 spectra check
-spectra admin diff semantic
+spectra diff semantic
 ```
 
-Use the Full profile’s structured outputs under `spectra/sdd/adoption/` to understand gaps before moving into implementation.
+Use the Full profile’s structured outputs under `.spectra/sdd/adoption/` to understand gaps before moving into implementation.

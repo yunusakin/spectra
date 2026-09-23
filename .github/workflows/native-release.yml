@@ -71,7 +71,7 @@ jobs:
           mkdir -p "$brownfield_dir/src/test/java"
           printf 'class BalanceServiceTest {}\n' > "$brownfield_dir/src/test/java/BalanceServiceTest.java"
           /tmp/spectra-native/bin/spectra adopt "$brownfield_dir" --git-mode shared
-          brownfield_status="$("$brownfield_dir/spectra/bin/spectra" status --cwd "$brownfield_dir")"
+          brownfield_status="$("$brownfield_dir/.spectra/bin/spectra" status --cwd "$brownfield_dir")"
           printf '%s\n' "$brownfield_status"
           grep -F 'Spectra Project Status' <<< "$brownfield_status"
           grep -F 'Profile: lite' <<< "$brownfield_status"
@@ -85,8 +85,8 @@ jobs:
           git -C "$local_dir" commit -qm 'initial source'
           /tmp/spectra-native/bin/spectra adopt "$local_dir" --git-mode local
           test -z "$(git -C "$local_dir" status --short)"
-          git -C "$local_dir" check-ignore -q spectra/install.json
-          grep -F '"gitMode": "local"' "$local_dir/spectra/install.json"
+          git -C "$local_dir" check-ignore -q .spectra/install.json
+          grep -F '"gitMode": "local"' "$local_dir/.spectra/install.json"
 
       - uses: actions/upload-artifact@v4
         with:

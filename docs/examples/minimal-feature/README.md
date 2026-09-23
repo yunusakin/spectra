@@ -1,6 +1,6 @@
 # Minimal Feature Example
 
-This folder shows the smallest useful Spectra v2 feature bundle.
+This folder shows the smallest useful Spectra feature bundle.
 
 Use it as:
 

@@ -1,11 +1,11 @@
 import path from "node:path";
-import { getProjectLayout } from "./project-layout.js";
+import { getSddRoot } from "./project-layout.js";
 import { hasRealMarkdownContent } from "./specs.js";
 
 const MAX_DETECTED_MODULES = 10;
 
 function getProjectBriefPath(repoRoot) {
-  return path.join(getProjectLayout(repoRoot).sdd, "memory-bank", "core", "projectbrief.md");
+  return path.join(getSddRoot(repoRoot), "memory-bank", "core", "projectbrief.md");
 }
 
 function isProjectBriefTemplateOnly(repoRoot) {
@@ -39,7 +39,7 @@ function section(heading, value, fallbackBody, extra = "") {
 
 // Pure render function: given optional user answers and an optional repo
 // index, produces the projectbrief.md content. Headings must match exactly
-// what lib/context.js's parseProjectSummary expects, so this stays a drop-in
+// what lib/context/summaries.js's parseProjectSummary expects, so this stays a drop-in
 // replacement for the shipped "Filled by intake" template rather than a
 // parallel format.
 function buildProjectBriefDraft({ answers = {}, repoIndex = null } = {}) {

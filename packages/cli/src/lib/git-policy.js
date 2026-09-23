@@ -127,7 +127,7 @@ function beginLocalGitPolicy(targetDir) {
     excludePath: resolveExcludePath(targetRoot),
     beforeFiles: listFiles(targetRoot),
     rootsExisted: {
-      spectra: fs.existsSync(path.join(targetRoot, "spectra"))
+      ".spectra": fs.existsSync(path.join(targetRoot, ".spectra"))
     }
   };
 }
@@ -138,7 +138,7 @@ function patternFor(relativeTarget, relativePath, directory = false) {
 }
 
 function buildExcludePatterns(policy, ownedPaths) {
-  const broadRoots = ["spectra"].filter(
+  const broadRoots = [".spectra"].filter(
     (root) => !policy.rootsExisted[root] && ownedPaths.some((filePath) => filePath.startsWith(`${root}/`))
   );
   const exactPaths = ownedPaths.filter(
@@ -176,7 +176,7 @@ function ensureLocalSpectraExclude(targetDir) {
   const targetRoot = fs.realpathSync(requestedTarget);
   const relativeTarget = toPosix(path.relative(gitRoot, targetRoot)) || ".";
   const excludePath = resolveExcludePath(targetRoot);
-  const spectraPattern = patternFor(relativeTarget, "spectra", true);
+  const spectraPattern = patternFor(relativeTarget, ".spectra", true);
   const current = fs.existsSync(excludePath) ? fs.readFileSync(excludePath, "utf8") : "";
   if (current.includes(spectraPattern)) {
     return { changed: false, excludePath, excludePatterns: [spectraPattern] };
