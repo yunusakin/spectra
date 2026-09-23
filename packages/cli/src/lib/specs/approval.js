@@ -7,7 +7,10 @@ import { validateSpectraV2 } from "./validation.js";
 import { verifyV2 } from "./verification.js";
 import { hasRealMarkdownContent, writeJsonContract } from "./primitives.js";
 
-function approveStage(repoRoot, stage) {
+// `shellStatus` is the exit status of verify-work.sh, run by the caller (see
+// lib/verify-runner.js) so release approval enforces the same checks as
+// `spectra verify --profile release`.
+function approveStage(repoRoot, stage, { shellStatus } = {}) {
   ensureStageAllowed(stage);
 
   const validation = validateSpectraV2(repoRoot);
@@ -20,7 +23,7 @@ function approveStage(repoRoot, stage) {
   const currentIndex = stageOrder(currentHighest);
   const targetIndex = stageOrder(stage);
 
-  if (targetIndex > currentIndex + 1 && currentHighest !== "draft") {
+  if (targetIndex > currentIndex + 1) {
     throw new Error(`Cannot skip stages. Highest valid stage is ${currentHighest}.`);
   }
 
@@ -29,7 +32,10 @@ function approveStage(repoRoot, stage) {
   }
 
   if (stage === "release-approved") {
-    const releaseReport = verifyV2(repoRoot, { scope: "all", profile: "release" });
+    if (shellStatus === undefined) {
+      throw new Error("Cannot approve release stage: verify-work.sh status is required.");
+    }
+    const releaseReport = verifyV2(repoRoot, { scope: "all", profile: "release", shellStatus });
     if (releaseReport.blocked) {
       throw new Error(`Cannot approve release stage: verify --profile release is ${releaseReport.verdict}.`);
     }

@@ -62,15 +62,18 @@ function knownDocMoves(projectRoot, profile, targetDocsRoot) {
   return moves;
 }
 
-function normalizeExcludeLines(lines) {
-  const normalized = lines.filter((line) => line !== "" && !LEGACY_EXCLUSIONS.has(line));
+// Only lines Spectra itself recorded in install.json are removable; an
+// identical-looking rule the user added (e.g. /docs/) must survive.
+function normalizeExcludeLines(lines, ownedPatterns) {
+  const owned = new Set(ownedPatterns);
+  const normalized = lines.filter((line) => line !== "" && !(LEGACY_EXCLUSIONS.has(line) && owned.has(line)));
   if (!normalized.includes(CANONICAL_EXCLUSION)) {
     normalized.push(CANONICAL_EXCLUSION);
   }
   return normalized;
 }
 
-function normalizeLocalExclusions(projectRoot) {
+function normalizeLocalExclusions(projectRoot, ownedPatterns = []) {
   const result = spawnSync("git", ["-C", projectRoot, "rev-parse", "--git-path", "info/exclude"], {
     encoding: "utf8"
   });
@@ -81,7 +84,7 @@ function normalizeLocalExclusions(projectRoot) {
     ? result.stdout.trim()
     : path.resolve(projectRoot, result.stdout.trim());
   const current = fs.existsSync(excludePath) ? fs.readFileSync(excludePath, "utf8").split(/\r?\n/) : [];
-  const normalized = normalizeExcludeLines(current);
+  const normalized = normalizeExcludeLines(current, ownedPatterns);
   ensureDirectory(path.dirname(excludePath));
   fs.writeFileSync(excludePath, `${normalized.join("\n")}\n`);
 }
@@ -160,7 +163,7 @@ function migrateRootSddLayout(absoluteRoot, layout) {
   // as a plain "root-sdd" layout.
   ensureDirectory(layout.root);
   if (gitMode === "local") {
-    normalizeLocalExclusions(absoluteRoot);
+    normalizeLocalExclusions(absoluteRoot, oldMetadata.excludePatterns ?? []);
   }
   const metadata = writeMigratedMetadata(layout, oldMetadata, {
     profile,
@@ -219,7 +222,7 @@ function migrateSpectraDirLayout(absoluteRoot, layout) {
 
   ensureDirectory(layout.root);
   if (gitMode === "local") {
-    normalizeLocalExclusions(absoluteRoot);
+    normalizeLocalExclusions(absoluteRoot, oldMetadata.excludePatterns ?? []);
   }
   const metadata = writeMigratedMetadata(layout, oldMetadata, {
     profile,

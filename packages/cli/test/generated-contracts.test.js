@@ -1,0 +1,79 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
+import { cliRoot, initProject } from "./helpers/project.js";
+
+const repoRoot = path.resolve(cliRoot, "..", "..");
+const sourceScripts = path.join(repoRoot, "scripts");
+const runtimeScripts = path.join(repoRoot, "packages", "core", "assets", "runtime", "scripts");
+
+function walk(dir, out = []) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walk(full, out);
+    else out.push(full);
+  }
+  return out;
+}
+
+test("generated Full scaffolding teaches canonical vocabulary only", () => {
+  const root = initProject("full");
+  const problems = [];
+  for (const file of walk(path.join(root, ".spectra", "sdd"))) {
+    fs.readFileSync(file, "utf8").split("\n").forEach((line, index) => {
+      if (/verify v2|Spectra Verify v2|spectra validate|\.\/spectra\/bin/i.test(line)) {
+        problems.push(`${path.relative(root, file)}:${index + 1}: ${line.trim()}`);
+      }
+    });
+  }
+  assert.deepEqual(problems, []);
+});
+
+test("generated release thresholds only require gates that verify enforces", () => {
+  const root = initProject("full");
+  const featuresDir = path.join(root, ".spectra", "sdd", "features");
+  const thresholdFiles = walk(featuresDir).filter((file) => /kind:\s*"?ReleaseThresholds/.test(fs.readFileSync(file, "utf8")) || /"kind":\s*"ReleaseThresholds"/.test(fs.readFileSync(file, "utf8")));
+  assert.ok(thresholdFiles.length > 0);
+  for (const file of thresholdFiles) {
+    const text = fs.readFileSync(file, "utf8");
+    // verify never runs project tests, so the contract must not claim it does.
+    assert.doesNotMatch(text, /"?tests"?:\s*\{\s*"?required"?:\s*true/, `${file} requires project tests`);
+    assert.match(text, /verify_work/);
+  }
+  for (const file of walk(featuresDir)) {
+    const text = fs.readFileSync(file, "utf8");
+    assert.doesNotMatch(text, /aggregate validation, policy, tests,/, `${file} claims tests are aggregated`);
+  }
+});
+
+// scripts/ is the repository's own copy of the runtime scripts. Anything not
+// listed here must stay byte-identical to the packaged runtime; a deliberate
+// difference must be added below with its reason.
+const INTENTIONAL_DIFFERENCES = {
+  "validate-repo.sh": "repository-only validator: includes source-repo smoke tests (agent readiness) that do not apply to consumer runtimes"
+};
+
+test("source scripts/ match the packaged runtime except for documented differences", () => {
+  const drift = [];
+  for (const name of fs.readdirSync(sourceScripts)) {
+    const runtimeFile = path.join(runtimeScripts, name);
+    if (!fs.existsSync(runtimeFile)) {
+      drift.push(`${name}: source-only file (document it or remove it)`);
+      continue;
+    }
+    if (INTENTIONAL_DIFFERENCES[name]) continue;
+    if (!fs.readFileSync(path.join(sourceScripts, name)).equals(fs.readFileSync(runtimeFile))) {
+      drift.push(`${name}: differs from packaged runtime`);
+    }
+  }
+  assert.deepEqual(drift, []);
+});
+
+test("shell scripts distinguish the project root from the data root", () => {
+  const runtime = fs.readFileSync(path.join(runtimeScripts, "_runtime.sh"), "utf8");
+  assert.match(runtime, /SPECTRA_DATA_ROOT/);
+  assert.match(runtime, /SPECTRA_PROJECT_ROOT/);
+  const specDiff = fs.readFileSync(path.join(runtimeScripts, "spec-diff.sh"), "utf8");
+  assert.doesNotMatch(specDiff, /-d "\.git"/, "spec-diff must not assume the data root is the Git root");
+});

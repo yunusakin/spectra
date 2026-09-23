@@ -197,6 +197,7 @@ ${todo_hits:-"- No TODO/FIXME markers detected with simple heuristics"}
 - Treat discovery output as unconfirmed until intake or discussion records it explicitly.
 EOF
 
+mkdir -p "${SPECTRA_ROOT}/sdd/memory-bank/tech" "${SPECTRA_ROOT}/sdd/memory-bank/business"
 cat > "${SPECTRA_ROOT}/sdd/memory-bank/tech/modules.md" <<EOF
 # Technical Module Index
 

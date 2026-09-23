@@ -326,6 +326,9 @@ parse_skill_runs() {
   ' "${skill_runs_file}" 2>/dev/null || true
 }
 
+# Paths are relative to the data root (the CWD) in every mode; --relative keeps
+# git diff aligned with ls-files, which is CWD-relative, so tracked and
+# untracked changes to the same logical file match the same sdd/... patterns.
 collect_changed_files() {
   if [[ -n "${BASE_REF}" ]]; then
     if ! git rev-parse --verify "${BASE_REF}^{commit}" >/dev/null 2>&1; then
@@ -336,13 +339,13 @@ collect_changed_files() {
       add_error "Head ref not found or not a commit: ${HEAD_REF}"
       return 0
     fi
-    git diff --name-only "${BASE_REF}...${HEAD_REF}" 2>/dev/null || true
+    git diff --relative --name-only "${BASE_REF}...${HEAD_REF}" 2>/dev/null || true
     return 0
   fi
 
   if git rev-parse --verify HEAD >/dev/null 2>&1; then
     {
-      git diff --name-only HEAD 2>/dev/null || true
+      git diff --relative --name-only HEAD 2>/dev/null || true
       git ls-files --others --exclude-standard 2>/dev/null || true
     } | sed '/^$/d' | sort -u
     return 0
@@ -353,7 +356,7 @@ collect_changed_files() {
 }
 
 collect_project_changed_files() {
-  local project_root="${SPECTRA_PROJECT_ROOT:-${REPO_ROOT}}"
+  local project_root="${SPECTRA_PROJECT_ROOT:-${REPO_ROOT}}"  # repo-root-relative namespace
 
   if git -C "${project_root}" rev-parse --verify HEAD >/dev/null 2>&1; then
     {

@@ -200,7 +200,9 @@ function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
     cwd: dataRoot,
     env: {
       ...process.env,
+      // SPECTRA_REPO_ROOT is the legacy name for the data root; kept as an alias.
       SPECTRA_REPO_ROOT: dataRoot,
+      SPECTRA_DATA_ROOT: dataRoot,
       SPECTRA_PROJECT_ROOT: repoRoot,
       SPECTRA_RUNTIME_ROOT: runtimeDir
     },
@@ -238,6 +240,11 @@ function removeFinderArtifacts(rootDir) {
   }
 }
 
+// True when running as a native (SEA/compiled) binary rather than under Node.
+function isNativeRuntime() {
+  return !path.basename(process.execPath).toLowerCase().startsWith("node");
+}
+
 function hasCommand(commandName) {
   const result = spawnSync("bash", ["-lc", `command -v ${commandName}`], {
     stdio: "ignore"
@@ -268,6 +275,7 @@ export {
   getExecutablePath,
   getRuntimeAssetsDir,
   hasCommand,
+  isNativeRuntime,
   mergeGitignore,
   removeFinderArtifacts,
   readInstallMetadata,

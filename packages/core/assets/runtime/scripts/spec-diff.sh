@@ -56,8 +56,8 @@ if [[ -z "${MODE}" ]]; then
   exit 2
 fi
 
-if [[ ! -d ".git" ]]; then
-  echo "Error: this does not look like a git repository (missing .git)." >&2
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "Error: this does not look like a git repository." >&2
   exit 2
 fi
 
@@ -103,9 +103,9 @@ diff_name_status() {
   local base="$1"
   local scope="$2"
   if [[ "${NO_WORKTREE}" -eq 1 ]]; then
-    git diff --name-status "${base}..HEAD" -- "${scope}" || true
+    git diff --relative --name-status "${base}..HEAD" -- "${scope}" || true
   else
-    git diff --name-status "${base}" -- "${scope}" || true
+    git diff --relative --name-status "${base}" -- "${scope}" || true
   fi
 }
 
@@ -113,9 +113,9 @@ diff_patch_for_file() {
   local base="$1"
   local file="$2"
   if [[ "${NO_WORKTREE}" -eq 1 ]]; then
-    git diff "${base}..HEAD" -- "${file}" || true
+    git diff --relative "${base}..HEAD" -- "${file}" || true
   else
-    git diff "${base}" -- "${file}" || true
+    git diff --relative "${base}" -- "${file}" || true
   fi
 }
 
@@ -238,21 +238,23 @@ if [[ "${count_renamed}" -gt 0 ]]; then
   entry_lines+=("")
 fi
 
+FENCE='```'
 if [[ "${INCLUDE_PATCH}" -eq 1 ]]; then
   entry_lines+=("### Patch")
   entry_lines+=("")
-  for p in "${added[@]}" "${modified[@]}" "${deleted[@]}"; do
+  # The +expansion keeps empty arrays safe under set -u on bash before 4.4 (macOS 3.2).
+  for p in ${added[@]+"${added[@]}"} ${modified[@]+"${modified[@]}"} ${deleted[@]+"${deleted[@]}"}; do
     [[ -n "${p}" ]] || continue
     patch="$(diff_patch_for_file "${base}" "${p}")"
     entry_lines+=("#### \`${p}\`")
     entry_lines+=("")
-    entry_lines+=("```diff")
+    entry_lines+=("${FENCE}diff")
     if [[ -n "${patch}" ]]; then
       entry_lines+=("${patch}")
     else
       entry_lines+=("(no changes)")
     fi
-    entry_lines+=("```")
+    entry_lines+=("${FENCE}")
     entry_lines+=("")
   done
 fi

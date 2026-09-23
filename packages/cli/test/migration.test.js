@@ -326,3 +326,22 @@ test("source-repo protection is not bypassed by a stray canonical .spectra/sdd m
 
   assert.deepEqual(migrateLegacyLayout(root), { migrated: false, reason: "source-repo" });
 });
+
+test("migration keeps user-owned exclude rules that merely look like legacy Spectra ones", () => {
+  const root = createLegacyProject();
+  // Spectra recorded only /.spectra/ and /sdd/; the user independently excluded /docs/ and /spectra/.
+  fs.writeFileSync(excludePath(root), "# >>> spectra local:.\n/.spectra/\n/sdd/\n# <<< spectra local:.\n/docs/\n/spectra/\nsdd/\n");
+  const metadataPath = path.join(root, ".spectra", "install.json");
+  const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+  metadata.excludePatterns = ["/.spectra/", "/sdd/"];
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata));
+
+  migrateLegacyLayout(root);
+
+  const lines = fs.readFileSync(excludePath(root), "utf8").split("\n");
+  assert.ok(lines.includes("/docs/"), "user /docs/ rule must survive");
+  assert.ok(lines.includes("/spectra/"), "user /spectra/ rule must survive");
+  assert.ok(lines.includes("sdd/"), "user sdd/ rule must survive");
+  assert.ok(!lines.includes("/sdd/"), "Spectra-recorded /sdd/ rule is replaced");
+  assert.ok(lines.includes("/.spectra/"));
+});

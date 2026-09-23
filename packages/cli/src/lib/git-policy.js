@@ -69,7 +69,18 @@ function listFiles(rootDir) {
 }
 
 function assertNoTrackedSpectraRoots(targetRoot) {
-  const result = runGit(targetRoot, ["ls-files", "--", "spectra", "sdd", ".spectra"]);
+  // Root spectra/ and sdd/ are only Spectra-owned when they carry a Spectra
+  // marker; company projects may legitimately track directories with those names.
+  const roots = [".spectra"];
+  for (const [root, markers] of [
+    ["spectra", ["spectra/install.json", "spectra/sdd/system/manifest.env"]],
+    ["sdd", ["sdd/system/manifest.env"]]
+  ]) {
+    if (runGit(targetRoot, ["ls-files", "--", ...markers]).stdout.trim()) {
+      roots.push(root);
+    }
+  }
+  const result = runGit(targetRoot, ["ls-files", "--", ...roots]);
   const tracked = result.stdout
     .split(/\r?\n/)
     .map((line) => line.trim())

@@ -47,7 +47,7 @@ function buildFeatureBundle(projectName) {
         nonFunctional: [
           {
             id: "NFR-1",
-            statement: "Verification must aggregate validation, policy, tests, evals, telemetry, and release readiness.",
+            statement: "Verification must aggregate structure validation, policy, verify-work checks (project tests are not run), evals, telemetry, and release readiness.",
             priority: "must"
           }
         ]
@@ -182,7 +182,7 @@ function buildFeatureBundle(projectName) {
         ],
         refusal_style: "brief_with_reason",
         safe_alternatives: [
-          "run spectra validate",
+          "run spectra check",
           "run spectra approve --stage implementation-approved",
           "run spectra verify --profile release"
         ]
@@ -282,7 +282,7 @@ function buildFeatureBundle(projectName) {
       eval_thresholds_ref: "./evals/release-thresholds.yaml",
       gates: {
         validation: { required: true },
-        tests: { required: true },
+        verify_work: { required: true },
         evals: {
           required_suite: "release",
           min_pass_rate: 0.98
@@ -486,7 +486,7 @@ function buildFeatureBundle(projectName) {
         items: []
       }
     },
-    briefMarkdown: `# Feature Brief\n\n## Feature\n${safeProjectName} Core Flow\n\n## Intent\nUse executable specs, staged approvals, evals, telemetry, and verify v2 to move from intent to release confidence.\n\n## Narrative\nThis brief is narrative-only. Canonical machine state lives in the adjacent YAML contracts.\n`,
+    briefMarkdown: `# Feature Brief\n\n## Feature\n${safeProjectName} Core Flow\n\n## Intent\nUse executable specs, staged approvals, evals, telemetry, and spectra verify to move from intent to release confidence.\n\n## Narrative\nThis brief is narrative-only. Canonical machine state lives in the adjacent YAML contracts.\n`,
     releaseChecklistMarkdown: `# Release Checklist\n\n- [ ] Validation is green\n- [ ] Policy checks are green\n- [ ] Release eval suite passes\n- [ ] Telemetry contract is valid\n- [ ] Manual release approval is recorded\n- [ ] Rollback path is confirmed\n`
   };
 }

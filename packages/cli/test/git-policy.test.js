@@ -114,8 +114,10 @@ test("local policy uses exact paths when a Spectra root existed before adoption"
 test("local policy rejects tracked Spectra roots before mutation", () => {
   const root = createGitRepo();
   fs.mkdirSync(path.join(root, "spectra"), { recursive: true });
+  // install.json is the Spectra marker that makes a root spectra/ directory Spectra-owned.
+  fs.writeFileSync(path.join(root, "spectra", "install.json"), "{}\n");
   fs.writeFileSync(path.join(root, "spectra", "existing.md"), "tracked\n");
-  run(root, "git", ["add", "spectra/existing.md"]);
+  run(root, "git", ["add", "spectra"]);
   run(root, "git", ["commit", "-qm", "track spectra"]);
 
   assert.throws(() => beginLocalGitPolicy(root), /tracked Spectra path.*spectra\/existing\.md/s);
@@ -133,4 +135,28 @@ test("local policy writes to the shared Git exclude file from a linked worktree"
 
   assert.equal(fs.realpathSync(result.excludePath), fs.realpathSync(path.join(root, ".git", "info", "exclude")));
   assert.equal(run(worktree, "git", ["check-ignore", ".spectra/install.json"]), ".spectra/install.json");
+});
+
+test("local Git mode ignores tracked root sdd/ and spectra/ directories that are not Spectra-owned", () => {
+  const root = createGitRepo();
+  fs.mkdirSync(path.join(root, "sdd"));
+  fs.mkdirSync(path.join(root, "spectra"));
+  fs.writeFileSync(path.join(root, "sdd", "design.md"), "company\n");
+  fs.writeFileSync(path.join(root, "spectra", "notes.md"), "company\n");
+  run(root, "git", ["add", "sdd", "spectra"]);
+  run(root, "git", ["commit", "-qm", "company dirs"]);
+
+  assert.doesNotThrow(() => beginLocalGitPolicy(root));
+});
+
+test("local Git mode still rejects tracked Spectra-owned roots", () => {
+  const root = createGitRepo();
+  fs.mkdirSync(path.join(root, "sdd", "system"), { recursive: true });
+  fs.writeFileSync(path.join(root, "sdd", "system", "manifest.env"), "repo_mode=consumer\n");
+  fs.mkdirSync(path.join(root, ".spectra"));
+  fs.writeFileSync(path.join(root, ".spectra", "install.json"), "{}\n");
+  run(root, "git", ["add", "-f", "sdd", ".spectra"]);
+  run(root, "git", ["commit", "-qm", "tracked spectra"]);
+
+  assert.throws(() => beginLocalGitPolicy(root), /tracked Spectra path/);
 });

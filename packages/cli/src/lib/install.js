@@ -204,7 +204,7 @@ function installSpectra({
   const nativeBinaryPath = detectNativeBinaryPath();
   materializeLocalNodeCli(absoluteTarget);
   writeRepoLocalLauncher(absoluteTarget, nativeBinaryPath);
-  removeFinderArtifacts(absoluteTarget);
+  removeFinderArtifacts(layout.root);
   writeInstallMetadata(absoluteTarget, {
     ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
     installedAt: new Date().toISOString(),

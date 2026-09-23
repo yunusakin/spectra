@@ -279,7 +279,7 @@ Repository layout for maintainers:
 - `docs/` — contributor/user documentation for this repository
 - `scripts/` — repository maintenance scripts, not the supported consumer setup interface
 
-This repository's source is at `3.0.9`. Publishing it — tagging a GitHub release and running `npm publish` from `packages/cli/` — is a separate maintainer step; check [Releases](https://github.com/yunusakin/spectra/releases) or [npm](https://www.npmjs.com/package/spectra-pack) for what's actually installable right now.
+This repository's source is at `3.1.0`. Publishing it — tagging a GitHub release and running `npm publish` from `packages/cli/` — is a separate maintainer step; check [Releases](https://github.com/yunusakin/spectra/releases) or [npm](https://www.npmjs.com/package/spectra-pack) for what's actually installable right now.
 
 ## License
 

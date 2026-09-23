@@ -9,7 +9,7 @@ spectra init .
 spectra adopt .
 ```
 
-The supported generated layout is `spectra/`. These repository scripts are not the primary consumer setup interface.
+The supported generated layout is `.spectra/`. These repository scripts are not the primary consumer setup interface.
 
 ## Conventions
 - Small, single-purpose scripts.

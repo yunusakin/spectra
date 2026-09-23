@@ -5,7 +5,8 @@ set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/_runtime.sh"
 
-REPO_ROOT="${SPECTRA_REPO_ROOT}"
+REPO_ROOT="${SPECTRA_DATA_ROOT}"
+PROJECT_ROOT="${SPECTRA_PROJECT_ROOT}"
 cd "${REPO_ROOT}"
 
 GREEN='\033[0;32m'
@@ -180,7 +181,7 @@ fi
 
 # 7. Tests
 test_files=$(
-  find . -type f \
+  cd "${PROJECT_ROOT}" && find . -type f \
     ! -path './.git/*' \
     ! -path './.spectra/*' \
     ! -path './sdd/*' \
@@ -199,7 +200,7 @@ test_files=$(
 if [[ "${test_files}" -gt 0 ]]; then
   ok "Tests:" "${test_files} test file(s) found across repository"
 else
-  install_mode="$(awk -F'"' '/"installMode"[[:space:]]*:/ { print $4; exit }' .spectra/install.json 2>/dev/null || true)"
+  install_mode="$(awk -F'"' '/"installMode"[[:space:]]*:/ { print $4; exit }' "${REPO_ROOT}/install.json" 2>/dev/null || true)"
   if [[ "${install_mode}" == "adopt" ]]; then
     warn "Tests:" "No test files detected by repository scan"
   else
