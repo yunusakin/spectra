@@ -25,7 +25,9 @@ const STALE = [
   [/spectra (eval run|skills resolve|adapters generate|spec diff|context-pack|discuss-task)\b/, "legacy command form"],
   [/\.\/spectra\/bin\b/, "3.0.8 launcher path"],
   [/(?<![\w./$-])spectra\/sdd\b/, "3.0.8 sdd path"],
-  [/`\/spectra\/`/, "3.0.8 Git exclude pattern"]
+  [/`\/spectra\/`/, "3.0.8 Git exclude pattern"],
+  [/does not (use|create)[\s\S]*?`\.spectra\/`[\s\S]*?\bcanonical\b/i, "lists .spectra/ as non-canonical (self-contradictory)"],
+  [/does not create root-level `\.spectra\/`/i, "lists .spectra/ as a directory Spectra does not create"]
 ];
 
 test("docs teach canonical commands and paths only", { skip: files.length === 0 }, () => {

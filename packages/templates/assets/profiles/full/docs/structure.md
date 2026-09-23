@@ -68,4 +68,4 @@ The selected profile, Git mode, project schema, runtime version, launcher metada
 - `spectra status` summarizes current project and Spectra changes
 - Full-profile `spectra approve` updates `.spectra/sdd/governance/approval-state.yaml`
 
-Spectra does not create root-level `.spectra/`, `sdd/`, `docs/`, `app/`, or `.github/` directories.
+Spectra does not create root-level `spectra/`, `sdd/`, `docs/`, `app/`, or `.github/` directories.

@@ -87,14 +87,15 @@ your-project/
 ├── your-existing-code/
 └── .spectra/
     ├── bin/spectra       # project-local launcher
+    ├── cli/              # local Node CLI the launcher falls back to
     ├── config.yaml       # profile, Git mode, and schema
     ├── install.json      # installation and version metadata
     ├── docs/             # Spectra guides
-    ├── cache/            # disposable context and repo-index cache
+    ├── cache/            # disposable context and repo-index cache (created on first use)
     └── sdd/              # context, business memory, and profile runtime
 ```
 
-Spectra keeps its own generated project layer under the root `.spectra/` directory. It does not use root `app/`, `docs/`, `sdd/`, `.spectra/`, or `.github/` directories as the canonical location for Spectra-owned files.
+Spectra keeps its own generated project layer under the root `.spectra/` directory. It does not use root `app/`, `docs/`, `spectra/`, `sdd/`, or `.github/` directories as the canonical location for Spectra-owned files.
 
 Full adds these inside the same boundary:
 
