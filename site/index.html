@@ -57,15 +57,15 @@
             <strong>spectra</strong>
           </div>
           <pre><code>$ npx spectra-pack@latest adopt .
-$ ./spectra/bin/spectra index
+$ ./.spectra/bin/spectra index
   ecosystems: maven
   modules: 20
   test-targets: 18
 
-$ ./spectra/bin/spectra context --role planner --goal discover
+$ ./.spectra/bin/spectra context --role planner --goal discover
   loaded focused project context
 
-$ ./spectra/bin/spectra verify
+$ ./.spectra/bin/spectra verify
   release confidence: ready</code></pre>
         </aside>
       </section>
@@ -74,7 +74,7 @@ $ ./spectra/bin/spectra verify
         <div>
           <strong>Repo-local</strong>
           <span
-            >Everything Spectra owns lives under <code>spectra/</code>.</span
+            >Everything Spectra owns lives under <code>.spectra/</code>.</span
           >
         </div>
         <div>
@@ -101,8 +101,8 @@ $ ./spectra/bin/spectra verify
             <h3>Existing project</h3>
             <pre><code>cd existing-project
 npx spectra-pack@latest adopt .
-./spectra/bin/spectra onboard
-./spectra/bin/spectra check</code></pre>
+./.spectra/bin/spectra onboard
+./.spectra/bin/spectra check</code></pre>
           </article>
           <article>
             <h3>macOS / Linux native</h3>
@@ -183,7 +183,7 @@ spectra status</code></pre>
 
       <section class="closing">
         <div>
-          <p class="eyebrow">Spectra 3.0.8</p>
+          <p class="eyebrow">Spectra 3.0.9</p>
           <h2>Keep the product code yours. Keep the context findable.</h2>
         </div>
         <div class="hero-actions">
@@ -199,7 +199,7 @@ spectra status</code></pre>
 
     <footer class="site-footer">
       <span>MIT licensed</span>
-      <a href="https://github.com/yunusakin/spectra/releases/tag/v3.0.8"
+      <a href="https://github.com/yunusakin/spectra/releases/tag/v3.0.9"
         >Release notes</a
       >
       <a href="./docs/">Docs</a>

@@ -30,14 +30,14 @@
       <h1>The commands worth remembering.</h1>
       <p class="lead">
         Use <code>spectra</code> below if you installed the native binary.
-        Otherwise use <code>./spectra/bin/spectra</code> from the project root.
+        Otherwise use <code>./.spectra/bin/spectra</code> from the project root.
       </p>
 
       <section class="command-reference">
         <article>
           <h2>spectra index</h2>
           <p>
-            Builds <code>spectra/cache/index/repo-index.json</code>, a
+            Builds <code>.spectra/cache/index/repo-index.json</code>, a
             disposable map of modules, dependencies, projects, and test targets.
             Run it after bootstrap, build-file changes, or when context feels
             stale.
@@ -84,14 +84,15 @@ spectra check --base main --head HEAD</code></pre>
 spectra verify --scope app --item FEAT-001 --profile release</code></pre>
         </article>
         <article>
-          <h2>spectra admin</h2>
+          <h2>Advanced commands</h2>
           <p>
-            Groups advanced Full-profile operations such as approvals, evals,
-            diffs, skills, and adapter generation.
+            Top-level Full-profile operations such as approvals, evals, diffs,
+            skills, and adapter generation. <code>spectra admin &lt;command&gt;</code>
+            remains a compatibility alias.
           </p>
-          <pre><code>spectra admin approve --stage implementation-approved
-spectra admin eval FEAT-001 --suite smoke
-spectra admin adapters --agents codex,claude --target .</code></pre>
+          <pre><code>spectra approve --stage implementation-approved
+spectra eval FEAT-001 --suite smoke
+spectra adapters --agents codex,claude --target .</code></pre>
         </article>
       </section>
     </main>

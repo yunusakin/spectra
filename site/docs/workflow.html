@@ -54,14 +54,14 @@ spectra status</code></pre>
         <h2>Full flow</h2>
         <pre><code>spectra context --role planner --goal discover
 spectra check
-spectra admin approve --stage product-approved
-spectra admin approve --stage technical-approved
-spectra admin approve --stage implementation-approved
+spectra approve --stage product-approved
+spectra approve --stage technical-approved
+spectra approve --stage implementation-approved
 spectra task --item FEAT-001 --task-type feature --goal "Implement the flow"
 spectra context --role implementer --goal implement
-spectra admin eval FEAT-001 --suite smoke
+spectra eval FEAT-001 --suite smoke
 spectra verify --profile release
-spectra admin approve --stage release-approved</code></pre>
+spectra approve --stage release-approved</code></pre>
         <p>
           Full is for teams that want formal specs, approvals, evals, and
           release gates. Start with Lite unless those controls are already

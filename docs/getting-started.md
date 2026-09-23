@@ -38,8 +38,8 @@ Choose `local` when Spectra is personal tooling for a company repository. It add
 `npx` is a one-time bootstrap command. It does not make `spectra` globally available. Use the generated repo-local launcher:
 
 ```bash
-./spectra/bin/spectra status
-./spectra/bin/spectra check
+./.spectra/bin/spectra status
+./.spectra/bin/spectra check
 ```
 
 ### Native installation without Node/npm
@@ -69,7 +69,7 @@ spectra adopt . --git-mode local
 
 The native installer downloads the matching release artifact and verifies its SHA-256 checksum. See [Native Install](native-install.md) for permanent PATH configuration and troubleshooting.
 
-The remaining examples use `spectra`. In an npm/npx-only repository, replace it with `./spectra/bin/spectra`.
+The remaining examples use `spectra`. In an npm/npx-only repository, replace it with `./.spectra/bin/spectra`.
 
 To change an existing Lite project to Full:
 
@@ -94,16 +94,16 @@ In `local` mode, `git status --ignored` shows the generated paths with `!!`, whi
 
 ## 3. Understand the Generated State
 
-Lite creates an isolated SDD workspace under `spectra/`:
+Lite creates an isolated SDD workspace under `.spectra/`:
 
-- `spectra/sdd/memory-bank/`: active context, progress, and implementation intent
-- `spectra/sdd/system/`: minimal runtime context needed by Lite
-- `spectra/docs/`: Spectra reference material
-- `spectra/cache/`: disposable generated summaries and repo-index data
+- `.spectra/sdd/memory-bank/`: active context, progress, and implementation intent
+- `.spectra/sdd/system/`: minimal runtime context needed by Lite
+- `.spectra/docs/`: Spectra reference material
+- `.spectra/cache/`: disposable generated summaries and repo-index data
 
 For existing projects, `spectra adopt` writes an initial repo index when possible. Run `spectra onboard` while `projectbrief.md` is still a template, and run `spectra index` again after manifest changes or if adoption reports that indexing failed.
 
-Full adds feature bundles, governance, evaluation contracts, and adoption analysis under `spectra/sdd/`. YAML contracts are canonical; Markdown is supporting context.
+Full adds feature bundles, governance, evaluation contracts, and adoption analysis under `.spectra/sdd/`. YAML contracts are canonical; Markdown is supporting context.
 
 ## 4. Use the Lite Daily Loop
 
@@ -120,9 +120,9 @@ spectra status
 
 Full `spectra adopt --profile full` maps the existing codebase and creates:
 
-- `spectra/sdd/adoption/current-state.summary.yaml`
-- `spectra/sdd/adoption/gap-analysis.yaml`
-- `spectra/sdd/adoption/review-queue.yaml`
+- `.spectra/sdd/adoption/current-state.summary.yaml`
+- `.spectra/sdd/adoption/gap-analysis.yaml`
+- `.spectra/sdd/adoption/review-queue.yaml`
 
 Treat `matches`, `partial`, `missing`, `conflict`, and `unknown` as review classifications, not automatic proof that implementation is correct. Resolve low-confidence and unknown items with human review, then update the executable specs to reflect the intended target state.
 
@@ -159,9 +159,9 @@ If you wire the same checks into GitHub Actions, prepare the Node environment fi
 ## 8. Advance Staged Approvals (Full only)
 
 ```bash
-spectra admin approve --stage product-approved
-spectra admin approve --stage technical-approved
-spectra admin approve --stage implementation-approved
+spectra approve --stage product-approved
+spectra approve --stage technical-approved
+spectra approve --stage implementation-approved
 ```
 
 - `product-approved`: product intent, scope, and acceptance criteria are accepted
@@ -181,8 +181,8 @@ The task command records intended work for implementation and review traceabilit
 ## 10. Evaluate Product Behavior (Full only)
 
 ```bash
-spectra admin eval <feature-id> --suite smoke
-spectra admin eval <feature-id> --suite release
+spectra eval <feature-id> --suite smoke
+spectra eval <feature-id> --suite release
 ```
 
 Eval suites exercise golden scenarios, regression cases, failure modes, refusal behavior, and release thresholds declared in the feature bundle.
@@ -193,12 +193,12 @@ Eval suites exercise golden scenarios, regression cases, failure modes, refusal 
 spectra verify --profile release
 ```
 
-Release verification aggregates structure, policy, tests, eval readiness, telemetry coverage, approval state, and release thresholds.
+Release verification aggregates structure, policy, verify-work checks (manifest, policy and memory files; project tests are not run), eval readiness, telemetry coverage, approval state, and release thresholds.
 
 After verification passes:
 
 ```bash
-spectra admin approve --stage release-approved
+spectra approve --stage release-approved
 ```
 
 ## 12. Handle Later Spec Changes
@@ -206,7 +206,7 @@ spectra admin approve --stage release-approved
 Do not rerun `adopt` for normal spec evolution. Inspect semantic impact and revalidate:
 
 ```bash
-spectra admin diff semantic
+spectra diff semantic
 spectra check
 spectra status
 ```

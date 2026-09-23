@@ -32,7 +32,8 @@ const WORKFLOWS = [
 ];
 
 // Advanced commands are top-level too; `spectra admin <command>` remains
-// a compatibility alias for them.
+// a compatibility alias for these plus `doctor`, which is listed above
+// under Maintenance since it is mainstream, not advanced.
 const ADVANCED = [
   ["approve", "Advance staged approval state"],
   ["eval", "Run contract-driven evaluation suites"],

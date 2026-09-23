@@ -29,15 +29,15 @@ Existing project:
 ```bash
 cd existing-project
 npx spectra-pack@latest adopt .
-./spectra/bin/spectra onboard
-./spectra/bin/spectra check
-./spectra/bin/spectra status
+./.spectra/bin/spectra onboard
+./.spectra/bin/spectra check
+./.spectra/bin/spectra status
 ```
 
 `npx` does not install a global command. Use the generated launcher after bootstrap:
 
 ```bash
-./spectra/bin/spectra version
+./.spectra/bin/spectra version
 ```
 
 ### Without Node or npm
@@ -68,7 +68,7 @@ spectra check
 spectra status
 ```
 
-The remaining examples use `spectra`. If you used only `npx`, replace `spectra` with `./spectra/bin/spectra`.
+The remaining examples use `spectra`. If you used only `npx`, replace `spectra` with `./.spectra/bin/spectra`.
 
 To promote an existing Lite project to Full:
 
@@ -80,10 +80,10 @@ Use `spectra update` for CLI/runtime updates. Use `spectra upgrade` for profile 
 
 ## 2. Review What Spectra Created
 
-Lite keeps its SDD system, memory bank, docs, launcher, and metadata inside `spectra/`:
+Lite keeps its SDD system, memory bank, docs, launcher, and metadata inside `.spectra/`:
 
 ```text
-spectra/
+.spectra/
 ├── docs/
 ├── cache/
 ├── sdd/memory-bank/
@@ -96,14 +96,14 @@ spectra/
 Full additionally creates feature bundles, governance, and adoption analysis:
 
 ```text
-spectra/sdd/features/
-spectra/sdd/governance/
-spectra/sdd/adoption/
+.spectra/sdd/features/
+.spectra/sdd/governance/
+.spectra/sdd/adoption/
 ```
 
-Everything Spectra owns is inside `spectra/`. Your code, tests, existing documentation, and normal repository layout stay where they are.
+Everything Spectra owns is inside `.spectra/`. Your code, tests, existing documentation, and normal repository layout stay where they are.
 
-By default, local Git mode keeps `spectra/` out of your company repository through `.git/info/exclude`. Use `--git-mode shared` only when the team wants to commit Spectra files.
+By default, local Git mode keeps `.spectra/` out of your company repository through `.git/info/exclude`. Use `--git-mode shared` only when the team wants to commit Spectra files.
 
 For existing projects, `adopt` writes an initial repo index when possible. Run `spectra onboard` while `projectbrief.md` is still a template, and run `spectra index` again after manifest changes or if adoption reports that indexing failed.
 
@@ -126,17 +126,17 @@ Start Full explicitly:
 spectra init . --profile full
 ```
 
-Full adds `spectra/sdd/features/`, `governance/`, and `adoption/`. Its advanced operations live under `spectra admin`:
+Full adds `.spectra/sdd/features/`, `governance/`, and `adoption/`. Its advanced operations are top-level commands:
 
 ```bash
-spectra admin approve --stage product-approved
-spectra admin approve --stage technical-approved
-spectra admin approve --stage implementation-approved
-spectra admin eval <feature-id> --suite smoke
+spectra approve --stage product-approved
+spectra approve --stage technical-approved
+spectra approve --stage implementation-approved
+spectra eval <feature-id> --suite smoke
 spectra verify --profile release
 ```
 
-Top-level `approve`, `eval`, and similar advanced commands remain available for compatibility, but new documentation uses `spectra admin`.
+`spectra admin <command>` still works as a compatibility alias for these commands, but the top-level forms above are the documented ones.
 
 ## Next
 

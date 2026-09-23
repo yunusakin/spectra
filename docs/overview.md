@@ -21,7 +21,7 @@ Spectra is built around a hybrid documentation model:
 
 The goal is to keep product intent readable while making validation, eval, telemetry, approval, and release gates executable.
 
-## What Makes Spectra v2 Different
+## What Makes Spectra Different
 
 ### CLI-first
 
@@ -49,9 +49,9 @@ Implementation is blocked until `implementation-approved`. Release signoff is bl
 
 ### Eval and verify
 
-In Full, `spectra admin eval` checks behavior contracts and scenario suites.
+In Full, `spectra eval` checks behavior contracts and scenario suites.
 
-`spectra verify` aggregates structure, policy, tests, eval readiness, telemetry coverage, approval state, and release confidence.
+`spectra verify` aggregates structure, policy, verify-work checks (manifest, policy and memory files; project tests are not run), eval readiness, telemetry coverage, approval state, and release confidence.
 
 ### Token-aware context
 
