@@ -73,7 +73,7 @@ Spectra initializes a repository by creating one Spectra-owned directory:
 
 Spectra-owned files should not be installed into root-level `docs/`, `sdd/`, `.spectra/`, `.github/`, or `app/`. Legacy shell scripts may still exist in the repository for compatibility and runtime maintenance, but the supported consumer setup path is this CLI.
 
-Lite is the default. Full adds executable specs, governance, adoption, agent adapters, and advanced admin workflows. Local Git mode is the default and excludes `/spectra/` through `.git/info/exclude`; shared mode makes it commit-ready.
+Lite is the default. Full adds executable specs, governance, adoption, agent adapters, and advanced admin workflows. Local Git mode is the default and excludes `/.spectra/` through `.git/info/exclude`; shared mode makes it commit-ready.
 
 ## Business Context
 

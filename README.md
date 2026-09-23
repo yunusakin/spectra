@@ -111,7 +111,7 @@ If you see older instructions that mention copying Spectra files to root-level `
 
 ## Git mode: private or shared
 
-`local` is the default. It writes `/spectra/` to `.git/info/exclude`, so Spectra stays private while your source code remains visible to Git. It does not modify `.gitignore`.
+`local` is the default. It writes `/.spectra/` to `.git/info/exclude`, so Spectra stays private while your source code remains visible to Git. It does not modify `.gitignore`.
 
 Use shared mode when the team wants to review and commit Spectra files:
 

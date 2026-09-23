@@ -56,7 +56,7 @@ The selected profile, Git mode, project schema, runtime version, launcher metada
 
 ## Git Modes
 
-`local` is the default. It records `/spectra/` in the repository-local `.git/info/exclude` file without changing `.gitignore`.
+`local` is the default. It records `/.spectra/` in the repository-local `.git/info/exclude` file without changing `.gitignore`.
 
 `shared` leaves `.spectra/` visible and ready to commit with the project.
 

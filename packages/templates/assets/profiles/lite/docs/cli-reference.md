@@ -32,6 +32,23 @@ spectra version
 
 The remaining examples use `spectra`. Substitute `./.spectra/bin/spectra` when using only the repo-local launcher. See [Native Install](native-install.md) for supported platforms and troubleshooting.
 
+## Local Execution
+
+The only executable Spectra generates locally is the launcher at
+`.spectra/bin/spectra` (plus a `.spectra/bin/spectra.cmd` wrapper on
+Windows), written by `init`/`adopt` and kept in place by `update`. It
+resolves the installed native binary, falling back to the local Node
+CLI, then a `spectra` on `PATH`. There is no separate per-command local
+bin surface: every `spectra <command>` is available identically through
+`spectra <command>` (installed) and `./.spectra/bin/spectra <command>`
+(local), both operating on the same `.spectra/` project state. The
+shell scripts under the runtime's `scripts/` directory (`validate-repo.sh`,
+`verify-work.sh`, `check-policy.sh`, etc.) are internal implementation
+detail invoked by these commands; they are not a separate user-facing
+interface and were not part of the local bin surface before 3.0.9
+either — moving the canonical root from `spectra/` to `.spectra/` did
+not add, remove, or rename any local command.
+
 ## Setup Commands
 
 | Command | Use When | What It Does | Options / Modes |
@@ -68,7 +85,7 @@ spectra onboard [--force]
 
 `--agents <csv>` is valid only with `--profile full`; Lite keeps agent adapter files out of the repository root.
 
-`local` is the default Git mode. It requires a Git worktree, leaves `.gitignore` unchanged, and writes `/spectra/` to Git's repository-local exclude file. Project code and company documentation remain visible to Git.
+`local` is the default Git mode. It requires a Git worktree, leaves `.gitignore` unchanged, and writes `/.spectra/` to Git's repository-local exclude file. Project code and company documentation remain visible to Git.
 
 Use `--git-mode shared` when the generated Spectra layer should be reviewed and committed with the repository.
 

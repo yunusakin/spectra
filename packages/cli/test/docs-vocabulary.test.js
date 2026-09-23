@@ -24,7 +24,8 @@ for (const root of docRoots) {
 const STALE = [
   [/spectra (eval run|skills resolve|adapters generate|spec diff|context-pack|discuss-task)\b/, "legacy command form"],
   [/\.\/spectra\/bin\b/, "3.0.8 launcher path"],
-  [/(?<![\w./$-])spectra\/sdd\b/, "3.0.8 sdd path"]
+  [/(?<![\w./$-])spectra\/sdd\b/, "3.0.8 sdd path"],
+  [/`\/spectra\/`/, "3.0.8 Git exclude pattern"]
 ];
 
 test("docs teach canonical commands and paths only", { skip: files.length === 0 }, () => {

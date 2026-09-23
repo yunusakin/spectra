@@ -33,7 +33,7 @@ git switch -c chore/spectra-adoption
 npx spectra-pack@latest adopt . --git-mode local
 ```
 
-Choose `local` when Spectra is personal tooling for a company repository. It adds only `/spectra/` to `.git/info/exclude`; your application changes remain normal commit candidates. Choose `shared` when the team intends to version the Spectra operating layer.
+Choose `local` when Spectra is personal tooling for a company repository. It adds only `/.spectra/` to `.git/info/exclude`; your application changes remain normal commit candidates. Choose `shared` when the team intends to version the Spectra operating layer.
 
 `npx` is a one-time bootstrap command. It does not make `spectra` globally available. Use the generated repo-local launcher:
 
