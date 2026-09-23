@@ -71,7 +71,7 @@ function runFix(repoRoot) {
     .filter((agentResult) => agentResult.detected)
     .filter((agentResult) => {
       const adapterFiles = new Set(AGENT_DEFINITIONS[agentResult.agent].files.map((entry) => entry.path));
-      return agentResult.checks.some((check) => adapterFiles.has(check.name) && ["missing", "invalid"].includes(check.status));
+      return agentResult.checks.some((check) => adapterFiles.has(check.name) && check.status === "missing");
     })
     .filter((agentResult) => {
       const definition = AGENT_DEFINITIONS[agentResult.agent];

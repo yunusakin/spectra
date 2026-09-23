@@ -138,3 +138,36 @@ test("re-approving the current stage is allowed", () => {
   commitAll(root, "again");
   assert.equal(approve(root, "product-approved").status, 0);
 });
+
+test("editing projectbrief.md invalidates product approval and re-approval restores it", () => {
+  const root = initProject("full");
+  approveThrough(root, "technical-approved");
+  assert.equal(approvalState(root).highest_valid_state, "technical-approved");
+
+  fs.appendFileSync(
+    path.join(root, ".spectra", "sdd", "memory-bank", "core", "projectbrief.md"),
+    "\n## New scope\nAdditional capability.\n"
+  );
+  commitAll(root, "scope increase");
+  spectra(root, ["status"]);
+  const status = spectra(root, ["status"]);
+  assert.equal(approvalState(root).highest_valid_state, "draft", "scope increase must invalidate approvals");
+  assert.match(status.stdout, /Next recommended action:\s+spectra approve --stage product-approved/);
+
+  // Re-approval walks the stages again, sequentially.
+  assert.notEqual(approve(root, "technical-approved").status, 0);
+  assert.equal(approve(root, "product-approved").status, 0);
+  commitAll(root, "re-approved product");
+  assert.equal(approve(root, "technical-approved").status, 0);
+});
+
+test("editing a feature spec (yaml) invalidates approvals in a canonical project", () => {
+  const root = initProject("full");
+  approveThrough(root, "technical-approved");
+  const featuresDir = path.join(root, ".spectra", "sdd", "features");
+  const feature = fs.readdirSync(featuresDir)[0];
+  fs.appendFileSync(path.join(featuresDir, feature, "feature.spec.yaml"), "\n# scope change\n");
+  commitAll(root, "spec change");
+  spectra(root, ["status"]);
+  assert.equal(approvalState(root).highest_valid_state, "draft");
+});

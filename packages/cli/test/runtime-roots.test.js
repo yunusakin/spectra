@@ -123,3 +123,23 @@ test("health-check scans the project for tests and resolves install metadata", (
   });
   assert.match(result.stdout, /Tests:\s+2 test file\(s\) found/);
 });
+
+test("shell-backed commands resolve the same project from root and nested dirs, installed and local", () => {
+  const root = initProject("full");
+  fs.mkdirSync(path.join(root, "src", "deep"), { recursive: true });
+  const commands = [["check"], ["verify"], ["status"], ["skills", "--task-type", "docs"], ["quick", "--type", "docs", "--task", "note"]];
+  for (const args of commands) {
+    const results = [];
+    for (const [label, invoke] of invocations) {
+      for (const cwd of [root, path.join(root, "src", "deep")]) {
+        const result = invoke(cwd, args);
+        const output = result.stdout + result.stderr;
+        assert.doesNotMatch(output, /\.spectra\/\.spectra/, `${label} ${args[0]} from ${cwd}`);
+        assert.doesNotMatch(output, /missing \.git|Could not find a Spectra runtime/, `${label} ${args[0]} from ${cwd}: ${output}`);
+        results.push(`${label}@${path.relative(root, cwd) || "."}=${result.status}`);
+      }
+    }
+    const codes = new Set(results.map((entry) => entry.split("=")[1]));
+    assert.equal(codes.size, 1, `${args[0]} exit codes differ: ${results.join(", ")}`);
+  }
+});

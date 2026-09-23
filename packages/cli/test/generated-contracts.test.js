@@ -89,3 +89,20 @@ test("agent adapter files are regenerable projections of .spectra state", () => 
   assert.equal(generate().status, 0);
   assert.deepEqual(files.map(snapshot), before);
 });
+
+test("adapters refuse to overwrite user-owned files unless forced; doctor --fix never does", () => {
+  const root = initProject("full");
+  const claude = path.join(root, "CLAUDE.md");
+  fs.writeFileSync(claude, "# my own notes\n");
+
+  const refused = spectra(root, ["adapters", "--agents", "claude"]);
+  assert.notEqual(refused.status, 0);
+  assert.match(refused.stderr + refused.stdout, /Refusing to overwrite/);
+  assert.equal(fs.readFileSync(claude, "utf8"), "# my own notes\n");
+
+  const fixed = spectra(root, ["doctor", "--fix"]);
+  assert.equal(fs.readFileSync(claude, "utf8"), "# my own notes\n", `doctor --fix overwrote CLAUDE.md: ${fixed.stdout}`);
+
+  assert.equal(spectra(root, ["adapters", "--agents", "claude", "--force"]).status, 0);
+  assert.match(fs.readFileSync(claude, "utf8"), /^# Spectra Core Instructions/);
+});

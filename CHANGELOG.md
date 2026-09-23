@@ -15,11 +15,15 @@ Targets `v3.1.0`. Post-consolidation correctness release. No new product capabil
 - **`spectra doctor`** does not require `node` on `PATH` when running as a native binary.
 - **Local Git mode** only treats root `spectra/` and `sdd/` as Spectra-owned when they carry a Spectra marker (`install.json` / `system/manifest.env`); ordinary company directories with those names no longer block install.
 - **Migration** removes only Git exclude lines Spectra recorded in `install.json`; identical-looking user rules (`/docs/`, `/sdd/`, `/spectra/`) survive.
+- **Approval invalidation in canonical projects.** Git reports `.spectra/sdd/...` paths, which the semantic-diff and context-pack matchers (written against `sdd/...`) never matched, so edits to `projectbrief.md` and to feature spec `.yaml` files did not invalidate approvals. Changed-file paths are now normalized once in `git-diff.js`.
+- **`spectra adapters` and `doctor --fix` no longer overwrite user-written adapter files** (e.g. an existing `CLAUDE.md`). Files without the Spectra header are refused unless `adapters --force` is passed; `doctor --fix` only restores missing adapters.
 - **Generated release contract** no longer requires a `tests` gate that verify never evaluates (now `verify_work`), and generated text no longer says "verify v2" or "run spectra validate".
 
 ### Changed
 - The source `scripts/` tree is synchronized with the packaged runtime scripts; the only intentional difference (`validate-repo.sh`) is documented and tested.
 - Docs-vocabulary tests also cover the scripts READMEs.
+- `spectra status` recommends re-approval when approvals were invalidated; otherwise it still suggests `spectra check`.
+- Docs define agent adapter files as regenerable projections of `.spectra/` state.
 
 ## [3.0.9 development notes]
 

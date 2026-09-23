@@ -23,8 +23,14 @@ function spectra(cwd, args, env) {
 }
 
 // Repo-local launcher invocation (./.spectra/bin/spectra).
+// Like a developer would, the launcher is found by its project-root path even
+// when the command is run from a nested directory.
 function localSpectra(cwd, args, env) {
-  return run(cwd, path.join(cwd, ".spectra", "bin", "spectra"), args, env);
+  let dir = cwd;
+  while (!fs.existsSync(path.join(dir, ".spectra", "bin", "spectra")) && path.dirname(dir) !== dir) {
+    dir = path.dirname(dir);
+  }
+  return run(cwd, path.join(dir, ".spectra", "bin", "spectra"), args, env);
 }
 
 function git(cwd, ...args) {

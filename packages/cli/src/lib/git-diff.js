@@ -38,6 +38,13 @@ function collectGitDiff(repoRoot, args) {
     .filter(Boolean);
 }
 
+// Git reports repo-root-relative paths, so Spectra data files arrive as
+// .spectra/sdd/... (or spectra/sdd/... for 3.0.8 installs). Consumers match
+// them against data-root-relative sdd/... patterns, so normalize here once.
+function toDataRelative(gitPath) {
+  return gitPath.replace(/^(?:\.spectra|spectra)\/(?=sdd\/)/, "");
+}
+
 function getChangedFiles(repoRoot, { base = null, head = null, includeWorktree = true, sort = true } = {}) {
   if (!isGitRepo(repoRoot)) {
     return [];
@@ -60,7 +67,8 @@ function getChangedFiles(repoRoot, { base = null, head = null, includeWorktree =
     addFiles(collectGitDiff(repoRoot, ["ls-files", "--others", "--exclude-standard"]));
   }
 
-  return sort ? [...seen].sort() : [...seen];
+  const files = [...new Set([...seen].map(toDataRelative))];
+  return sort ? files.sort() : files;
 }
 
 
