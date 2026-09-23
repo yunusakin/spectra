@@ -133,10 +133,6 @@ function writeMigratedMetadata(layout, oldMetadata, { profile, gitMode, installM
 // .spectra/ data directory. The data directory already has the canonical
 // name, so migration moves sdd/ and known docs into it.
 function migrateRootSddLayout(absoluteRoot, layout) {
-  if (isSourceRepository(absoluteRoot)) {
-    return { migrated: false, reason: "source-repo" };
-  }
-
   const legacyInstall = path.join(absoluteRoot, ".spectra", "install.json");
   const legacySdd = path.join(absoluteRoot, "sdd");
   if (!fs.existsSync(legacyInstall) && !fs.existsSync(legacySdd)) {
@@ -155,23 +151,28 @@ function migrateRootSddLayout(absoluteRoot, layout) {
     ...docMoves
   ]);
 
+  // Order matters. Moving sdd/ is what flips detectLayout() to "canonical",
+  // and this layout's .spectra/install.json already exists (pre-3.0 data
+  // directory), so nothing after that move could ever be told apart from a
+  // finished migration on retry. Everything that can fail or be repeated —
+  // Git exclusions, metadata, config, doc moves — therefore runs first and
+  // is idempotent; sdd/ moves last, and a failed attempt stays retryable
+  // as a plain "root-sdd" layout.
   ensureDirectory(layout.root);
-  movePath(legacySdd, sddTarget);
-  for (const [sourcePath, targetPath] of docMoves) {
-    movePath(sourcePath, targetPath);
-  }
-  copyDirectory(path.join(getProfileAssetsDir(profile), "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
-
   if (gitMode === "local") {
     normalizeLocalExclusions(absoluteRoot);
   }
-
   const metadata = writeMigratedMetadata(layout, oldMetadata, {
     profile,
     gitMode,
     installMode: oldMetadata.installMode ?? "adopt"
   });
   fs.writeFileSync(layout.config, `profile: ${profile}\ngitMode: ${gitMode}\nschemaVersion: ${SCHEMA_VERSION}\n`);
+  for (const [sourcePath, targetPath] of docMoves) {
+    movePath(sourcePath, targetPath);
+  }
+  movePath(legacySdd, sddTarget);
+  copyDirectory(path.join(getProfileAssetsDir(profile), "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
 
   return { migrated: true, profile, gitMode, localLauncher: metadata.localLauncher };
 }
@@ -200,31 +201,39 @@ function migrateSpectraDirLayout(absoluteRoot, layout) {
   const profile = oldMetadata.profile === "lite" ? "lite" : "full";
   const gitMode = oldMetadata.gitMode ?? "shared";
 
+  // install.json is rewritten (not moved) below, and sdd/ moves last: the
+  // sdd/ manifest is what flips detectLayout() to "canonical", and a
+  // canonical layout with an install.json is treated as finished on retry.
+  // So every step that can fail or be repeated (Git exclusions, metadata)
+  // runs first, and until sdd/ has moved a failed attempt is still a plain
+  // "spectra-dir" layout that simply re-runs.
   const authoritativeMoves = [];
   for (const entry of fs.readdirSync(legacyRoot, { withFileTypes: true })) {
-    if (entry.name === "cache") {
+    if (entry.name === "cache" || entry.name === "install.json") {
       continue;
     }
     authoritativeMoves.push([path.join(legacyRoot, entry.name), path.join(layout.root, entry.name)]);
   }
+  authoritativeMoves.sort(([a], [b]) => Number(path.basename(a) === "sdd") - Number(path.basename(b) === "sdd"));
   preflightMoves(authoritativeMoves);
 
   ensureDirectory(layout.root);
-  for (const [sourcePath, targetPath] of authoritativeMoves) {
-    movePath(sourcePath, targetPath);
-  }
-  mergeCacheDirectories(path.join(legacyRoot, "cache"), path.join(layout.root, "cache"));
-  fs.rmSync(legacyRoot, { recursive: true, force: true });
-
   if (gitMode === "local") {
     normalizeLocalExclusions(absoluteRoot);
   }
-
   const metadata = writeMigratedMetadata(layout, oldMetadata, {
     profile,
     gitMode,
     installMode: oldMetadata.installMode ?? "adopt"
   });
+
+  for (const [sourcePath, targetPath] of authoritativeMoves) {
+    movePath(sourcePath, targetPath);
+  }
+  mergeCacheDirectories(path.join(legacyRoot, "cache"), path.join(layout.root, "cache"));
+
+  // Removed last so a failure above never leaves spectra/ half-deleted.
+  fs.rmSync(legacyRoot, { recursive: true, force: true });
 
   return { migrated: true, profile, gitMode, localLauncher: metadata.localLauncher };
 }
@@ -236,6 +245,20 @@ function needsMigration(projectRoot) {
   const layout = detectLayout(absoluteRoot);
   if (layout === "spectra-dir" || layout === "root-sdd") {
     return true;
+  }
+  if (layout === "canonical") {
+    // A canonical sdd/ manifest without install.json, or a leftover
+    // legacy spectra/ directory beside an otherwise-complete install,
+    // both mean a prior migration didn't fully finish (see
+    // migrateLegacyLayout()). Report these as needing a migration pass
+    // so callers that gate on needsMigration() — `spectra update` in
+    // particular — route through migrateLegacyLayout() and surface its
+    // specific error, instead of failing later with a generic message
+    // or silently ignoring the leftover directory forever.
+    return (
+      !fs.existsSync(getProjectLayout(absoluteRoot).installMetadata) ||
+      fs.existsSync(path.join(absoluteRoot, "spectra"))
+    );
   }
   if (layout === null) {
     return (
@@ -249,9 +272,56 @@ function needsMigration(projectRoot) {
 function migrateLegacyLayout(projectRoot) {
   const absoluteRoot = path.resolve(projectRoot);
   const layout = getProjectLayout(absoluteRoot);
+
+  // Checked unconditionally, before layout detection: a root-level sdd/
+  // with repo_mode=canonical marks this as the Spectra source repo
+  // itself, never a consumer install. detectLayout() prefers a
+  // .spectra/sdd/ manifest when one exists (e.g. left behind by an
+  // earlier accidental `init`), which would otherwise let this guard be
+  // bypassed permanently once that stray directory appears.
+  if (isSourceRepository(absoluteRoot)) {
+    return { migrated: false, reason: "source-repo" };
+  }
+
   const detected = detectLayout(absoluteRoot);
 
   if (detected === "canonical") {
+    // A canonical sdd/ manifest without install.json means an earlier
+    // migration moved content into place and then failed before writing
+    // metadata (e.g. Git exclusions couldn't be updated). Treating that
+    // as "already migrated" would hide a broken, half-finished install.
+    if (!fs.existsSync(layout.installMetadata)) {
+      throw new Error(
+        `Incomplete migration detected: ${layout.root} has sdd/ but no install.json. ` +
+        "Investigate and repair or remove the .spectra directory before retrying."
+      );
+    }
+    // A spectra/ directory beside a complete .spectra/ install has two
+    // very different possible origins, and we can tell them apart:
+    //
+    // - migrateSpectraDirLayout() MOVES every child of spectra/ into
+    //   .spectra/ (renameSync) except cache/, which is only COPIED. So if
+    //   its final rmSync(legacyRoot) failed after everything else
+    //   succeeded, spectra/ contains nothing but that regenerable cache/.
+    //   That is a provably harmless leftover; finish the cleanup.
+    //
+    // - Anything else in spectra/ (sdd/, install.json, docs, ...) cannot
+    //   have come from that failure: it is a second, independent tree
+    //   (e.g. an old backup restored after .spectra/ was already in use)
+    //   that may hold content .spectra/ doesn't. We can't tell which side
+    //   is authoritative, so leave it untouched and make the human choose.
+    const legacyRoot = path.join(absoluteRoot, "spectra");
+    if (fs.existsSync(legacyRoot)) {
+      const conflictingEntries = fs.readdirSync(legacyRoot).filter((name) => name !== "cache");
+      if (conflictingEntries.length > 0) {
+        throw new Error(
+          `Conflicting legacy layout: ${legacyRoot} contains ${conflictingEntries.join(", ")} ` +
+          `alongside a complete ${layout.root} install. Neither tree was modified. ` +
+          "Compare them and merge or remove spectra/ manually before retrying."
+        );
+      }
+      fs.rmSync(legacyRoot, { recursive: true, force: true });
+    }
     return { migrated: false, reason: "canonical" };
   }
   if (detected === "spectra-dir") {
