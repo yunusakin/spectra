@@ -18,13 +18,13 @@ Canonical files:
 Before coding, run:
 
 ```bash
-bash scripts/resolve-skills.sh --task-type <task_type>
+spectra skills --task-type <task_type>
 ```
 
 If you provide explicit skills/order, validate it:
 
 ```bash
-bash scripts/resolve-skills.sh --task-type <task_type> --skills <csv>
+spectra skills --task-type <task_type> --skills <csv>
 ```
 
 A non-zero exit is blocking.

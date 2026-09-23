@@ -124,6 +124,33 @@ test("health-check scans the project for tests and resolves install metadata", (
   assert.match(result.stdout, /Tests:\s+2 test file\(s\) found/);
 });
 
+test("health-check counts Python and Go tests in the project, not just Node/Java", () => {
+  const root = initProject("full");
+  fs.mkdirSync(path.join(root, "pkg"));
+  fs.writeFileSync(path.join(root, "pkg", "test_calc.py"), "");
+  fs.writeFileSync(path.join(root, "pkg", "calc_test.go"), "");
+  const dataRoot = path.join(root, ".spectra");
+  const script = path.join(cliRoot, "..", "core", "assets", "runtime", "scripts", "health-check.sh");
+  const result = run(dataRoot, "bash", [script], {
+    SPECTRA_REPO_ROOT: dataRoot,
+    SPECTRA_DATA_ROOT: dataRoot,
+    SPECTRA_PROJECT_ROOT: root,
+    SPECTRA_RUNTIME_ROOT: path.join(cliRoot, "assets", "runtime")
+  });
+  assert.match(result.stdout, /Tests:\s+2 test file\(s\) found/);
+});
+
+test("spectra diff works in a linked Git worktree (.git is a file)", () => {
+  const root = initProject("full");
+  git(root, "add", "-A", "-f");
+  git(root, "commit", "-qm", "baseline");
+  const worktree = path.join(fs.mkdtempSync(path.join(path.dirname(root), "spectra-wt-")), "linked");
+  git(root, "worktree", "add", "-q", "-b", "wt-branch", worktree);
+  assert.equal(fs.statSync(path.join(worktree, ".git")).isFile(), true);
+  const init = spectra(worktree, ["diff", "init"]);
+  assert.equal(init.status, 0, init.stderr || init.stdout);
+});
+
 test("shell-backed commands resolve the same project from root and nested dirs, installed and local", () => {
   const root = initProject("full");
   fs.mkdirSync(path.join(root, "src", "deep"), { recursive: true });

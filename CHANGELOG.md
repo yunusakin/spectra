@@ -17,6 +17,7 @@ Targets `v3.1.0`. Post-consolidation correctness release. No new product capabil
 - **Migration** removes only Git exclude lines Spectra recorded in `install.json`; identical-looking user rules (`/docs/`, `/sdd/`, `/spectra/`) survive.
 - **Approval invalidation in canonical projects.** Git reports `.spectra/sdd/...` paths, which the semantic-diff and context-pack matchers (written against `sdd/...`) never matched, so edits to `projectbrief.md` and to feature spec `.yaml` files did not invalidate approvals. Changed-file paths are now normalized once in `git-diff.js`.
 - **`spectra adapters` and `doctor --fix` no longer overwrite user-written adapter files** (e.g. an existing `CLAUDE.md`). Files without the Spectra header are refused unless `adapters --force` is passed; `doctor --fix` only restores missing adapters.
+- **Shipped Full-profile rules taught `bash scripts/...` invocations** (`resolve-skills.sh`, `validate-repo.sh --strict`, `spec-diff.sh --update`) that do not exist in consumer projects. They now teach `spectra skills`, `spectra check` and `spectra diff update`.
 - **Generated release contract** no longer requires a `tests` gate that verify never evaluates (now `verify_work`), and generated text no longer says "verify v2" or "run spectra validate".
 
 ### Changed

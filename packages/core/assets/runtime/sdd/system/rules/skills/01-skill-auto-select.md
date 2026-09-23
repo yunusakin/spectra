@@ -5,10 +5,10 @@ When the agent is about to implement a task (post-approval), it MUST classify th
 ## Mandatory Contract
 
 1. Classify the implementation item into a `task_type`.
-2. Run `bash scripts/resolve-skills.sh --task-type <task_type>`.
+2. Run `spectra skills --task-type <task_type>`.
 3. Use the reported `Recommended Order` as execution order.
 4. If overriding with explicit skills, validate with:
-   - `bash scripts/resolve-skills.sh --task-type <task_type> --skills <csv>`
+   - `spectra skills --task-type <task_type> --skills <csv>`
 5. If resolver returns non-zero, do not proceed to coding.
 
 Canonical dependency source:

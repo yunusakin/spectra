@@ -171,3 +171,27 @@ test("editing a feature spec (yaml) invalidates approvals in a canonical project
   spectra(root, ["status"]);
   assert.equal(approvalState(root).highest_valid_state, "draft");
 });
+
+test("product approval is refused while projectbrief.md is template-only", () => {
+  const root = initProject("full");
+  const result = approve(root, "product-approved");
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr + result.stdout, /template-only/);
+  assert.equal(approvalState(root).current_state, "draft");
+});
+
+test("release approval is refused when the release eval suite is below threshold", () => {
+  const root = initProject("full");
+  approveThrough(root, "implementation-approved");
+  const featuresDir = path.join(root, ".spectra", "sdd", "features");
+  for (const file of fs.readdirSync(path.join(featuresDir, fs.readdirSync(featuresDir)[0], "evals"))) {
+    const target = path.join(featuresDir, fs.readdirSync(featuresDir)[0], "evals", file);
+    const text = fs.readFileSync(target, "utf8");
+    if (/overall_pass_rate/.test(text)) {
+      fs.writeFileSync(target, text.replace(/overall_pass_rate:\s*[\d.]+/, "overall_pass_rate: 1.5"));
+    }
+  }
+  completeReleaseChecklists(root);
+  assert.notEqual(spectra(root, ["verify", "--profile", "release"]).status, 0);
+  assert.notEqual(approve(root, "release-approved").status, 0);
+});

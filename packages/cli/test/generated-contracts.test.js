@@ -22,7 +22,7 @@ test("generated Full scaffolding teaches canonical vocabulary only", () => {
   const problems = [];
   for (const file of walk(path.join(root, ".spectra", "sdd"))) {
     fs.readFileSync(file, "utf8").split("\n").forEach((line, index) => {
-      if (/verify v2|Spectra Verify v2|spectra validate|\.\/spectra\/bin/i.test(line)) {
+      if (/verify v2|Spectra Verify v2|spectra validate|context-pack\.sh|discuss-task\.sh|eval run|skills resolve|adapters generate|spec diff\b(?! report)|bash scripts\/|\.\/spectra\/bin/i.test(line)) {
         problems.push(`${path.relative(root, file)}:${index + 1}: ${line.trim()}`);
       }
     });
