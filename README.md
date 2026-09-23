@@ -228,11 +228,9 @@ Spectra keeps durable product knowledge under `.spectra/sdd/memory-bank/business
 
 Example domain index:
 
-```markdown
 | Domain | Keywords | Rules | Unresolved | Related Modules |
 | --- | --- | --- | --- | --- |
-| customer-policy | eligibility,limit,approval | business/customer-policy/rules.md | business/customer-policy/unresolved.md | account-service |
-```
+| `customer-policy` | `eligibility`, `limit`, `approval` | `rules.md` | `unresolved.md` | `account-service` |
 
 `spectra route --format json` includes match explanations such as `matchedBy: "keyword"` and `matchedValue: "eligibility"` so routing stays inspectable. New knowledge defaults to unresolved; direct active creation requires explicit verified evidence:
 
@@ -281,7 +279,7 @@ Repository layout for maintainers:
 - `docs/` — contributor/user documentation for this repository
 - `scripts/` — repository maintenance scripts, not the supported consumer setup interface
 
-Current release: `3.0.9`.
+This repository's source is at `3.0.9`. Publishing it — tagging a GitHub release and running `npm publish` from `packages/cli/` — is a separate maintainer step; check [Releases](https://github.com/yunusakin/spectra/releases) or [npm](https://www.npmjs.com/package/spectra-pack) for what's actually installable right now.
 
 ## License
 

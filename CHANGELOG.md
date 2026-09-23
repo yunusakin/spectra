@@ -1,8 +1,8 @@
 # Changelog
 
-## [v3.0.9] - 2026-09-23
+## [Unreleased]
 
-Consolidation and reliability release. No new product capabilities.
+Targets `v3.0.9`. Consolidation and reliability release. No new product capabilities.
 
 ### Changed
 - `.spectra/` is the single canonical project root; everything Spectra manages, including the local launcher (`.spectra/bin/spectra`), lives beneath it. The 3.0.8 `spectra/` layout and the pre-3.0 root `sdd/` layout are migration inputs only.
@@ -18,9 +18,9 @@ Consolidation and reliability release. No new product capabilities.
 - Migration no longer risks partial moves: the legacy `spectra/` directory is removed last, the root-`sdd/` move happens last, half-finished migrations are reported instead of treated as complete, conflicting `spectra/` and `.spectra/` trees are left untouched with an actionable error, and a Spectra source repository is always refused.
 - Test discovery is deterministic and CI runs the suite on Node 20 and 22. Version parity now also covers `init.sh`.
 
-## [Unreleased]
+## Historical: pre-3.0 project layout notes
 
-This work is intended for `v3.0.0` because the generated project layout changes from root-level Spectra directories to the single `spectra/` boundary.
+Undated notes from before this project moved to per-version headings below; content predates `v2.0.0`. This work was intended for `v3.0.0` because the generated project layout changes from root-level Spectra directories to the single `spectra/` boundary.
 
 ### Added
 - Lite and Full installation profiles with Lite as the default.
