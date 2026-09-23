@@ -6,7 +6,7 @@ This repository is designed to be a stable Spectra workspace for a single projec
 
 - Create a new repo per project based on this Spectra template.
 - Treat the repo root as the agent working directory.
-- Keep each project’s Spectra state under its own `spectra/` directory and leave code in the project’s normal source layout.
+- Keep each project’s Spectra state under its own `.spectra/` directory and leave code in the project’s normal source layout.
 
 This keeps profile, Git policy, status, and approval state isolated per project.
 
@@ -19,18 +19,18 @@ Example structure:
 ```text
 projects/
   orders/
-    spectra/
+    .spectra/
     src/
   billing/
-    spectra/
+    .spectra/
     src/
 shared/
   libs/
 ```
 
 Guidelines:
-- Do not share `spectra/sdd/governance/` between projects. Each project should own its own spec and approval state.
-- Keep `spectra/sdd/memory-bank/` project-local too.
+- Do not share `.spectra/sdd/governance/` between projects. Each project should own its own spec and approval state.
+- Keep `.spectra/sdd/memory-bank/` project-local too.
 - Shared code can remain in the monorepo’s normal shared-package layout.
 
 See also: `docs/monorepo-conventions.md`.

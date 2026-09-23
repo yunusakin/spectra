@@ -49,5 +49,8 @@ jobs:
       - name: Adapter generation smoke check
         run: bash scripts/generate-adapters.sh --agents claude,cursor,windsurf,copilot,codex,antigravity --target /tmp/spectra-adapters
 
+      - name: Version parity
+        run: node packages/cli/scripts/check-versions.mjs
+
       - name: Full test suite
         run: npm test

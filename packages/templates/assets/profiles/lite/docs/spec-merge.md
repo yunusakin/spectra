@@ -1,6 +1,6 @@
 # Spec Merge Strategies
 
-In Spectra v2, the canonical merge target is the feature bundle, not the old memory-bank-first flow.
+In Spectra, the canonical merge target is the feature bundle, not the old memory-bank-first flow.
 
 ## Source Of Truth
 
@@ -23,7 +23,7 @@ Use Markdown only as supporting narrative.
 ## Recommended Commands
 
 ```bash
-spectra admin diff semantic
+spectra diff semantic
 spectra check
 spectra status
 ```
@@ -48,4 +48,4 @@ Best when:
 
 - do not merge implementation that violates staged approval
 - do not treat narrative Markdown as canonical if YAML says otherwise
-- in Full, always run `spectra admin diff semantic` after a non-trivial spec merge
+- in Full, always run `spectra diff semantic` after a non-trivial spec merge

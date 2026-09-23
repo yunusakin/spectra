@@ -71,7 +71,7 @@ spectra status
 spectra check
 ```
 
-For the Full profile, review generated brownfield outputs under `spectra/sdd/adoption/` before advancing approvals.
+For the Full profile, review generated brownfield outputs under `.spectra/sdd/adoption/` before advancing approvals.
 
 ## Install Locations
 
@@ -91,25 +91,25 @@ curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh |
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | \
-  SPECTRA_VERSION=v3.0.8 sh
+  SPECTRA_VERSION=v3.0.9 sh
 ```
 
-Version values use the Git tag form, such as `v3.0.8`.
+Version values use the Git tag form, such as `v3.0.9`.
 
 ## Repo-Local Launcher
 
 Both `spectra init` and `spectra adopt` create:
 
 ```text
-spectra/bin/spectra
+.spectra/bin/spectra
 ```
 
 Use it when global PATH setup is unavailable or when a repository should invoke its recorded Spectra installation:
 
 ```bash
-./spectra/bin/spectra status
-./spectra/bin/spectra check
-./spectra/bin/spectra update
+./.spectra/bin/spectra status
+./.spectra/bin/spectra check
+./.spectra/bin/spectra update
 ```
 
 The launcher tries the recorded native binary first, then a local Node CLI fallback if present, then `spectra` on PATH. It contains no product logic. `spectra update` checks for a newer release, asks once before changing anything, and also refreshes or migrates the project runtime.

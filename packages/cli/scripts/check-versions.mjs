@@ -27,6 +27,12 @@ function readManifestVersion(filePath) {
   return match[1].trim();
 }
 
+function readShellVersion(filePath) {
+  const match = fs.readFileSync(filePath, "utf8").match(/^VERSION="([^"]+)"/m);
+  if (!match) throw new Error(`Could not read VERSION from ${filePath}`);
+  return match[1];
+}
+
 const expectedVersion = readJson(path.join(repoRoot, "package.json")).version;
 const versions = [
   ["root package.json", expectedVersion],
@@ -45,6 +51,10 @@ for (const profile of ["lite", "full"]) {
     readManifestVersion(path.join(repoRoot, "profiles", profile, "sdd", "system", "manifest.env"))
   ]);
 }
+versions.push([
+  "packages/core/assets/runtime/scripts/init.sh",
+  readShellVersion(path.join(repoRoot, "packages", "core", "assets", "runtime", "scripts", "init.sh"))
+]);
 versions.push([
   "packages/core/assets/runtime/sdd/system/manifest.env",
   readManifestVersion(path.join(repoRoot, "packages", "core", "assets", "runtime", "sdd", "system", "manifest.env"))
