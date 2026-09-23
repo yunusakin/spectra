@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { cliRoot, initProject } from "./helpers/project.js";
+import { cliRoot, initProject, spectra } from "./helpers/project.js";
 
 const repoRoot = path.resolve(cliRoot, "..", "..");
 const sourceScripts = path.join(repoRoot, "scripts");
@@ -76,4 +76,16 @@ test("shell scripts distinguish the project root from the data root", () => {
   assert.match(runtime, /SPECTRA_PROJECT_ROOT/);
   const specDiff = fs.readFileSync(path.join(runtimeScripts, "spec-diff.sh"), "utf8");
   assert.doesNotMatch(specDiff, /-d "\.git"/, "spec-diff must not assume the data root is the Git root");
+});
+
+test("agent adapter files are regenerable projections of .spectra state", () => {
+  const root = initProject("full");
+  const files = ["CLAUDE.md", "AGENTS.md", ".cursor/rules"].map((f) => path.join(root, f));
+  const generate = () => spectra(root, ["adapters", "--agents", "claude,codex,cursor"]);
+  assert.equal(generate().status, 0);
+  const snapshot = (file) => (fs.statSync(file).isDirectory() ? walk(file).map((f) => fs.readFileSync(f, "utf8")).join("\n") : fs.readFileSync(file, "utf8"));
+  const before = files.map(snapshot);
+  for (const file of files) fs.rmSync(file, { recursive: true, force: true });
+  assert.equal(generate().status, 0);
+  assert.deepEqual(files.map(snapshot), before);
 });

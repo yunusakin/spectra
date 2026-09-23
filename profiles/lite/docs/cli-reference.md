@@ -132,6 +132,10 @@ spectra version
 spectra help
 ```
 
+### Adapter files are generated projections
+
+Canonical Spectra state lives only under `.spectra/`. Agent adapter files (`CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md`, `.cursor/rules/**`, `.windsurf/rules/**`, `.agent/rules/**`) are generated projections of that state. They live at the paths each tool requires, are fully regenerable with `spectra adapters`, and should not be edited by hand.
+
 For Full-profile agent-enabled repos, run `spectra doctor` after adapter generation. A healthy setup requires:
 
 - each configured agent's adapter files exist
