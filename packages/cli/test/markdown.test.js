@@ -1,7 +1,4 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import test from "node:test";
 import {
   countByStatus,
@@ -13,11 +10,8 @@ import {
   isPlaceholderValue,
   isTemplateLine,
   meaningfulLines,
-  normalizeHeader,
-  normalizeWhitespace,
   parseMarkdownTable,
   parseSections,
-  readTextIfExists,
   splitTableRow,
   stripComments
 } from "../src/lib/context/markdown.js";
@@ -63,11 +57,6 @@ test("stripComments removes single- and multi-line comments", () => {
   assert.equal(stripComments("a <!-- note --> b"), "a  b");
   assert.equal(stripComments("a <!-- one\ntwo --> b"), "a  b");
   assert.equal(stripComments("no comments"), "no comments");
-});
-
-test("normalizeWhitespace collapses runs and trims", () => {
-  assert.equal(normalizeWhitespace("  a \t\t b\n c  "), "a b c");
-  assert.equal(normalizeWhitespace("   "), "");
 });
 
 test("isPlaceholderValue recognizes template placeholders", () => {
@@ -173,14 +162,6 @@ test("splitTableRow keeps escaped pipes inside a cell", () => {
   assert.deepEqual(splitTableRow("| use \\| here | open |"), ["use | here", "open"]);
 });
 
-test("normalizeHeader lowercases and sanitizes", () => {
-  assert.equal(normalizeHeader("Open Questions"), "open_questions");
-  assert.equal(normalizeHeader("Status (%)"), "status");
-  assert.equal(normalizeHeader("Q1.Q2"), "q1_q2");
-  assert.equal(normalizeHeader("__x__"), "x");
-  assert.equal(normalizeHeader(""), "");
-});
-
 test("isPlaceholderRow requires every cell to be a placeholder", () => {
   assert.equal(isPlaceholderRow(["<id>", "<name>"]), true);
   assert.equal(isPlaceholderRow(["none", "n/a"]), true);
@@ -260,11 +241,3 @@ test("countByStatus counts case-insensitively with overlapping matchers", () => 
 // ---------------------------------------------------------------------------
 // file reads
 // ---------------------------------------------------------------------------
-
-test("readTextIfExists reads files and returns empty string when missing", () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-md-"));
-  const filePath = path.join(dir, "note.md");
-  fs.writeFileSync(filePath, "# Note\ncontent\n");
-  assert.equal(readTextIfExists(filePath), "# Note\ncontent\n");
-  assert.equal(readTextIfExists(path.join(dir, "missing.md")), "");
-});

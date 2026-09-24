@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const docRoots = ["docs", "profiles/lite/docs", "profiles/full/docs", "site"];
-const docFiles = ["README.md", "packages/cli/README.md"];
+const docFiles = ["README.md", "packages/cli/README.md", "scripts/README.md", "packages/core/assets/runtime/scripts/README.md"];
 
 function collect(dir, out) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -23,6 +23,8 @@ for (const root of docRoots) {
 
 const STALE = [
   [/spectra (eval run|skills resolve|adapters generate|spec diff|context-pack|discuss-task)\b/, "legacy command form"],
+  [/generated layout is `spectra\/`/, "3.0.8 layout claim"],
+  [/verify v2/i, "stale product vocabulary"],
   [/\.\/spectra\/bin\b/, "3.0.8 launcher path"],
   [/(?<![\w./$-])spectra\/sdd\b/, "3.0.8 sdd path"],
   [/`\/spectra\/`/, "3.0.8 Git exclude pattern"],

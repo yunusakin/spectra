@@ -3,6 +3,7 @@ import { title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { computeApprovalState } from "../lib/specs.js";
 import { buildStatusReport } from "../lib/status-report.js";
+import { STAGES, stageOrder } from "../lib/specs/stages.js";
 
 function statusCommand(argv) {
   const { options } = parseOptions(argv, {
@@ -35,8 +36,10 @@ function statusCommand(argv) {
     }
   }
 
+  let nextApproval = null;
   if (profile === "full") {
     const approval = computeApprovalState(repoRoot);
+    nextApproval = { invalidations: approval.invalidations, nextStage: STAGES[stageOrder(approval.highest_valid_state) + 1] };
     title("");
     title(`Approval State: ${approval.current_state}`);
     title(`Highest Valid: ${approval.highest_valid_state}`);
@@ -45,9 +48,12 @@ function statusCommand(argv) {
     }
   }
 
+  // Only recommendation derivable from state already computed above: approvals
+  // invalidated by later changes must be re-granted stage by stage.
+  const invalidated = nextApproval && nextApproval.invalidations.length > 0;
   title("");
   title("Next recommended action:");
-  title("  spectra check");
+  title(invalidated ? `  spectra approve --stage ${nextApproval.nextStage}` : "  spectra check");
   return 0;
 }
 

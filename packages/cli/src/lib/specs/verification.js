@@ -77,7 +77,8 @@ function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", 
   }
   const releaseBlocked =
     profile === "release" &&
-    (releaseChecklistWarnings.length > 0 || approvalState.highest_valid_state !== "release-approved");
+    (releaseChecklistWarnings.length > 0 ||
+      stageOrder(approvalState.highest_valid_state) < stageOrder("implementation-approved"));
   stages.push({
     name: "release-readiness",
     blocking: releaseBlocked,

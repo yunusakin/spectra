@@ -9,6 +9,7 @@ import {
   getInstalledProfile,
   getRuntimeAssetsDir,
   hasCommand,
+  isNativeRuntime,
   readInstallMetadata,
   runInstalledScript,
   writeInstallMetadata
@@ -70,7 +71,7 @@ function runFix(repoRoot) {
     .filter((agentResult) => agentResult.detected)
     .filter((agentResult) => {
       const adapterFiles = new Set(AGENT_DEFINITIONS[agentResult.agent].files.map((entry) => entry.path));
-      return agentResult.checks.some((check) => adapterFiles.has(check.name) && ["missing", "invalid"].includes(check.status));
+      return agentResult.checks.some((check) => adapterFiles.has(check.name) && check.status === "missing");
     })
     .filter((agentResult) => {
       const definition = AGENT_DEFINITIONS[agentResult.agent];
@@ -129,7 +130,10 @@ function doctorCommand(argv) {
 
   let hasFailure = false;
 
-  for (const commandName of ["bash", "git", "node"]) {
+  // A native binary bundles its own Node runtime, so node on PATH is only
+  // required when the CLI itself is running under Node.
+  const requiredCommands = isNativeRuntime() ? ["bash", "git"] : ["bash", "git", "node"];
+  for (const commandName of requiredCommands) {
     if (hasCommand(commandName)) {
       ok(`${commandName} is available`);
     } else {

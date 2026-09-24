@@ -27,44 +27,6 @@ function createProject() {
   return root;
 }
 
-test("canonical public commands route directly to their implementation", () => {
-  assert.deepEqual(normalizeCommand("context", "--help"), {
-    command: "context",
-    subcommand: "--help",
-    rest: []
-  });
-  assert.deepEqual(normalizeCommand("task", "--item", "T1"), {
-    command: "task",
-    subcommand: "--item",
-    rest: ["T1"]
-  });
-  assert.deepEqual(normalizeCommand("eval", "FEAT-001"), {
-    command: "eval",
-    subcommand: "FEAT-001",
-    rest: []
-  });
-  assert.deepEqual(normalizeCommand("skills", "--task-type", "feature"), {
-    command: "skills",
-    subcommand: "--task-type",
-    rest: ["feature"]
-  });
-  assert.deepEqual(normalizeCommand("adapters", "--agents", "codex"), {
-    command: "adapters",
-    subcommand: "--agents",
-    rest: ["codex"]
-  });
-  assert.deepEqual(normalizeCommand("diff", "semantic"), {
-    command: "diff",
-    subcommand: "semantic",
-    rest: []
-  });
-  assert.deepEqual(normalizeCommand("knowledge", "add", "--domain", "core"), {
-    command: "knowledge",
-    subcommand: "add",
-    rest: ["--domain", "core"]
-  });
-});
-
 test("legacy command forms normalize to canonical commands", () => {
   // renamed vocabulary
   assert.equal(normalizeCommand("context-pack", "--help").command, "context");

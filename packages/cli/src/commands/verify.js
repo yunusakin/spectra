@@ -1,4 +1,4 @@
-import { runInstalledScript } from "../lib/runtime.js";
+import { runVerifyWork } from "../lib/verify-runner.js";
 import { fail, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { findSpectraRoot } from "../lib/runtime.js";
@@ -15,20 +15,10 @@ function verifyCommand(argv) {
     return 0;
   }
 
-  const args = [];
-
-  if (options["--item"]) {
-    args.push("--item", options["--item"]);
-  }
-
-  if (options["--scope"]) {
-    args.push("--scope", options["--scope"]);
-  }
-
-  const status = runInstalledScript({
+  const status = runVerifyWork({
     cwd: options["--cwd"] ?? process.cwd(),
-    scriptName: "verify-work.sh",
-    args
+    scope: options["--scope"],
+    item: options["--item"]
   });
 
   const repoRoot = findSpectraRoot(options["--cwd"] ?? process.cwd());

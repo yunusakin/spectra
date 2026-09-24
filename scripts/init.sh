@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="2.0.0"
+VERSION="3.1.0"
 REPO_URL="https://github.com/yunusakin/spectra"
 
 RED='\033[0;31m'

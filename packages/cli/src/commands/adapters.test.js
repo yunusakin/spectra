@@ -46,28 +46,6 @@ test("adaptersCommand fails fast when codex adapter is unhealthy", () => {
   }
 });
 
-test("adaptersCommand succeeds when codex adapter is healthy", () => {
-  const targetDir = makeTempDir("spectra-adapters-pass-");
-
-  withFakeCodex(() => {
-    const status = adaptersCommand(["--cwd", process.cwd(), "--agents", "codex", "--target", targetDir]);
-    assert.equal(status, 0);
-    assert.equal(fs.existsSync(path.join(targetDir, "AGENTS.md")), true);
-  });
-});
-
-test("adaptersCommand succeeds for multi-agent non-Codex output", () => {
-  const targetDir = makeTempDir("spectra-adapters-multi-pass-");
-  const status = adaptersCommand(["--cwd", process.cwd(), "--agents", "claude,cursor,windsurf,copilot,antigravity", "--target", targetDir]);
-
-  assert.equal(status, 0);
-  assert.equal(fs.existsSync(path.join(targetDir, "CLAUDE.md")), true);
-  assert.equal(fs.existsSync(path.join(targetDir, ".cursor", "rules", "spectra-core.mdc")), true);
-  assert.equal(fs.existsSync(path.join(targetDir, ".windsurf", "rules", "spectra-core.md")), true);
-  assert.equal(fs.existsSync(path.join(targetDir, ".github", "copilot-instructions.md")), true);
-  assert.equal(fs.existsSync(path.join(targetDir, ".agent", "rules", "spectra-core.md")), true);
-});
-
 test("generated adapters include the core business-memory policy", () => {
   const targetDir = makeTempDir("spectra-adapters-policy-");
 

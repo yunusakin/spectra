@@ -326,6 +326,9 @@ parse_skill_runs() {
   ' "${skill_runs_file}" 2>/dev/null || true
 }
 
+# Paths are relative to the data root (the CWD) in every mode; --relative keeps
+# git diff aligned with ls-files, which is CWD-relative, so tracked and
+# untracked changes to the same logical file match the same sdd/... patterns.
 collect_changed_files() {
   if [[ -n "${BASE_REF}" ]]; then
     if ! git rev-parse --verify "${BASE_REF}^{commit}" >/dev/null 2>&1; then
@@ -336,13 +339,13 @@ collect_changed_files() {
       add_error "Head ref not found or not a commit: ${HEAD_REF}"
       return 0
     fi
-    git diff --name-only "${BASE_REF}...${HEAD_REF}" 2>/dev/null || true
+    git diff --relative --name-only "${BASE_REF}...${HEAD_REF}" 2>/dev/null || true
     return 0
   fi
 
   if git rev-parse --verify HEAD >/dev/null 2>&1; then
     {
-      git diff --name-only HEAD 2>/dev/null || true
+      git diff --relative --name-only HEAD 2>/dev/null || true
       git ls-files --others --exclude-standard 2>/dev/null || true
     } | sed '/^$/d' | sort -u
     return 0
@@ -350,6 +353,35 @@ collect_changed_files() {
 
   git ls-files -m -o --exclude-standard 2>/dev/null || true
   return 0
+}
+
+collect_project_changed_files() {
+  local project_root="${SPECTRA_PROJECT_ROOT:-${REPO_ROOT}}"  # repo-root-relative namespace
+
+  if git -C "${project_root}" rev-parse --verify HEAD >/dev/null 2>&1; then
+    {
+      git -C "${project_root}" diff --name-only HEAD 2>/dev/null || true
+      git -C "${project_root}" ls-files --others --exclude-standard 2>/dev/null || true
+    } | sed '/^$/d' | sort -u
+    return 0
+  fi
+
+  git -C "${project_root}" ls-files -m -o --exclude-standard 2>/dev/null || true
+}
+
+is_project_source_file() {
+  local file="$1"
+  case "${file}" in
+    spectra/*|sdd/*|.spectra/*|docs/*|*.md|*.txt|*.yaml|*.yml|*.json)
+      return 1
+      ;;
+    src/*|lib/*|app/*|packages/*|services/*|server/*|client/*|*.js|*.jsx|*.ts|*.tsx|*.mjs|*.cjs|*.py|*.go|*.rs|*.java|*.kt|*.rb|*.php|*.cs)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
 }
 
 validate_skill_run_row() {
@@ -482,7 +514,7 @@ validate_skill_run_row() {
       add_error "${line}"
     done <<< "${output}"
 
-    if echo "${output}" | grep -q .; then
+    if grep -q . <<< "${output}"; then
       return 1
     fi
   fi
@@ -505,6 +537,7 @@ approval_status="$(parse_approval_status "${state_file}")"
 open_questions="$(parse_open_technical_questions "${state_file}")"
 blocking_findings="$(parse_blocking_review_findings "${review_gate_file}")"
 changed_files="$(collect_changed_files)"
+project_changed_files="$(collect_project_changed_files)"
 project_name_value="$(parse_project_name "${project_brief_file}")"
 repo_mode="$(read_manifest_value "repo_mode")"
 
@@ -525,6 +558,17 @@ if [[ -d "app" ]]; then
   fi
 fi
 
+project_source_changed=false
+if [[ -n "${project_changed_files}" ]]; then
+  while IFS= read -r file; do
+    [[ -n "${file}" ]] || continue
+    if is_project_source_file "${file}"; then
+      project_source_changed=true
+      break
+    fi
+  done <<< "${project_changed_files}"
+fi
+
 ###################################
 # 1. Approval gate: no app/ code without approval evidence
 ###################################
@@ -533,6 +577,12 @@ if "${app_has_code}"; then
     add_error "app/ contains code but ${state_file} does not exist."
   elif [[ "${approval_status}" != "implementation-approved" && "${approval_status}" != "release-approved" && "${approval_status}" != "approved" ]]; then
     add_error "app/ contains code but Approval Status is not implementation-approved or release-approved in ${state_file}."
+  fi
+fi
+
+if "${project_source_changed}"; then
+  if [[ "${approval_status}" != "implementation-approved" && "${approval_status}" != "release-approved" && "${approval_status}" != "approved" ]]; then
+    add_error "Project code contains changes without implementation approval in ${state_file}."
   fi
 fi
 
@@ -578,12 +628,12 @@ fi
 # 4. Invariant change trail
 ###################################
 if [[ -n "${changed_files}" ]]; then
-  if echo "${changed_files}" | grep -qx "${invariants_file}"; then
+  if grep -qx "${invariants_file}" <<< "${changed_files}"; then
     has_trail=false
-    if echo "${changed_files}" | grep -qx "${spec_history_file}"; then
+    if grep -qx "${spec_history_file}" <<< "${changed_files}"; then
       has_trail=true
     fi
-    if echo "${changed_files}" | grep -qx "${arch_decisions_file}"; then
+    if grep -qx "${arch_decisions_file}" <<< "${changed_files}"; then
       has_trail=true
     fi
 
@@ -653,7 +703,7 @@ if [[ "${repo_mode}" == "consumer" && -n "${changed_files}" ]]; then
   done <<< "${changed_files}"
 
   if "${has_spec_or_code_change}"; then
-    if ! echo "${changed_files}" | grep -qx "${progress_file}"; then
+    if ! grep -qx "${progress_file}" <<< "${changed_files}"; then
       add_error "Spec/code files changed in checked range but ${progress_file} was not updated."
     fi
   fi
@@ -674,7 +724,7 @@ if [[ -n "${changed_files}" ]]; then
 fi
 
 if "${has_app_change_in_range}"; then
-  if ! echo "${changed_files}" | grep -qx "${skill_runs_file}"; then
+  if ! grep -qx "${skill_runs_file}" <<< "${changed_files}"; then
     add_error "app/* changed in checked range but ${skill_runs_file} was not updated."
   fi
 

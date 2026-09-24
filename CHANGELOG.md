@@ -2,7 +2,35 @@
 
 ## [Unreleased]
 
-Targets `v3.0.9`. Consolidation and reliability release. No new product capabilities.
+Targets `v3.1.0`. Post-consolidation correctness release. No new product capabilities; the `spectra/v2` schema identifier is unchanged.
+
+### Fixed
+- **Release approval deadlock.** `verify --profile release` required `release-approved`, the state `approve --stage release-approved` was trying to grant. Release readiness now requires at least `implementation-approved`, so the documented sequence can succeed.
+- **Approval stages can no longer be skipped from `draft`.** `draft -> technical-approved` (and further) was accepted and left `current_state` ahead of the computed `highest_valid_state`.
+- **Release approval enforces `verify-work.sh`.** `approve --stage release-approved` previously assumed the shell checks passed; it now runs them through the same runner as `spectra verify`.
+- **Canonical `.spectra` root for shell-backed commands.** `spectra diff init/update` failed with a false "missing .git" error in every canonical project; `spec-diff.sh` now checks for a Git work tree and reports data-root-relative paths (which also makes its exclude list effective). `spec-diff.sh --patch` no longer fails on a stray command substitution or on empty change categories under bash 3.2.
+- **Policy path namespaces.** `check-policy.sh` compared repo-root-relative tracked paths and data-root-relative untracked paths against `sdd/...` patterns, so results depended on Git state. All modes now use data-root-relative paths. Note: tracked, uncommitted edits under `sdd/` were previously invisible to the "progress.md must be updated" rule in canonical projects; they now count, as intended.
+- **`health-check.sh`** scans the project (not `.spectra`) for tests and reads `install.json` from the data root. Scripts now receive `SPECTRA_DATA_ROOT` alongside `SPECTRA_PROJECT_ROOT`; `SPECTRA_REPO_ROOT` remains as a legacy alias for the data root.
+- **Install no longer deletes user files.** Finder-artifact cleanup is limited to `.spectra/`; previously it removed `.DS_Store` files anywhere in the project.
+- **`spectra doctor`** does not require `node` on `PATH` when running as a native binary.
+- **Local Git mode** only treats root `spectra/` and `sdd/` as Spectra-owned when they carry a Spectra marker (`install.json` / `system/manifest.env`); ordinary company directories with those names no longer block install.
+- **Migration** removes only Git exclude lines Spectra recorded in `install.json`; identical-looking user rules (`/docs/`, `/sdd/`, `/spectra/`) survive.
+- **Approval invalidation in canonical projects.** Git reports `.spectra/sdd/...` paths, which the semantic-diff and context-pack matchers (written against `sdd/...`) never matched, so edits to `projectbrief.md` and to feature spec `.yaml` files did not invalidate approvals. Changed-file paths are now normalized once in `git-diff.js`.
+- **`spectra adapters` and `doctor --fix` no longer overwrite user-written adapter files** (e.g. an existing `CLAUDE.md`), and neither does `init`/`adopt`/`upgrade --agents`, which refuses before installing anything. Files without the Spectra header are refused unless `adapters --force` is passed; `doctor --fix` only restores missing adapters.
+- **Shipped Full-profile rules taught `bash scripts/...` invocations** (`resolve-skills.sh`, `validate-repo.sh --strict`, `spec-diff.sh --update`) that do not exist in consumer projects. They now teach `spectra skills`, `spectra check` and `spectra diff update`.
+- **Adopt discovery no longer reports `.spectra/` as project content.** `map-codebase.sh` excluded the legacy `sdd/` and `spectra/` names but not `.spectra`, so it listed `.spectra` as a module and filled its 20-line test list with Spectra's own files, hiding the project's real tests.
+- **Generated release contract** no longer requires a `tests` gate that verify never evaluates (now `verify_work`), and generated text no longer says "verify v2" or "run spectra validate".
+
+### Changed
+- The source `scripts/` tree is synchronized with the packaged runtime scripts; the only intentional difference (`validate-repo.sh`) is documented and tested.
+- Docs-vocabulary tests also cover the scripts READMEs.
+- Internal: layout detection (`detectLayout`) is confined to `project-layout.js` and `migration.js`; `runtime.js` and `context/roots.js` use `findProjectRoot` / `getActiveRoot`. `feature-bundles.js` defaults are split into spec, eval and governance modules, and `context/summaries.js` into memory and governance summary modules; summary-cache invalidation now covers every module in `context/`. Generated scaffolding and context summaries are byte-identical.
+- `spectra status` recommends re-approval when approvals were invalidated; otherwise it still suggests `spectra check`.
+- Docs define agent adapter files as regenerable projections of `.spectra/` state.
+
+## [3.0.9 development notes]
+
+Consolidation and reliability release. No new product capabilities.
 
 ### Changed
 - `.spectra/` is the single canonical project root; everything Spectra manages, including the local launcher (`.spectra/bin/spectra`), lives beneath it. The 3.0.8 `spectra/` layout and the pre-3.0 root `sdd/` layout are migration inputs only.

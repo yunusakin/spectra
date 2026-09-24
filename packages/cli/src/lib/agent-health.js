@@ -108,6 +108,21 @@ function readStartsWith(filePath, expectedHeader, readFile) {
   }
 }
 
+// Adapter files that already exist but do not carry the Spectra header are
+// user-owned; regenerating them would silently destroy the user's content.
+function findForeignAdapterFiles(targetRoot, agents, readFile = fs.readFileSync) {
+  const foreign = [];
+  for (const agent of agents) {
+    for (const entry of AGENT_DEFINITIONS[agent]?.files ?? []) {
+      const absolutePath = path.join(targetRoot, entry.path);
+      if (fs.existsSync(absolutePath) && !readStartsWith(absolutePath, entry.header, readFile)) {
+        foreign.push(entry.path);
+      }
+    }
+  }
+  return foreign;
+}
+
 function checkAgentHealth(
   targetRoot,
   agent,
@@ -166,4 +181,6 @@ function checkAgentsHealth(targetRoot, agents, options = {}) {
   return normalizeAgents(agents).map((agent) => checkAgentHealth(targetRoot, agent, options));
 }
 
-export { AGENT_DEFINITIONS, checkAgentHealth, checkAgentsHealth, normalizeAgents };
+export { AGENT_DEFINITIONS, checkAgentHealth, checkAgentsHealth, normalizeAgents,
+  findForeignAdapterFiles
+};

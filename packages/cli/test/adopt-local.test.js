@@ -162,7 +162,7 @@ test("local adopt refuses a tracked adapter collision before installing", () => 
   ]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /tracked adapter path.*AGENTS\.md/s);
+  assert.match(result.stderr, /(tracked adapter path|Refusing to overwrite).*AGENTS\.md/s);
   assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
   assert.equal(fs.readFileSync(path.join(root, "AGENTS.md"), "utf8"), "company instructions\n");
 });
@@ -231,5 +231,20 @@ test("adopt fails loudly when map-codebase.sh exits non-zero", () => {
     assert.doesNotMatch(result.stdout, /Adopted Spectra/);
   } finally {
     fs.rmSync(brokenAssetsDir, { recursive: true, force: true });
+  }
+});
+
+test("adopt discovery never reports Spectra's own .spectra directory as project content", () => {
+  const root = createRepo();
+  fs.mkdirSync(path.join(root, "test"));
+  fs.writeFileSync(path.join(root, "test", "app.test.js"), "");
+  const result = run(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "shared", "--profile", "full"]);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+
+  const memoryBank = path.join(root, ".spectra", "sdd", "memory-bank");
+  const testing = fs.readFileSync(path.join(memoryBank, "discovery", "testing.md"), "utf8");
+  assert.match(testing, /test\/app\.test\.js/, "the project's own test must still be discovered");
+  for (const file of ["discovery/testing.md", "discovery/structure.md", "tech/modules.md"]) {
+    assert.doesNotMatch(fs.readFileSync(path.join(memoryBank, file), "utf8"), /\.spectra/, `${file} lists .spectra`);
   }
 });
