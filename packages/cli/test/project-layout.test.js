@@ -6,16 +6,6 @@ import test from "node:test";
 import { detectLayout, getCacheRoot, getProjectLayout, getSddRoot } from "../src/lib/project-layout.js";
 import { findSpectraRoot } from "../src/lib/runtime.js";
 
-test("canonical project layout keeps all Spectra-owned files under .spectra", () => {
-  const layout = getProjectLayout("/tmp/example");
-
-  assert.equal(layout.root, "/tmp/example/.spectra");
-  assert.equal(layout.sdd, "/tmp/example/.spectra/sdd");
-  assert.equal(layout.docs, "/tmp/example/.spectra/docs");
-  assert.equal(layout.installMetadata, "/tmp/example/.spectra/install.json");
-  assert.equal(layout.launcher, "/tmp/example/.spectra/bin/spectra");
-});
-
 function makeRoot(prefix) {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 }

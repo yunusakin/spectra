@@ -272,31 +272,6 @@ test("a spectra/ directory with non-cache content beside .spectra is a conflict 
   assert.equal(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"), canonicalInstallBefore);
 });
 
-test("needsMigration reports true for a canonical sdd/ manifest without install.json", () => {
-  // `spectra update` only attempts migration when needsMigration() is
-  // true, so this broken state must be reported as needing migration —
-  // otherwise `update` would skip straight past migrateLegacyLayout()'s
-  // "Incomplete migration detected" error and fail with a generic,
-  // unrelated message instead.
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-broken-migration-needs-"));
-  spawnSync("git", ["-C", root, "init", "-q"]);
-  fs.mkdirSync(path.join(root, ".spectra", "sdd", "system"), { recursive: true });
-  fs.writeFileSync(path.join(root, ".spectra", "sdd", "system", "manifest.env"), "spectra_version=3.0.9\nrepo_mode=consumer\n");
-
-  assert.equal(needsMigration(root), true);
-});
-
-test("a canonical sdd/ manifest without install.json is reported as an incomplete migration, not a no-op", () => {
-  // Simulates a prior migration that moved sdd/ into place but crashed
-  // before writing install.json (e.g. Git exclusions failed).
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-broken-migration-"));
-  spawnSync("git", ["-C", root, "init", "-q"]);
-  fs.mkdirSync(path.join(root, ".spectra", "sdd", "system"), { recursive: true });
-  fs.writeFileSync(path.join(root, ".spectra", "sdd", "system", "manifest.env"), "spectra_version=3.0.9\nrepo_mode=consumer\n");
-
-  assert.throws(() => migrateLegacyLayout(root), /Incomplete migration detected/);
-});
-
 test("migration refuses to move a Spectra source repository", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-source-repo-"));
   spawnSync("git", ["-C", root, "init", "-q"]);

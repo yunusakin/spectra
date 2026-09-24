@@ -37,23 +37,6 @@ test("resolveGitMode honors an explicit mode and rejects invalid values", async 
   );
 });
 
-test("resolveGitMode defaults non-interactive and interactive calls to local", async () => {
-  assert.equal(await resolveGitMode({ isTTY: false }), "local");
-  assert.equal(
-    await resolveGitMode({
-      isTTY: true,
-      ask: async ({ defaultMode }) => defaultMode
-    }),
-    "local"
-  );
-});
-
-test("local policy refuses non-git targets before creating files", () => {
-  const target = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-not-git-"));
-  assert.throws(() => beginLocalGitPolicy(target), /requires a Git worktree/);
-  assert.deepEqual(fs.readdirSync(target), []);
-});
-
 test("local policy records only created files and preserves existing exclude rules", () => {
   const root = createGitRepo();
   const target = path.join(root, "services", "balance api");

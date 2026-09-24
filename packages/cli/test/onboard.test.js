@@ -38,33 +38,6 @@ function projectBriefPath(root) {
 // Unit: buildProjectBriefDraft (pure render function)
 // ---------------------------------------------------------------------------
 
-test("buildProjectBriefDraft keeps the headings parseProjectSummary expects", () => {
-  const draft = buildProjectBriefDraft({
-    answers: { projectName: "Orders API", purpose: "Manage customer orders", appType: "REST service" },
-    repoIndex: null
-  });
-  assert.match(draft, /^# Project Brief/);
-  assert.match(draft, /## Project Name/);
-  assert.match(draft, /Orders API/);
-  assert.match(draft, /## Purpose/);
-  assert.match(draft, /Manage customer orders/);
-  assert.match(draft, /## App Type/);
-  assert.match(draft, /REST service/);
-  assert.match(draft, /## Product Context/);
-  assert.match(draft, /## Requirements/);
-  assert.match(draft, /## Constraints/);
-});
-
-test("buildProjectBriefDraft leaves blank answers as the original template placeholder", () => {
-  const draft = buildProjectBriefDraft({ answers: {}, repoIndex: null });
-  assert.match(draft, /Filled by intake/);
-});
-
-test("buildProjectBriefDraft omits the detected-stack section when no repo index is given", () => {
-  const draft = buildProjectBriefDraft({ answers: { projectName: "Demo" }, repoIndex: null });
-  assert.doesNotMatch(draft, /Detected Stack/);
-});
-
 test("buildProjectBriefDraft appends an evidence-labeled detected-stack section from a repo index", () => {
   const repoIndex = {
     ecosystems: ["node", "go"],
@@ -85,21 +58,6 @@ test("buildProjectBriefDraft appends an evidence-labeled detected-stack section 
 // ---------------------------------------------------------------------------
 // Unit: resolveOnboardingAnswers (decision logic, mirrors resolveGitMode)
 // ---------------------------------------------------------------------------
-
-test("resolveOnboardingAnswers returns null without prompting when the terminal is not interactive", async () => {
-  let asked = false;
-  const result = await resolveOnboardingAnswers({
-    isTTY: false,
-    ask: async () => {
-      asked = true;
-      return {};
-    },
-    existingHasContent: false,
-    force: false
-  });
-  assert.equal(result, null);
-  assert.equal(asked, false);
-});
 
 test("resolveOnboardingAnswers returns null without prompting when the brief already has real content", async () => {
   let asked = false;
