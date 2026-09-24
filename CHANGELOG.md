@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased]
+## [3.1.0] - 2026-09-24
 
-Targets `v3.1.0`. Post-consolidation correctness release. No new product capabilities; the `spectra/v2` schema identifier is unchanged.
+Post-consolidation correctness release. No new product capabilities; the `spectra/v2` schema identifier is unchanged.
 
 ### Fixed
 - **Release approval deadlock.** `verify --profile release` required `release-approved`, the state `approve --stage release-approved` was trying to grant. Release readiness now requires at least `implementation-approved`, so the documented sequence can succeed.
