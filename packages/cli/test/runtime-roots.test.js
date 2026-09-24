@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { cliRoot, git, initProject, localSpectra, run, spectra } from "./helpers/project.js";
+import { cliPath, cliRoot, git, initProject, localSpectra, run, spectra } from "./helpers/project.js";
 
 const invocations = [
   ["installed CLI", spectra],
@@ -169,4 +170,35 @@ test("shell-backed commands resolve the same project from root and nested dirs, 
     const codes = new Set(results.map((entry) => entry.split("=")[1]));
     assert.equal(codes.size, 1, `${args[0]} exit codes differ: ${results.join(", ")}`);
   }
+});
+
+test("doctor checks node only when the CLI runs under Node, not as a native binary", (t) => {
+  // A copy of the Node binary under another name is what process.execPath looks
+  // like for a native (SEA) build. If this Node cannot be relocated there is
+  // nothing to simulate.
+  const sim = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-native-sim-"));
+  fs.mkdirSync(path.join(sim, "bin"));
+  const bin = path.join(sim, "bin", "spectra");
+  fs.copyFileSync(process.execPath, bin);
+  fs.chmodSync(bin, 0o755);
+  // Dynamically linked builds (e.g. Homebrew) load libnode from ../lib.
+  const nodeLib = path.join(path.dirname(fs.realpathSync(process.execPath)), "..", "lib");
+  if (fs.existsSync(nodeLib)) {
+    fs.mkdirSync(path.join(sim, "lib"));
+    for (const name of fs.readdirSync(nodeLib).filter((entry) => entry.startsWith("libnode"))) {
+      fs.copyFileSync(path.join(nodeLib, name), path.join(sim, "lib", name));
+    }
+  }
+  if (run(process.cwd(), bin, ["--version"]).status !== 0) {
+    t.skip("this Node binary is not relocatable, so a native binary cannot be simulated");
+    return;
+  }
+
+  const root = initProject("lite");
+  const native = run(root, bin, [cliPath, "doctor"]);
+  const underNode = spectra(root, ["doctor"]);
+  assert.match(native.stdout, /bash is available/);
+  assert.match(native.stdout, /git is available/);
+  assert.doesNotMatch(native.stdout + native.stderr, /node is (available|missing)/, "native mode must not require node");
+  assert.match(underNode.stdout, /node is (available|missing)/, "Node mode still checks node");
 });
