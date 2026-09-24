@@ -101,15 +101,15 @@ detect_stack() {
 
 top_dirs="$(find "${ROOT}" -maxdepth 1 -mindepth 1 -type d \
   ! -name '.git' ! -name 'node_modules' ! -name 'dist' ! -name 'build' ! -name '.next' \
-  ! -name 'sdd' ! -name '.cursor' ! -name '.windsurf' ! -name '.agent' \
+  ! -name 'sdd' ! -name '.spectra' ! -name '.cursor' ! -name '.windsurf' ! -name '.agent' \
   -exec basename {} \; | sort | sed 's/^/- /')"
 
 module_rows="$(find "${ROOT}" -maxdepth 1 -mindepth 1 -type d \
-  ! -name '.git' ! -name 'node_modules' ! -name 'dist' ! -name 'build' ! -name 'spectra' \
+  ! -name '.git' ! -name 'node_modules' ! -name 'dist' ! -name 'build' ! -name 'spectra' ! -name '.spectra' \
   -exec basename {} \; | sort | awk '{ printf "| %s | Unconfirmed discovered directory | %s/ | |\\n", $0, $0 }')"
 
 test_files="$(find "${ROOT}" -type f \( -name '*test*' -o -name '*spec*' -o -path '*/tests/*' -o -path '*/test/*' \) \
-  ! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/sdd/*' ! -path '*/.cursor/*' ! -path '*/.windsurf/*' ! -path '*/.agent/*' \
+  ! -path '*/node_modules/*' ! -path '*/.git/*' ! -path '*/sdd/*' ! -path '*/.spectra/*' ! -path '*/.cursor/*' ! -path '*/.windsurf/*' ! -path '*/.agent/*' \
   | sed "s#${ROOT}/#- #" | sort | head -20)"
 
 workflow_files="$(

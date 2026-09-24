@@ -233,3 +233,18 @@ test("adopt fails loudly when map-codebase.sh exits non-zero", () => {
     fs.rmSync(brokenAssetsDir, { recursive: true, force: true });
   }
 });
+
+test("adopt discovery never reports Spectra's own .spectra directory as project content", () => {
+  const root = createRepo();
+  fs.mkdirSync(path.join(root, "test"));
+  fs.writeFileSync(path.join(root, "test", "app.test.js"), "");
+  const result = run(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "shared", "--profile", "full"]);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+
+  const memoryBank = path.join(root, ".spectra", "sdd", "memory-bank");
+  const testing = fs.readFileSync(path.join(memoryBank, "discovery", "testing.md"), "utf8");
+  assert.match(testing, /test\/app\.test\.js/, "the project's own test must still be discovered");
+  for (const file of ["discovery/testing.md", "discovery/structure.md", "tech/modules.md"]) {
+    assert.doesNotMatch(fs.readFileSync(path.join(memoryBank, file), "utf8"), /\.spectra/, `${file} lists .spectra`);
+  }
+});
