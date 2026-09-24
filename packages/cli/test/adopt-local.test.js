@@ -162,7 +162,7 @@ test("local adopt refuses a tracked adapter collision before installing", () => 
   ]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /tracked adapter path.*AGENTS\.md/s);
+  assert.match(result.stderr, /(tracked adapter path|Refusing to overwrite).*AGENTS\.md/s);
   assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
   assert.equal(fs.readFileSync(path.join(root, "AGENTS.md"), "utf8"), "company instructions\n");
 });

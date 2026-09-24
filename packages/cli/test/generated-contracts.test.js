@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { cliRoot, initProject, spectra } from "./helpers/project.js";
+import { cliRoot, createGitProject, initProject, spectra } from "./helpers/project.js";
 
 const repoRoot = path.resolve(cliRoot, "..", "..");
 const sourceScripts = path.join(repoRoot, "scripts");
@@ -105,4 +105,14 @@ test("adapters refuse to overwrite user-owned files unless forced; doctor --fix 
 
   assert.equal(spectra(root, ["adapters", "--agents", "claude", "--force"]).status, 0);
   assert.match(fs.readFileSync(claude, "utf8"), /^# Spectra Core Instructions/);
+});
+
+test("init --agents refuses to overwrite an existing user-owned adapter file before installing anything", () => {
+  const root = createGitProject();
+  fs.writeFileSync(path.join(root, "CLAUDE.md"), "# my own notes\n");
+  const result = spectra(root, ["init", ".", "--profile", "full", "--agents", "claude"]);
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr + result.stdout, /Refusing to overwrite/);
+  assert.equal(fs.readFileSync(path.join(root, "CLAUDE.md"), "utf8"), "# my own notes\n");
+  assert.equal(fs.existsSync(path.join(root, ".spectra")), false, "nothing may be installed when the request is refused");
 });
