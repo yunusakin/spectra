@@ -2,7 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { detectLayout, getInstallMetadataPaths, getProjectLayout, getSddRoot } from "./project-layout.js";
+import {
+  findProjectRoot,
+  getInstallMetadataPaths,
+  getProjectLayout,
+  getActiveRoot,
+  getSddRoot,
+  hasSpectraInstall
+} from "./project-layout.js";
 
 function getExecutablePath() {
   try {
@@ -108,7 +115,7 @@ function mergeGitignore(sourcePath, targetPath) {
 }
 
 function findManifestPath(targetRoot) {
-  if (!detectLayout(targetRoot)) {
+  if (!hasSpectraInstall(targetRoot)) {
     return null;
   }
   const manifestPath = path.join(getSddRoot(targetRoot), "system", "manifest.env");
@@ -151,30 +158,7 @@ function getInstalledProfile(targetRoot) {
   return findManifestPath(targetRoot) ? "lite" : "full";
 }
 
-function findSpectraRoot(startDir = process.cwd()) {
-  let current = path.resolve(startDir);
-
-  while (true) {
-    const layout = detectLayout(current);
-
-    if (layout) {
-      // A root-sdd hit inside a directory that also carries install.json
-      // means `current` is itself a data directory (.spectra/ or spectra/);
-      // the project root is its parent.
-      const looksLikeDataDir = layout === "root-sdd" && fs.existsSync(path.join(current, "install.json"));
-      if (looksLikeDataDir && path.dirname(current) !== current) {
-        return path.dirname(current);
-      }
-      return current;
-    }
-
-    const parent = path.dirname(current);
-    if (parent === current) {
-      return null;
-    }
-    current = parent;
-  }
-}
+const findSpectraRoot = findProjectRoot;
 
 function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
   const repoRoot = findSpectraRoot(cwd);
@@ -193,8 +177,7 @@ function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
   // as their working directory: canonical and 3.0.8 installs run inside
   // .spectra/ or spectra/, pre-3.0 and not-installed roots run at the
   // project root.
-  const layout = detectLayout(repoRoot);
-  const dataRoot = layout ? path.dirname(getSddRoot(repoRoot)) : repoRoot;
+  const dataRoot = getActiveRoot(repoRoot);
 
   const result = spawnSync("bash", [scriptPath, ...args], {
     cwd: dataRoot,

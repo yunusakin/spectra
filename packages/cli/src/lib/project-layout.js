@@ -88,8 +88,49 @@ function getInstallMetadataPaths(projectRoot) {
   ];
 }
 
+// True when projectRoot holds a Spectra install in any supported layout.
+function hasSpectraInstall(projectRoot) {
+  return detectLayout(projectRoot) !== null;
+}
+
+// Walks up from startDir to the project root of a Spectra install, or null.
+function findProjectRoot(startDir = process.cwd()) {
+  let current = path.resolve(startDir);
+
+  while (true) {
+    const layout = detectLayout(current);
+
+    if (layout) {
+      // A root-sdd hit inside a directory that also carries install.json
+      // means `current` is itself a data directory (.spectra/ or spectra/);
+      // the project root is its parent.
+      const looksLikeDataDir = layout === "root-sdd" && fs.existsSync(path.join(current, "install.json"));
+      if (looksLikeDataDir && path.dirname(current) !== current) {
+        return path.dirname(current);
+      }
+      return current;
+    }
+
+    const parent = path.dirname(current);
+    if (parent === current) {
+      return null;
+    }
+    current = parent;
+  }
+}
+
+// The directory whose sdd/ and cache/ a project reads from, and the working
+// directory of runtime shell scripts: the data root for canonical and 3.0.8
+// installs, the project root for pre-3.0 root-sdd installs and before install.
+function getActiveRoot(projectRoot) {
+  return hasSpectraInstall(projectRoot) ? path.dirname(getSddRoot(projectRoot)) : path.resolve(projectRoot);
+}
+
 export {
   detectLayout,
+  findProjectRoot,
+  getActiveRoot,
+  hasSpectraInstall,
   getCacheRoot,
   getDataRoot,
   getInstallMetadataPaths,
