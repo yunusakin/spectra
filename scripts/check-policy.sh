@@ -514,7 +514,7 @@ validate_skill_run_row() {
       add_error "${line}"
     done <<< "${output}"
 
-    if echo "${output}" | grep -q .; then
+    if grep -q . <<< "${output}"; then
       return 1
     fi
   fi
@@ -628,12 +628,12 @@ fi
 # 4. Invariant change trail
 ###################################
 if [[ -n "${changed_files}" ]]; then
-  if echo "${changed_files}" | grep -qx "${invariants_file}"; then
+  if grep -qx "${invariants_file}" <<< "${changed_files}"; then
     has_trail=false
-    if echo "${changed_files}" | grep -qx "${spec_history_file}"; then
+    if grep -qx "${spec_history_file}" <<< "${changed_files}"; then
       has_trail=true
     fi
-    if echo "${changed_files}" | grep -qx "${arch_decisions_file}"; then
+    if grep -qx "${arch_decisions_file}" <<< "${changed_files}"; then
       has_trail=true
     fi
 
@@ -703,7 +703,7 @@ if [[ "${repo_mode}" == "consumer" && -n "${changed_files}" ]]; then
   done <<< "${changed_files}"
 
   if "${has_spec_or_code_change}"; then
-    if ! echo "${changed_files}" | grep -qx "${progress_file}"; then
+    if ! grep -qx "${progress_file}" <<< "${changed_files}"; then
       add_error "Spec/code files changed in checked range but ${progress_file} was not updated."
     fi
   fi
@@ -724,7 +724,7 @@ if [[ -n "${changed_files}" ]]; then
 fi
 
 if "${has_app_change_in_range}"; then
-  if ! echo "${changed_files}" | grep -qx "${skill_runs_file}"; then
+  if ! grep -qx "${skill_runs_file}" <<< "${changed_files}"; then
     add_error "app/* changed in checked range but ${skill_runs_file} was not updated."
   fi
 

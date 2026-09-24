@@ -118,3 +118,16 @@ test("init --agents refuses to overwrite an existing user-owned adapter file bef
   assert.equal(fs.readFileSync(path.join(root, "CLAUDE.md"), "utf8"), "# my own notes\n");
   assert.equal(fs.existsSync(path.join(root, ".spectra")), false, "nothing may be installed when the request is refused");
 });
+
+test("spectra check does not misreport listed prompts when the prompts index is very large", () => {
+  // The validators pipe the index into `grep -q` under `set -o pipefail`. grep exits
+  // on the first match, so a large index makes the writer die of SIGPIPE and the
+  // pipeline fail even though the prompt IS listed.
+  const root = initProject("full");
+  const index = path.join(root, ".spectra", "sdd", "system", "prompts", "index.md");
+  const padding = Array.from({ length: 9000 }, (_, i) => `- \`zzz/padding-entry-${String(i).padStart(5, "0")}-xxxxxxxxxxxxxxxx.md\``);
+  fs.appendFileSync(index, `\n${padding.join("\n")}\n`);
+
+  const result = spectra(root, ["check"]);
+  assert.doesNotMatch(result.stdout + result.stderr, /not listed in prompts index/);
+});

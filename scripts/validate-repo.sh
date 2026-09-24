@@ -195,10 +195,10 @@ check_skill_dependency_map() {
     [[ -n "${from}${to}${relation}${required}${order_weight}${reason}" ]] || continue
     [[ "${from}" =~ ^# ]] && continue
     has_row=1
-    if ! printf '%s\n' "${known_skills}" | grep -qx "${from}"; then
+    if ! grep -qx "${from}" <<< "${known_skills}"; then
       add_error "${map_file}:${row_no}: unknown skill '${from}'"
     fi
-    if ! printf '%s\n' "${known_skills}" | grep -qx "${to}"; then
+    if ! grep -qx "${to}" <<< "${known_skills}"; then
       add_error "${map_file}:${row_no}: unknown skill '${to}'"
     fi
     [[ "${from}" != "${to}" ]] || add_error "${map_file}:${row_no}: self-loop not allowed"
@@ -359,7 +359,7 @@ if [[ -d "${skills_dir}" ]]; then
     task_types="$(extract_front_matter_field "${skill_md}" "task_types")"
     [[ -n "${task_types}" ]] || add_error "${skill_md}: front matter missing \`task_types\`"
 
-    if [[ -n "${indexed_skills}" ]] && ! printf '%s\n' "${indexed_skills}" | grep -qx "${skill_name}"; then
+    if [[ -n "${indexed_skills}" ]] && ! grep -qx "${skill_name}" <<< "${indexed_skills}"; then
       add_error "${d}: not listed in sdd/system/skills/index.md"
     fi
   done
@@ -377,7 +377,7 @@ if [[ -f "${prompts_index}" ]]; then
   )"
   while IFS= read -r -d '' p; do
     rel="${p#${prompts_root}/}"
-    if ! printf '%s\n' "${indexed_prompts}" | grep -qx "${rel}"; then
+    if ! grep -qx "${rel}" <<< "${indexed_prompts}"; then
       add_error "${prompts_root}/${rel}: not listed in prompts index"
     fi
   done < <(
