@@ -315,3 +315,15 @@ test("Lite task writes its implementation brief under .spectra/sdd", () => {
   assert.match(brief, /Create the order flow/);
   assert.equal(fs.existsSync(path.join(root, "sdd")), false);
 });
+
+test("init writes a Windows launcher that runs the project's local Node CLI", () => {
+  const root = createGitProject();
+  assert.equal(run(root, process.execPath, [cliPath, "init", "."]).status, 0);
+
+  const cmd = fs.readFileSync(path.join(root, ".spectra", "bin", "spectra.cmd"), "utf8");
+  assert.match(cmd, /\r\n/, "batch files need CRLF line endings");
+  assert.match(cmd, /%~dp0/);
+  assert.match(cmd, /\.\.\\cli\\bin\\spectra\.js/);
+  // The referenced local CLI must actually exist in the install.
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "cli", "bin", "spectra.js")), true);
+});
