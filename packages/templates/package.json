@@ -6,9 +6,6 @@
   "exports": {
     ".": "./src/index.js"
   },
-  "scripts": {
-    "test": "node --test test/*.test.js"
-  },
   "files": [
     "src",
     "assets"

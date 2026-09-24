@@ -57,3 +57,37 @@ test("spectra verify --help still prints usage and succeeds", () => {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(result.stdout, /Usage: spectra verify/);
 });
+
+test("--cwd=<value> keeps '=' inside the value and targets that project", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-opt-"));
+  const project = path.join(root, "a=b");
+  fs.mkdirSync(project);
+  const git = (...args) => assert.equal(spawnSync("git", args, { cwd: project }).status, 0);
+  git("init", "-q");
+  git("config", "user.email", "spectra@example.test");
+  git("config", "user.name", "Spectra Test");
+  fs.writeFileSync(path.join(project, "only-here.txt"), "x");
+  git("add", "only-here.txt");
+  git("commit", "-qm", "initial");
+  assert.equal(run(["init", "."], { cwd: project }).status, 0);
+
+  const result = run(["status", `--cwd=${project}`], { cwd: root });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /only-here\.txt/);
+});
+
+test("--yes=false is accepted as a boolean value", () => {
+  const project = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-opt-yes-"));
+  const git = (...args) => assert.equal(spawnSync("git", args, { cwd: project }).status, 0);
+  git("init", "-q");
+  git("config", "user.email", "spectra@example.test");
+  git("config", "user.name", "Spectra Test");
+  fs.writeFileSync(path.join(project, "f.txt"), "x");
+  git("add", "f.txt");
+  git("commit", "-qm", "initial");
+  assert.equal(run(["init", "."], { cwd: project }).status, 0);
+
+  const result = run(["update", "--yes=false"], { cwd: project });
+  assert.equal(result.status, 0, result.stderr);
+  assert.doesNotMatch(result.stderr, /Unknown option|requires a value|accepted values/);
+});
