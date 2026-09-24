@@ -465,7 +465,11 @@ adapter_outputs=(
 
 if [[ "${repo_mode}" == "canonical" ]]; then
   for p in "${adapter_outputs[@]}"; do
-    [[ ! -e "${p}" ]] || add_error "Canonical repo must not commit generated adapter output: ${p}"
+    # Generated adapters always start with a "# Spectra ..." header. A file
+    # without one is hand-written project guidance and is not Spectra output.
+    if [[ -e "${p}" ]] && head -n 1 "${p}" | grep -q '^# Spectra '; then
+      add_error "Canonical repo must not commit generated adapter output: ${p}"
+    fi
   done
 elif [[ "${repo_mode}" == "consumer" ]]; then
   for p in "${adapter_outputs[@]}"; do
