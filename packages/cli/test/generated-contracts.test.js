@@ -80,8 +80,10 @@ test("shell scripts distinguish the project root from the data root", () => {
 
 test("agent adapter files are regenerable projections of .spectra state", () => {
   const root = initProject("full");
-  const files = ["CLAUDE.md", "AGENTS.md", ".cursor/rules"].map((f) => path.join(root, f));
-  const generate = () => spectra(root, ["adapters", "--agents", "claude,codex,cursor"]);
+  // codex is left out on purpose: it needs the codex CLI on PATH, which the
+  // projection contract does not depend on.
+  const files = ["CLAUDE.md", ".github/copilot-instructions.md", ".cursor/rules"].map((f) => path.join(root, f));
+  const generate = () => spectra(root, ["adapters", "--agents", "claude,copilot,cursor"]);
   assert.equal(generate().status, 0);
   const snapshot = (file) => (fs.statSync(file).isDirectory() ? walk(file).map((f) => fs.readFileSync(f, "utf8")).join("\n") : fs.readFileSync(file, "utf8"));
   const before = files.map(snapshot);
