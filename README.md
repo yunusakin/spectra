@@ -256,7 +256,6 @@ Repository layout for maintainers:
 
 - `packages/cli/` — npm CLI and repo-local launcher implementation
 - `packages/core/assets/runtime/` — runtime scripts copied into installed projects
-- `profiles/full/` — source runtime and project templates
 - `packages/templates/` — published project template package
 - `docs/` — contributor/user documentation for this repository
 - `scripts/` — repository maintenance scripts, not the supported consumer setup interface

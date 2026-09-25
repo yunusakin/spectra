@@ -26,10 +26,6 @@ tracked_events:
       - NFR-1
     required: true
     fields:
-      - name: profile
-        type: string
-        required: true
-        pii: none
       - name: confidence_score
         type: number
         required: true
