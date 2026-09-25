@@ -9,8 +9,8 @@
     "test": "npm test --workspaces --if-present",
     "spectra": "node packages/cli/bin/spectra.js",
     "doctor": "node packages/cli/bin/spectra.js doctor",
-    "validate": "node packages/cli/bin/spectra.js validate",
-    "verify": "node packages/cli/bin/spectra.js verify"
+    "check": "bash scripts/validate-repo.sh --strict",
+    "verify": "bash scripts/verify-work.sh"
   },
   "engines": {
     "node": ">=20"

@@ -9,11 +9,12 @@ const helperDir = path.dirname(fileURLToPath(import.meta.url));
 const cliRoot = path.resolve(helperDir, "..", "..");
 const cliPath = path.join(cliRoot, "bin", "spectra.js");
 
-function run(cwd, command, args, env = {}) {
+function run(cwd, command, args, env = {}, options = {}) {
   return spawnSync(command, args, {
     cwd,
     encoding: "utf8",
-    env: { ...process.env, SPECTRA_ASSETS_DIR: path.join(cliRoot, "assets"), ...env }
+    env: { ...process.env, SPECTRA_ASSETS_DIR: path.join(cliRoot, "assets"), ...env },
+    ...options
   });
 }
 
@@ -27,10 +28,11 @@ function spectra(cwd, args, env) {
 // when the command is run from a nested directory.
 function localSpectra(cwd, args, env) {
   let dir = cwd;
-  while (!fs.existsSync(path.join(dir, ".spectra", "bin", "spectra")) && path.dirname(dir) !== dir) {
+  const launcher = process.platform === "win32" ? "spectra.cmd" : "spectra";
+  while (!fs.existsSync(path.join(dir, ".spectra", "bin", launcher)) && path.dirname(dir) !== dir) {
     dir = path.dirname(dir);
   }
-  return run(cwd, path.join(dir, ".spectra", "bin", "spectra"), args, env);
+  return run(cwd, path.join(dir, ".spectra", "bin", launcher), args, env, { shell: process.platform === "win32" });
 }
 
 function git(cwd, ...args) {
