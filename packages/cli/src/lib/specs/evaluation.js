@@ -81,8 +81,8 @@ function evaluateScenario(scenario, featureSpec, behaviorSpec, telemetryContract
   };
 }
 
-function runCommand(command, cwd) {
-  return spawnSync(command, { cwd, shell: true, encoding: "utf8", timeout: 60_000, maxBuffer: 1024 * 1024 });
+function runCommand(command, cwd, env = process.env) {
+  return spawnSync(command, { cwd, env, shell: true, encoding: "utf8", timeout: 60_000, maxBuffer: 1024 * 1024 });
 }
 
 function evaluateCommandScenario(repoRoot, scenario, result, setupError) {
@@ -93,6 +93,18 @@ function evaluateCommandScenario(repoRoot, scenario, result, setupError) {
   }
   if (typeof scenario.input?.command !== "string" || !scenario.input.command.trim()) {
     result.reasons.push("command mode requires input.command");
+    result.passed = false;
+    return result;
+  }
+  const fixturePlaceholders = scenario.input.command.match(/<[^<>]*-fixture>/g) ?? [];
+  const unsupportedFixture = fixturePlaceholders.find((placeholder) => placeholder !== "<case-fixture>");
+  if (unsupportedFixture) {
+    result.reasons.push(`unsupported fixture placeholder ${unsupportedFixture}`);
+    result.passed = false;
+    return result;
+  }
+  if (scenario.input.fixture && !scenario.input.command.includes("<case-fixture>")) {
+    result.reasons.push("fixture files require input.command to include <case-fixture>");
     result.passed = false;
     return result;
   }
@@ -107,11 +119,11 @@ function evaluateCommandScenario(repoRoot, scenario, result, setupError) {
       ensureDirectory(path.dirname(target));
       fs.writeFileSync(target, file.content ?? "");
     }
-    const quotedFixture = process.platform === "win32"
-      ? `"${fixtureRoot}"`
-      : `'${fixtureRoot.replaceAll("'", "'\\''")}'`;
-    const command = scenario.input.command.replace(/<[\w-]*fixture>/g, quotedFixture);
-    const actual = runCommand(command, repoRoot);
+    const fixtureVariable = process.platform === "win32"
+      ? '"%SPECTRA_EVAL_FIXTURE_ROOT%"'
+      : '"$SPECTRA_EVAL_FIXTURE_ROOT"';
+    const command = scenario.input.command.replaceAll("<case-fixture>", fixtureVariable);
+    const actual = runCommand(command, repoRoot, { ...process.env, SPECTRA_EVAL_FIXTURE_ROOT: fixtureRoot });
     if (actual.error) result.reasons.push(`command failed: ${actual.error.message}`);
     const expected = scenario.expected ?? {};
     if (typeof expected.exit_code !== "number") result.reasons.push("command mode requires expected.exit_code");
