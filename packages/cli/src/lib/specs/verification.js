@@ -65,10 +65,22 @@ function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}
   });
 
   const releaseChecklistWarnings = [];
+  if (featureDirs.length === 0) {
+    releaseChecklistWarnings.push("no feature release checklists found");
+  }
   for (const featureDir of featureDirs) {
     const checklistPath = path.join(featureDir, "release-checklist.md");
+    if (!fs.existsSync(checklistPath)) {
+      releaseChecklistWarnings.push(`${path.relative(repoRoot, checklistPath)} release checklist is missing`);
+      continue;
+    }
     const markdown = readMarkdown(checklistPath);
-    const unchecked = markdown.split(/\r?\n/).filter((line) => /^- \[ \]/.test(line)).length;
+    const checklistItems = markdown.split(/\r?\n/).filter((line) => /^- \[[ xX]\]/.test(line));
+    if (checklistItems.length === 0) {
+      releaseChecklistWarnings.push(`${path.relative(repoRoot, checklistPath)} has no checklist items`);
+      continue;
+    }
+    const unchecked = checklistItems.filter((line) => /^- \[ \]/.test(line)).length;
     if (unchecked > 0) {
       releaseChecklistWarnings.push(`${path.relative(repoRoot, checklistPath)} has ${unchecked} unchecked item(s)`);
     }

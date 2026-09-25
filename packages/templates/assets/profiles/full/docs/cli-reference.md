@@ -169,7 +169,7 @@ spectra verify
 
 - There is no public `spectra feature` command. The core executable spec bundle is created by `init` or `adopt`.
 - Prefer single-word commands in user-facing workflows.
-- In Full, use `spectra diff semantic` after meaningful spec changes to understand approval impact.
+- Use `spectra diff semantic` after meaningful spec changes to understand approval impact.
 
 ## Versioning and Migration
 

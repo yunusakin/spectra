@@ -118,6 +118,32 @@ test("release approval is refused while the release checklist is incomplete", ()
   assert.match(result.stderr + result.stdout, /Cannot approve release stage/);
 });
 
+test("verify and release approval require present, non-empty release checklists", () => {
+  const root = initProject();
+  approveThrough(root, "implementation-approved");
+  completeReleaseChecklists(root);
+
+  const featureDir = path.join(root, ".spectra", "sdd", "features", fs.readdirSync(path.join(root, ".spectra", "sdd", "features"))[0]);
+  const checklist = path.join(featureDir, "release-checklist.md");
+  const progress = path.join(root, ".spectra", "sdd", "memory-bank", "core", "progress.md");
+
+  fs.appendFileSync(progress, "\n- Release checklist integrity checked.\n");
+  fs.writeFileSync(checklist, "# Release Checklist\n");
+  commitAll(root, "empty release checklist");
+  const emptyVerify = spectra(root, ["verify"]);
+  assert.notEqual(emptyVerify.status, 0);
+  assert.match(emptyVerify.stdout + emptyVerify.stderr, /no checklist items/i);
+  assert.notEqual(approve(root, "release-approved").status, 0);
+
+  fs.appendFileSync(progress, "\n- Missing release checklist check recorded.\n");
+  fs.unlinkSync(checklist);
+  commitAll(root, "remove release checklist");
+  const missingVerify = spectra(root, ["verify"]);
+  assert.notEqual(missingVerify.status, 0);
+  assert.match(missingVerify.stdout + missingVerify.stderr, /release checklist is missing/i);
+  assert.notEqual(approve(root, "release-approved").status, 0);
+});
+
 test("release approval enforces verify-work.sh the same way as verify", () => {
   const root = initProject();
   approveThrough(root, "implementation-approved");
