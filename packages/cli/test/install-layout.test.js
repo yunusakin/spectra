@@ -77,6 +77,18 @@ test("Lite runtime guidance only advertises files installed for Lite", () => {
   assert.deepEqual(missing, []);
 });
 
+test("Lite installed CLI reference recommends a Lite daily flow", () => {
+  const root = createGitProject();
+  const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "lite"]);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+
+  const reference = fs.readFileSync(path.join(root, ".spectra", "docs", "cli-reference.md"), "utf8");
+  const flow = reference.split("## Recommended Daily Flow")[1]?.split("## Notes")[0] ?? "";
+  assert.match(flow, /spectra task/);
+  assert.match(flow, /spectra status/);
+  assert.doesNotMatch(flow, /spectra (?:approve|eval)\b/);
+});
+
 test("setup rejects an unsupported profile before writing files", () => {
   const root = createGitProject();
   const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "unsupported"]);

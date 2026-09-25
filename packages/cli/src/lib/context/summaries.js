@@ -89,6 +89,16 @@ function listContextModules() {
   }
 }
 
+function sourceChangedSince(sourcePath, outputMtime) {
+  if (!fs.existsSync(sourcePath)) return false;
+  const stats = fs.statSync(sourcePath);
+  if (stats.mtimeMs > outputMtime) return true;
+  if (!stats.isDirectory()) return false;
+  return fs.readdirSync(sourcePath, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() || entry.isFile())
+    .some((entry) => sourceChangedSince(path.join(sourcePath, entry.name), outputMtime));
+}
+
 function needsRebuild(outputPath, sourcePaths) {
   if (!fs.existsSync(outputPath)) {
     return true;
@@ -98,9 +108,7 @@ function needsRebuild(outputPath, sourcePaths) {
   // pack selection) invalidates generated summaries, not just the facade.
   const contextModuleFiles = import.meta.url ? [new URL("../context.js", import.meta.url), ...listContextModules()] : [];
   const outputMtime = fs.statSync(outputPath).mtimeMs;
-  return [...contextModuleFiles, ...sourcePaths].filter(Boolean).some(
-    (sourcePath) => fs.existsSync(sourcePath) && fs.statSync(sourcePath).mtimeMs > outputMtime
-  );
+  return [...contextModuleFiles, ...sourcePaths].filter(Boolean).some((sourcePath) => sourceChangedSince(sourcePath, outputMtime));
 }
 
 function ensureContextSummaries(repoRoot) {

@@ -26,6 +26,17 @@ Native Context Refresh Marker
 BRIEF
   "$project/.spectra/bin/spectra" context --role implementer --goal implement --cwd "$project"
   grep -F 'Native Context Refresh Marker' "$project/.spectra/cache/context/project.summary.json"
+  if [[ "$profile" == "full" ]]; then
+    feature_specs=("$project"/.spectra/sdd/features/*/feature.spec.yaml)
+    test -f "${feature_specs[0]}"
+    sleep 1
+    cat > "${feature_specs[0]}" <<'SPEC'
+{"kind":"FeatureSpec","metadata":{"status":"review-ready"},"requirements":{"functional":[],"nonFunctional":[]}}
+SPEC
+    "$project/.spectra/bin/spectra" context --role implementer --goal implement --cwd "$project"
+    grep -F 'review-ready' "$project/.spectra/cache/context/feature-bundle.summary.json"
+    grep -F 'review-ready' "$project/.spectra/cache/context/shared-core.summary.json"
+  fi
   SPECTRA_LATEST_VERSION="$version" "$project/.spectra/bin/spectra" update --cwd "$project"
   grep -F "\"profile\": \"$profile\"" "$project/.spectra/install.json"
 done
