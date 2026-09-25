@@ -24,17 +24,10 @@ test("spectra verify --unknown fails clearly", () => {
   assert.match(result.stderr, /Unknown option: --unknown/);
 });
 
-test("spectra verify --profile fails clearly instead of running", () => {
-  const result = run(["verify", "--profile"]);
+test("spectra verify rejects the removed verification profile option", () => {
+  const result = run(["verify", "--profile", "release"]);
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /Option --profile requires a value/);
-});
-
-test("spectra verify --profile --help reports the missing value", () => {
-  const result = run(["verify", "--profile", "--help"]);
-  assert.equal(result.status, 1);
-  assert.match(result.stderr, /Option --profile requires a value/);
-  assert.doesNotMatch(result.stdout, /Usage: spectra verify/);
+  assert.match(result.stderr, /Unknown option: --profile/);
 });
 
 test("spectra verify --help=false runs without showing help", () => {

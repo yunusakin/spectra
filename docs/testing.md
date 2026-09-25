@@ -61,9 +61,11 @@ Purpose:
 Run it:
 
 ```bash
-spectra verify --profile standard
-spectra verify --profile release
+spectra verify
 ```
+
+`spectra verify` runs the release-grade verification suite, including release
+evals and approval checklist gates.
 
 Use it:
 
@@ -75,7 +77,7 @@ Use it:
 ```bash
 spectra check
 spectra eval <feature-id> --suite smoke
-spectra verify --profile release
+spectra verify
 ```
 
 ## What Should Block Work

@@ -73,7 +73,7 @@ spectra eval my-product-core --suite release
 ## Verify
 
 ```bash
-spectra verify --profile release
+spectra verify
 ```
 
 Verify aggregates:

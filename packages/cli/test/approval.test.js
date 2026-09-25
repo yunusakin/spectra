@@ -99,14 +99,14 @@ test("stages progress sequentially through release approval", () => {
   const root = initProject();
   approveThrough(root, "release-approved");
   assert.equal(approvalState(root).current_state, "release-approved");
-  assert.equal(spectra(root, ["verify", "--profile", "release"]).status, 0);
+  assert.equal(spectra(root, ["verify"]).status, 0);
 });
 
 test("release verify passes at implementation-approved once prerequisites hold (no approval deadlock)", () => {
   const root = initProject();
   approveThrough(root, "implementation-approved");
   completeReleaseChecklists(root);
-  const verify = spectra(root, ["verify", "--profile", "release"]);
+  const verify = spectra(root, ["verify"]);
   assert.equal(verify.status, 0, verify.stdout + verify.stderr);
 });
 
@@ -126,7 +126,7 @@ test("release approval enforces verify-work.sh the same way as verify", () => {
   // invisible to the JS-side spec validation, so only the shell check can catch it.
   const progress = path.join(root, ".spectra", "sdd", "memory-bank", "core", "progress.md");
   fs.appendFileSync(progress, "\n- Owner: `<unresolved-owner>`\n");
-  const verify = spectra(root, ["verify", "--profile", "release"]);
+  const verify = spectra(root, ["verify"]);
   const approval = approve(root, "release-approved");
   assert.notEqual(verify.status, 0, "verify must fail when verify-work.sh fails");
   assert.notEqual(approval.status, 0, "release approval must not bypass verify-work.sh");
@@ -209,6 +209,6 @@ test("release approval is refused when the release eval suite is below threshold
     }
   }
   completeReleaseChecklists(root);
-  assert.notEqual(spectra(root, ["verify", "--profile", "release"]).status, 0);
+  assert.notEqual(spectra(root, ["verify"]).status, 0);
   assert.notEqual(approve(root, "release-approved").status, 0);
 });

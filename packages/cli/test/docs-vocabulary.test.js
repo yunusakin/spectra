@@ -29,7 +29,7 @@ const STALE = [
   [/`\/spectra\/`/, "3.0.8 Git exclude pattern"],
   [/does not (use|create)[\s\S]*?`\.spectra\/`[\s\S]*?\bcanonical\b/i, "lists .spectra/ as non-canonical (self-contradictory)"],
   [/does not create root-level `\.spectra\/`/i, "lists .spectra/ as a directory Spectra does not create"],
-  [/--profile\s+(?:<lite\|full>|full|lite)|spectra upgrade|\bLite (?:profile|is the default)|\bFull profile\b/i, "removed installation profile guidance"]
+  [/--profile\s+(?:<lite\|full>|full|lite)|spectra upgrade|spectra verify[^\n]*--profile|\bLite (?:profile|is the default)|\bFull profile\b/i, "removed installation profile guidance"]
 ];
 
 test("docs teach canonical commands and paths only", { skip: files.length === 0 }, () => {

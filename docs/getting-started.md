@@ -181,7 +181,7 @@ Eval suites exercise golden scenarios, regression cases, failure modes, refusal 
 ## 11. Verify Release Confidence
 
 ```bash
-spectra verify --profile release
+spectra verify
 ```
 
 Release verification aggregates structure, policy, verify-work checks (manifest, policy and memory files; project tests are not run), eval readiness, telemetry coverage, approval state, and release thresholds.

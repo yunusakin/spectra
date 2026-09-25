@@ -10,7 +10,7 @@ import { hasRealMarkdownContent, writeJsonContract } from "./primitives.js";
 
 // `shellStatus` is the exit status of verify-work.sh, run by the caller (see
 // lib/verify-runner.js) so release approval enforces the same checks as
-// `spectra verify --profile release`.
+// `spectra verify`.
 function approveStage(repoRoot, stage, { shellStatus } = {}) {
   ensureStageAllowed(stage);
 
@@ -36,9 +36,9 @@ function approveStage(repoRoot, stage, { shellStatus } = {}) {
     if (shellStatus === undefined) {
       throw new Error("Cannot approve release stage: verify-work.sh status is required.");
     }
-    const releaseReport = verifyV2(repoRoot, { scope: "all", profile: "release", shellStatus });
+    const releaseReport = verifyV2(repoRoot, { scope: "all", shellStatus });
     if (releaseReport.blocked) {
-      throw new Error(`Cannot approve release stage: verify --profile release is ${releaseReport.verdict}.`);
+      throw new Error(`Cannot approve release stage: verify is ${releaseReport.verdict}.`);
     }
   }
 

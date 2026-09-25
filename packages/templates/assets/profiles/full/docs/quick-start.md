@@ -113,7 +113,7 @@ spectra approve --stage product-approved
 spectra approve --stage technical-approved
 spectra approve --stage implementation-approved
 spectra eval <feature-id> --suite smoke
-spectra verify --profile release
+spectra verify
 ```
 
 `spectra admin <command>` still works as a compatibility alias for these commands, but the top-level forms above are the documented ones.

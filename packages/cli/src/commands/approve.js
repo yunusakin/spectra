@@ -32,7 +32,7 @@ function approveCommand(argv) {
   ok(`Approval stage updated: ${previous} -> ${updated.current_state}`);
   next("./.spectra/bin/spectra check");
   if (updated.current_state === "release-approved") {
-    next("./.spectra/bin/spectra verify --profile release");
+    next("./.spectra/bin/spectra verify");
   }
   return 0;
 }

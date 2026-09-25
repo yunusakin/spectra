@@ -9,7 +9,7 @@ import { validateSpectraV2 } from "./validation.js";
 import { computeApprovalState } from "./approval-state.js";
 import { runEvalSuite } from "./evaluation.js";
 
-function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", shellStatus = 0 } = {}) {
+function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}) {
   const validation = validateSpectraV2(repoRoot);
   const approvalState = computeApprovalState(repoRoot);
   const reviewSummary = readJsonContract(path.join(getCacheRoot(repoRoot), "context", "review.summary.json"), {
@@ -38,10 +38,10 @@ function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", 
     detail: `highest valid stage: ${approvalState.highest_valid_state}`
   });
 
-  const evalReport = runEvalSuite(repoRoot, { suiteId: profile === "release" ? "release" : "smoke" });
+  const evalReport = runEvalSuite(repoRoot, { suiteId: "release" });
   stages.push({
     name: "evals",
-    blocking: profile === "release" ? !evalReport.passed : false,
+    blocking: !evalReport.passed,
     warnings: evalReport.passed ? [] : ["eval suite is below release threshold"],
     score: evalReport.passed ? 1 : 0.4,
     detail: `pass rate ${evalReport.totals.pass_rate.toFixed(2)}`
@@ -65,18 +65,15 @@ function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", 
   });
 
   const releaseChecklistWarnings = [];
-  if (profile === "release") {
-    for (const featureDir of featureDirs) {
-      const checklistPath = path.join(featureDir, "release-checklist.md");
-      const markdown = readMarkdown(checklistPath);
-      const unchecked = markdown.split(/\r?\n/).filter((line) => /^- \[ \]/.test(line)).length;
-      if (unchecked > 0) {
-        releaseChecklistWarnings.push(`${path.relative(repoRoot, checklistPath)} has ${unchecked} unchecked item(s)`);
-      }
+  for (const featureDir of featureDirs) {
+    const checklistPath = path.join(featureDir, "release-checklist.md");
+    const markdown = readMarkdown(checklistPath);
+    const unchecked = markdown.split(/\r?\n/).filter((line) => /^- \[ \]/.test(line)).length;
+    if (unchecked > 0) {
+      releaseChecklistWarnings.push(`${path.relative(repoRoot, checklistPath)} has ${unchecked} unchecked item(s)`);
     }
   }
   const releaseBlocked =
-    profile === "release" &&
     (releaseChecklistWarnings.length > 0 ||
       stageOrder(approvalState.highest_valid_state) < stageOrder("implementation-approved"));
   stages.push({
@@ -84,7 +81,7 @@ function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", 
     blocking: releaseBlocked,
     warnings: releaseChecklistWarnings,
     score: releaseBlocked ? 0.3 : 1,
-    detail: profile === "release" ? `current stage: ${approvalState.highest_valid_state}` : "profile standard"
+    detail: `current stage: ${approvalState.highest_valid_state}`
   });
 
   const indexFreshness = checkIndexFreshness(repoRoot);
@@ -147,7 +144,6 @@ function verifyV2(repoRoot, { scope = "all", item = null, profile = "standard", 
   const blocked = stages.some((stage) => stage.blocking);
 
   return {
-    profile,
     scope,
     item,
     stages,

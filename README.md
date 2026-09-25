@@ -166,7 +166,7 @@ spectra approve --stage implementation-approved          # gate: cleared to star
 spectra task --item FEAT-001 --task-type feature --goal "Implement the product flow"
 spectra context --role implementer --goal implement    # load context for coding
 spectra eval <feature-id> --suite smoke                 # run the feature's evaluation suite
-spectra verify --profile release                        # aggregate checks into a release-confidence score
+spectra verify                                          # aggregate release-grade checks into a confidence score
 spectra approve --stage release-approved                # gate: cleared to ship
 ```
 

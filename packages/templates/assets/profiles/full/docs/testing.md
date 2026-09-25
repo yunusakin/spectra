@@ -59,8 +59,7 @@ Purpose:
 Run it:
 
 ```bash
-spectra verify --profile standard
-spectra verify --profile release
+spectra verify
 ```
 
 Use it:
@@ -73,7 +72,7 @@ Use it:
 ```bash
 spectra check
 spectra eval <feature-id> --suite smoke
-spectra verify --profile release
+spectra verify
 ```
 
 ## What Should Block Work
