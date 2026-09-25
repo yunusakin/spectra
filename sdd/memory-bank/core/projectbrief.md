@@ -12,7 +12,7 @@ Provide a native, CLI-first spec-driven development framework that keeps product
 Developer CLI and reusable project runtime
 
 ## Product Context
-Spectra is distributed through npm and standalone macOS/Linux binaries. It supports Lite and Full profiles, keeps generated state under `spectra/`, and can be used privately through Git local-exclude mode or committed through shared mode.
+Spectra is distributed through npm and standalone macOS/Linux binaries. Every project receives the complete Spectra workflow by default, with generated state under `.spectra/`; projects can keep that state private through Git local-exclude mode or commit it through shared mode.
 
 <!--
 Example:
@@ -32,14 +32,14 @@ Example:
 ## Requirements
 
 ### Functional Requirements
-- Initialize and adopt repositories with Lite or Full profiles.
-- Keep all Spectra-owned generated content under `spectra/`.
+- Initialize and adopt repositories with the complete Spectra workflow by default.
+- Keep all Spectra-owned generated content under `.spectra/`.
 - Provide concise context, task, check, status, help, and update workflows.
 - Support safe legacy-layout migration and native installation without Node or npm.
 
 ### Non-Functional Requirements
 - Preserve company files and Git policies during local-mode installation and migration.
-- Keep npm, native, runtime, and profile versions synchronized.
+- Keep npm, native, and runtime versions synchronized.
 - Verify behavior through automated CLI and native smoke tests.
 
 <!--

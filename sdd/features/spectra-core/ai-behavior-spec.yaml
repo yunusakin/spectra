@@ -82,7 +82,7 @@ refusal_policy:
   safe_alternatives:
     - run spectra validate
     - run spectra approve --stage implementation-approved
-    - run spectra verify --profile release
+    - run spectra verify
 observability_events:
   - name: spectra_context_pack_requested
     trigger: context-pack command runs
