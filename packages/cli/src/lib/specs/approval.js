@@ -1,8 +1,9 @@
 import path from "node:path";
 import { getSddRoot } from "../project-layout.js";
-import { getCurrentCommit, getChangedFiles, isGitRepo } from "../git-diff.js";
+import { getCurrentCommit, isGitRepo } from "../git-diff.js";
 import { stageOrder } from "./stages.js";
-import { computeApprovalState, loadApprovalState, syncLegacyApprovalStatus, ensureStageAllowed } from "./approval-state.js";
+import { computeApprovalState, loadApprovalState, syncLegacyApprovalStatus, ensureStageAllowed, stageIsValid } from "./approval-state.js";
+import { buildSemanticDiff } from "./semantic-diff.js";
 import { validateSpectraV2 } from "./validation.js";
 import { verifyV2 } from "./verification.js";
 import { hasRealMarkdownContent, writeJsonContract } from "./primitives.js";
@@ -43,9 +44,13 @@ function approveStage(repoRoot, stage, { shellStatus } = {}) {
 
   const { path: approvalPath, state } = loadApprovalState(repoRoot);
   const commit = getCurrentCommit(repoRoot);
-  const dirty = isGitRepo(repoRoot)
-    ? getChangedFiles(repoRoot, { includeWorktree: true }).length > 0
-    : false;
+  const worktreeDiff = isGitRepo(repoRoot)
+    ? buildSemanticDiff(repoRoot, { base: commit, head: "HEAD", includeWorktree: true })
+    : null;
+  if (worktreeDiff && !stageIsValid(stage, worktreeDiff.categories)) {
+    throw new Error(`Cannot approve ${stage}: uncommitted changes would immediately invalidate it; commit changes and retry.`);
+  }
+  const dirty = (worktreeDiff?.changed_files.length ?? 0) > 0;
 
   state.current_state = stage;
   state.highest_valid_state = stage;

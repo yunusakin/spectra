@@ -1,8 +1,16 @@
 # Changelog
 
-## [Unreleased]
+## [3.1.1] - Unreleased
 
-Targets `v3.1.0`. Post-consolidation correctness release. No new product capabilities; the `spectra/v2` schema identifier is unchanged.
+### Fixed
+- Native `spectra context` works on repeated calls and refreshes summaries after project state changes.
+- Generated Full agent adapters direct project state updates to `.spectra/sdd/`.
+- Approval refuses uncommitted changes that would immediately invalidate the requested stage.
+- Lite runtime guidance and context packs reference only files installed with Lite.
+
+## [3.1.0] - 2026-09-24
+
+Post-consolidation correctness release. No new product capabilities; the `spectra/v2` schema identifier is unchanged.
 
 ### Fixed
 - **Release approval deadlock.** `verify --profile release` required `release-approved`, the state `approve --stage release-approved` was trying to grant. Release readiness now requires at least `implementation-approved`, so the documented sequence can succeed.

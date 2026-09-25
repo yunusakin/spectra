@@ -92,6 +92,25 @@ test("agent adapter files are regenerable projections of .spectra state", () => 
   assert.deepEqual(files.map(snapshot), before);
 });
 
+test("Full Codex adapter directs state updates into canonical .spectra files", () => {
+  const root = initProject("full");
+  const generated = spectra(root, ["adapters", "--agents", "codex"], { SPECTRA_CODEX_COMMAND: "git" });
+  assert.equal(generated.status, 0, generated.stderr || generated.stdout);
+
+  const instructions = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
+  const statePaths = [...instructions.matchAll(/`([^`]*(?:activeContext|progress)\.md)`/g)].map((match) => match[1]);
+  assert.deepEqual(statePaths, [
+    ".spectra/sdd/memory-bank/core/activeContext.md",
+    ".spectra/sdd/memory-bank/core/progress.md"
+  ]);
+  assert.match(instructions, /project state in `\.spectra\/sdd\/memory-bank\/`/);
+  for (const relativePath of statePaths) {
+    fs.appendFileSync(path.join(root, relativePath), "\nCodex adapter E2E marker\n");
+    assert.match(fs.readFileSync(path.join(root, relativePath), "utf8"), /Codex adapter E2E marker/);
+  }
+  assert.equal(fs.existsSync(path.join(root, "sdd")), false);
+});
+
 test("adapters refuse to overwrite user-owned files unless forced; doctor --fix never does", () => {
   const root = initProject("full");
   const claude = path.join(root, "CLAUDE.md");

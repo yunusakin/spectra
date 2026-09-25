@@ -1,19 +1,17 @@
 # Release Summary
 
-## Unreleased
+## v3.1.1 (unreleased)
 
-### Simpler Product Surface
-- Adds Lite and Full profiles, defaulting to Lite for everyday SDD work.
-- Keeps core commands focused on `init`, `adopt`, `context`, `task`, `check`, `status`, `update`, and `help`.
-- Groups Full workflows beneath `spectra admin` while preserving old command aliases.
+Correctness patch for native context, Full adapter state paths, approval feedback, and Lite context guidance. The `spectra/v2` schema identifier is unchanged.
 
-### One Project Boundary
-- Stores launchers, metadata, generated docs, SDD runtime, and working context beneath `spectra/`.
-- Defaults to local Git mode so company repositories can use Spectra without committing its files.
+## v3.1.0
 
-### Versioning and Updates
-- Synchronizes CLI, npm, native, and runtime release versions while tracking project schema separately.
-- Adds one-confirmation updates, already-current reporting, runtime refresh, and conflict-safe legacy migration.
+Post-consolidation correctness release. The public Full commands remain top-level, canonical project state remains under `.spectra/`, and the `spectra/v2` schema identifier is unchanged.
+
+- Fixes the release approval deadlock and rejects stage skipping from draft.
+- Repairs canonical-path handling in shell-backed checks and invalidates approvals after relevant project-brief or feature-spec edits.
+- Protects user files during installation and preserves user-written agent adapters.
+- Publishes native archives and checksums for macOS and Linux on arm64 and x64. See [CHANGELOG.md](CHANGELOG.md) for the full change list.
 
 ## v2.0.2
 

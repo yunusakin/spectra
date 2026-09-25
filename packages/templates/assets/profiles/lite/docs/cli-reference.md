@@ -1,6 +1,6 @@
 # CLI Reference
 
-This is the current public command surface for Spectra `3.1.0`.
+This is the current public command surface for Spectra `3.1.1`.
 
 ## Install and Bootstrap
 
@@ -159,12 +159,9 @@ When those checks pass, `spectra doctor` reports each configured agent as `healt
 
 ```bash
 spectra context --role planner --goal discover
-spectra check
-spectra approve --stage implementation-approved
 spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
-spectra context --role implementer --goal implement
-spectra eval my-product-core --suite smoke
-spectra verify
+spectra check
+spectra status
 ```
 
 ## Notes

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { git, initProject, spectra } from "./helpers/project.js";
+import { createGitProject, git, initProject, spectra } from "./helpers/project.js";
 
 function approve(root, stage) {
   return spectra(root, ["approve", "--stage", stage]);
@@ -178,6 +178,23 @@ test("product approval is refused while projectbrief.md is template-only", () =>
   assert.notEqual(result.status, 0);
   assert.match(result.stderr + result.stdout, /template-only/);
   assert.equal(approvalState(root).current_state, "draft");
+});
+
+test("dirty project scope cannot receive an approval that immediately invalidates", () => {
+  const root = initProject("full", createGitProject(), ["--git-mode", "shared"]);
+  fillProjectBrief(root);
+
+  const refused = approve(root, "product-approved");
+  assert.notEqual(refused.status, 0);
+  assert.match(refused.stderr + refused.stdout, /commit.*retry/i);
+  assert.equal(approvalState(root).current_state, "draft");
+
+  commitAll(root, "record product scope");
+  const approved = approve(root, "product-approved");
+  assert.equal(approved.status, 0, approved.stderr + approved.stdout);
+  const status = spectra(root, ["status"]);
+  assert.match(status.stdout, /Highest Valid: product-approved/);
+  assert.equal(approve(root, "technical-approved").status, 0);
 });
 
 test("release approval is refused when the release eval suite is below threshold", () => {
