@@ -74,7 +74,7 @@ jobs:
           brownfield_status="$("$brownfield_dir/.spectra/bin/spectra" status --cwd "$brownfield_dir")"
           printf '%s\n' "$brownfield_status"
           grep -F 'Spectra Project Status' <<< "$brownfield_status"
-          grep -F 'Profile: lite' <<< "$brownfield_status"
+          ! grep -F 'Profile:' <<< "$brownfield_status"
           local_dir="$(mktemp -d)"
           git -C "$local_dir" init -q
           git -C "$local_dir" config user.email spectra@example.test
