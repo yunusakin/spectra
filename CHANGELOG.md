@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.1] - Unreleased
+
+### Fixed
+- Native `spectra context` works on repeated calls and refreshes summaries after project state changes.
+- Generated Full agent adapters direct project state updates to `.spectra/sdd/`.
+- Approval refuses uncommitted changes that would immediately invalidate the requested stage.
+- Lite runtime guidance and context packs reference only files installed with Lite.
+
 ## [3.1.0] - 2026-09-24
 
 Post-consolidation correctness release. No new product capabilities; the `spectra/v2` schema identifier is unchanged.

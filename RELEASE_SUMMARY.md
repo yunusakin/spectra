@@ -1,5 +1,9 @@
 # Release Summary
 
+## v3.1.1 (unreleased)
+
+Correctness patch for native context, Full adapter state paths, approval feedback, and Lite context guidance. The `spectra/v2` schema identifier is unchanged.
+
 ## v3.1.0
 
 Post-consolidation correctness release. The public Full commands remain top-level, canonical project state remains under `.spectra/`, and the `spectra/v2` schema identifier is unchanged.

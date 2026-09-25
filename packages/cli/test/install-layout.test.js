@@ -60,6 +60,23 @@ test("Lite init keeps all generated files under .spectra", () => {
   assert.equal(run(root, "git", ["check-ignore", ".spectra/install.json"]).status, 0);
 });
 
+test("Lite runtime guidance only advertises files installed for Lite", () => {
+  const root = createGitProject();
+  const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "lite"]);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+
+  const dataRoot = path.join(root, ".spectra");
+  const runtimeRoot = path.join(dataRoot, "sdd", "system", "runtime");
+  const minimal = fs.readFileSync(path.join(runtimeRoot, "minimal.md"), "utf8");
+  const packs = fs.readFileSync(path.join(runtimeRoot, "context-packs.tsv"), "utf8");
+  const referenced = [
+    ...[...minimal.matchAll(/`(sdd\/[^`]+)`/g)].map((match) => match[1]),
+    ...packs.split(/\r?\n/).filter((line) => line && !line.startsWith("#")).map((line) => line.split("\t")[1])
+  ];
+  const missing = [...new Set(referenced)].filter((relativePath) => !fs.existsSync(path.join(dataRoot, relativePath)));
+  assert.deepEqual(missing, []);
+});
+
 test("setup rejects an unsupported profile before writing files", () => {
   const root = createGitProject();
   const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "unsupported"]);
