@@ -12,7 +12,7 @@ const invocations = [
 
 for (const [label, invoke] of invocations) {
   test(`spectra diff init/update works under the canonical .spectra root (${label})`, () => {
-    const root = initProject("full");
+    const root = initProject();
     const init = invoke(root, ["diff", "init"]);
     assert.equal(init.status, 0, init.stderr || init.stdout);
     assert.doesNotMatch(init.stderr, /missing \.git|not look like a git repository/);
@@ -35,7 +35,7 @@ for (const [label, invoke] of invocations) {
 }
 
 test("spectra diff supports --base, --no-worktree and --patch from a nested directory", () => {
-  const root = initProject("full");
+  const root = initProject();
   const base = git(root, "rev-parse", "HEAD").trim();
   fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "core", "projectbrief.md"), "\nEdited.\n");
   git(root, "add", "-A", "-f");
@@ -49,7 +49,7 @@ test("spectra diff supports --base, --no-worktree and --patch from a nested dire
 
 test("check-policy sees tracked and untracked changes to the same logical file identically", () => {
   // Shared mode: .spectra is not Git-excluded, so untracked files are visible.
-  const root = initProject("full", undefined, ["--git-mode", "shared"]);
+  const root = initProject(undefined, ["--git-mode", "shared"]);
   git(root, "add", "-A");
   git(root, "commit", "-qm", "baseline");
   const core = path.join(root, ".spectra", "sdd", "memory-bank", "core");
@@ -75,7 +75,7 @@ test("check-policy sees tracked and untracked changes to the same logical file i
 });
 
 test("install/update never delete user-owned .DS_Store files outside .spectra", () => {
-  const root = initProject("lite");
+  const root = initProject();
   fs.mkdirSync(path.join(root, "assets"));
   fs.mkdirSync(path.join(root, "docs"));
   fs.writeFileSync(path.join(root, "assets", ".DS_Store"), "user");
@@ -87,7 +87,7 @@ test("install/update never delete user-owned .DS_Store files outside .spectra", 
     assert.equal(result.status, 0, `${args.join(" ")}: ${result.stderr || result.stdout}`);
   }
   // Fresh init into a directory that already has such files.
-  const adopted = initProject("lite", (() => {
+  const adopted = initProject((() => {
     const other = fs.mkdtempSync(path.join(root, "..", "spectra-ds-"));
     git(other, "init", "-q");
     git(other, "config", "user.email", "a@b.c");
@@ -108,7 +108,7 @@ test("install/update never delete user-owned .DS_Store files outside .spectra", 
 });
 
 test("health-check scans the project for tests and resolves install metadata", () => {
-  const root = initProject("full");
+  const root = initProject();
   fs.mkdirSync(path.join(root, "test"));
   fs.writeFileSync(path.join(root, "test", "app.test.js"), "");
   fs.mkdirSync(path.join(root, "src", "test"), { recursive: true });
@@ -126,7 +126,7 @@ test("health-check scans the project for tests and resolves install metadata", (
 });
 
 test("health-check counts Python and Go tests in the project, not just Node/Java", () => {
-  const root = initProject("full");
+  const root = initProject();
   fs.mkdirSync(path.join(root, "pkg"));
   fs.writeFileSync(path.join(root, "pkg", "test_calc.py"), "");
   fs.writeFileSync(path.join(root, "pkg", "calc_test.go"), "");
@@ -142,7 +142,7 @@ test("health-check counts Python and Go tests in the project, not just Node/Java
 });
 
 test("spectra diff works in a linked Git worktree (.git is a file)", () => {
-  const root = initProject("full");
+  const root = initProject();
   git(root, "add", "-A", "-f");
   git(root, "commit", "-qm", "baseline");
   const worktree = path.join(fs.mkdtempSync(path.join(path.dirname(root), "spectra-wt-")), "linked");
@@ -153,7 +153,7 @@ test("spectra diff works in a linked Git worktree (.git is a file)", () => {
 });
 
 test("shell-backed commands resolve the same project from root and nested dirs, installed and local", () => {
-  const root = initProject("full");
+  const root = initProject();
   fs.mkdirSync(path.join(root, "src", "deep"), { recursive: true });
   const commands = [["check"], ["verify"], ["status"], ["skills", "--task-type", "docs"], ["quick", "--type", "docs", "--task", "note"]];
   for (const args of commands) {
@@ -194,7 +194,7 @@ test("doctor checks node only when the CLI runs under Node, not as a native bina
     return;
   }
 
-  const root = initProject("lite");
+  const root = initProject();
   const native = run(root, bin, [cliPath, "doctor"]);
   const underNode = spectra(root, ["doctor"]);
   assert.match(native.stdout, /bash is available/);

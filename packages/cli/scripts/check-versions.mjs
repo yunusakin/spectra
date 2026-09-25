@@ -45,12 +45,10 @@ const versions = [
   ["packages/cli/src/lib/version.js", readSourceCliVersion()]
 ];
 
-for (const profile of ["lite", "full"]) {
-  versions.push([
-    `profiles/${profile}/sdd/system/manifest.env`,
-    readManifestVersion(path.join(repoRoot, "profiles", profile, "sdd", "system", "manifest.env"))
-  ]);
-}
+versions.push([
+  "profiles/full/sdd/system/manifest.env",
+  readManifestVersion(path.join(repoRoot, "profiles", "full", "sdd", "system", "manifest.env"))
+]);
 versions.push([
   "packages/core/assets/runtime/scripts/init.sh",
   readShellVersion(path.join(repoRoot, "packages", "core", "assets", "runtime", "scripts", "init.sh"))

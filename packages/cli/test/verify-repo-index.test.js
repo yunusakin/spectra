@@ -28,7 +28,7 @@ function runOk(cwd, args, options = {}) {
   return result;
 }
 
-function createFullProfileProject() {
+function createProject() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-verify-index-"));
   spawnSync("git", ["init", "-q"], { cwd: root });
   spawnSync("git", ["config", "user.email", "spectra@example.test"], { cwd: root });
@@ -36,7 +36,7 @@ function createFullProfileProject() {
   fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "demo-app" }, null, 2));
   spawnSync("git", ["add", "."], { cwd: root });
   spawnSync("git", ["commit", "-qm", "initial"], { cwd: root });
-  runOk(root, ["init", ".", "--profile", "full", "--git-mode", "local"]);
+  runOk(root, ["init", ".", "--git-mode", "local"]);
   return root;
 }
 
@@ -45,7 +45,7 @@ function repoIndexLine(stdout) {
 }
 
 test("verify reports the repo index as not built yet before spectra index has run", () => {
-  const root = createFullProfileProject();
+  const root = createProject();
   assert.equal(fs.existsSync(path.join(root, ".spectra", "cache", "index", "repo-index.json")), false);
 
   const result = run(root, ["verify"]);
@@ -56,7 +56,7 @@ test("verify reports the repo index as not built yet before spectra index has ru
 });
 
 test("verify names its shell stage for what it measures and never claims to run project tests", () => {
-  const root = createFullProfileProject();
+  const root = createProject();
   const result = run(root, ["verify"]);
 
   assert.match(result.stdout, /^Spectra Verify$/m);
@@ -68,7 +68,7 @@ test("verify names its shell stage for what it measures and never claims to run 
 });
 
 test("verify reports the repo index as fresh right after spectra index has run", () => {
-  const root = createFullProfileProject();
+  const root = createProject();
   runOk(root, ["index"]);
 
   const result = run(root, ["verify"]);
@@ -80,7 +80,7 @@ test("verify reports the repo index as fresh right after spectra index has run",
 });
 
 test("verify reports the repo index as stale after a manifest change without re-indexing", () => {
-  const root = createFullProfileProject();
+  const root = createProject();
   runOk(root, ["index"]);
 
   fs.writeFileSync(
@@ -96,7 +96,7 @@ test("verify reports the repo index as stale after a manifest change without re-
 });
 
 test("the repo-index stage never blocks verify on its own", () => {
-  const root = createFullProfileProject();
+  const root = createProject();
   // No spectra index run at all, and no other work done — repo-index stage
   // stays "not built yet" but must never be the reason verify is blocked.
   const result = run(root, ["verify"]);

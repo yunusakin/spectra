@@ -18,7 +18,7 @@ function walk(dir, out = []) {
 }
 
 test("generated Full scaffolding teaches canonical vocabulary only", () => {
-  const root = initProject("full");
+  const root = initProject();
   const problems = [];
   for (const file of walk(path.join(root, ".spectra", "sdd"))) {
     fs.readFileSync(file, "utf8").split("\n").forEach((line, index) => {
@@ -31,7 +31,7 @@ test("generated Full scaffolding teaches canonical vocabulary only", () => {
 });
 
 test("generated release thresholds only require gates that verify enforces", () => {
-  const root = initProject("full");
+  const root = initProject();
   const featuresDir = path.join(root, ".spectra", "sdd", "features");
   const thresholdFiles = walk(featuresDir).filter((file) => /kind:\s*"?ReleaseThresholds/.test(fs.readFileSync(file, "utf8")) || /"kind":\s*"ReleaseThresholds"/.test(fs.readFileSync(file, "utf8")));
   assert.ok(thresholdFiles.length > 0);
@@ -79,7 +79,7 @@ test("shell scripts distinguish the project root from the data root", () => {
 });
 
 test("agent adapter files are regenerable projections of .spectra state", () => {
-  const root = initProject("full");
+  const root = initProject();
   // codex is left out on purpose: it needs the codex CLI on PATH, which the
   // projection contract does not depend on.
   const files = ["CLAUDE.md", ".github/copilot-instructions.md", ".cursor/rules"].map((f) => path.join(root, f));
@@ -93,7 +93,7 @@ test("agent adapter files are regenerable projections of .spectra state", () => 
 });
 
 test("Full Codex adapter directs state updates into canonical .spectra files", () => {
-  const root = initProject("full");
+  const root = initProject();
   const generated = spectra(root, ["adapters", "--agents", "codex"], { SPECTRA_CODEX_COMMAND: "git" });
   assert.equal(generated.status, 0, generated.stderr || generated.stdout);
 
@@ -116,7 +116,7 @@ test("Full Codex adapter directs state updates into canonical .spectra files", (
 });
 
 test("adapters refuse to overwrite user-owned files unless forced; doctor --fix never does", () => {
-  const root = initProject("full");
+  const root = initProject();
   const claude = path.join(root, "CLAUDE.md");
   fs.writeFileSync(claude, "# my own notes\n");
 
@@ -135,7 +135,7 @@ test("adapters refuse to overwrite user-owned files unless forced; doctor --fix 
 test("init --agents refuses to overwrite an existing user-owned adapter file before installing anything", () => {
   const root = createGitProject();
   fs.writeFileSync(path.join(root, "CLAUDE.md"), "# my own notes\n");
-  const result = spectra(root, ["init", ".", "--profile", "full", "--agents", "claude"]);
+  const result = spectra(root, ["init", ".", "--agents", "claude"]);
   assert.notEqual(result.status, 0);
   assert.match(result.stderr + result.stdout, /Refusing to overwrite/);
   assert.equal(fs.readFileSync(path.join(root, "CLAUDE.md"), "utf8"), "# my own notes\n");
@@ -146,7 +146,7 @@ test("spectra check does not misreport listed prompts when the prompts index is 
   // The validators pipe the index into `grep -q` under `set -o pipefail`. grep exits
   // on the first match, so a large index makes the writer die of SIGPIPE and the
   // pipeline fail even though the prompt IS listed.
-  const root = initProject("full");
+  const root = initProject();
   const index = path.join(root, ".spectra", "sdd", "system", "prompts", "index.md");
   const padding = Array.from({ length: 9000 }, (_, i) => `- \`zzz/padding-entry-${String(i).padStart(5, "0")}-xxxxxxxxxxxxxxxx.md\``);
   fs.appendFileSync(index, `\n${padding.join("\n")}\n`);

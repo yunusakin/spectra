@@ -15,4 +15,4 @@ Files:
 - `telemetry-contract.yaml`
 - `evals/release-thresholds.yaml`
 
-These files are illustrative. The Full profile creates the first bundle during `init` or `adopt`; evolve it by editing the YAML contracts and running `spectra check`.
+These files are illustrative. `init` or `adopt` creates the first bundle; evolve it by editing the YAML contracts and running `spectra check`.

@@ -1,7 +1,6 @@
 name: full
 description: Spec-driven development with governance, feature bundles, evaluations, and adoption analysis.
 includes:
-  - lite
   - governance
   - feature-bundles
   - evaluations

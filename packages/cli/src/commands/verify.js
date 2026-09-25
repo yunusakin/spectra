@@ -7,11 +7,11 @@ import { verifyV2 } from "../lib/specs.js";
 function verifyCommand(argv) {
   const { options } = parseOptions(argv, {
     booleanFlags: ["--help"],
-    stringFlags: ["--cwd", "--scope", "--item", "--profile"]
+    stringFlags: ["--cwd", "--scope", "--item"]
   });
 
   if (options["--help"]) {
-    title("Usage: spectra verify [--cwd <path>] [--scope <all|spec|app>] [--item <id>] [--profile <standard|release>]");
+    title("Usage: spectra verify [--cwd <path>] [--scope <all|spec|app>] [--item <id>]");
     return 0;
   }
 
@@ -30,7 +30,6 @@ function verifyCommand(argv) {
   const report = verifyV2(repoRoot, {
     scope: options["--scope"] ?? "all",
     item: options["--item"] ?? null,
-    profile: options["--profile"] ?? "standard",
     shellStatus: status
   });
 

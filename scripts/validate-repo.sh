@@ -431,7 +431,7 @@ EOF
 chmod +x "${fake_codex_bin}/codex"
 agent_init_log="${tmp_dir}/agent-init.log"
 agent_adapters_log="${tmp_dir}/agent-adapters.log"
-if ! SPECTRA_CODEX_COMMAND="${fake_codex_bin}/codex" PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js init "${agent_health_repo}" --profile full --git-mode shared >"${agent_init_log}" 2>&1; then
+if ! SPECTRA_CODEX_COMMAND="${fake_codex_bin}/codex" PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js init "${agent_health_repo}" --git-mode shared >"${agent_init_log}" 2>&1; then
   add_error "spectra init: failed agent readiness smoke repo bootstrap"
   while IFS= read -r line; do add_error "spectra init output: ${line}"; done < "${agent_init_log}"
 elif ! SPECTRA_CODEX_COMMAND="${fake_codex_bin}/codex" PATH="${fake_codex_bin}:${PATH}" node packages/cli/bin/spectra.js adapters --cwd "${agent_health_repo}" --agents claude,cursor,windsurf,copilot,codex,antigravity --target "${agent_health_repo}" >"${agent_adapters_log}" 2>&1; then

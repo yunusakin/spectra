@@ -4,7 +4,7 @@ Spectra owns one directory in a consumer project: `.spectra/`.
 
 ## Consumer Repo Shape
 
-After `spectra init .`, a Lite project looks like this:
+After `spectra init .`, a project looks like this:
 
 ```text
 your-project/
@@ -18,29 +18,24 @@ your-project/
     ├── docs/
     ├── cache/
     ├── sdd/
+    │   ├── features/
+    │   ├── governance/
+    │   ├── adoption/
     │   ├── memory-bank/
     │   └── system/
     ├── config.yaml
     └── install.json
 ```
 
-Full adds these directories beneath `.spectra/sdd/`:
-
-```text
-features/
-governance/
-adoption/
-```
-
 ## What Lives Where
 
 ### `.spectra/sdd/memory-bank/`
 
-Long-lived project context. Lite uses active context, progress, project brief, and implementation brief; Full adds discovery, review, and traceability material.
+Long-lived project context includes active context, progress, project brief, implementation intent, discovery, review, and traceability material.
 
 ### `.spectra/sdd/system/`
 
-Lite contains only the manifest and minimal runtime context. Full adds rules, prompts, scaffolds, skills, and adapters.
+Runtime assets include the manifest, rules, prompts, scaffolds, skills, and adapters.
 
 ### `.spectra/docs/`
 
@@ -52,7 +47,7 @@ Generated context summaries and other disposable runtime data.
 
 ### `.spectra/config.yaml` and `.spectra/install.json`
 
-The selected profile, Git mode, project schema, runtime version, launcher metadata, and installation history.
+Git mode, project schema, runtime version, launcher metadata, and installation history.
 
 ## Git Modes
 
@@ -62,10 +57,10 @@ The selected profile, Git mode, project schema, runtime version, launcher metada
 
 ## Command-to-Structure Mapping
 
-- `spectra init` and `spectra adopt` create the selected profile under `.spectra/`
+- `spectra init` and `spectra adopt` create the project runtime under `.spectra/`
 - `spectra context` reads `.spectra/sdd/` and writes summaries to `.spectra/cache/`
 - `spectra task` writes `.spectra/sdd/memory-bank/core/implementation-brief.md`
 - `spectra status` summarizes current project and Spectra changes
-- Full-profile `spectra approve` updates `.spectra/sdd/governance/approval-state.yaml`
+- `spectra approve` updates `.spectra/sdd/governance/approval-state.yaml`
 
 Spectra does not create root-level `spectra/`, `sdd/`, `docs/`, `app/`, or `.github/` directories.

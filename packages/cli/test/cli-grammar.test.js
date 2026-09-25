@@ -22,7 +22,7 @@ function run(args, options = {}) {
 function createProject() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-grammar-"));
   spawnSync("git", ["-C", root, "init", "-q"]);
-  const init = run(["init", ".", "--profile", "lite"], { cwd: root });
+  const init = run(["init", "."], { cwd: root });
   assert.equal(init.status, 0, init.stderr || init.stdout);
   return root;
 }
@@ -93,7 +93,7 @@ test("legacy forms reach the canonical usage text", () => {
 test("every canonical command answers --help at a single command token", () => {
   const canonical = [
     "init", "adopt", "onboard", "context", "task", "route", "knowledge",
-    "check", "verify", "status", "update", "upgrade", "doctor",
+    "check", "verify", "status", "update", "doctor",
     "approve", "eval", "diff", "quick", "skills", "adapters", "validate"
   ];
 

@@ -29,7 +29,7 @@ CI note:
 - the GitHub `validate` workflow prepares a Node 22 runtime and runs `npm ci` before invoking CLI-based validation smoke checks
 - this is required because the validation path executes `node packages/cli/bin/spectra.js ...` and depends on packaged CLI dependencies being installed
 
-## `spectra eval` (Full)
+## `spectra eval`
 
 Purpose:
 
@@ -59,8 +59,7 @@ Purpose:
 Run it:
 
 ```bash
-spectra verify --profile standard
-spectra verify --profile release
+spectra verify
 ```
 
 Use it:
@@ -73,7 +72,7 @@ Use it:
 ```bash
 spectra check
 spectra eval <feature-id> --suite smoke
-spectra verify --profile release
+spectra verify
 ```
 
 ## What Should Block Work

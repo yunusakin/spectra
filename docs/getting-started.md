@@ -1,15 +1,12 @@
 # Getting Started
 
-This guide explains how to introduce Spectra without changing your application’s folder structure or forcing governance on every project.
-
-Start with Lite. Move to Full only when a team needs formal specs, approvals, and release gates.
+This guide explains how to introduce Spectra without changing your application’s folder structure. Every installation includes executable specs, approvals, evaluations, and release gates.
 
 ## Quick decision
 
 - New repository: `spectra init .`
 - Existing repository: `spectra adopt .`
 - No Node/npm: install the native macOS/Linux binary.
-- Existing Lite project that needs governance: `spectra upgrade --profile full`
 
 ## 1. Choose a Distribution Path
 
@@ -71,13 +68,7 @@ The native installer downloads the matching release artifact and verifies its SH
 
 The remaining examples use `spectra`. In an npm/npx-only repository, replace it with `./.spectra/bin/spectra`.
 
-To change an existing Lite project to Full:
-
-```bash
-spectra upgrade --profile full
-```
-
-The upgrade preserves existing memory-bank files and adds Full profile files.
+Run `spectra update` to bring an existing installation to the current runtime. Existing project memory is preserved.
 
 ## 2. Review Bootstrap Changes
 
@@ -94,18 +85,18 @@ In `local` mode, `git status --ignored` shows the generated paths with `!!`, whi
 
 ## 3. Understand the Generated State
 
-Lite creates an isolated SDD workspace under `.spectra/`:
+Spectra creates an isolated SDD workspace under `.spectra/`:
 
 - `.spectra/sdd/memory-bank/`: active context, progress, and implementation intent
-- `.spectra/sdd/system/`: minimal runtime context needed by Lite
+- `.spectra/sdd/system/`: runtime rules, prompts, scaffolds, and adapters
 - `.spectra/docs/`: Spectra reference material
 - `.spectra/cache/`: disposable generated summaries and repo-index data
 
 For existing projects, `spectra adopt` writes an initial repo index when possible. Run `spectra onboard` while `projectbrief.md` is still a template, and run `spectra index` again after manifest changes or if adoption reports that indexing failed.
 
-Full adds feature bundles, governance, evaluation contracts, and adoption analysis under `.spectra/sdd/`. YAML contracts are canonical; Markdown is supporting context.
+Feature bundles, governance, evaluation contracts, and adoption analysis live under `.spectra/sdd/`. YAML contracts are canonical; Markdown is supporting context.
 
-## 4. Use the Lite Daily Loop
+## 4. Use the Daily Loop
 
 ```bash
 spectra context --role planner --goal discover
@@ -114,11 +105,11 @@ spectra check
 spectra status
 ```
 
-`status` is the command to run when you return to a project. `check` confirms the Spectra layer is healthy. Neither command requires a time window or a Full profile.
+`status` is the command to run when you return to a project. `check` confirms the Spectra layer is healthy.
 
-## 5. Review Brownfield Analysis (Full only)
+## 5. Review Brownfield Analysis
 
-Full `spectra adopt --profile full` maps the existing codebase and creates:
+`spectra adopt` maps the existing codebase and creates:
 
 - `.spectra/sdd/adoption/current-state.summary.yaml`
 - `.spectra/sdd/adoption/gap-analysis.yaml`
@@ -145,7 +136,7 @@ Recommended role and goal pairs:
 
 Context packs load compact contracts and summaries before long-form narrative files.
 
-## 7. Validate Before Approval (Full only)
+## 7. Validate Before Approval
 
 ```bash
 spectra status
@@ -156,7 +147,7 @@ Validation should pass after bootstrap, after meaningful spec changes, and befor
 
 If you wire the same checks into GitHub Actions, prepare the Node environment first. Spectra's own `validate` workflow uses Node 22 and runs `npm ci` before calling CLI-based validation smoke checks.
 
-## 8. Advance Staged Approvals (Full only)
+## 8. Advance Staged Approvals
 
 ```bash
 spectra approve --stage product-approved
@@ -178,7 +169,7 @@ spectra context --role implementer --goal implement
 
 The task command records intended work for implementation and review traceability.
 
-## 10. Evaluate Product Behavior (Full only)
+## 10. Evaluate Product Behavior
 
 ```bash
 spectra eval <feature-id> --suite smoke
@@ -187,10 +178,10 @@ spectra eval <feature-id> --suite release
 
 Eval suites exercise golden scenarios, regression cases, failure modes, refusal behavior, and release thresholds declared in the feature bundle.
 
-## 11. Verify Release Confidence (Full only)
+## 11. Verify Release Confidence
 
 ```bash
-spectra verify --profile release
+spectra verify
 ```
 
 Release verification aggregates structure, policy, verify-work checks (manifest, policy and memory files; project tests are not run), eval readiness, telemetry coverage, approval state, and release thresholds.
@@ -216,8 +207,7 @@ Re-approve any stage invalidated by the semantic diff.
 ## Common Mistakes
 
 - assuming `npx` created a global `spectra` command
-- using Full approvals when Lite is enough
-- implementing Full-profile work before `implementation-approved`
+- starting implementation before `implementation-approved`
 - treating generated brownfield analysis as a complete code audit
 - duplicating canonical YAML state in Markdown
 - skipping validation after spec changes

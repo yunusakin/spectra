@@ -48,4 +48,4 @@ Best when:
 
 - do not merge implementation that violates staged approval
 - do not treat narrative Markdown as canonical if YAML says otherwise
-- in Full, always run `spectra diff semantic` after a non-trivial spec merge
+- always run `spectra diff semantic` after a non-trivial spec merge

@@ -71,7 +71,7 @@ spectra status
 spectra check
 ```
 
-For the Full profile, review generated brownfield outputs under `.spectra/sdd/adoption/` before advancing approvals.
+Review generated brownfield outputs under `.spectra/sdd/adoption/` before advancing approvals.
 
 ## Install Locations
 
@@ -114,13 +114,7 @@ Use it when global PATH setup is unavailable or when a repository should invoke 
 
 The launcher tries the recorded native binary first, then a local Node CLI fallback if present, then `spectra` on PATH. It contains no product logic. `spectra update` checks for a newer release, asks once before changing anything, and also refreshes or migrates the project runtime.
 
-To change the project profile after installation:
-
-```bash
-spectra upgrade --profile full
-```
-
-`update` changes the CLI/runtime version; `upgrade` changes the project profile.
+`spectra update` changes the CLI/runtime version and refreshes the project runtime.
 
 ## Release Artifacts
 
@@ -160,4 +154,4 @@ Native installation currently supports only the four targets listed above. Use t
 
 ## Maintainer Notes
 
-Native artifacts are built by `.github/workflows/native-release.yml` on version tags. Builds use Node 22 and Node SEA; release jobs smoke-test Lite and Full setup, `help`, `version`, `status`, `check`, update detection, and the repo-local launcher before uploading artifacts.
+Native artifacts are built by `.github/workflows/native-release.yml` on version tags. Builds use Node 22 and Node SEA; release jobs smoke-test the default setup, `help`, `version`, `status`, `check`, update detection, and the repo-local launcher before uploading artifacts.

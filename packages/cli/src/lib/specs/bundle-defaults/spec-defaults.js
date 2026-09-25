@@ -176,7 +176,7 @@ function buildSpecDefaults({ featureId, safeProjectName }) {
         safe_alternatives: [
           "run spectra check",
           "run spectra approve --stage implementation-approved",
-          "run spectra verify --profile release"
+          "run spectra verify"
         ]
       },
       observability_events: [

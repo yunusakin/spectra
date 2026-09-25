@@ -99,10 +99,10 @@ test("adopt shared leaves company gitignore rules unchanged", () => {
 
 test("repeated local adoption preserves the existing ownership policy", () => {
   const root = createRepo();
-  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local", "--profile", "full"]);
+  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local"]);
   const before = fs.readFileSync(path.join(root, ".git", "info", "exclude"), "utf8");
 
-  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local", "--profile", "full"]);
+  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local"]);
 
   assert.equal(fs.readFileSync(path.join(root, ".git", "info", "exclude"), "utf8"), before);
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
@@ -112,7 +112,7 @@ test("repeated local adoption preserves the existing ownership policy", () => {
 
 test("adapters extend a persistent local policy", () => {
   const root = createRepo();
-  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local", "--profile", "full"]);
+  runOk(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "local"]);
 
   // codex's adapter health check requires the real `codex` CLI on PATH; CI
   // runners don't have it installed, so a fake one that just exits 0 stands
@@ -155,8 +155,6 @@ test("local adopt refuses a tracked adapter collision before installing", () => 
     ".",
     "--git-mode",
     "local",
-    "--profile",
-    "full",
     "--agents",
     "codex"
   ]);
@@ -238,7 +236,7 @@ test("adopt discovery never reports Spectra's own .spectra directory as project 
   const root = createRepo();
   fs.mkdirSync(path.join(root, "test"));
   fs.writeFileSync(path.join(root, "test", "app.test.js"), "");
-  const result = run(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "shared", "--profile", "full"]);
+  const result = run(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "shared"]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
 
   const memoryBank = path.join(root, ".spectra", "sdd", "memory-bank");

@@ -12,18 +12,7 @@ Under the hood, Spectra follows **SDD (Spec-Driven Development)**: intent, conte
 
 ## Start here
 
-Spectra has one CLI and two profiles:
-
-| Profile | Use it when | What it gives you |
-| --- | --- | --- |
-| **Lite** (default) | A small personal or project-local memory for one person or agent | context, tasks, status, health checks, and updates |
-| **Full** | Team governance, staged approvals, or agent adapters | Lite, plus specs you can approve stage-by-stage, evaluation suites, brownfield-adoption analysis, and generated agent config files |
-
-Most projects should start with Lite. You can select Full during setup:
-
-```bash
-spectra init . --profile full
-```
+Spectra provides executable specs, approvals, evaluations, brownfield analysis, and agent adapters in every installation.
 
 ## Choose your setup
 
@@ -31,7 +20,6 @@ spectra init . --profile full
 New project?              spectra init .
 Existing project?         spectra adopt .
 No Node or npm?           Use the native installation.
-Lite → Full?              spectra upgrade --profile full
 ```
 
 ## Five-minute setup
@@ -100,16 +88,16 @@ your-project/
 └── .spectra/
     ├── bin/spectra       # project-local launcher
     ├── cli/              # local Node CLI the launcher falls back to
-    ├── config.yaml       # profile, Git mode, and schema
+    ├── config.yaml       # Git mode and schema
     ├── install.json      # installation and version metadata
     ├── docs/             # Spectra guides
     ├── cache/            # disposable context and repo-index cache (created on first use)
-    └── sdd/              # context, business memory, and profile runtime
+    └── sdd/              # context, business memory, and runtime assets
 ```
 
 Spectra keeps its own generated project layer under the root `.spectra/` directory. It does not use root `app/`, `docs/`, `spectra/`, `sdd/`, or `.github/` directories as the canonical location for Spectra-owned files.
 
-Full adds these inside the same boundary:
+The project context, feature specs, governance, and adoption analysis all live inside the same boundary:
 
 ```text
 .spectra/sdd/
@@ -120,7 +108,7 @@ Full adds these inside the same boundary:
 
 Your application code and company documentation remain in their existing locations.
 
-If you see older instructions that mention copying Spectra files to root-level `docs/`, `sdd/`, `scripts/`, or `.github/`, treat them as legacy implementation details. The supported setup surface is the CLI (`spectra init`, `spectra adopt`, `spectra upgrade`, and `spectra update`) and the canonical generated layout is `.spectra/`.
+If you see older instructions that mention copying Spectra files to root-level `docs/`, `sdd/`, `scripts/`, or `.github/`, treat them as legacy implementation details. The supported setup surface is the CLI (`spectra init`, `spectra adopt`, and `spectra update`) and the canonical generated layout is `.spectra/`.
 
 ## Git mode: private or shared
 
@@ -133,17 +121,9 @@ spectra init . --git-mode shared
 spectra adopt . --git-mode shared
 ```
 
-You cannot change profile or Git mode by repeating `init`. To promote an existing Lite installation to Full, run:
+Add `--agents codex,claude` during `init` or `adopt` to generate agent adapters. `spectra update` updates the CLI and project runtime while preserving existing project memory.
 
-```bash
-spectra upgrade --profile full
-```
-
-Spectra asks for confirmation, preserves existing memory-bank files, and adds the Full profile files. Add `--agents codex,claude` if you also want agent adapters generated.
-
-`spectra update` updates the CLI and project runtime. `spectra upgrade` changes the installed Lite or Full profile.
-
-## The daily Lite workflow
+## The daily workflow
 
 ```mermaid
 flowchart LR
@@ -173,9 +153,9 @@ spectra status
 
 For existing projects, `spectra adopt` writes an initial repo index when possible. Run `spectra onboard` while `projectbrief.md` is still a template, and run `spectra index` again after manifest changes or if adoption reports that indexing failed.
 
-## The Full workflow
+## The governance workflow
 
-Full adds staged governance: each stage below must be explicitly approved before the next one is allowed, so a feature can't skip from "someone had an idea" straight to "released." The usual sequence is:
+Staged governance requires each stage to be explicitly approved before the next one is allowed, so a feature can't skip from "someone had an idea" straight to "released." The usual sequence is:
 
 ```bash
 spectra context --role planner --goal discover        # load context for planning
@@ -186,7 +166,7 @@ spectra approve --stage implementation-approved          # gate: cleared to star
 spectra task --item FEAT-001 --task-type feature --goal "Implement the product flow"
 spectra context --role implementer --goal implement    # load context for coding
 spectra eval <feature-id> --suite smoke                 # run the feature's evaluation suite
-spectra verify --profile release                        # aggregate checks into a release-confidence score
+spectra verify                                          # aggregate release-grade checks into a confidence score
 spectra approve --stage release-approved                # gate: cleared to ship
 ```
 
@@ -196,7 +176,7 @@ Advanced commands are top-level, for example `spectra approve` and `spectra eval
 
 ```bash
 spectra help
-spectra help advanced       # Full commands
+spectra help advanced       # advanced commands
 spectra update              # check for a newer CLI/runtime
 spectra version
 ```
@@ -218,7 +198,7 @@ If Spectra says `Spectra is already up to date.`, no changes are needed. If an u
 | `spectra status` | Resume work and see recent updates |
 | `spectra update` | Check for updates and migrate old layouts |
 | `spectra help` | Learn the everyday command surface |
-| `spectra approve`, `eval`, `diff`, `adapters`, `skills`, `quick` | Use Full-profile advanced workflows |
+| `spectra approve`, `eval`, `diff`, `adapters`, `skills`, `quick` | Manage specs, approvals, evaluations, and adapters |
 
 See [CLI Reference](docs/cli-reference.md) for every option and compatibility alias.
 
@@ -253,10 +233,10 @@ After confirmation, the legacy 3.0.8 `spectra/` directory, root `sdd/`, and know
 ## Documentation
 
 - [Quick Start](docs/quick-start.md) — shortest onboarding path
-- [Getting Started](docs/getting-started.md) — detailed Lite and Full workflow
+- [Getting Started](docs/getting-started.md) — setup and workflow
 - [CLI Reference](docs/cli-reference.md) — commands and options
 - [Structure](docs/structure.md) — what each generated directory means
-- [Workflow](docs/workflow.md) — Full governance lifecycle
+- [Workflow](docs/workflow.md) — governance lifecycle
 - [Native Install](docs/native-install.md) — macOS/Linux installation
 - [Testing and Verification](docs/testing.md) — quality checks
 - [Website](https://yunusakin.github.io/spectra/) — project overview
@@ -276,8 +256,8 @@ Repository layout for maintainers:
 
 - `packages/cli/` — npm CLI and repo-local launcher implementation
 - `packages/core/assets/runtime/` — runtime scripts copied into installed projects
-- `profiles/lite/` and `profiles/full/` — source profile templates
-- `packages/templates/` — published profile template package
+- `profiles/full/` — source runtime and project templates
+- `packages/templates/` — published project template package
 - `docs/` — contributor/user documentation for this repository
 - `scripts/` — repository maintenance scripts, not the supported consumer setup interface
 

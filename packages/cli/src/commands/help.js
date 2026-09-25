@@ -1,5 +1,4 @@
 import { title } from "../lib/output.js";
-import { findSpectraRoot, getInstalledProfile } from "../lib/runtime.js";
 
 // Canonical public vocabulary grouped by user workflow. Compatibility
 // aliases (context-pack, discuss-task, eval run, skills resolve,
@@ -26,7 +25,6 @@ const WORKFLOWS = [
   ]],
   ["Maintenance", [
     ["update", "Update Spectra and the project runtime"],
-    ["upgrade", "Change the installed Lite or Full profile"],
     ["doctor", "Check local tools, runtime, and adapters"]
   ]]
 ];
@@ -60,7 +58,7 @@ function printCommandEntries(commands) {
   }
 }
 
-function printHelp(command = null, cwd = process.cwd()) {
+function printHelp(command = null) {
   if (command === "advanced") {
     title("Spectra advanced commands");
     title("");
@@ -80,11 +78,6 @@ function printHelp(command = null, cwd = process.cwd()) {
   }
 
   title("Spectra — AI-assisted development context");
-  const projectRoot = findSpectraRoot(cwd);
-  const profile = projectRoot ? getInstalledProfile(projectRoot) : null;
-  if (profile) {
-    title(`Profile: ${profile}`);
-  }
   for (const [group, commands] of WORKFLOWS) {
     title("");
     title(`${group}:`);
@@ -92,11 +85,7 @@ function printHelp(command = null, cwd = process.cwd()) {
   }
   title("");
   title("Run `spectra help <command>` for details.");
-  if (profile === "full") {
-    title("Full profile: run `spectra help advanced` for advanced commands.");
-  } else if (!profile) {
-    title("Run `spectra help advanced` for advanced commands.");
-  }
+  title("Run `spectra help advanced` for advanced commands.");
   return 0;
 }
 

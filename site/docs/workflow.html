@@ -35,7 +35,7 @@
       </p>
 
       <section>
-        <h2>Lite flow</h2>
+        <h2>Project workflow</h2>
         <pre><code>spectra index
 spectra onboard
 spectra context --role planner --goal discover
@@ -44,39 +44,9 @@ spectra context --role implementer --goal implement
 spectra check
 spectra status</code></pre>
         <p>
-          Lite is the right default for personal or project-local use. It gives
-          agents focused context and gives humans a repeatable health check
-          without forcing approval gates.
-        </p>
-      </section>
-
-      <section>
-        <h2>Full flow</h2>
-        <pre><code>spectra context --role planner --goal discover
-spectra check
-spectra approve --stage product-approved
-spectra approve --stage technical-approved
-spectra approve --stage implementation-approved
-spectra task --item FEAT-001 --task-type feature --goal "Implement the flow"
-spectra context --role implementer --goal implement
-spectra eval FEAT-001 --suite smoke
-spectra verify --profile release
-spectra approve --stage release-approved</code></pre>
-        <p>
-          Full is for teams that want formal specs, approvals, evals, and
-          release gates. Start with Lite unless those controls are already
-          useful.
-        </p>
-      </section>
-
-      <section>
-        <h2>Profile changes</h2>
-        <pre><code>spectra upgrade --profile full
-spectra upgrade --profile full --agents codex,claude</code></pre>
-        <p>
-          <code>upgrade</code> changes the installed profile.
-          <code>update</code> refreshes the installed CLI/runtime. Do not rerun
-          <code>adopt</code> for normal upgrades.
+          Use approvals, evals, and release checks as needed for each project.
+          <code>spectra update</code> refreshes the CLI and project runtime
+          while preserving existing project memory.
         </p>
       </section>
     </main>
