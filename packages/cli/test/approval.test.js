@@ -74,7 +74,7 @@ function approveThrough(root, upTo) {
 }
 
 test("approval starts at draft and cannot skip stages from draft", () => {
-  const root = initProject("full");
+  const root = initProject();
   fillProjectBrief(root);
   assert.equal(approvalState(root).highest_valid_state, "draft");
 
@@ -87,7 +87,7 @@ test("approval starts at draft and cannot skip stages from draft", () => {
 });
 
 test("approval cannot skip intermediate stages beyond draft", () => {
-  const root = initProject("full");
+  const root = initProject();
   approveThrough(root, "product-approved");
   assert.notEqual(approve(root, "implementation-approved").status, 0);
   assert.notEqual(approve(root, "release-approved").status, 0);
@@ -96,14 +96,14 @@ test("approval cannot skip intermediate stages beyond draft", () => {
 });
 
 test("stages progress sequentially through release approval", () => {
-  const root = initProject("full");
+  const root = initProject();
   approveThrough(root, "release-approved");
   assert.equal(approvalState(root).current_state, "release-approved");
   assert.equal(spectra(root, ["verify", "--profile", "release"]).status, 0);
 });
 
 test("release verify passes at implementation-approved once prerequisites hold (no approval deadlock)", () => {
-  const root = initProject("full");
+  const root = initProject();
   approveThrough(root, "implementation-approved");
   completeReleaseChecklists(root);
   const verify = spectra(root, ["verify", "--profile", "release"]);
@@ -111,7 +111,7 @@ test("release verify passes at implementation-approved once prerequisites hold (
 });
 
 test("release approval is refused while the release checklist is incomplete", () => {
-  const root = initProject("full");
+  const root = initProject();
   approveThrough(root, "implementation-approved");
   const result = approve(root, "release-approved");
   assert.notEqual(result.status, 0);
@@ -119,7 +119,7 @@ test("release approval is refused while the release checklist is incomplete", ()
 });
 
 test("release approval enforces verify-work.sh the same way as verify", () => {
-  const root = initProject("full");
+  const root = initProject();
   approveThrough(root, "implementation-approved");
   completeReleaseChecklists(root);
   // A template marker fails check-policy.sh (part of verify-work.sh) but is
@@ -133,14 +133,14 @@ test("release approval enforces verify-work.sh the same way as verify", () => {
 });
 
 test("re-approving the current stage is allowed", () => {
-  const root = initProject("full");
+  const root = initProject();
   approveThrough(root, "product-approved");
   commitAll(root, "again");
   assert.equal(approve(root, "product-approved").status, 0);
 });
 
 test("editing projectbrief.md invalidates product approval and re-approval restores it", () => {
-  const root = initProject("full");
+  const root = initProject();
   approveThrough(root, "technical-approved");
   assert.equal(approvalState(root).highest_valid_state, "technical-approved");
 
@@ -162,7 +162,7 @@ test("editing projectbrief.md invalidates product approval and re-approval resto
 });
 
 test("editing a feature spec (yaml) invalidates approvals in a canonical project", () => {
-  const root = initProject("full");
+  const root = initProject();
   approveThrough(root, "technical-approved");
   const featuresDir = path.join(root, ".spectra", "sdd", "features");
   const feature = fs.readdirSync(featuresDir)[0];
@@ -173,7 +173,7 @@ test("editing a feature spec (yaml) invalidates approvals in a canonical project
 });
 
 test("product approval is refused while projectbrief.md is template-only", () => {
-  const root = initProject("full");
+  const root = initProject();
   const result = approve(root, "product-approved");
   assert.notEqual(result.status, 0);
   assert.match(result.stderr + result.stdout, /template-only/);
@@ -181,7 +181,7 @@ test("product approval is refused while projectbrief.md is template-only", () =>
 });
 
 test("dirty project scope cannot receive an approval that immediately invalidates", () => {
-  const root = initProject("full", createGitProject(), ["--git-mode", "shared"]);
+  const root = initProject(createGitProject(), ["--git-mode", "shared"]);
   fillProjectBrief(root);
 
   const refused = approve(root, "product-approved");
@@ -198,7 +198,7 @@ test("dirty project scope cannot receive an approval that immediately invalidate
 });
 
 test("release approval is refused when the release eval suite is below threshold", () => {
-  const root = initProject("full");
+  const root = initProject();
   approveThrough(root, "implementation-approved");
   const featuresDir = path.join(root, ".spectra", "sdd", "features");
   for (const file of fs.readdirSync(path.join(featuresDir, fs.readdirSync(featuresDir)[0], "evals"))) {

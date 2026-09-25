@@ -29,15 +29,16 @@ function createGitProject() {
   return root;
 }
 
-test("Lite init keeps all generated files under .spectra", () => {
+test("init installs the unified runtime under .spectra", () => {
   const root = createGitProject();
   const result = run(root, process.execPath, [cliPath, "init", "."]);
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "manifest.env")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "runtime", "minimal.md")), true);
-  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "adapters")), false);
-  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "prompts")), false);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "adapters")), true);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "prompts")), true);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "governance", "approval-state.yaml")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "core", "projectbrief.md")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "docs", "workflow.md")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "bin", "spectra")), true);
@@ -50,19 +51,19 @@ test("Lite init keeps all generated files under .spectra", () => {
   assert.equal(fs.existsSync(path.join(root, ".github")), false);
 
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.equal(metadata.profile, "lite");
+  assert.equal(Object.hasOwn(metadata, "profile"), false);
   assert.equal(metadata.gitMode, "local");
-  assert.equal(metadata.schemaVersion, 2);
+  assert.equal(metadata.schemaVersion, 3);
   const config = fs.readFileSync(path.join(root, ".spectra", "config.yaml"), "utf8");
-  assert.match(config, /^profile: lite$/m);
+  assert.doesNotMatch(config, /^profile:/m);
   assert.match(config, /^gitMode: local$/m);
-  assert.match(config, /^schemaVersion: 2$/m);
+  assert.match(config, /^schemaVersion: 3$/m);
   assert.equal(run(root, "git", ["check-ignore", ".spectra/install.json"]).status, 0);
 });
 
-test("Lite runtime guidance only advertises files installed for Lite", () => {
+test("installed runtime guidance only advertises files that are installed", () => {
   const root = createGitProject();
-  const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "lite"]);
+  const result = run(root, process.execPath, [cliPath, "init", "."]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
 
   const dataRoot = path.join(root, ".spectra");
@@ -77,58 +78,40 @@ test("Lite runtime guidance only advertises files installed for Lite", () => {
   assert.deepEqual(missing, []);
 });
 
-test("Lite installed CLI reference recommends a Lite daily flow", () => {
+test("setup rejects the removed installation profile option before writing files", () => {
   const root = createGitProject();
-  const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "lite"]);
-  assert.equal(result.status, 0, result.stderr || result.stdout);
-
-  const reference = fs.readFileSync(path.join(root, ".spectra", "docs", "cli-reference.md"), "utf8");
-  const flow = reference.split("## Recommended Daily Flow")[1]?.split("## Notes")[0] ?? "";
-  assert.match(flow, /spectra task/);
-  assert.match(flow, /spectra status/);
-  assert.doesNotMatch(flow, /spectra (?:approve|eval)\b/);
-});
-
-test("setup rejects an unsupported profile before writing files", () => {
-  const root = createGitProject();
-  const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "unsupported"]);
+  const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "full"]);
 
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /--profile must be lite or full/);
+  assert.match(result.stderr, /Unknown option: --profile/);
   assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
 });
 
-test("setup rejects profile or Git-mode changes for an existing installation", () => {
+test("setup rejects Git-mode changes for an existing installation", () => {
   const root = createGitProject();
   const initial = run(root, process.execPath, [cliPath, "init", "."]);
   assert.equal(initial.status, 0, initial.stderr || initial.stdout);
-
-  const profileChange = run(root, process.execPath, [cliPath, "adopt", ".", "--profile", "full"]);
-  assert.equal(profileChange.status, 1);
-  assert.match(profileChange.stderr, /profile changes require an explicit upgrade/);
 
   const gitModeChange = run(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "shared"]);
   assert.equal(gitModeChange.status, 1);
   assert.match(gitModeChange.stderr, /Git mode changes require an explicit migration/);
 
   const config = fs.readFileSync(path.join(root, ".spectra", "config.yaml"), "utf8");
-  assert.match(config, /^profile: lite$/m);
+  assert.doesNotMatch(config, /^profile:/m);
   assert.match(config, /^gitMode: local$/m);
 });
 
-test("Lite setup rejects root-level agent adapter generation", () => {
+test("init can generate agent adapters without an installation profile", () => {
   const root = createGitProject();
-  const result = run(root, process.execPath, [cliPath, "init", ".", "--agents", "codex"]);
+  const result = run(root, process.execPath, [cliPath, "init", ".", "--agents", "claude"]);
 
-  assert.equal(result.status, 1);
-  assert.match(result.stderr, /Agent adapters require --profile full/);
-  assert.equal(fs.existsSync(path.join(root, "AGENTS.md")), false);
-  assert.equal(fs.existsSync(path.join(root, ".spectra")), false);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(fs.readFileSync(path.join(root, "CLAUDE.md"), "utf8"), /^# Spectra Core Instructions/);
 });
 
-test("Full init adds governance and feature scaffolding under .spectra", () => {
+test("init adds governance and feature scaffolding under .spectra", () => {
   const root = createGitProject();
-  const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "full"]);
+  const result = run(root, process.execPath, [cliPath, "init", "."]);
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "governance", "approval-state.yaml")), true);
@@ -136,16 +119,17 @@ test("Full init adds governance and feature scaffolding under .spectra", () => {
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "adapters")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "prompts")), true);
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.equal(metadata.profile, "full");
+  assert.equal(Object.hasOwn(metadata, "profile"), false);
 });
 
-test("Full shared init materializes repo-local runtime assets for adapter commands", () => {
+test("shared init materializes repo-local runtime assets for adapter commands", () => {
   const root = createGitProject();
-  const result = run(root, process.execPath, [cliPath, "init", ".", "--profile", "full", "--git-mode", "shared"]);
+  const result = run(root, process.execPath, [cliPath, "init", ".", "--git-mode", "shared"]);
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "cli", "assets", "runtime", "scripts", "generate-adapters.sh")), true);
-  assert.equal(fs.existsSync(path.join(root, ".spectra", "cli", "assets", "profiles", "lite", "profile.yaml")), true);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "cli", "assets", "profiles", "full", "profile.yaml")), true);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "cli", "assets", "profiles", "lite")), false);
   const adapters = run(root, process.execPath, [
     path.join(root, ".spectra", "cli", "bin", "spectra.js"),
     "adapters", "--cwd", root, "--agents", "claude,cursor,windsurf,copilot,antigravity", "--target", root
@@ -154,9 +138,9 @@ test("Full shared init materializes repo-local runtime assets for adapter comman
 });
 
 
-test("Full status and check resolve governance from .spectra", () => {
+test("status and check resolve governance from .spectra", () => {
   const root = createGitProject();
-  const init = run(root, process.execPath, [cliPath, "init", ".", "--profile", "full"]);
+  const init = run(root, process.execPath, [cliPath, "init", "."]);
   assert.equal(init.status, 0, init.stderr || init.stdout);
 
   const status = run(root, process.execPath, [cliPath, "status", "--cwd", root]);
@@ -167,9 +151,9 @@ test("Full status and check resolve governance from .spectra", () => {
   assert.equal(check.status, 0, check.stderr || check.stdout);
 });
 
-test("Full check blocks unapproved company source changes outside .spectra", () => {
+test("check blocks unapproved company source changes outside .spectra", () => {
   const root = createGitProject();
-  const init = run(root, process.execPath, [cliPath, "init", ".", "--profile", "full"]);
+  const init = run(root, process.execPath, [cliPath, "init", "."]);
   assert.equal(init.status, 0, init.stderr || init.stdout);
   fs.mkdirSync(path.join(root, "src"));
   fs.writeFileSync(path.join(root, "src", "orders.js"), "export const orders = [];\n");
@@ -183,9 +167,9 @@ function launcher(root) {
   return path.join(root, ".spectra", "bin", "spectra");
 }
 
-test("Full: installed CLI and local launcher resolve the same project state and policy verdict", () => {
+test("installed CLI and local launcher resolve the same project state and policy verdict", () => {
   const root = createGitProject();
-  const init = run(root, process.execPath, [cliPath, "init", ".", "--profile", "full"]);
+  const init = run(root, process.execPath, [cliPath, "init", "."]);
   assert.equal(init.status, 0, init.stderr || init.stdout);
 
   const cliClean = run(root, process.execPath, [cliPath, "check", "--cwd", root]);
@@ -210,28 +194,26 @@ test("Full: installed CLI and local launcher resolve the same project state and 
   assert.equal(localStatus.stdout, cliStatus.stdout);
 });
 
-for (const profile of ["lite", "full"]) {
-  test(`${profile}: install, check and status create no Spectra-managed state outside .spectra`, () => {
-    const root = createGitProject();
-    const before = fs.readdirSync(root).sort();
-    assert.equal(run(root, process.execPath, [cliPath, "init", ".", "--profile", profile]).status, 0);
-    assert.equal(run(root, process.execPath, [cliPath, "check", "--cwd", root]).status, 0);
-    assert.equal(run(root, process.execPath, [cliPath, "status", "--cwd", root]).status, 0);
-    assert.equal(run(root, launcher(root), ["check", "--cwd", root]).status, 0);
+test("install, check and status create no Spectra-managed state outside .spectra", () => {
+  const root = createGitProject();
+  const before = fs.readdirSync(root).sort();
+  assert.equal(run(root, process.execPath, [cliPath, "init", "."]).status, 0);
+  assert.equal(run(root, process.execPath, [cliPath, "check", "--cwd", root]).status, 0);
+  assert.equal(run(root, process.execPath, [cliPath, "status", "--cwd", root]).status, 0);
+  assert.equal(run(root, launcher(root), ["check", "--cwd", root]).status, 0);
 
-    assert.deepEqual(fs.readdirSync(root).sort(), [...before, ".spectra"].sort());
-    for (const legacy of ["spectra", "sdd", "docs"]) {
-      assert.equal(fs.existsSync(path.join(root, legacy)), false, `${legacy}/ must not be created`);
-    }
-    const untracked = run(root, "git", ["status", "--porcelain", "--untracked-files=all"]).stdout;
-    assert.equal(untracked.trim(), "", "local Git mode must leave the worktree clean");
-  });
-}
+  assert.deepEqual(fs.readdirSync(root).sort(), [...before, ".spectra"].sort());
+  for (const legacy of ["spectra", "sdd", "docs"]) {
+    assert.equal(fs.existsSync(path.join(root, legacy)), false, `${legacy}/ must not be created`);
+  }
+  const untracked = run(root, "git", ["status", "--porcelain", "--untracked-files=all"]).stdout;
+  assert.equal(untracked.trim(), "", "local Git mode must leave the worktree clean");
+});
 
-test("Full adopt writes discovery and governance artifacts under .spectra", () => {
+test("adopt writes discovery and governance artifacts under .spectra", () => {
   const root = createGitProject();
   fs.writeFileSync(path.join(root, "README.md"), "# Company project\n");
-  const result = run(root, process.execPath, [cliPath, "adopt", ".", "--profile", "full"]);
+  const result = run(root, process.execPath, [cliPath, "adopt", "."]);
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "discovery", "stack.md")), true);
@@ -239,23 +221,9 @@ test("Full adopt writes discovery and governance artifacts under .spectra", () =
   assert.equal(fs.existsSync(path.join(root, "sdd")), false);
 });
 
-test("Lite status and check do not require Full governance files", () => {
+test("check reports policy and spec validation", () => {
   const root = createGitProject();
-  const init = run(root, process.execPath, [cliPath, "init", "."]);
-  assert.equal(init.status, 0, init.stderr || init.stdout);
-
-  const status = run(root, process.execPath, [cliPath, "status", "--cwd", root]);
-  assert.equal(status.status, 0, status.stderr || status.stdout);
-
-  const check = run(root, process.execPath, [cliPath, "check", "--cwd", root]);
-  assert.equal(check.status, 0, check.stderr || check.stdout);
-  assert.match(check.stdout, /Lite project checks passed \(required files and business context; policy and spec validation are Full-profile checks\)/);
-  assert.doesNotMatch(check.stdout, /Validation and policy checks passed/);
-});
-
-test("Full check reports policy and spec validation, unlike Lite", () => {
-  const root = createGitProject();
-  assert.equal(run(root, process.execPath, [cliPath, "init", ".", "--profile", "full"]).status, 0);
+  assert.equal(run(root, process.execPath, [cliPath, "init", "."]).status, 0);
 
   const check = run(root, process.execPath, [cliPath, "check", "--cwd", root]);
   assert.equal(check.status, 0, check.stderr || check.stdout);
@@ -309,7 +277,7 @@ test("status omits untouched generated memory templates", () => {
   assert.doesNotMatch(status.stdout, /review-gate\.md/);
 });
 
-test("Lite context resolves files from .spectra/sdd", () => {
+test("context resolves files from .spectra/sdd", () => {
   const root = createGitProject();
   const init = run(root, process.execPath, [cliPath, "init", "."]);
   assert.equal(init.status, 0, init.stderr || init.stdout);
@@ -323,7 +291,7 @@ test("Lite context resolves files from .spectra/sdd", () => {
   assert.equal(fs.existsSync(path.join(root, ".spectra", "cache", "context", "project.summary.json")), true);
 });
 
-test("Lite task writes its implementation brief under .spectra/sdd", () => {
+test("task writes its implementation brief under .spectra/sdd", () => {
   const root = createGitProject();
   const init = run(root, process.execPath, [cliPath, "init", "."]);
   assert.equal(init.status, 0, init.stderr || init.stdout);

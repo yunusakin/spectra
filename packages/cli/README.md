@@ -36,11 +36,11 @@ The examples below use `spectra`. Replace it with `./.spectra/bin/spectra` when 
 Setup:
 
 ```bash
-spectra init [path] [--profile <lite|full>] [--git-mode <local|shared>] [--agents <csv>]
-spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>] [--agents <csv>]
+spectra init [path] [--git-mode <local|shared>] [--agents <csv>]
+spectra adopt [path] [--git-mode <local|shared>] [--agents <csv>]
 ```
 
-`--agents` requires `--profile full`.
+`--agents` generates adapter files at the paths expected by each agent.
 
 Workflow:
 
@@ -67,13 +67,13 @@ spectra diff semantic
 Spectra initializes a repository by creating one Spectra-owned directory:
 
 - `.spectra/bin/` repo-local launcher
-- `.spectra/install.json` profile, Git mode, CLI/runtime version, and schema metadata
+- `.spectra/install.json` Git mode, CLI/runtime version, and schema metadata
 - `.spectra/docs/` generated Spectra reference material
-- `.spectra/sdd/` profile runtime, working context, and business memory
+- `.spectra/sdd/` runtime assets, working context, and business memory
 
 Spectra-owned files should not be installed into root-level `docs/`, `sdd/`, `.spectra/`, `.github/`, or `app/`. Legacy shell scripts may still exist in the repository for compatibility and runtime maintenance, but the supported consumer setup path is this CLI.
 
-Lite is the default. Full adds executable specs, governance, adoption, agent adapters, and advanced admin workflows. Local Git mode is the default and excludes `/.spectra/` through `.git/info/exclude`; shared mode makes it commit-ready.
+Every installation includes executable specs, governance, adoption, agent adapters, and advanced workflows. Local Git mode is the default and excludes `/.spectra/` through `.git/info/exclude`; shared mode makes it commit-ready.
 
 ## Business Context
 
@@ -89,11 +89,11 @@ Business knowledge lives under `.spectra/sdd/memory-bank/business/` and is index
 
 New business claims default to unresolved. Use `--status active --verified` only when evidence is authoritative; code behavior alone should normally be recorded as unresolved.
 
-Agent adapters such as `AGENTS.md` or `CLAUDE.md` are generated only when requested with a Full profile. They point agents back to the same Spectra source of truth instead of duplicating project knowledge per agent.
+Agent adapters such as `AGENTS.md` or `CLAUDE.md` are generated when requested with `--agents`. They point agents back to the same Spectra source of truth instead of duplicating project knowledge per agent.
 
 ## Doctor repair
 
-`spectra doctor` checks local tool, runtime, and adapter health. `spectra doctor --fix` repairs safe generated Spectra files such as launchers, runtime/profile files, version metadata, local Git exclude policy, and detected adapter files. It does not rewrite business memory or application code.
+`spectra doctor` checks local tool, runtime, and adapter health. `spectra doctor --fix` repairs safe generated Spectra files such as launchers, runtime files, version metadata, local Git exclude policy, and detected adapter files. It does not rewrite business memory or application code.
 
 ## Documentation
 

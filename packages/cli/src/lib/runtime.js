@@ -50,7 +50,10 @@ function resolveAssetDir(localRelativePath, devFallbackRelativePath) {
 }
 
 const runtimeDir = resolveAssetDir(path.join("assets", "runtime"), path.join("..", "core", "assets", "runtime"));
-const profilesDir = resolveAssetDir(path.join("assets", "profiles"), path.join("..", "..", "profiles"));
+const projectAssetsDir = path.join(
+  resolveAssetDir(path.join("assets", "profiles"), path.join("..", "..", "profiles")),
+  "full"
+);
 
 function ensureDirectory(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -149,15 +152,6 @@ function readInstallMetadata(targetRoot) {
   return null;
 }
 
-function getInstalledProfile(targetRoot) {
-  const metadata = readInstallMetadata(targetRoot);
-  if (metadata?.profile === "lite" || metadata?.profile === "full") {
-    return metadata.profile;
-  }
-
-  return findManifestPath(targetRoot) ? "lite" : "full";
-}
-
 const findSpectraRoot = findProjectRoot;
 
 function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
@@ -239,8 +233,8 @@ function getRuntimeAssetsDir() {
   return runtimeDir;
 }
 
-function getProfileAssetsDir(profile) {
-  return path.join(profilesDir, profile);
+function getProjectAssetsDir() {
+  return projectAssetsDir;
 }
 
 function getCliPackageRoot() {
@@ -252,8 +246,7 @@ export {
   copyFile,
   ensureDirectory,
   findSpectraRoot,
-  getInstalledProfile,
-  getProfileAssetsDir,
+  getProjectAssetsDir,
   getCliPackageRoot,
   getExecutablePath,
   getRuntimeAssetsDir,

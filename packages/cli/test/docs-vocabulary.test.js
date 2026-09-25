@@ -5,7 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const docRoots = ["docs", "profiles/lite/docs", "profiles/full/docs", "site"];
+const docRoots = ["docs", "profiles/full/docs", "site"];
 const docFiles = ["README.md", "packages/cli/README.md", "scripts/README.md", "packages/core/assets/runtime/scripts/README.md"];
 
 function collect(dir, out) {
@@ -20,7 +20,6 @@ const files = docFiles.map((f) => path.join(repoRoot, f)).filter((f) => fs.exist
 for (const root of docRoots) {
   if (fs.existsSync(path.join(repoRoot, root))) collect(path.join(repoRoot, root), files);
 }
-
 const STALE = [
   [/spectra (eval run|skills resolve|adapters generate|spec diff|context-pack|discuss-task)\b/, "legacy command form"],
   [/generated layout is `spectra\/`/, "3.0.8 layout claim"],
@@ -29,7 +28,8 @@ const STALE = [
   [/(?<![\w./$-])spectra\/sdd\b/, "3.0.8 sdd path"],
   [/`\/spectra\/`/, "3.0.8 Git exclude pattern"],
   [/does not (use|create)[\s\S]*?`\.spectra\/`[\s\S]*?\bcanonical\b/i, "lists .spectra/ as non-canonical (self-contradictory)"],
-  [/does not create root-level `\.spectra\/`/i, "lists .spectra/ as a directory Spectra does not create"]
+  [/does not create root-level `\.spectra\/`/i, "lists .spectra/ as a directory Spectra does not create"],
+  [/--profile\s+(?:<lite\|full>|full|lite)|spectra upgrade|\bLite (?:profile|is the default)|\bFull profile\b/i, "removed installation profile guidance"]
 ];
 
 test("docs teach canonical commands and paths only", { skip: files.length === 0 }, () => {

@@ -4,7 +4,7 @@ import { findSpectraRoot, readInstallMetadata } from "../lib/runtime.js";
 import { getCliVersion } from "../lib/version.js";
 import { migrateLegacyLayout, needsMigration } from "../lib/migration.js";
 import { installSpectra } from "../lib/install.js";
-import { SCHEMA_VERSION } from "../lib/profile.js";
+import { SCHEMA_VERSION } from "../lib/install-metadata.js";
 import { ok, fail, title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { validateCommand } from "./validate.js";
@@ -33,7 +33,6 @@ function refreshProjectRuntime(projectRoot) {
     targetDir: projectRoot,
     adopt: metadata.installMode === "adopt",
     gitMode: metadata.gitMode ?? "shared",
-    profile: metadata.profile ?? "full",
     refresh: true
   });
 }

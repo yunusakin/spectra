@@ -52,8 +52,8 @@ function createGitProject() {
   return root;
 }
 
-function initProject(profile = "full", root = createGitProject(), extraArgs = []) {
-  const result = spectra(root, ["init", ".", "--profile", profile, ...extraArgs]);
+function initProject(root = createGitProject(), extraArgs = []) {
+  const result = spectra(root, ["init", ".", ...extraArgs]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
   return root;
 }

@@ -13,6 +13,8 @@ function replaceDirectory(sourceDir, targetDir) {
 
 replaceDirectory(path.resolve(cliRoot, "../core/assets/runtime"), path.join(cliRoot, "assets", "runtime"));
 fs.rmSync(path.join(cliRoot, "assets", "base"), { recursive: true, force: true });
-const profilesSource = path.resolve(cliRoot, "..", "..", "profiles");
-replaceDirectory(profilesSource, path.join(cliRoot, "assets", "profiles"));
-replaceDirectory(profilesSource, path.resolve(cliRoot, "../templates/assets/profiles"));
+const profileSource = path.resolve(cliRoot, "..", "..", "profiles", "full");
+fs.rmSync(path.join(cliRoot, "assets", "profiles"), { recursive: true, force: true });
+fs.rmSync(path.resolve(cliRoot, "../templates/assets/profiles"), { recursive: true, force: true });
+replaceDirectory(profileSource, path.join(cliRoot, "assets", "profiles", "full"));
+replaceDirectory(profileSource, path.resolve(cliRoot, "../templates/assets/profiles/full"));

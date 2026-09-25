@@ -19,7 +19,6 @@ import { onboardCommand } from "./commands/onboard.js";
 import { verifyCommand } from "./commands/verify.js";
 import { printHelp as printCommandHelp } from "./commands/help.js";
 import { internalUpdateProjectCommand, updateCommand } from "./commands/update.js";
-import { upgradeCommand } from "./commands/upgrade.js";
 import { fail, title } from "./lib/output.js";
 import { getCliVersion } from "./lib/version.js";
 
@@ -97,8 +96,6 @@ function dispatch(argv) {
       return onboardCommand(args);
     case "update":
       return updateCommand(args);
-    case "upgrade":
-      return upgradeCommand(args);
     case "__update-project":
       return internalUpdateProjectCommand(args);
     case "init":

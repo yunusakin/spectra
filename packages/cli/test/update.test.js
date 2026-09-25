@@ -71,7 +71,7 @@ test("update migrates a 3.0.8 spectra/ layout and its scripts still resolve SPEC
   // exercises runInstalledScript()'s data-root resolution end to end for
   // the pre-3.0.9 spectra/ layout, not just root-sdd.
   const root = createGitProject();
-  assert.equal(run(root, ["init", ".", "--profile", "lite"]).status, 0);
+  assert.equal(run(root, ["init", "."]).status, 0);
   fs.renameSync(path.join(root, ".spectra"), path.join(root, "spectra"));
   fs.writeFileSync(
     path.join(root, "spectra", "install.json"),
@@ -80,9 +80,12 @@ test("update migrates a 3.0.8 spectra/ layout and its scripts still resolve SPEC
 
   const result = run(root, ["update"], { input: "y\n" });
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  assert.match(result.stdout, /project checks passed/);
+  assert.match(result.stdout, /Validation and policy checks passed/);
   assert.equal(fs.existsSync(path.join(root, "spectra")), false);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "manifest.env")), true);
+  const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
+  assert.equal(metadata.schemaVersion, 3);
+  assert.equal(Object.hasOwn(metadata, "profile"), false);
 });
 
 test("update surfaces the same incomplete-migration error as init for a broken canonical layout", () => {
@@ -134,7 +137,7 @@ test("update refreshes an installed project when only the schema is outdated", (
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "tech", "modules.md")), true);
   const updated = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
-  assert.equal(updated.schemaVersion, 2);
+  assert.equal(updated.schemaVersion, 3);
 });
 
 test("declining update leaves a legacy layout untouched", () => {

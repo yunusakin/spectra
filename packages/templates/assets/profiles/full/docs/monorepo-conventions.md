@@ -3,9 +3,9 @@
 ## Structure
 - Company code and documentation stay in the repository's existing structure.
 - `.spectra/` contains all Spectra-owned metadata, docs, SDD state, and runtime files.
-- Full-profile executable specs and governance live under `.spectra/sdd/`.
+- Executable specs and governance live under `.spectra/sdd/`.
 
-Spectra does not create or require a root `app/` directory. Full-profile approval rules govern implementation without imposing a company source layout.
+Spectra does not create or require a root `app/` directory. Approval rules govern implementation without imposing a company source layout.
 
 ## Naming
 - Use lowercase with hyphens for directories and files.

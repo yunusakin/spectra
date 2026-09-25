@@ -1,22 +1,9 @@
-import fs from "node:fs";
-import path from "node:path";
-import { getInstalledProfile, runInstalledScript } from "../lib/runtime.js";
+import { runInstalledScript } from "../lib/runtime.js";
 import { fail, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { findSpectraRoot } from "../lib/runtime.js";
 import { validateSpectraV2 } from "../lib/specs.js";
-import { getProjectLayout } from "../lib/project-layout.js";
 import { validateBusinessContext } from "../lib/business-context.js";
-
-function validateLiteProject(repoRoot) {
-  const layout = getProjectLayout(repoRoot);
-  const requiredPaths = [
-    path.join(layout.sdd, "system", "manifest.env"),
-    path.join(layout.sdd, "system", "runtime", "minimal.md"),
-    path.join(layout.sdd, "memory-bank", "core", "projectbrief.md")
-  ];
-  return requiredPaths.filter((filePath) => !fs.existsSync(filePath));
-}
 
 function validateCommand(argv, { commandName = "validate" } = {}) {
   const { options } = parseOptions(argv, {
@@ -39,20 +26,6 @@ function validateCommand(argv, { commandName = "validate" } = {}) {
   if (businessErrors.length > 0) {
     for (const error of businessErrors) fail(error);
     return 1;
-  }
-
-  if (getInstalledProfile(repoRoot) === "lite") {
-    const missingPaths = validateLiteProject(repoRoot);
-    if (missingPaths.length > 0) {
-      for (const filePath of missingPaths) {
-        fail(`Missing required Lite file: ${filePath}`);
-      }
-      return 1;
-    }
-    // Lite intentionally skips repo structure, policy and spec validation
-    // (those need Full governance files), so say what was actually checked.
-    ok("Lite project checks passed (required files and business context; policy and spec validation are Full-profile checks)");
-    return 0;
   }
 
   const validateStatus = runInstalledScript({

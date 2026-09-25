@@ -18,7 +18,7 @@ function writeYaml(file, value) {
 }
 
 test("smoke eval fails when every selected scenario fails", () => {
-  const root = initProject("full");
+  const root = initProject();
   const { featureId, evalDir } = evalFiles(root);
   const goldenPath = path.join(evalDir, "golden-scenarios.yaml");
   const golden = YAML.parse(fs.readFileSync(goldenPath, "utf8"));
@@ -36,7 +36,7 @@ test("smoke eval fails when every selected scenario fails", () => {
 });
 
 test("command eval executes setup and fixtures, then compares real exit and output", () => {
-  const root = initProject("full");
+  const root = initProject();
   const { featureId, evalDir } = evalFiles(root);
   const specialTemp = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "spectra-eval-parent-")), "eval space & %TEMP%");
   fs.mkdirSync(specialTemp);

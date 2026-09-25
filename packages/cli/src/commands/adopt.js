@@ -3,7 +3,6 @@ import { installSpectra } from "../lib/install.js";
 import { next, ok, title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { resolveGitMode } from "../lib/git-policy.js";
-import { normalizeProfile } from "../lib/profile.js";
 
 async function askGitMode({ defaultMode }) {
   const prompt = createInterface({ input: process.stdin, output: process.stdout });
@@ -28,11 +27,11 @@ async function askGitMode({ defaultMode }) {
 async function adoptCommand(argv) {
   const { options, positional } = parseOptions(argv, {
     booleanFlags: ["--help"],
-    stringFlags: ["--agents", "--git-mode", "--profile"]
+    stringFlags: ["--agents", "--git-mode"]
   });
 
   if (options["--help"]) {
-    title("Usage: spectra adopt [path] [--profile <lite|full>] [--agents <csv>] [--git-mode <local|shared>]");
+    title("Usage: spectra adopt [path] [--agents <csv>] [--git-mode <local|shared>]");
     return 0;
   }
 
@@ -41,13 +40,11 @@ async function adoptCommand(argv) {
     isTTY: Boolean(process.stdin.isTTY && process.stdout.isTTY),
     ask: askGitMode
   });
-  const profile = normalizeProfile(options["--profile"]);
   const targetDir = positional[0] ?? ".";
   const result = installSpectra({
     targetDir,
     adopt: true,
     agents: options["--agents"] ?? "",
-    profile,
     gitMode
   });
 

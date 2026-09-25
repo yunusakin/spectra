@@ -24,10 +24,10 @@ function git(cwd, args) {
   return spawnSync("git", args, { cwd, encoding: "utf8" });
 }
 
-function createProject(profile = "lite", extraArgs = []) {
+function createProject(extraArgs = []) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-doctor-"));
   assert.equal(git(root, ["init", "-q"]).status, 0);
-  assert.equal(run(root, ["init", ".", "--profile", profile, ...extraArgs]).status, 0);
+  assert.equal(run(root, ["init", ".", ...extraArgs]).status, 0);
   return root;
 }
 
@@ -73,7 +73,7 @@ test("doctor --fix restores generated files and version metadata without rewriti
   assert.match(fs.readFileSync(businessPath, "utf8"), /Keep this exact user text/);
 });
 
-test("doctor --fix does not recreate missing memory-bank files", () => {
+test("doctor --fix leaves missing memory-bank files for manual repair", () => {
   const root = createProject();
   const businessReadmePath = path.join(root, ".spectra", "sdd", "memory-bank", "business", "README.md");
   const activeContextPath = path.join(root, ".spectra", "sdd", "memory-bank", "core", "activeContext.md");
@@ -82,13 +82,14 @@ test("doctor --fix does not recreate missing memory-bank files", () => {
 
   const result = run(root, ["doctor", "--fix", "--cwd", root]);
 
-  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.equal(result.status, 1, result.stderr || result.stdout);
+  assert.match(result.stdout, /Validation: FAIL/);
   assert.equal(fs.existsSync(businessReadmePath), false);
   assert.equal(fs.existsSync(activeContextPath), false);
 });
 
-test("doctor --fix does not rewrite Full governance or feature state", () => {
-  const root = createProject("full");
+test("doctor --fix does not rewrite governance or feature state", () => {
+  const root = createProject();
   const approvalPath = path.join(root, ".spectra", "sdd", "governance", "approval-state.yaml");
   const featuresRoot = path.join(root, ".spectra", "sdd", "features");
   const featureDir = fs.readdirSync(featuresRoot)[0];
@@ -117,7 +118,7 @@ test("doctor --fix restores local git exclude policy", () => {
 });
 
 test("doctor --fix restores missing detected adapter files", () => {
-  const root = createProject("full", ["--git-mode", "shared", "--agents", "cursor"]);
+  const root = createProject(["--git-mode", "shared", "--agents", "cursor"]);
   const adapterPath = path.join(root, ".cursor", "rules", "spectra-context.mdc");
   fs.rmSync(adapterPath);
 

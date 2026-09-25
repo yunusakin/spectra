@@ -53,8 +53,8 @@ not add, remove, or rename any local command.
 
 | Command | Use When | What It Does | Options / Modes |
 | --- | --- | --- | --- |
-| `spectra init [path] [--profile <lite\|full>] [--git-mode <local\|shared>] [--agents <csv>]` | starting a new Git repository | bootstraps a Spectra-managed project under `.spectra/` | defaults: `lite`, `local`; `--agents` requires `--profile full` |
-| `spectra adopt [path] [--profile <lite\|full>] [--git-mode <local\|shared>] [--agents <csv>]` | adding Spectra to an existing repository | installs the selected profile under `.spectra/` | `local`: private via Git exclude; `shared`: commit-ready; `--agents` requires `--profile full` |
+| `spectra init [path] [--git-mode <local\|shared>] [--agents <csv>]` | starting a new Git repository | bootstraps the Spectra runtime under `.spectra/` | `local` is the default; `--agents` generates adapter files |
+| `spectra adopt [path] [--git-mode <local\|shared>] [--agents <csv>]` | adding Spectra to an existing repository | installs the runtime under `.spectra/` | `local`: private via Git exclude; `shared`: commit-ready |
 | `spectra index [--check] [--explain] [--format <text\|json>]` | after bootstrap or manifest changes | builds or checks the deterministic repo index used by context, onboard, and verify | `--check` is read-only; `--explain` prints evidence |
 | `spectra onboard [--force]` | after bootstrap when `projectbrief.md` is still a template | drafts the project brief from interactive answers and the repo index | non-interactive runs never rewrite the brief |
 | `spectra route --task "<task>"` | before work that may touch business behavior | selects the smallest relevant module and business-domain context with deterministic match explanations | use `--format json`, `--domain`, or `--module` for explicit routing |
@@ -65,25 +65,24 @@ not add, remove, or rename any local command.
 | `spectra doctor [--fix]` | checking local tool/runtime/adapter health | reports doctor checks; with `--fix`, repairs safe generated Spectra files and re-runs validation | does not rewrite business memory or application code |
 | `spectra status` | resuming work | summarizes current project and Spectra changes | recommends the next action |
 | `spectra update [--yes]` | checking or upgrading Spectra | checks the latest CLI version, asks once when changes are needed, refreshes runtime files, and migrates legacy layouts | reports `Spectra is already up to date.` when no work is needed; `--yes` skips the confirmation prompt |
-| `spectra upgrade --profile <lite\|full>` | changing the installed profile | promotes Lite to Full while preserving existing project memory and updates runtime metadata | `--agents <csv>` optionally generates Full agent adapters; asks once for confirmation |
-| `spectra help [command\|advanced]` | learning the CLI | shows the everyday workflow or Full commands | supports `--help` too |
-| `spectra approve`, `eval`, `diff`, `adapters`, `skills`, `quick` | using Full features | advanced operations, each a top-level command | `spectra admin <command>` remains a compatibility alias |
+| `spectra help [command\|advanced]` | learning the CLI | shows the workflow and available commands | supports `--help` too |
+| `spectra approve`, `eval`, `diff`, `adapters`, `skills`, `quick` | managing specs, approvals, evaluations, and adapters | available as top-level commands | `spectra admin <command>` remains a compatibility alias |
 | `spectra version` | confirming install state | prints the installed CLI version | no additional modes |
 
 ```bash
-spectra init [path] [--profile <lite|full>] [--git-mode <local|shared>] [--agents <csv>]
-spectra adopt [path] [--profile <lite|full>] [--git-mode <local|shared>] [--agents <csv>]
+spectra init [path] [--git-mode <local|shared>] [--agents <csv>]
+spectra adopt [path] [--git-mode <local|shared>] [--agents <csv>]
 spectra index [--check] [--explain] [--format text|json]
 spectra onboard [--force]
 ```
 
-`init` creates a new Spectra-managed project under `.spectra/`. Lite is the default profile.
+`init` creates a new Spectra-managed project under `.spectra/`.
 
-`adopt` adds Spectra to an existing codebase. Full additionally creates brownfield adoption outputs.
+`adopt` adds Spectra to an existing codebase and creates brownfield adoption outputs.
 
 `index` writes `.spectra/cache/index/repo-index.json`, a disposable cache of detected modules, build/test targets, dependencies, runtimes, and evidence. `onboard` uses that cache only as technical evidence; it does not infer business intent.
 
-`--agents <csv>` is valid only with `--profile full`; Lite keeps agent adapter files out of the repository root.
+`--agents <csv>` optionally generates agent adapter files at the paths expected by each agent.
 
 `local` is the default Git mode. It requires a Git worktree, leaves `.gitignore` unchanged, and writes `/.spectra/` to Git's repository-local exclude file. Project code and company documentation remain visible to Git.
 
@@ -116,7 +115,6 @@ spectra task --item <id> --task-type <type> --goal "<goal>"
 spectra check [--base <sha> --head <sha>]
 spectra status
 spectra update
-spectra upgrade --profile full
 ```
 
 ## Utility Commands
@@ -136,7 +134,7 @@ spectra help
 
 Canonical Spectra state lives only under `.spectra/`. Agent adapter files (`CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md`, `.cursor/rules/**`, `.windsurf/rules/**`, `.agent/rules/**`) are generated projections of that state. They live at the paths each tool requires, are fully regenerable with `spectra adapters`, and should not be edited by hand.
 
-For Full-profile agent-enabled repos, run `spectra doctor` after adapter generation. A healthy setup requires:
+For agent-enabled repos, run `spectra doctor` after adapter generation. A healthy setup requires:
 
 - each configured agent's adapter files exist
 - each adapter file matches the Spectra-generated template

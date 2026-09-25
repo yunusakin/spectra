@@ -17,7 +17,7 @@ test("installSpectra fails fast when codex adapter is requested without codex on
 
   try {
     assert.throws(
-      () => installSpectra({ targetDir, profile: "full", gitMode: "shared", agents: "codex" }),
+      () => installSpectra({ targetDir, gitMode: "shared", agents: "codex" }),
       /Agent setup is unhealthy: Codex: .*missing from PATH/
     );
   } finally {

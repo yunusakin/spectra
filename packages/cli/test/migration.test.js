@@ -43,8 +43,8 @@ test("legacy migration moves Spectra-owned state into .spectra and preserves com
   assert.equal(fs.existsSync(path.join(root, "docs", "company.md")), true);
 
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.equal(metadata.profile, "full");
-  assert.equal(metadata.schemaVersion, 2);
+  assert.equal(Object.hasOwn(metadata, "profile"), false);
+  assert.equal(metadata.schemaVersion, 3);
   assert.equal(metadata.localLauncher, ".spectra/bin/spectra");
   assert.ok(metadata.excludePatterns.includes("/.spectra/"));
   assert.ok(!metadata.excludePatterns.includes("/spectra/"));
@@ -137,7 +137,7 @@ test("legacy migration adds business context scaffolding without replacing exist
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md")), true);
 
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.equal(metadata.schemaVersion, 2);
+  assert.equal(metadata.schemaVersion, 3);
 });
 
 // 3.0.8 installs live entirely under spectra/; migration must move each
@@ -174,7 +174,7 @@ test("spectra-dir migration moves the 3.0.8 layout into .spectra and merges cach
   assert.equal(fs.existsSync(path.join(root, ".spectra", "docs")), false); // no docs in this fixture
 
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.equal(metadata.profile, "lite");
+  assert.equal(Object.hasOwn(metadata, "profile"), false);
   assert.equal(metadata.localLauncher, ".spectra/bin/spectra");
   assert.ok(metadata.excludePatterns.includes("/.spectra/"));
 

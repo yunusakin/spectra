@@ -8,7 +8,7 @@ import {
   ensureDirectory,
   getExecutablePath,
   getCliPackageRoot,
-  getProfileAssetsDir,
+  getProjectAssetsDir,
   getRuntimeAssetsDir,
   readInstallMetadata,
   removeFinderArtifacts,
@@ -21,7 +21,7 @@ import { migrateLegacyLayout } from "./migration.js";
 import { assertPathsUntracked, beginLocalGitPolicy, finishLocalGitPolicy } from "./git-policy.js";
 import { getAdapterOutputPaths } from "./adapter-paths.js";
 import { getProjectLayout } from "./project-layout.js";
-import { SCHEMA_VERSION, createInstallMetadata, normalizeProfile } from "./profile.js";
+import { SCHEMA_VERSION, createInstallMetadata } from "./install-metadata.js";
 import { buildRepoIndex } from "./index/engine.js";
 import { writeIndex } from "./index/cache.js";
 import { warn } from "./output.js";
@@ -72,7 +72,7 @@ function materializeLocalNodeCli(targetRoot) {
     replaceDirectory(path.join(cliPackageRoot, dirName), path.join(localCliRoot, dirName));
   }
   replaceDirectory(getRuntimeAssetsDir(), path.join(localCliRoot, "assets", "runtime"));
-  replaceDirectory(path.dirname(getProfileAssetsDir("lite")), path.join(localCliRoot, "assets", "profiles"));
+  replaceDirectory(path.dirname(getProjectAssetsDir()), path.join(localCliRoot, "assets", "profiles"));
 
   for (const fileName of ["package.json", "README.md", "LICENSE"]) {
     copyFile(path.join(cliPackageRoot, fileName), path.join(localCliRoot, fileName));
@@ -132,13 +132,12 @@ function writeRepoLocalLauncher(targetRoot, nativeBinaryPath) {
   );
 }
 
-function writeProjectConfig(targetRoot, { profile, gitMode, overwrite = false }) {
+function writeProjectConfig(targetRoot, { gitMode }) {
   const configPath = getProjectLayout(targetRoot).config;
-  if (fs.existsSync(configPath) && !overwrite) {
-    return;
-  }
   ensureDirectory(path.dirname(configPath));
-  fs.writeFileSync(configPath, `profile: ${profile}\ngitMode: ${gitMode}\nschemaVersion: ${SCHEMA_VERSION}\n`);
+  const existing = fs.existsSync(configPath) ? fs.readFileSync(configPath, "utf8").split(/\r?\n/) : [];
+  const preserved = existing.filter((line) => line.trim() && !/^(?:profile|gitMode|schemaVersion):/.test(line));
+  fs.writeFileSync(configPath, [`gitMode: ${gitMode}`, `schemaVersion: ${SCHEMA_VERSION}`, ...preserved, ""].join("\n"));
 }
 
 function installSpectra({
@@ -146,9 +145,7 @@ function installSpectra({
   adopt = false,
   agents = "",
   gitMode = "local",
-  profile = "lite",
   refresh = false,
-  upgrade = false,
   refreshMemoryBank = true,
   refreshV2Scaffolding = true
 }) {
@@ -163,9 +160,8 @@ function installSpectra({
       );
     }
   }
-  const normalizedProfile = normalizeProfile(profile);
   const layout = getProjectLayout(absoluteTarget);
-  const profileAssetsDir = getProfileAssetsDir(normalizedProfile);
+  const profileAssetsDir = getProjectAssetsDir();
 
   // Bring any pre-3.0.9 layout (spectra/ or root sdd/) to the canonical
   // .spectra root first so init/adopt/doctor-fix can never create a
@@ -177,13 +173,7 @@ function installSpectra({
     );
   }
 
-  if (normalizedProfile === "lite" && agents) {
-    throw new Error("Agent adapters require --profile full because they create tool integration files outside .spectra/.");
-  }
   const existingMetadata = readInstallMetadata(absoluteTarget);
-  if (!upgrade && existingMetadata?.profile && existingMetadata.profile !== normalizedProfile) {
-    throw new Error("profile changes require an explicit upgrade command.");
-  }
   if (existingMetadata?.gitMode && existingMetadata.gitMode !== gitMode) {
     throw new Error("Git mode changes require an explicit migration command.");
   }
@@ -206,9 +196,9 @@ function installSpectra({
   if (refreshMemoryBank) {
     copyDirectory(path.join(profileAssetsDir, "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
   }
-  writeProjectConfig(absoluteTarget, { profile: normalizedProfile, gitMode, overwrite: upgrade });
+  writeProjectConfig(absoluteTarget, { gitMode });
   updateManifestRepoMode(absoluteTarget, "consumer");
-  if (normalizedProfile === "full" && refreshV2Scaffolding) {
+  if (refreshV2Scaffolding) {
     ensureV2Scaffolding(layout.root, { adopt });
   }
   const nativeBinaryPath = detectNativeBinaryPath();
@@ -216,7 +206,7 @@ function installSpectra({
   writeRepoLocalLauncher(absoluteTarget, nativeBinaryPath);
   removeFinderArtifacts(layout.root);
   writeInstallMetadata(absoluteTarget, {
-    ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
+    ...createInstallMetadata({ gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
     installedAt: new Date().toISOString(),
     binaryPath: nativeBinaryPath,
     localLauncher: ".spectra/bin/spectra"
@@ -229,9 +219,7 @@ function installSpectra({
       args: ["--root", absoluteTarget, "--spectra-root", layout.root],
       strict: true
     });
-    if (normalizedProfile === "full") {
-      buildAdoptionArtifacts(layout.root);
-    }
+    buildAdoptionArtifacts(layout.root);
     try {
       const repoIndex = buildRepoIndex(absoluteTarget);
       writeIndex(absoluteTarget, repoIndex);
@@ -273,7 +261,7 @@ function installSpectra({
     ownedPaths = localResult.ownedPaths;
     excludePatterns = localResult.excludePatterns;
     writeInstallMetadata(absoluteTarget, {
-      ...createInstallMetadata({ profile: normalizedProfile, gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
+      ...createInstallMetadata({ gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
       installedAt: new Date().toISOString(),
       binaryPath: nativeBinaryPath,
       localLauncher: ".spectra/bin/spectra",

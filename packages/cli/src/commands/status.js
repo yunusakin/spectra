@@ -1,4 +1,4 @@
-import { findSpectraRoot, getInstalledProfile } from "../lib/runtime.js";
+import { findSpectraRoot } from "../lib/runtime.js";
 import { title } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { computeApprovalState } from "../lib/specs.js";
@@ -21,11 +21,9 @@ function statusCommand(argv) {
   if (!repoRoot) {
     throw new Error(`Could not find a Spectra runtime from ${cwd}`);
   }
-  const profile = getInstalledProfile(repoRoot);
   const report = buildStatusReport(repoRoot);
 
   title("Spectra Project Status");
-  title(`Profile: ${profile}`);
   title("");
   title("Recent updates:");
   if (report.recentUpdates.length === 0) {
@@ -37,15 +35,13 @@ function statusCommand(argv) {
   }
 
   let nextApproval = null;
-  if (profile === "full") {
-    const approval = computeApprovalState(repoRoot);
-    nextApproval = { invalidations: approval.invalidations, nextStage: STAGES[stageOrder(approval.highest_valid_state) + 1] };
-    title("");
-    title(`Approval State: ${approval.current_state}`);
-    title(`Highest Valid: ${approval.highest_valid_state}`);
-    if (approval.invalidations.length > 0) {
-      title(`Invalidations: ${approval.invalidations.length}`);
-    }
+  const approval = computeApprovalState(repoRoot);
+  nextApproval = { invalidations: approval.invalidations, nextStage: STAGES[stageOrder(approval.highest_valid_state) + 1] };
+  title("");
+  title(`Approval State: ${approval.current_state}`);
+  title(`Highest Valid: ${approval.highest_valid_state}`);
+  if (approval.invalidations.length > 0) {
+    title(`Invalidations: ${approval.invalidations.length}`);
   }
 
   // Only recommendation derivable from state already computed above: approvals

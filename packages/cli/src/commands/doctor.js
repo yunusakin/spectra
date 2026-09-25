@@ -6,7 +6,6 @@ import { validateBusinessContext } from "../lib/business-context.js";
 import { validateCommand } from "./validate.js";
 import {
   findSpectraRoot,
-  getInstalledProfile,
   getRuntimeAssetsDir,
   hasCommand,
   isNativeRuntime,
@@ -16,7 +15,7 @@ import {
 } from "../lib/runtime.js";
 import { fail, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
-import { createInstallMetadata } from "../lib/profile.js";
+import { createInstallMetadata } from "../lib/install-metadata.js";
 
 function detectGitMode(repoRoot) {
   const metadata = readInstallMetadata(repoRoot);
@@ -26,12 +25,11 @@ function detectGitMode(repoRoot) {
   return "local";
 }
 
-function mergeMetadata(repoRoot, { profile, gitMode, excludePatterns = null }) {
+function mergeMetadata(repoRoot, { gitMode, excludePatterns = null }) {
   const current = readInstallMetadata(repoRoot) ?? {};
   writeInstallMetadata(repoRoot, {
     ...current,
     ...createInstallMetadata({
-      profile,
       gitMode,
       installMode: current.installMode ?? "doctor-fix"
     }),
@@ -43,28 +41,26 @@ function mergeMetadata(repoRoot, { profile, gitMode, excludePatterns = null }) {
 }
 
 function runFix(repoRoot) {
-  const profile = getInstalledProfile(repoRoot);
   const gitMode = detectGitMode(repoRoot);
   const fixed = [];
 
   installSpectra({
     targetDir: repoRoot,
-    profile,
     gitMode,
     refresh: true,
     refreshMemoryBank: false,
     refreshV2Scaffolding: false
   });
-  fixed.push("refreshed generated runtime, profile docs, system files, launcher, and install metadata");
+  fixed.push("refreshed generated runtime, docs, system files, launcher, and install metadata");
 
   if (gitMode === "local") {
     const exclude = ensureLocalSpectraExclude(repoRoot);
-    mergeMetadata(repoRoot, { profile, gitMode, excludePatterns: exclude.excludePatterns });
+    mergeMetadata(repoRoot, { gitMode, excludePatterns: exclude.excludePatterns });
     if (exclude.changed) {
       fixed.push("restored local Git exclude policy for /.spectra/");
     }
   } else {
-    mergeMetadata(repoRoot, { profile, gitMode });
+    mergeMetadata(repoRoot, { gitMode });
   }
 
   const repairableAdapters = checkAgentsHealth(repoRoot, Object.keys(AGENT_DEFINITIONS))

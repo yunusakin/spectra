@@ -8,7 +8,7 @@ This repository is designed to be a stable Spectra workspace for a single projec
 - Treat the repo root as the agent working directory.
 - Keep each project’s Spectra state under its own `.spectra/` directory and leave code in the project’s normal source layout.
 
-This keeps profile, Git policy, status, and approval state isolated per project.
+This keeps Git policy, status, and approval state isolated per project.
 
 ## Option: Monorepo With One Spectra Workspace Per Project Folder
 

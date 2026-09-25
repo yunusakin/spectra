@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { detectLayout, getProjectLayout } from "./project-layout.js";
-import { createInstallMetadata, SCHEMA_VERSION } from "./profile.js";
-import { copyDirectory, ensureDirectory, getProfileAssetsDir } from "./runtime.js";
+import { createInstallMetadata, SCHEMA_VERSION } from "./install-metadata.js";
+import { copyDirectory, ensureDirectory, getProjectAssetsDir } from "./runtime.js";
 
 // Patterns that describe Spectra's old homes. They are stripped during
 // migration and replaced with the canonical /.spectra/ exclusion.
@@ -48,9 +48,9 @@ function listRelativeFiles(rootDir) {
   return files;
 }
 
-function knownDocMoves(projectRoot, profile, targetDocsRoot) {
+function knownDocMoves(projectRoot, targetDocsRoot) {
   const sourceDocsRoot = path.join(projectRoot, "docs");
-  const profileDocsRoot = path.join(getProfileAssetsDir(profile), "docs");
+  const profileDocsRoot = path.join(getProjectAssetsDir(), "docs");
   const moves = [];
   for (const relativePath of listRelativeFiles(profileDocsRoot)) {
     const sourcePath = path.join(sourceDocsRoot, relativePath);
@@ -117,13 +117,14 @@ function readMetadata(metadataPath) {
   }
 }
 
-function writeMigratedMetadata(layout, oldMetadata, { profile, gitMode, installMode }) {
+function writeMigratedMetadata(layout, oldMetadata, { gitMode, installMode }) {
+  const { profile: legacyProfile, ...previousMetadata } = oldMetadata;
   const excludePatterns = gitMode === "local"
     ? [...new Set([...(oldMetadata.excludePatterns ?? []).filter((pattern) => !LEGACY_EXCLUSIONS.has(pattern)), CANONICAL_EXCLUSION])]
     : oldMetadata.excludePatterns ?? [];
   const metadata = {
-    ...oldMetadata,
-    ...createInstallMetadata({ profile, gitMode, installMode }),
+    ...previousMetadata,
+    ...createInstallMetadata({ gitMode, installMode }),
     localLauncher: ".spectra/bin/spectra",
     excludePatterns
   };
@@ -143,12 +144,11 @@ function migrateRootSddLayout(absoluteRoot, layout) {
   }
 
   const oldMetadata = readMetadata(legacyInstall);
-  const profile = oldMetadata.profile === "lite" ? "lite" : "full";
   const gitMode = oldMetadata.gitMode ?? "shared";
 
   const sddTarget = path.join(layout.root, "sdd");
   const docsTarget = path.join(layout.root, "docs");
-  const docMoves = knownDocMoves(absoluteRoot, profile, docsTarget);
+  const docMoves = knownDocMoves(absoluteRoot, docsTarget);
   preflightMoves([
     [legacySdd, sddTarget],
     ...docMoves
@@ -166,18 +166,17 @@ function migrateRootSddLayout(absoluteRoot, layout) {
     normalizeLocalExclusions(absoluteRoot, oldMetadata.excludePatterns ?? []);
   }
   const metadata = writeMigratedMetadata(layout, oldMetadata, {
-    profile,
     gitMode,
     installMode: oldMetadata.installMode ?? "adopt"
   });
-  fs.writeFileSync(layout.config, `profile: ${profile}\ngitMode: ${gitMode}\nschemaVersion: ${SCHEMA_VERSION}\n`);
+  fs.writeFileSync(layout.config, `gitMode: ${gitMode}\nschemaVersion: ${SCHEMA_VERSION}\n`);
   for (const [sourcePath, targetPath] of docMoves) {
     movePath(sourcePath, targetPath);
   }
   movePath(legacySdd, sddTarget);
-  copyDirectory(path.join(getProfileAssetsDir(profile), "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
+  copyDirectory(path.join(getProjectAssetsDir(), "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
 
-  return { migrated: true, profile, gitMode, localLauncher: metadata.localLauncher };
+  return { migrated: true, gitMode, localLauncher: metadata.localLauncher };
 }
 
 // 3.0.8 layout: everything under spectra/. Move each child into
@@ -201,7 +200,6 @@ function mergeCacheDirectories(sourceDir, targetDir) {
 function migrateSpectraDirLayout(absoluteRoot, layout) {
   const legacyRoot = path.join(absoluteRoot, "spectra");
   const oldMetadata = readMetadata(path.join(legacyRoot, "install.json"));
-  const profile = oldMetadata.profile === "lite" ? "lite" : "full";
   const gitMode = oldMetadata.gitMode ?? "shared";
 
   // install.json is rewritten (not moved) below, and sdd/ moves last: the
@@ -225,7 +223,6 @@ function migrateSpectraDirLayout(absoluteRoot, layout) {
     normalizeLocalExclusions(absoluteRoot, oldMetadata.excludePatterns ?? []);
   }
   const metadata = writeMigratedMetadata(layout, oldMetadata, {
-    profile,
     gitMode,
     installMode: oldMetadata.installMode ?? "adopt"
   });
@@ -238,7 +235,7 @@ function migrateSpectraDirLayout(absoluteRoot, layout) {
   // Removed last so a failure above never leaves spectra/ half-deleted.
   fs.rmSync(legacyRoot, { recursive: true, force: true });
 
-  return { migrated: true, profile, gitMode, localLauncher: metadata.localLauncher };
+  return { migrated: true, gitMode, localLauncher: metadata.localLauncher };
 }
 
 // Cheap, side-effect-free check used by update/init/adopt to decide
