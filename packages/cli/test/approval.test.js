@@ -127,6 +127,14 @@ test("verify and release approval require present, non-empty release checklists"
   const checklist = path.join(featureDir, "release-checklist.md");
   const progress = path.join(root, ".spectra", "sdd", "memory-bank", "core", "progress.md");
 
+  fs.appendFileSync(progress, "\n- Nested checklist integrity checked.\n");
+  fs.writeFileSync(checklist, "# Release Checklist\n\n- [x] Parent item\n  - [ ] Required nested item\n");
+  commitAll(root, "add incomplete nested checklist item");
+  const nestedVerify = spectra(root, ["verify"]);
+  assert.notEqual(nestedVerify.status, 0);
+  assert.match(nestedVerify.stdout + nestedVerify.stderr, /1 unchecked item/i);
+  assert.notEqual(approve(root, "release-approved").status, 0);
+
   fs.appendFileSync(progress, "\n- Release checklist integrity checked.\n");
   fs.writeFileSync(checklist, "# Release Checklist\n");
   commitAll(root, "empty release checklist");

@@ -75,12 +75,12 @@ function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}
       continue;
     }
     const markdown = readMarkdown(checklistPath);
-    const checklistItems = markdown.split(/\r?\n/).filter((line) => /^- \[[ xX]\]/.test(line));
+    const checklistItems = markdown.split(/\r?\n/).filter((line) => /^\s*-\s+\[[ xX]\]/.test(line));
     if (checklistItems.length === 0) {
       releaseChecklistWarnings.push(`${path.relative(repoRoot, checklistPath)} has no checklist items`);
       continue;
     }
-    const unchecked = checklistItems.filter((line) => /^- \[ \]/.test(line)).length;
+    const unchecked = checklistItems.filter((line) => /^\s*-\s+\[ \]/.test(line)).length;
     if (unchecked > 0) {
       releaseChecklistWarnings.push(`${path.relative(repoRoot, checklistPath)} has ${unchecked} unchecked item(s)`);
     }
