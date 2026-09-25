@@ -1,5 +1,7 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { ensureDirectory } from "../runtime.js";
 import { getFeatureBundle, getFeatureDirs, listRequirementIds } from "./feature-bundles.js";
 import { readJsonContract } from "./primitives.js";
@@ -79,6 +81,58 @@ function evaluateScenario(scenario, featureSpec, behaviorSpec, telemetryContract
   };
 }
 
+function runCommand(command, cwd) {
+  return spawnSync(command, { cwd, shell: true, encoding: "utf8", timeout: 60_000, maxBuffer: 1024 * 1024 });
+}
+
+function evaluateCommandScenario(repoRoot, scenario, result, setupError) {
+  if (setupError) {
+    result.reasons.push(`suite setup failed: ${setupError}`);
+    result.passed = false;
+    return result;
+  }
+  if (typeof scenario.input?.command !== "string" || !scenario.input.command.trim()) {
+    result.reasons.push("command mode requires input.command");
+    result.passed = false;
+    return result;
+  }
+
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-eval-"));
+  try {
+    for (const file of scenario.input.fixture?.files ?? []) {
+      const target = path.resolve(fixtureRoot, file.path ?? "");
+      if (!file.path || !target.startsWith(`${fixtureRoot}${path.sep}`)) {
+        throw new Error(`invalid fixture path: ${file.path}`);
+      }
+      ensureDirectory(path.dirname(target));
+      fs.writeFileSync(target, file.content ?? "");
+    }
+    const quotedFixture = process.platform === "win32"
+      ? `"${fixtureRoot}"`
+      : `'${fixtureRoot.replaceAll("'", "'\\''")}'`;
+    const command = scenario.input.command.replace(/<[\w-]*fixture>/g, quotedFixture);
+    const actual = runCommand(command, repoRoot);
+    if (actual.error) result.reasons.push(`command failed: ${actual.error.message}`);
+    const expected = scenario.expected ?? {};
+    if (typeof expected.exit_code !== "number") result.reasons.push("command mode requires expected.exit_code");
+    else if (actual.status !== expected.exit_code) result.reasons.push(`exit code ${actual.status} != ${expected.exit_code}`);
+    for (const stream of ["stdout", "stderr"]) {
+      if (typeof expected[stream] === "string" && actual[stream] !== expected[stream]) {
+        result.reasons.push(`${stream} did not match expected output`);
+      }
+      for (const fragment of expected[`${stream}_contains`] ?? []) {
+        if (!actual[stream]?.includes(fragment)) result.reasons.push(`${stream} missing ${JSON.stringify(fragment)}`);
+      }
+    }
+  } catch (error) {
+    result.reasons.push(`command evaluation failed: ${error.message}`);
+  } finally {
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+  result.passed = result.passed && result.reasons.length === 0;
+  return result;
+}
+
 function runEvalSuite(repoRoot, { featureId = null, suiteId = "smoke" } = {}) {
   const featureDirs = getFeatureDirs(repoRoot);
   const selectedDirs = featureId
@@ -110,9 +164,32 @@ function runEvalSuite(repoRoot, { featureId = null, suiteId = "smoke" } = {}) {
     const failureModes = readJsonContract(paths.failureModesPath);
     const evalThresholds = readJsonContract(paths.evalThresholdsPath);
     const scenarios = buildEvalSelection(regressionSuite, goldenScenarios, suiteId);
-    const results = scenarios.map((scenario) =>
-      evaluateScenario(scenario, featureSpec, behaviorSpec, telemetryContract, failureModes)
-    );
+    const suite = regressionSuite.suites.find((candidate) => candidate.id === suiteId);
+    const mode = suite.execution?.tool_mode ?? "contract";
+    if (mode !== "contract" && mode !== "command") throw new Error(`Unsupported eval tool mode: ${mode}`);
+    let setupError = null;
+    if (mode === "command" && scenarios.length) {
+      for (const command of suite.execution?.setup ?? []) {
+        const run = runCommand(command, repoRoot);
+        if (run.error || run.status !== 0) {
+          setupError = run.error?.message ?? `exit ${run.status}: ${run.stderr?.trim() || command}`;
+          break;
+        }
+      }
+    }
+    const results = scenarios.map((scenario) => {
+      if (mode === "command") {
+        return evaluateCommandScenario(repoRoot, scenario, {
+          scenario_id: scenario.id,
+          title: scenario.title,
+          category: scenario.category,
+          severity: scenario.severity,
+          passed: true,
+          reasons: []
+        }, setupError);
+      }
+      return evaluateScenario(scenario, featureSpec, behaviorSpec, telemetryContract, failureModes);
+    });
     const passed = results.filter((result) => result.passed).length;
     const totals = {
       scenarios: results.length,
@@ -122,12 +199,12 @@ function runEvalSuite(repoRoot, { featureId = null, suiteId = "smoke" } = {}) {
     };
 
     const requiredOverall =
-      suiteId === "release" ? evalThresholds?.thresholds?.overall_pass_rate ?? 0.98 : 0;
+      suiteId === "release" ? evalThresholds?.thresholds?.overall_pass_rate ?? 0.98 : 1;
     const featureReport = {
       feature_id: featureSpec?.metadata?.id ?? path.basename(featureDir),
       totals,
       release_threshold: requiredOverall,
-      passed: totals.pass_rate >= requiredOverall,
+      passed: totals.scenarios > 0 && totals.pass_rate >= requiredOverall,
       scenarios: results
     };
 

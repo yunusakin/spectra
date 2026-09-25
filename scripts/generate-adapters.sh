@@ -94,10 +94,10 @@ ${common_body}
 ## Tool Notes
 
 - Target: ${tool_name}
-- Bootstrap context: \`spectra context --role planner --goal discover\`
-- Intake context: \`spectra context --role planner --goal decide\`
-- Repo structure (modules, build/test commands, dependencies): \`spectra index --explain\` — do not read the whole tree yourself.
-- Verification gate: \`spectra verify\`
+- Bootstrap context: \`./.spectra/bin/spectra context --role planner --goal discover\`
+- Intake context: \`./.spectra/bin/spectra context --role planner --goal decide\`
+- Repo structure (modules, build/test commands, dependencies): \`./.spectra/bin/spectra index --explain\` — do not read the whole tree yourself.
+- Verification gate: \`./.spectra/bin/spectra verify\`
 
 ## Ignore Guidance
 ${ignore_lines}
@@ -124,13 +124,13 @@ EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.cursor/rules/spectra-workflow.mdc"
 # Spectra Workflow
 
-- Preferred compact context: \`spectra context --role implementer --goal implement\`
-- Use \`spectra verify --scope app\` before marking implementation ready.
+- Preferred compact context: \`./.spectra/bin/spectra context --role implementer --goal implement\`
+- Use \`./.spectra/bin/spectra verify --scope app\` before marking implementation ready.
 EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.cursor/rules/spectra-context.mdc"
 # Spectra Context Routing
 
-- Ask Spectra for role/goal context with \`spectra context --role <role> --goal <goal>\`.
+- Ask Spectra for role/goal context with \`./.spectra/bin/spectra context --role <role> --goal <goal>\`.
 - Do not preload unrelated files when a pack exists.
 $(business_memory_policy)
 EOF
@@ -144,13 +144,13 @@ EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.windsurf/rules/spectra-workflow.md"
 # Spectra Workflow
 
-- Run \`spectra task --item <id> --task-type <type> --goal "<goal>"\` before post-approval coding.
-- Run \`spectra verify --scope app\` before handoff.
+- Run \`./.spectra/bin/spectra task --item <id> --task-type <type> --goal "<goal>"\` before post-approval coding.
+- Run \`./.spectra/bin/spectra verify --scope app\` before handoff.
 EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.windsurf/rules/spectra-context.md"
 # Spectra Context
 
-- Resolve the required pack with \`spectra context --role <role> --goal <goal>\`.
+- Resolve the required pack with \`./.spectra/bin/spectra context --role <role> --goal <goal>\`.
 $(business_memory_policy)
 EOF
       ;;
@@ -177,13 +177,13 @@ EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.agent/rules/spectra-workflow.md"
 # Spectra Workflow
 
-- Use \`spectra task --item <id> --task-type <type> --goal "<goal>"\` before implementation work.
-- Use \`spectra verify\` before marking work complete.
+- Use \`./.spectra/bin/spectra task --item <id> --task-type <type> --goal "<goal>"\` before implementation work.
+- Use \`./.spectra/bin/spectra verify\` before marking work complete.
 EOF
       cat <<EOF | write_file "${TARGET_ROOT}/.agent/rules/spectra-context.md"
 # Spectra Context
 
-- Resolve task context via \`spectra context --role <role> --goal <goal>\`.
+- Resolve task context via \`./.spectra/bin/spectra context --role <role> --goal <goal>\`.
 $(business_memory_policy)
 EOF
       ;;

@@ -266,9 +266,11 @@ After confirmation, the legacy 3.0.8 `spectra/` directory, root `sdd/`, and know
 ```bash
 npm install
 npm test
-npm run validate
+npm run check
 npm run verify
 ```
+
+These npm scripts check the source repository; installed projects use `spectra check` and `spectra verify`.
 
 Repository layout for maintainers:
 

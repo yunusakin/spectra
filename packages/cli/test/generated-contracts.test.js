@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { cliRoot, createGitProject, initProject, spectra } from "./helpers/project.js";
+import { cliRoot, createGitProject, initProject, localSpectra, spectra } from "./helpers/project.js";
 
 const repoRoot = path.resolve(cliRoot, "..", "..");
 const sourceScripts = path.join(repoRoot, "scripts");
@@ -104,6 +104,10 @@ test("Full Codex adapter directs state updates into canonical .spectra files", (
     ".spectra/sdd/memory-bank/core/progress.md"
   ]);
   assert.match(instructions, /project state in `\.spectra\/sdd\/memory-bank\/`/);
+  assert.match(instructions, /\.\/\.spectra\/bin\/spectra context --role planner --goal discover/);
+  assert.doesNotMatch(instructions, /`spectra context/);
+  const localContext = localSpectra(root, ["context", "--role", "planner", "--goal", "discover"]);
+  assert.equal(localContext.status, 0, localContext.stderr || localContext.stdout);
   for (const relativePath of statePaths) {
     fs.appendFileSync(path.join(root, relativePath), "\nCodex adapter E2E marker\n");
     assert.match(fs.readFileSync(path.join(root, relativePath), "utf8"), /Codex adapter E2E marker/);
