@@ -99,6 +99,9 @@ test("stages progress sequentially through release approval", () => {
   const root = initProject();
   approveThrough(root, "release-approved");
   assert.equal(approvalState(root).current_state, "release-approved");
+  const status = spectra(root, ["status"]);
+  assert.match(status.stdout, /Highest Valid: release-approved/);
+  assert.equal(approvalState(root).highest_valid_state, "release-approved");
   assert.equal(spectra(root, ["verify"]).status, 0);
 });
 
