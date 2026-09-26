@@ -71,6 +71,8 @@ function buildSemanticDiff(repoRoot, { base = null, head = null, includeWorktree
   const semanticEvents = [];
 
   for (const relativePath of changedFiles) {
+    // Generated governance/eval artifacts are outputs, not changes that should invalidate the approval they record.
+    if (relativePath === "sdd/governance/approval-state.yaml" || relativePath.includes("/evals/reports/")) continue;
     if (
       !relativePath.startsWith("sdd/") &&
       !relativePath.startsWith("app/") &&
