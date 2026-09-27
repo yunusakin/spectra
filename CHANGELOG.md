@@ -2,6 +2,13 @@
 
 ## [3.1.1] - Unreleased
 
+### Added
+- Release verification checks nested release-checklist items and blocks approval while any item remains incomplete.
+
+### Changed
+- Installation uses the unified Full runtime without profile selection; `spectra verify` runs release-readiness checks by default.
+- Release approvals remain valid across invocations and are invalidated when relevant semantic project scope changes.
+
 ### Fixed
 - Native `spectra context` works on repeated calls and refreshes summaries after project state changes.
 - Generated Full agent adapters direct project state updates to `.spectra/sdd/`.

@@ -2,7 +2,7 @@
 
 ## v3.1.1 (unreleased)
 
-Correctness patch for native context, Full adapter state paths, approval feedback, and Lite context guidance. The `spectra/v2` schema identifier is unchanged.
+Consolidates installation around the Full runtime without profile selection and makes `spectra verify` release-ready by default, including nested release-checklist enforcement. Release approvals persist across invocations, reject dirty project changes, and become invalid after relevant semantic scope changes. Also fixes native context refresh, generated adapter state paths, and Lite context guidance. The `spectra/v2` schema identifier is unchanged.
 
 ## v3.1.0
 
