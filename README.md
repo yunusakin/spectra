@@ -57,7 +57,7 @@ See [Native Install](docs/native-install.md) for permanent PATH setup and troubl
 
 ## What Spectra adds to a project
 
-Spectra keeps its runtime, context, feature specifications, approvals, and generated helpers under `.spectra/`. It does not take over root-level `app/`, `docs/`, `sdd/`, `spectra/`, or `.github/` directories.
+Spectra keeps its runtime, project context, feature specifications, and approvals under `.spectra/`. It does not use root-level `app/`, `docs/`, `sdd/`, `spectra/`, or `.github/` as its data directories. If you request agent adapters, Spectra can generate small adapter files in the project root; they point back to `.spectra/` as the source of truth.
 
 The default `local` Git mode keeps `.spectra/` private by recording it in `.git/info/exclude`; it does not edit `.gitignore`. Choose `shared` when your team wants to review and commit Spectra state:
 
@@ -65,13 +65,13 @@ The default `local` Git mode keeps `.spectra/` private by recording it in `.git/
 npx spectra-pack@latest adopt . --git-mode shared
 ```
 
-To generate agent-specific adapters during setup, pass the agents you use:
+To generate agent-specific adapters during setup, pass the agents you use to `init` or `adopt`:
 
 ```bash
-npx spectra-pack@latest adopt . --agents codex,claude
+npx spectra-pack@latest init . --agents codex,claude
 ```
 
-Adapters point back to `.spectra/` as the source of truth. Use `spectra update` to update an existing installation while preserving project memory.
+Use `./.spectra/bin/spectra update` to update an npm/npx installation, or `spectra update` after native installation. Project memory is preserved.
 
 ## A typical work session
 
@@ -124,3 +124,9 @@ npm run check
 ```
 
 Spectra's source is organized into `packages/cli/`, `packages/core/`, and `packages/templates/`.
+
+## Releases and license
+
+- [GitHub Releases](https://github.com/yunusakin/spectra/releases) — native macOS/Linux downloads
+- [spectra-pack on npm](https://www.npmjs.com/package/spectra-pack) — Node.js CLI
+- MIT license — see [LICENSE](LICENSE)
