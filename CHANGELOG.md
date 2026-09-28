@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.1.1] - Unreleased
+## [3.1.1] - 2026-09-28
 
 ### Added
 - Release verification checks nested release-checklist items and blocks approval while any item remains incomplete.
