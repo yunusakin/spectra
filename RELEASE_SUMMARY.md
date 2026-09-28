@@ -1,6 +1,6 @@
 # Release Summary
 
-## v3.1.1 (unreleased)
+## v3.1.1
 
 Consolidates installation around the Full runtime without profile selection and makes `spectra verify` release-ready by default, including nested release-checklist enforcement. Release approvals persist across invocations, reject dirty project changes, and become invalid after relevant semantic scope changes. Also fixes native context refresh, generated adapter state paths, and Lite context guidance. The `spectra/v2` schema identifier is unchanged.
 
