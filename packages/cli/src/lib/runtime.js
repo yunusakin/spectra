@@ -172,6 +172,8 @@ function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
   // .spectra/ or spectra/, pre-3.0 and not-installed roots run at the
   // project root.
   const dataRoot = getActiveRoot(repoRoot);
+  const targetFlag = scriptName === "generate-adapters.sh" ? args.indexOf("--target") : -1;
+  const docsTarget = targetFlag >= 0 ? path.resolve(cwd, args[targetFlag + 1]) : repoRoot;
 
   const result = spawnSync("bash", [scriptPath, ...args], {
     cwd: dataRoot,
@@ -181,6 +183,7 @@ function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
       SPECTRA_REPO_ROOT: dataRoot,
       SPECTRA_DATA_ROOT: dataRoot,
       SPECTRA_PROJECT_ROOT: repoRoot,
+      SPECTRA_PROJECT_DOCS_NAME: readInstallMetadata(docsTarget)?.docsProjectName ?? "",
       SPECTRA_RUNTIME_ROOT: runtimeDir
     },
     stdio: "inherit"

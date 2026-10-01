@@ -1,5 +1,5 @@
 import path from "node:path";
-import { AGENT_DEFINITIONS, checkAgentsHealth } from "../lib/agent-health.js";
+import { AGENT_DEFINITIONS, checkAgentsHealth, findForeignAdapterFiles } from "../lib/agent-health.js";
 import { installSpectra } from "../lib/install.js";
 import { ensureLocalSpectraExclude } from "../lib/git-policy.js";
 import { validateBusinessContext } from "../lib/business-context.js";
@@ -73,7 +73,12 @@ function runFix(repoRoot) {
       const definition = AGENT_DEFINITIONS[agentResult.agent];
       return !definition.cliCommand || hasCommand(definition.cliCommand());
     })
-    .map((agentResult) => agentResult.agent);
+    .map((agentResult) => agentResult.agent)
+    .filter((agent) => {
+      const foreign = findForeignAdapterFiles(repoRoot, [agent]);
+      if (foreign.length) warn(`Skipping adapter repair for ${agent}: user-owned files (${foreign.join(", ")}).`);
+      return foreign.length === 0;
+    });
 
   if (repairableAdapters.length > 0) {
     const status = runInstalledScript({

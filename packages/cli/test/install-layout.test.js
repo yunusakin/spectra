@@ -40,7 +40,7 @@ test("init installs the unified runtime under .spectra", () => {
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "system", "prompts")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "governance", "approval-state.yaml")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "core", "projectbrief.md")), true);
-  assert.equal(fs.existsSync(path.join(root, ".spectra", "docs", "workflow.md")), true);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "docs", "spectra", "workflow.md")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "bin", "spectra")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "config.yaml")), true);
   assert.equal(fs.existsSync(path.join(root, ".spectra", "install.json")), true);

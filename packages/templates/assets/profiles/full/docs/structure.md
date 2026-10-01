@@ -39,7 +39,9 @@ Runtime assets include the manifest, rules, prompts, scaffolds, skills, and adap
 
 ### `.spectra/docs/`
 
-Spectra’s generated usage guides, workflow reference, and examples. It never creates a root-level `docs/` directory.
+Spectra's usage guides and examples live under `.spectra/docs/spectra/`. Compatible plugin and skill project artifacts use `.spectra/docs/<project-name>/<plugin-or-skill-name>/`. The project name is selected once from the existing brief or repository folder and stored as `docsProjectName` in `install.json`, so repository renames do not change document paths. The reserved name `spectra` becomes `spectra-project`.
+
+Updates and `doctor --fix` refresh shipped guides recorded in `docsGuidePaths` while preserving extra project files and unowned guide-path collisions. Existing documentation is not automatically moved. Adapter generation with `--target` uses the target installation's stable name or folder name. Doctor skips repair when it would overwrite user-owned adapter siblings. Agent guidance honors explicit user paths, higher-priority instructions, and tools requiring fixed paths; it does not enforce external tool writes. Memory, specs, governance, and cache retain their existing locations.
 
 ### `.spectra/cache/`
 

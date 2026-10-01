@@ -46,7 +46,7 @@ test("doctor --fix restores generated files and version metadata without rewriti
   const root = createProject();
   const launcherPath = path.join(root, ".spectra", "bin", "spectra");
   const runtimePath = path.join(root, ".spectra", "sdd", "system", "runtime", "minimal.md");
-  const docsPath = path.join(root, ".spectra", "docs", "workflow.md");
+  const docsPath = path.join(root, ".spectra", "docs", "spectra", "workflow.md");
   const manifestPath = path.join(root, ".spectra", "sdd", "system", "manifest.env");
   const metadataPath = path.join(root, ".spectra", "install.json");
   const businessPath = path.join(root, ".spectra", "sdd", "memory-bank", "business", "README.md");

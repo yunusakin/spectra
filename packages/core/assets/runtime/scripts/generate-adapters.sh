@@ -73,7 +73,14 @@ normalize_csv() {
   echo "$1" | tr ',' '\n' | sed 's/^ *//;s/ *$//' | awk 'NF > 0' | awk '!seen[$0]++'
 }
 
-common_body="$(cat "${common_file}")"
+project_docs_name="${SPECTRA_PROJECT_DOCS_NAME:-$(basename "${TARGET_ROOT}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9][^a-z0-9]*/-/g;s/^-*//;s/-*$//')}"
+project_docs_name="${project_docs_name:-project}"
+if [[ "${project_docs_name}" == "spectra" ]]; then project_docs_name="spectra-project"; fi
+if [[ ! "${project_docs_name}" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
+  echo "Error: invalid project documentation directory name." >&2
+  exit 1
+fi
+common_body="$(sed "s/<project-name>/${project_docs_name}/g" "${common_file}")"
 ignore_lines="$(sed 's/^/- `/;s/$/`/' "${ignore_file}")"
 
 business_memory_policy() {
