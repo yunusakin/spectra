@@ -58,7 +58,7 @@ function enrichDiscovery(repoRoot, index) {
   if (modules.length) {
     const rows = new Map();
     for (const record of modules) {
-      const name = normalize(record.path === "." ? record.name : record.path);
+      const name = normalize(record.path === "." ? record.name : record.path) || normalize(path.basename(repoRoot)) || "root";
       const previous = rows.get(name);
       const paths = [previous?.paths, text(record.path)].filter(Boolean).join(", ");
       rows.set(name, { paths, evidence: evidence(record) });
