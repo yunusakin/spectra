@@ -70,7 +70,7 @@ test("adopt local keeps Spectra files local while project code remains visible",
 
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
   assert.equal(metadata.gitMode, "local");
-  assert.ok(metadata.ownedPaths.includes(".spectra/docs/workflow.md"));
+  assert.ok(metadata.ownedPaths.includes(".spectra/docs/spectra/workflow.md"));
   assert.ok(metadata.excludePatterns.includes("/.spectra/"));
   assert.match(fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "tech", "modules.md"), "utf8"), /Unconfirmed/);
   assert.match(fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "utf8"), /Candidate domains/);
@@ -106,7 +106,7 @@ test("repeated local adoption preserves the existing ownership policy", () => {
 
   assert.equal(fs.readFileSync(path.join(root, ".git", "info", "exclude"), "utf8"), before);
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.ok(metadata.ownedPaths.includes(".spectra/docs/workflow.md"));
+  assert.ok(metadata.ownedPaths.includes(".spectra/docs/spectra/workflow.md"));
   assert.ok(metadata.excludePatterns.includes("/.spectra/"));
 });
 

@@ -25,6 +25,8 @@ import { SCHEMA_VERSION, createInstallMetadata } from "./install-metadata.js";
 import { buildRepoIndex } from "./index/engine.js";
 import { writeIndex } from "./index/cache.js";
 import { enrichDiscovery } from "./index/discovery.js";
+import { parseProjectSummary } from "./context/memory-summaries.js";
+import { normalize } from "./business/parser.js";
 import { warn } from "./output.js";
 
 function replaceDirectory(sourceDir, targetDir) {
@@ -175,6 +177,10 @@ function installSpectra({
   }
 
   const existingMetadata = readInstallMetadata(absoluteTarget);
+  const docsProjectName = existingMetadata?.docsProjectName ?? (normalize(parseProjectSummary(layout.root).projectName || path.basename(absoluteTarget)) || "project");
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(docsProjectName)) throw new Error("Invalid project documentation directory name in install metadata.");
+  const stableDocsName = docsProjectName === "spectra" ? "spectra-project" : docsProjectName;
+  const guidesRoot = path.join(layout.docs, "spectra");
   if (existingMetadata?.gitMode && existingMetadata.gitMode !== gitMode) {
     throw new Error("Git mode changes require an explicit migration command.");
   }
@@ -188,16 +194,20 @@ function installSpectra({
 
   if (refresh) {
     replaceDirectory(path.join(profileAssetsDir, "sdd", "system"), path.join(layout.sdd, "system"));
-    replaceDirectory(path.join(profileAssetsDir, "docs"), layout.docs);
+    // Plugin/skill project artifacts share docs/ with generated usage guides.
+    // Refresh the guides without deleting files outside the shipped template.
+    const docsSource = path.join(profileAssetsDir, "docs");
+    if (fs.existsSync(docsSource)) fs.cpSync(docsSource, guidesRoot, { recursive: true });
   } else {
     copyDirectory(path.join(profileAssetsDir, "sdd", "system"), path.join(layout.sdd, "system"));
-    copyDirectory(path.join(profileAssetsDir, "docs"), layout.docs);
+    copyDirectory(path.join(profileAssetsDir, "docs"), guidesRoot);
   }
 
   if (refreshMemoryBank) {
     copyDirectory(path.join(profileAssetsDir, "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
   }
   writeProjectConfig(absoluteTarget, { gitMode });
+  ensureDirectory(path.join(layout.docs, stableDocsName));
   updateManifestRepoMode(absoluteTarget, "consumer");
   if (refreshV2Scaffolding) {
     ensureV2Scaffolding(layout.root, { adopt });
@@ -210,6 +220,7 @@ function installSpectra({
     ...createInstallMetadata({ gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
     installedAt: new Date().toISOString(),
     binaryPath: nativeBinaryPath,
+    docsProjectName: stableDocsName,
     localLauncher: ".spectra/bin/spectra"
   });
 
@@ -267,6 +278,7 @@ function installSpectra({
       ...createInstallMetadata({ gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init") }),
       installedAt: new Date().toISOString(),
       binaryPath: nativeBinaryPath,
+      docsProjectName: stableDocsName,
       localLauncher: ".spectra/bin/spectra",
       ownedPaths,
       excludePatterns

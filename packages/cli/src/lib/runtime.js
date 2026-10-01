@@ -181,6 +181,7 @@ function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
       SPECTRA_REPO_ROOT: dataRoot,
       SPECTRA_DATA_ROOT: dataRoot,
       SPECTRA_PROJECT_ROOT: repoRoot,
+      SPECTRA_PROJECT_DOCS_NAME: readInstallMetadata(repoRoot)?.docsProjectName ?? "",
       SPECTRA_RUNTIME_ROOT: runtimeDir
     },
     stdio: "inherit"
