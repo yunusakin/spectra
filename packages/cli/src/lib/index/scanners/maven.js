@@ -56,6 +56,18 @@ function scanMaven(ctx) {
     const buildNode = findChild(entry.doc, "build");
     const sourceDirOverride = childText(buildNode, "sourceDirectory");
     const testSourceDirOverride = childText(buildNode, "testSourceDirectory");
+    const sourceRoot = (override, conventional) => {
+      const unresolved = override?.includes("${");
+      return {
+        path: override ? (unresolved ? override : toPosixRelative(repoRoot, path.resolve(entry.dir, override))) : path.posix.join(entry.relDir, conventional),
+        confidence: unresolved ? "low" : override ? "high" : "medium",
+        status: override && !unresolved ? "confirmed" : "candidate"
+      };
+    };
+    const sourceRoots = {
+      main: sourceRoot(sourceDirOverride, "src/main/java"),
+      test: sourceRoot(testSourceDirOverride, "src/test/java")
+    };
 
     const childIds = (childDirsByDir.get(entry.relDir) ?? [])
       .map((childRelDir) => makeRecordId(ECOSYSTEM, "module", childRelDir))
@@ -83,32 +95,21 @@ function scanMaven(ctx) {
                 version: childText(entry.parentNode, "version")
               }
             : null,
-          sourceRoots: {
-            main: {
-              path: sourceDirOverride ?? path.posix.join(entry.relDir, "src/main/java"),
-              confidence: sourceDirOverride ? "high" : "medium",
-              status: sourceDirOverride ? "confirmed" : "candidate"
-            },
-            test: {
-              path: testSourceDirOverride ?? path.posix.join(entry.relDir, "src/test/java"),
-              confidence: testSourceDirOverride ? "high" : "medium",
-              status: testSourceDirOverride ? "confirmed" : "candidate"
-            }
-          }
+          sourceRoots
         },
         relationships: { dependsOn: childIds }
       })
     );
 
-    if (fs.existsSync(path.join(repoRoot, testSourceDirOverride ?? path.join(entry.relDir, "src/test/java")))) {
+    if (!sourceRoots.test.path.includes("${") && fs.existsSync(path.join(repoRoot, sourceRoots.test.path))) {
       records.push(
         createRecord({
           kind: "test-target",
           name: `${name}:test`,
           path: entry.relDir,
           ecosystem: ECOSYSTEM,
-          confidence: testSourceDirOverride ? "high" : "medium",
-          status: testSourceDirOverride ? "confirmed" : "candidate",
+          confidence: sourceRoots.test.confidence,
+          status: sourceRoots.test.status,
           evidence: [
             testSourceDirOverride
               ? evidenceEntry(entry.relPom, "build.testSourceDirectory")

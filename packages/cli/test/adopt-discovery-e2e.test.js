@@ -78,3 +78,34 @@ test("adopt discovery explicitly reports unsupported signals and tolerates index
   assert.match(architecture, /unavailable|failed/i);
   t.diagnostic(`Repeatable artifact: ${root}/.spectra/sdd/memory-bank/discovery/architecture.md`);
 });
+
+// Failure cases: unnamed root packages lose their routable identity; nested
+// Maven overrides resolve at the repository root; property paths claim certainty.
+test("unnamed Node packages retain a routable module identity", t => {
+  const root = createGitProject();
+  write(root, "package.json", JSON.stringify({ private: true }));
+  write(root, "src/app.js", "export const app = true;\n");
+  adopt(root);
+  const name = path.basename(root).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const routed = localSpectra(root, ["route", "--task", "inspect", "--module", name]);
+  assert.equal(routed.status, 0, routed.stderr || routed.stdout);
+  assert.match(fs.readFileSync(path.join(root, ".spectra/sdd/memory-bank/tech/modules.md"), "utf8"), new RegExp(`\\| ${name} \\|`));
+  t.diagnostic(`Repeatable artifact: ${root}/.spectra/cache/discovery-e2e.json`);
+});
+
+test("nested Maven source overrides resolve relative to their module", t => {
+  const root = createGitProject();
+  fs.unlinkSync(path.join(root, "package.json"));
+  write(root, "pom.xml", '<project><artifactId>platform</artifactId><modules><module>service</module><module>dynamic</module></modules></project>');
+  write(root, "service/pom.xml", '<project><artifactId>service</artifactId><build><sourceDirectory>sources</sourceDirectory><testSourceDirectory>tests</testSourceDirectory></build></project>');
+  write(root, "dynamic/pom.xml", '<project><artifactId>dynamic</artifactId><build><sourceDirectory>${custom.sources}</sourceDirectory></build></project>');
+  write(root, "service/sources/App.java", "class App {}\n");
+  write(root, "service/tests/AppTest.java", "class AppTest {}\n");
+  const docs = adopt(root);
+  assert.match(docs.architecture, /main source root: service\/sources \[confirmed, confidence=high; exists\]/);
+  assert.match(docs.architecture, /test source root: service\/tests \[confirmed, confidence=high; exists\]/);
+  assert.match(docs.architecture, /\$\{custom.sources\} \[candidate, confidence=low/);
+  assert.match(docs.testing, /service:test/);
+  assert.match(docs.testing, /mvn test/);
+  t.diagnostic(`Repeatable artifact: ${root}/.spectra/cache/discovery-e2e.json`);
+});
