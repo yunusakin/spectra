@@ -27,73 +27,48 @@
 
     <main class="docs-shell docs-article">
       <p class="eyebrow">Commands</p>
-      <h1>The commands worth remembering.</h1>
+      <h1>Know what a command does to your project.</h1>
       <p class="lead">
         Use <code>spectra</code> below if you installed the native binary.
         Otherwise use <code>./.spectra/bin/spectra</code> from the project root.
       </p>
 
-      <section class="command-reference">
-        <article>
-          <h2>spectra index</h2>
-          <p>
-            Builds <code>.spectra/cache/index/repo-index.json</code>, a
-            disposable map of modules, dependencies, projects, and test targets.
-            Run it after bootstrap, build-file changes, or when context feels
-            stale.
-          </p>
-          <pre><code>spectra index
+      <section aria-labelledby="command-effects-title">
+        <h2 id="command-effects-title">What each command changes</h2>
+        <p>Paths are relative to your project. Writes include caches and approval/eval records. Native users run <code>spectra</code>; npm users run <code>./.spectra/bin/spectra</code>. A failed check of release readiness may still refresh reports.</p>
+        <div class="command-table-scroll"><table class="command-effects-table"><thead><tr><th>Command</th><th>Purpose</th><th>Project effect</th></tr></thead><tbody>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#init"><code>spectra init</code></a></th><td>Bootstrap a new project</td><td>Creates .spectra/bin/, .spectra/cli/ for the Node fallback, .spectra/sdd/, .spectra/docs/spectra/, .spectra/docs/&lt;project-name&gt;/, .spectra/config.yaml and .spectra/install.json; local mode updates Git’s shared info/exclude file.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adopt"><code>spectra adopt</code></a></th><td>Add Spectra to an existing codebase</td><td>Installs the same layer as init; additionally writes .spectra/cache/index/repo-index.json, .spectra/sdd/memory-bank/discovery/*.md, the technical module map and .spectra/sdd/adoption/{current-state.summary,gap-analysis,review-queue}.yaml.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#onboard"><code>spectra onboard</code></a></th><td>Capture project intent from your answers</td><td>Interactive runs write .spectra/sdd/memory-bank/core/projectbrief.md. Non-interactive runs do not write project files.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#context"><code>spectra context</code></a></th><td>Load focused context before planning, implementation or review</td><td>Creates or refreshes .spectra/cache/context/*.summary.json; canonical source documents are not edited.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#task"><code>spectra task</code></a></th><td>Record intent before implementation</td><td>Overwrites .spectra/sdd/memory-bank/core/implementation-brief.md with the supplied item, goal and template sections.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#route"><code>spectra route</code></a></th><td>Select relevant technical modules and business domains</td><td>Does not write project files.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#knowledge"><code>spectra knowledge</code></a></th><td>Record durable business rules and manage their lifecycle</td><td>Updates .spectra/sdd/memory-bank/business/INDEX.md and domain rules.md / unresolved.md.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#index"><code>spectra index</code></a></th><td>Refresh evidence after bootstrap or manifest changes</td><td>Default mode writes .spectra/cache/index/repo-index.json. --check does not write project files, even when missing or stale.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#check"><code>spectra check</code></a></th><td>Validate the Spectra layer after changes</td><td>Does not write persistent project files; validation smoke checks use temporary directories.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#verify"><code>spectra verify</code></a></th><td>Assess release readiness before handoff</td><td>Refreshes .spectra/sdd/governance/approval-state.yaml and intake approval status; runs release evals and overwrites each selected feature’s evals/reports/latest.json and latest.md.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#status"><code>spectra status</code></a></th><td>Resume work and see recent changes</td><td>Does not write project files.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#update"><code>spectra update</code></a></th><td>Upgrade the CLI/runtime or migrate an old layout</td><td>When needed, replaces runtime/system/local launcher assets, refreshes owned guides and install metadata, and migrates recognized legacy paths into .spectra/. Self-update also changes the installed CLI outside the project.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#doctor"><code>spectra doctor</code></a></th><td>Inspect local tools, runtime and adapter health</td><td>Without --fix: does not write project files. With --fix: refreshes generated runtime/system, owned guides, launcher, .spectra/cli/ Node fallback, metadata and local exclude policy; repairs missing adapters only when no sibling is user-owned.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#approve"><code>spectra approve</code></a></th><td>Advance the staged approval lifecycle</td><td>Updates .spectra/sdd/governance/approval-state.yaml with stage/baseline/timestamp and syncs .spectra/sdd/memory-bank/core/intake-state.md; release approval also writes eval reports.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#eval"><code>spectra eval</code></a></th><td>Evaluate feature contracts or configured application behavior</td><td>Overwrites .spectra/sdd/features/&lt;feature&gt;/evals/reports/latest.json and latest.md. Command mode runs configured setup/scenario commands from the project root; their writes are defined by those commands.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#diff"><code>spectra diff</code></a></th><td>Understand specification changes and approval impact</td><td>init and update initialize/append .spectra/sdd/memory-bank/core/spec-diff.md by default. semantic recomputes approval-state.yaml and syncs intake-state.md.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#quick"><code>spectra quick</code></a></th><td>Run a focused docs/rules/spec/ops validation lane</td><td>Does not write persistent project files; validation uses temporary smoke projects.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#skills"><code>spectra skills</code></a></th><td>Resolve skill execution order for a task</td><td>Does not write project files.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adapters"><code>spectra adapters</code></a></th><td>Generate instructions for the AI tools you use</td><td>Writes required root/tool files in the target: AGENTS.md, CLAUDE.md, .github/copilot-instructions.md, .cursor/rules/, .windsurf/rules/ or .agent/rules/. Same-project local mode also updates install ownership metadata and Git info/exclude.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#version"><code>spectra version</code></a></th><td>Confirm the installed executable version</td><td>Does not write project files.</td></tr>
+          <tr><th scope="row"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#help"><code>spectra help</code></a></th><td>Discover commands and their options</td><td>Does not write project files.</td></tr>
+        </tbody></table></div>
+        <p>Read the <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md">complete CLI Reference</a> for prerequisites, modes, repeat behavior and before/after file trees. All normal command forms are top-level; older aliases remain compatibility entrypoints.</p>
+        <h3>Example: indexing your project</h3>
+        <pre><code>Before: .spectra/cache/index/repo-index.json absent or stale
+spectra index
+After:  .spectra/cache/index/repo-index.json contains current evidence
 spectra index --check
-spectra index --explain</code></pre>
-        </article>
-        <article>
-          <h2>spectra onboard</h2>
-          <p>
-            Drafts the project brief from repo facts and your answers. It is
-            most useful while <code>projectbrief.md</code> is still mostly a
-            template.
-          </p>
-          <pre><code>spectra onboard
-spectra onboard --force</code></pre>
-        </article>
-        <article>
-          <h2>spectra context</h2>
-          <p>
-            Loads role-aware context for an agent or human session without
-            dumping the whole repository into the prompt.
-          </p>
-          <pre><code>spectra context --role planner --goal discover
-spectra context --role implementer --goal implement</code></pre>
-        </article>
-        <article>
-          <h2>spectra check</h2>
-          <p>
-            Validates the installed Spectra layer. Use it after setup, after
-            spec/context changes, and before approval or release decisions.
-          </p>
-          <pre><code>spectra check
-spectra check --base main --head HEAD</code></pre>
-        </article>
-        <article>
-          <h2>spectra verify</h2>
-          <p>
-            Aggregates release-grade confidence signals and tracked feature
-            items.
-          </p>
-          <pre><code>spectra verify
-spectra verify --scope app --item FEAT-001</code></pre>
-        </article>
-        <article>
-          <h2>Advanced commands</h2>
-          <p>
-            Top-level operations such as approvals, evals, diffs, skills, and
-            adapter generation. <code>spectra admin &lt;command&gt;</code>
-            remains a compatibility alias.
-          </p>
-          <pre><code>spectra approve --stage implementation-approved
-spectra eval FEAT-001 --suite smoke
-spectra adapters --agents codex,claude --target .</code></pre>
-        </article>
+After:  no project file changes; freshness status printed</code></pre>
+        <figure class="command-flow"><img src="../assets/command-effects-setup.svg" alt="Setup and generated state; the command effects are also described in the table above." loading="lazy" /><figcaption>Setup and generated state. Dashed arrows are optional or conditional. On small screens, scroll the diagram horizontally.</figcaption></figure>
+        <figure class="command-flow"><img src="../assets/command-effects-workflow.svg" alt="Daily work and release readiness; the command effects are also described in the table above." loading="lazy" /><figcaption>Daily work and release readiness. Dashed arrows are optional or conditional. On small screens, scroll the diagram horizontally.</figcaption></figure>
+        <figure class="command-flow"><img src="../assets/command-effects-maintenance.svg" alt="Maintenance and preservation; the command effects are also described in the table above." loading="lazy" /><figcaption>Maintenance and preservation. Dashed arrows are optional or conditional. On small screens, scroll the diagram horizontally.</figcaption></figure>
       </section>
     </main>
 

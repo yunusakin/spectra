@@ -738,3 +738,11 @@ pre {
     padding: 20px;
   }
 }
+/* Command effects remain readable without a JavaScript diagram renderer. */
+.command-table-scroll { overflow-x: auto; }
+.command-effects-table { width: 100%; border-collapse: collapse; }
+.command-effects-table th, .command-effects-table td { padding: .8rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border, #ddd); }
+.command-effects-table th:first-child { min-width: 10rem; }
+.command-flow { margin: 2rem 0; overflow-x: auto; }
+.command-flow img { display: block; width: 100%; min-width: 600px; height: auto; background: #fff; border-radius: .75rem; }
+.command-flow figcaption { margin-top: .5rem; }
