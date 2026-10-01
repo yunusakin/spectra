@@ -48,6 +48,8 @@ spectra status</code></pre>
           <code>spectra update</code> refreshes the CLI and project runtime
           while preserving existing project memory.
         </p>
+        <p><code>context</code> refreshes summary caches; <code>task</code> replaces the implementation brief. <code>eval</code> writes latest reports, and <code>verify</code> also recomputes approval validity and runs release evals. Configured command-mode evals may execute application commands. See <a href="./commands.html">command effects</a> for exact paths and modes.</p>
+        <figure class="command-flow"><img src="../assets/command-effects-workflow.svg" alt="Recommended context, task, check, approval and evaluation flow; conditional steps use dashed arrows." /><figcaption>A recommended flow. Approvals advance in order; application implementation requires implementation approval.</figcaption></figure>
       </section>
     </main>
 

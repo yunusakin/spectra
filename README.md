@@ -73,6 +73,24 @@ npx spectra-pack@latest init . --agents codex,claude
 
 Use `./.spectra/bin/spectra update` to update an npm/npx installation, or `spectra update` after native installation. Project memory is preserved.
 
+An example after adopting `acme` with a Claude adapter:
+
+```text
+acme/
+├── .spectra/
+│   ├── bin/spectra                    # project-local command
+│   ├── cli/                           # Node fallback, when applicable
+│   ├── sdd/                           # memory, specs, governance and runtime
+│   ├── docs/spectra/                  # shipped Spectra usage guides
+│   ├── docs/acme/                     # compatible plugin/skill artifacts
+│   ├── cache/index/repo-index.json    # disposable repository evidence
+│   └── install.json                   # versions, names and ownership
+├── CLAUDE.md                          # optional tool-required projection
+└── .git/info/exclude                  # local mode adds /.spectra/
+```
+
+Other agents use their required root/tool paths. Adapters give compatible plugins output guidance; generating an adapter does not create plugin plans or move existing documents.
+
 ## A typical work session
 
 ```bash
@@ -91,17 +109,23 @@ Before shipping, run the feature's evaluation suite and `spectra verify`. Verify
 
 ## Common commands
 
-| Command | Purpose |
-| --- | --- |
-| `spectra init` | Set up a new project |
-| `spectra adopt` | Add Spectra to an existing project |
-| `spectra onboard` | Draft project context from your answers and repository index |
-| `spectra context` | Load focused project context for an agent or person |
-| `spectra task` | Record implementation intent |
-| `spectra check` | Validate the Spectra project layer |
-| `spectra status` | Resume work and see recent changes |
-| `spectra update` | Update Spectra and migrate older layouts |
-| `spectra help` | Browse commands and options |
+| Command | Purpose | Project effect |
+| --- | --- | --- |
+| [`spectra init`](docs/cli-reference.md#init) | Set up a new project | Creates the Spectra layer; local mode updates Git info/exclude; optional adapters use tool-required paths. |
+| [`spectra adopt`](docs/cli-reference.md#adopt) | Add Spectra to an existing project | Installs the layer and writes repository index/discovery evidence. |
+| [`spectra onboard`](docs/cli-reference.md#onboard) | Capture project intent | Interactive runs write projectbrief.md; non-interactive runs only report context. |
+| [`spectra index`](docs/cli-reference.md#index) | Refresh repository evidence | Replaces cache/index/repo-index.json; --check does not write project files. |
+| [`spectra context`](docs/cli-reference.md#context) | Load focused context | Reads canonical memory and refreshes derived cache/context summaries. |
+| [`spectra route`](docs/cli-reference.md#route) | Select relevant modules/domains | Reads knowledge indexes; does not write project files. |
+| [`spectra task`](docs/cli-reference.md#task) | Record implementation intent | Replaces memory-bank/core/implementation-brief.md. |
+| [`spectra check`](docs/cli-reference.md#check) | Validate the Spectra layer | Reports structure/policy/contract errors; no persistent project writes. |
+| [`spectra eval`](docs/cli-reference.md#eval) / [`verify`](docs/cli-reference.md#verify) | Evaluate contracts / assess readiness | Writes eval reports; verify also refreshes approval validity. Configured command-mode evals can execute application commands. |
+| [`spectra status`](docs/cli-reference.md#status) | Resume work | Reads Git and project memory; does not update memory files. |
+| [`spectra doctor`](docs/cli-reference.md#doctor) | Inspect or repair health | Read-only by default; --fix refreshes safe generated files and preserves user-owned documents/adapters. |
+| [`spectra update`](docs/cli-reference.md#update) | Upgrade Spectra | When needed, updates CLI/runtime and migrates legacy layouts; preserves project memory. |
+| [`spectra help`](docs/cli-reference.md#help) | Browse commands/options | Prints help; does not write project files. |
+
+Paths in this table are beneath `.spectra/` unless a Git or adapter path is stated. See the [complete command effects reference](docs/cli-reference.md#command-effects-at-a-glance) for all **21 public commands**, prerequisites, options, before/after file trees and workflow diagrams.
 
 ## Documentation
 

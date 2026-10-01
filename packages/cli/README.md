@@ -68,10 +68,11 @@ Spectra initializes a repository by creating one Spectra-owned directory:
 
 - `.spectra/bin/` repo-local launcher
 - `.spectra/install.json` Git mode, CLI/runtime version, and schema metadata
-- `.spectra/docs/` generated Spectra reference material
+- `.spectra/docs/spectra/` shipped Spectra reference material
+- `.spectra/docs/<project-name>/` compatible plugin/skill project artifacts
 - `.spectra/sdd/` runtime assets, working context, and business memory
 
-Spectra-owned files should not be installed into root-level `docs/`, `sdd/`, `.spectra/`, `.github/`, or `app/`. Legacy shell scripts may still exist in the repository for compatibility and runtime maintenance, but the supported consumer setup path is this CLI.
+Spectra state belongs under `.spectra/`; application code and company documentation keep their own locations. Optional agent adapters use the root/tool paths their agents require, including `.github/copilot-instructions.md`. Runtime shell scripts are invoked by the CLI and are not another user-facing command surface.
 
 Every installation includes executable specs, governance, adoption, agent adapters, and advanced workflows. Local Git mode is the default and excludes `/.spectra/` through `.git/info/exclude`; shared mode makes it commit-ready.
 
@@ -94,6 +95,16 @@ Agent adapters such as `AGENTS.md` or `CLAUDE.md` are generated when requested w
 ## Doctor repair
 
 `spectra doctor` checks local tool, runtime, and adapter health. `spectra doctor --fix` repairs safe generated Spectra files such as launchers, runtime files, version metadata, local Git exclude policy, and detected adapter files. It does not rewrite business memory or application code.
+
+## Command effects
+
+The [CLI Reference](https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#command-effects-at-a-glance) explains all 21 public commands with read/write paths, modes, examples and workflow diagrams. An installed copy is available at `.spectra/docs/spectra/cli-reference.md`.
+
+- `context` refreshes derived summary caches; it is not a zero-write command.
+- `index` writes the repository index; `index --check` only checks freshness.
+- `task` replaces the implementation brief; `knowledge` updates durable business rules.
+- `eval` writes latest reports; command-mode suites may execute application commands. `verify` runs release evals and recomputes approval validity.
+- `doctor` reports health; `doctor --fix` refreshes safe generated files and preserves unowned collisions and adapter siblings.
 
 ## Documentation
 
