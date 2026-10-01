@@ -408,10 +408,10 @@ generated_a="${tmp_dir}/generated-a"
 generated_b="${tmp_dir}/generated-b"
 mkdir -p "${generated_a}" "${generated_b}"
 
-if ! run_runtime_script generate-adapters.sh --agents claude,cursor,windsurf,copilot,codex,antigravity --target "${generated_a}" >/dev/null 2>&1; then
+if ! SPECTRA_PROJECT_DOCS_NAME="validation-project" run_runtime_script generate-adapters.sh --agents claude,cursor,windsurf,copilot,codex,antigravity --target "${generated_a}" >/dev/null 2>&1; then
   add_error "scripts/generate-adapters.sh: failed smoke generation into temp dir"
 fi
-if ! run_runtime_script generate-adapters.sh --agents claude,cursor,windsurf,copilot,codex,antigravity --target "${generated_b}" >/dev/null 2>&1; then
+if ! SPECTRA_PROJECT_DOCS_NAME="validation-project" run_runtime_script generate-adapters.sh --agents claude,cursor,windsurf,copilot,codex,antigravity --target "${generated_b}" >/dev/null 2>&1; then
   add_error "scripts/generate-adapters.sh: failed second smoke generation into temp dir"
 fi
 if [[ -d "${generated_a}" && -d "${generated_b}" ]] && ! diff -qr "${generated_a}" "${generated_b}" >/dev/null 2>&1; then
