@@ -24,6 +24,7 @@ import { getProjectLayout } from "./project-layout.js";
 import { SCHEMA_VERSION, createInstallMetadata } from "./install-metadata.js";
 import { buildRepoIndex } from "./index/engine.js";
 import { writeIndex } from "./index/cache.js";
+import { enrichDiscovery } from "./index/discovery.js";
 import { warn } from "./output.js";
 
 function replaceDirectory(sourceDir, targetDir) {
@@ -219,13 +220,15 @@ function installSpectra({
       args: ["--root", absoluteTarget, "--spectra-root", layout.root],
       strict: true
     });
-    buildAdoptionArtifacts(layout.root);
+    let repoIndex = null;
     try {
-      const repoIndex = buildRepoIndex(absoluteTarget);
+      repoIndex = buildRepoIndex(absoluteTarget);
       writeIndex(absoluteTarget, repoIndex);
     } catch (error) {
       warn(`Repo indexing failed during adopt: ${error.message}. Run "spectra index" manually once fixed.`);
     }
+    enrichDiscovery(absoluteTarget, repoIndex);
+    buildAdoptionArtifacts(layout.root);
   }
 
   if (agents) {

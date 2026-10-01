@@ -65,4 +65,8 @@ Direct markdown edits are allowed. `spectra check` validates duplicate IDs, inva
 
 ## Adoption
 
-`spectra adopt` creates a small provisional module map from top-level directories and an empty business-domain index. These outputs are explicitly unconfirmed; adoption does not infer business rules from code structure.
+`spectra adopt` creates a provisional technical module map from the existing repo index's manifest records, falling back to top-level directories when no supported modules are found. Discovery documents include module paths, source roots, runtime/entrypoint evidence, declared test commands and test-tool dependencies where the index supports them. Maven test commands are explicitly labeled as conventional suggestions; adoption does not execute project commands or measure coverage.
+
+Layout and configuration checks supplement that evidence. Categories without supported signals say so explicitly, and an index failure is reported rather than presented as successful discovery. All architectural interpretations and module responsibilities require review. The business-domain index starts empty; adoption does not infer business rules or project intent from code structure.
+
+To reproduce the adoption discovery checks, run `node packages/cli/scripts/sync-assets.mjs` followed by `node --test packages/cli/test/adopt-discovery-e2e.test.js`. Each scenario prints the path to its retained discovery artifact for inspection, including Maven module/test evidence, Node workspace commands, and unsupported or malformed manifests.
