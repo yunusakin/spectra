@@ -23,7 +23,8 @@ function statusCommand(argv) {
     throw new Error(`Could not find a Spectra runtime from ${cwd}`);
   }
   const compatibility = inspectProjectCompatibility(repoRoot);
-  if (compatibility.status !== "CURRENT") {
+  const sourceRuntime = compatibility.sourceRepository && compatibility.layout === "root-sdd" && compatibility.conflicts.length === 0;
+  if (compatibility.status !== "CURRENT" && !sourceRuntime) {
     title(`Compatibility: ${compatibility.status}`);
     title(`Application: ${compatibility.applicationVersion}; project schema: ${compatibility.projectSchemaVersion ?? "unknown"}; readable schema: ${compatibility.minimumReadableSchema}-${compatibility.maximumReadableSchema}`);
     title(compatibility.reason);

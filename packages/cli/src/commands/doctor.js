@@ -149,7 +149,8 @@ function doctorCommand(argv) {
 
   if (repoRoot) {
     const compatibility = options["--fix"] ? assertProjectOperationAllowed(repoRoot, "doctor-fix") : inspectProjectCompatibility(repoRoot);
-    if (compatibility.status !== "CURRENT") {
+    const sourceRuntime = compatibility.sourceRepository && compatibility.layout === "root-sdd" && compatibility.conflicts.length === 0;
+    if (compatibility.status !== "CURRENT" && !sourceRuntime) {
       title(`Compatibility: ${compatibility.status}`);
       title(`Application: ${compatibility.applicationVersion}; project schema: ${compatibility.projectSchemaVersion ?? "unknown"}; readable schema: ${compatibility.minimumReadableSchema}-${compatibility.maximumReadableSchema}`);
       title(compatibility.reason);

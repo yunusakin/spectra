@@ -260,6 +260,18 @@ scenario("compatibility source guard: source repository remains protected beside
   const result = execute(root, ["init", "."]); unchanged(report); assert.equal(result.status, 1); assert.match(result.stderr, /source repository/);
   const facts = execute(root, [], inspect); unchanged(report); success(facts); assert.equal(JSON.parse(facts.stdout).sourceRepository, true);
 });
+scenario("compatibility source diagnostics: status and doctor preserve source workflows while installers stay blocked", ({ project, execute, report }) => {
+  const root = project();
+  fs.renameSync(path.join(root, ".spectra/sdd"), path.join(root, "sdd"));
+  fs.rmSync(path.join(root, ".spectra"), { recursive: true });
+  const manifest = path.join(root, "sdd/system/manifest.env");
+  fs.writeFileSync(manifest, fs.readFileSync(manifest, "utf8").replace(/^repo_mode=.*$/m, "repo_mode=canonical"));
+  const status = execute(root, ["status"]); success(status); assert.match(status.stdout, /Spectra Project Status[\s\S]*Approval State:/);
+  const doctor = execute(root, ["doctor"]); unchanged(report); success(doctor); assert.match(doctor.stdout, /Spectra runtime found/); assert.doesNotMatch(doctor.stdout, /Compatibility: BROKEN/);
+  for (const args of [["init", "."], ["adopt", "."], ["doctor", "--fix"]]) {
+    const rejected = execute(root, args); unchanged(report); assert.equal(rejected.status, 1); assert.match(rejected.stderr, /source repository/i);
+  }
+});
 for (const name of ["install.json", "config.yaml"]) scenario(`compatibility dangling ${name}: broken links cannot authorize a fresh install`, ({ project, execute, report }) => {
   const root = project(); const foreign = project();
   fs.rmSync(path.join(root, ".spectra"), { recursive: true }); fs.mkdirSync(path.join(root, ".spectra"));
