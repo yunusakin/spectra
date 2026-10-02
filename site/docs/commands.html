@@ -66,9 +66,137 @@ spectra index
 After:  .spectra/cache/index/repo-index.json contains current evidence
 spectra index --check
 After:  no project file changes; freshness status printed</code></pre>
-        <figure class="command-flow"><img src="../assets/command-effects-setup.svg" alt="Setup and generated state; the command effects are also described in the table above." loading="lazy" /><figcaption>Setup and generated state. Dashed arrows are optional or conditional. On small screens, scroll the diagram horizontally.</figcaption></figure>
-        <figure class="command-flow"><img src="../assets/command-effects-workflow.svg" alt="Daily work and release readiness; the command effects are also described in the table above." loading="lazy" /><figcaption>Daily work and release readiness. Dashed arrows are optional or conditional. On small screens, scroll the diagram horizontally.</figcaption></figure>
-        <figure class="command-flow"><img src="../assets/command-effects-maintenance.svg" alt="Maintenance and preservation; the command effects are also described in the table above." loading="lazy" /><figcaption>Maintenance and preservation. Dashed arrows are optional or conditional. On small screens, scroll the diagram horizontally.</figcaption></figure>
+      </section>
+
+      <section class="diagram-section" id="setup" aria-labelledby="setup-title">
+        <p class="diagram-kicker">Explained workflow</p>
+        <h2 id="setup-title">Setup: from your project to the installed Spectra layer</h2>
+        <p>Choose a starting command, see the common installation, then follow the adopt-only discovery and configuration branches. Arrows to results describe effects; they do not ask you to run another command.</p>
+        <p><a href="#setup-details">Read the detailed group explanations below the diagram.</a></p>
+        <figure class="command-flow">
+          <div class="diagram-scroll" tabindex="0" role="region" aria-label="Setup: from your project to the installed Spectra layer diagram; use arrow keys to scroll" style="--diagram-min-width: 1136px">
+            <img src="../assets/command-effects-setup.svg" alt="Setup: from your project to the installed Spectra layer. Groups are explained in the cards immediately below." loading="lazy" />
+          </div>
+          <figcaption>Read the diagram with the matching group cards below. <a class="diagram-open" href="../assets/command-effects-setup.svg">Open full-size setup diagram</a>. Scroll inside the diagram to follow the full flow. Focus it and use arrow keys, or swipe to scroll.</figcaption>
+        </figure>
+        <ul class="diagram-legend" aria-label="Diagram legend">
+          <li><span class="diagram-key diagram-key-command" aria-hidden="true"></span>Command: an action you run</li>
+          <li><span class="diagram-key diagram-key-result" aria-hidden="true"></span>Result: files or reported information</li>
+          <li><span class="diagram-key diagram-key-condition" aria-hidden="true"></span>Condition: a choice or prerequisite</li>
+          <li><span class="diagram-key diagram-key-neutral" aria-hidden="true"></span>Input, human/agent work or preservation boundary</li>
+          <li>Solid arrows: labeled relationships or sequence. Dashed arrows: conditional or optional relationships; read their labels.</li>
+        </ul>
+        <div class="diagram-cards" id="setup-details">
+          <article class="diagram-card" id="setup-start" aria-labelledby="setup-start-title">
+            <h3 id="setup-start-title">S1 · Starting project</h3>
+            <dl><dt>Command / When to use</dt><dd><code>init</code> bootstraps a new project. <code>adopt</code> adds Spectra to an existing codebase and records repository observations.</dd><dt>Prerequisites</dt><dd>An installed Spectra CLI; default local mode requires a Git worktree. Run from the target project or pass its path.</dd><dt>Reads</dt><dd>Both commands inspect installation metadata and packaged templates. Adoption additionally reads application manifests and the source layout.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#init"><code>spectra init</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adopt"><code>spectra adopt</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="setup-install" aria-labelledby="setup-install-title">
+            <h3 id="setup-install-title">S2 · Installation</h3>
+            <dl><dt>What Spectra does</dt><dd>Installs the project-local Spectra layer. Native users can run <code>spectra</code>; the local launcher remains available at <code>./.spectra/bin/spectra</code>.</dd><dt>Writes / Project result</dt><dd><ul class="diagram-paths"><li><code>.spectra/bin/</code><span>Project-local launcher.</span></li><li><code>.spectra/cli/</code><span>Local CLI for the Node fallback, when needed.</span></li><li><code>.spectra/sdd/</code><span>System runtime, memory templates and feature contracts.</span></li><li><code>.spectra/docs/spectra/</code><span>Guides shipped with Spectra.</span></li><li><code>.spectra/docs/&lt;project-name&gt;/</code><span>Area for project-generated documents; plugins use their own subdirectories.</span></li><li><code>.spectra/config.yaml</code><span>Project configuration.</span></li><li><code>.spectra/install.json</code><span>Installation and ownership metadata.</span></li></ul></dd><dt>Conditions and preservation</dt><dd>Existing user memory is copied only when missing. The project docs area provides an output location; installation does not execute plugins or create their plans. Existing foreign adapters cause refusal before installation.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#init"><code>spectra init</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adopt"><code>spectra adopt</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="setup-discovery" aria-labelledby="setup-discovery-title">
+            <h3 id="setup-discovery-title">S3 · Existing-project discovery</h3>
+            <dl><dt>What Spectra does</dt><dd><code>adopt</code> records evidence from the existing codebase; it does not execute manifest test commands or infer confirmed business responsibilities.</dd><dt>Writes / Project result</dt><dd><ul class="diagram-paths"><li><code>.spectra/cache/index/repo-index.json</code><span>Repository evidence index.</span></li><li><code>.spectra/sdd/memory-bank/discovery/*.md</code><span>Repository observations.</span></li><li><code>.spectra/sdd/memory-bank/tech/modules.md</code><span>Unconfirmed technical module map.</span></li><li><code>.spectra/sdd/adoption/current-state.summary.yaml</code><span>Current-state summary.</span></li><li><code>.spectra/sdd/adoption/gap-analysis.yaml</code><span>Gaps requiring attention.</span></li><li><code>.spectra/sdd/adoption/review-queue.yaml</code><span>Findings for human review.</span></li></ul></dd><dt>Conditions and preservation</dt><dd>This is an adopt-only result. Findings need review before becoming confirmed project knowledge. Re-adoption regenerates discovery evidence; an indexing failure is reported and shell discovery remains available.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adopt"><code>spectra adopt</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="setup-choices" aria-labelledby="setup-choices-title">
+            <h3 id="setup-choices-title">S4 · Configuration choices</h3>
+            <dl><dt>Git mode</dt><dd><code>--git-mode local</code> is the default: adds the local Spectra exclusion to Git’s shared <code>info/exclude</code> file, leaving <code>.gitignore</code> unchanged. <code>--git-mode shared</code> leaves generated state visible to Git; visibility does not stage or commit it.</dd><dt>Optional adapters</dt><dd><code>--agents &lt;csv&gt;</code> generates instructions only for requested tools. Required locations include <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>.github/copilot-instructions.md</code>, <code>.cursor/rules/</code>, <code>.windsurf/rules/</code> and <code>.agent/rules/</code>.</dd><dt>Conditions and preservation</dt><dd>Adapter files follow each tool’s required path. Use <code>spectra adapters</code> deliberately to regenerate existing Spectra instructions; check ownership before replacing files.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#init"><code>spectra init</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adopt"><code>spectra adopt</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adapters"><code>spectra adapters</code> reference</a></p>
+          </article>
+        </div>
+      </section>
+
+      <section class="diagram-section" id="daily" aria-labelledby="daily-title">
+        <p class="diagram-kicker">Explained workflow</p>
+        <h2 id="daily-title">Daily work: preparation, approval conditions and readiness</h2>
+        <p>This is a recommended workflow. Preparation and specification work are separate from application implementation. The application-work approval gate is explicit; optional evaluation and supporting commands are shown separately.</p>
+        <p><a href="#daily-details">Read the detailed group explanations below the diagram.</a></p>
+        <figure class="command-flow">
+          <div class="diagram-scroll" tabindex="0" role="region" aria-label="Daily work: preparation, approval conditions and readiness diagram; use arrow keys to scroll" style="--diagram-min-width: 625px">
+            <img src="../assets/command-effects-workflow.svg" alt="Daily work: preparation, approval conditions and readiness. Groups are explained in the cards immediately below." loading="lazy" />
+          </div>
+          <figcaption>Read the diagram with the matching group cards below. <a class="diagram-open" href="../assets/command-effects-workflow.svg">Open full-size workflow diagram</a>. Scroll inside the diagram to follow the full flow. Focus it and use arrow keys, or swipe to scroll.</figcaption>
+        </figure>
+        <ul class="diagram-legend" aria-label="Diagram legend">
+          <li><span class="diagram-key diagram-key-command" aria-hidden="true"></span>Command: an action you run</li>
+          <li><span class="diagram-key diagram-key-result" aria-hidden="true"></span>Result: files or reported information</li>
+          <li><span class="diagram-key diagram-key-condition" aria-hidden="true"></span>Condition: a choice or prerequisite</li>
+          <li><span class="diagram-key diagram-key-neutral" aria-hidden="true"></span>Input, human/agent work or preservation boundary</li>
+          <li>Solid arrows: labeled relationships or sequence. Dashed arrows: conditional or optional relationships; read their labels.</li>
+        </ul>
+        <div class="diagram-cards" id="daily-details">
+          <article class="diagram-card" id="work-prepare" aria-labelledby="work-prepare-title">
+            <h3 id="work-prepare-title">W1 · Prepare context and intent</h3>
+            <dl><dt>Command / When to use</dt><dd>Use <code>route</code> when selecting relevant technical modules and business domains, <code>context</code> when loading focused sources, and <code>task</code> when recording implementation intent.</dd><dt>Reads</dt><dd>Canonical project sources, routing indexes, role/goal configuration and optional cached repository evidence.</dd><dt>Writes / Project result</dt><dd><ul class="diagram-paths"><li><code>.spectra/cache/context/*.summary.json</code><span>Context refreshes summary caches; canonical source documents remain unchanged.</span></li><li><code>.spectra/sdd/memory-bank/core/implementation-brief.md</code><span>Task replaces the brief with the supplied item and goal.</span></li></ul></dd><dt>Conditions</dt><dd>Route does not write project files and is optional. Context and task do not implement application features. This diagram is a recommended workflow, not a requirement to run every command.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#route"><code>spectra route</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#context"><code>spectra context</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#task"><code>spectra task</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="work-approval" aria-labelledby="work-approval-title">
+            <h3 id="work-approval-title">W2 · Prepare specifications and approvals</h3>
+            <dl><dt>Human / agent work</dt><dd>Prepare and review the product intent, technical specifications and contracts with your development tools. Spectra records approval state; it does not write your implementation.</dd><dt>Required stage order</dt><dd><code>product-approved</code> → <code>technical-approved</code> → <code>implementation-approved</code>. Each stage requires its prerequisites and a valid preceding stage; product approval also requires a meaningful project brief.</dd><dt>Writes / Project result</dt><dd><ul class="diagram-paths"><li><code>.spectra/sdd/governance/approval-state.yaml</code><span>Approval stage, commit baseline, timestamp and computed validity.</span></li><li><code>.spectra/sdd/memory-bank/core/intake-state.md</code><span>Synchronized approval status.</span></li></ul></dd><dt>Conditions and failed requests</dt><dd>App work requires valid implementation approval. Changes can invalidate an earlier approval; a recorded stage alone is insufficient. A failed approval request may still recompute validity and synchronize status.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#approve"><code>spectra approve</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#diff"><code>spectra diff</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="work-app" aria-labelledby="work-app-title">
+            <h3 id="work-app-title">W3 · Implement application changes</h3>
+            <dl><dt>Human / agent work</dt><dd>After valid implementation approval, use your own tools to change application code and run the project’s build and tests.</dd><dt>Project result</dt><dd>Application files change according to that work. These changes are made by humans, agents or configured application commands, rather than by context, task or approval commands.</dd><dt>Conditions</dt><dd>The diagram’s approval checkpoint describes the application-work gate. Specification-only work can be prepared before that gate.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#approve"><code>spectra approve</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#check"><code>spectra check</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="work-validate" aria-labelledby="work-validate-title">
+            <h3 id="work-validate-title">W4 · Validate and assess readiness</h3>
+            <dl><dt>Command / When to use</dt><dd><code>check</code> validates Spectra structure and policy and can be used at other stages too. An explicit <code>eval</code> runs the selected suite when useful. <code>verify</code> assesses readiness and runs release evals itself; manual eval is not a prerequisite.</dd><dt>Reads</dt><dd>Contracts, policy inputs, approval validity, feature eval definitions, readiness checklists, review evidence and repository index freshness.</dd><dt>Writes / Project result</dt><dd><ul class="diagram-paths"><li><code>.spectra/sdd/governance/approval-state.yaml</code><span>Verify recomputes validity.</span></li><li><code>.spectra/sdd/memory-bank/core/intake-state.md</code><span>Verify synchronizes approval status.</span></li><li><code>.spectra/sdd/features/&lt;feature&gt;/evals/reports/latest.json</code><span>Latest selected-suite or release-eval report.</span></li><li><code>.spectra/sdd/features/&lt;feature&gt;/evals/reports/latest.md</code><span>Readable version of the latest report.</span></li></ul></dd><dt>Conditions and failed runs</dt><dd>Check does not write persistent project files; smoke checks use temporary directories. A failed verify can still refresh state and reports. In command-mode eval, configured setup/scenario commands run from the project root and may modify their chosen paths. Check and verify do not automatically run your generic npm/Maven test command.</dd><dt>Final release approval</dt><dd>Request <code>approve --stage release-approved</code> when readiness and release prerequisites are satisfied. This command runs verification again before recording approval, so release approval attempts can also write eval reports.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#check"><code>spectra check</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#eval"><code>spectra eval</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#verify"><code>spectra verify</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#approve"><code>spectra approve</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="work-support" aria-labelledby="work-support-title">
+            <h3 id="work-support-title">W5 · Supporting commands</h3>
+            <dl><dt>Status</dt><dd><code>spectra status</code> reads Git state, installation metadata and resume memory. It does not write project files or update progress for you.</dd><dt>Repository index</dt><dd><code>spectra index</code> rebuilds <code>.spectra/cache/index/repo-index.json</code>. It reads manifests and source/test layout without executing build or test commands.</dd><dt>Freshness check</dt><dd><code>spectra index --check</code> reports missing, stale or fresh evidence without writing project files. Missing or stale evidence returns a failure.</dd><dt>Conditions</dt><dd>Use these commands when resuming work or when repository evidence needs attention. They are supporting actions, not mandatory links in the main workflow.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#status"><code>spectra status</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#index"><code>spectra index</code> reference</a></p>
+          </article>
+        </div>
+      </section>
+
+      <section class="diagram-section" id="maintenance" aria-labelledby="maintenance-title">
+        <p class="diagram-kicker">Explained workflow</p>
+        <h2 id="maintenance-title">Maintenance: update, diagnosis, repair and preservation</h2>
+        <p>Update and doctor have separate paths. Compare their conditions and effects, then read the preservation boundary. The boundary describes what stays intact, not an extra step to execute.</p>
+        <p><a href="#maintenance-details">Read the detailed group explanations below the diagram.</a></p>
+        <figure class="command-flow">
+          <div class="diagram-scroll" tabindex="0" role="region" aria-label="Maintenance: update, diagnosis, repair and preservation diagram; use arrow keys to scroll" style="--diagram-min-width: 652px">
+            <img src="../assets/command-effects-maintenance.svg" alt="Maintenance: update, diagnosis, repair and preservation. Groups are explained in the cards immediately below." loading="lazy" />
+          </div>
+          <figcaption>Read the diagram with the matching group cards below. <a class="diagram-open" href="../assets/command-effects-maintenance.svg">Open full-size maintenance diagram</a>. Scroll inside the diagram to follow the full flow. Focus it and use arrow keys, or swipe to scroll.</figcaption>
+        </figure>
+        <ul class="diagram-legend" aria-label="Diagram legend">
+          <li><span class="diagram-key diagram-key-command" aria-hidden="true"></span>Command: an action you run</li>
+          <li><span class="diagram-key diagram-key-result" aria-hidden="true"></span>Result: files or reported information</li>
+          <li><span class="diagram-key diagram-key-condition" aria-hidden="true"></span>Condition: a choice or prerequisite</li>
+          <li><span class="diagram-key diagram-key-neutral" aria-hidden="true"></span>Input, human/agent work or preservation boundary</li>
+          <li>Solid arrows: labeled relationships or sequence. Dashed arrows: conditional or optional relationships; read their labels.</li>
+        </ul>
+        <div class="diagram-cards" id="maintenance-details">
+          <article class="diagram-card" id="maint-update" aria-labelledby="maint-update-title">
+            <h3 id="maint-update-title">M1 · Update installed versions and layout</h3>
+            <dl><dt>Command / When to use</dt><dd><code>spectra update</code> upgrades the CLI/runtime or migrates a recognized old layout. It requires an installed or recognized legacy Spectra project; <code>--cwd</code> selects a project from elsewhere.</dd><dt>Reads</dt><dd>Published version, installed CLI/project metadata, runtime/schema versions and legacy layout markers. Latest-version lookup requires network access.</dd><dt>What Spectra does</dt><dd>If all versions and the layout are current, reports “already current” without refreshing project files. Otherwise requests confirmation; <code>--yes</code> skips the prompt, not validation. Declining leaves the project unchanged.</dd><dt>Writes / Project result</dt><dd><ul class="diagram-paths"><li><code>.spectra/sdd/system/</code><span>Generated project runtime, when refresh is needed.</span></li><li><code>.spectra/docs/spectra/</code><span>Owned shipped guides; unowned collisions are preserved.</span></li><li><code>.spectra/bin/ and .spectra/cli/</code><span>Launcher and Node fallback assets, when applicable.</span></li><li><code>.spectra/install.json</code><span>Refreshed installation metadata.</span></li><li><code>Recognized legacy Spectra paths</code><span>Migrated into .spectra/ only when the old layout is recognized.</span></li></ul></dd><dt>Outside-project effect</dt><dd>When a newer CLI is installed, self-update also changes the CLI installation outside the project. A project-only runtime/schema refresh does not imply a new global CLI version.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#update"><code>spectra update</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="maint-doctor" aria-labelledby="maint-doctor-title">
+            <h3 id="maint-doctor-title">M2 · Inspect or repair local health</h3>
+            <dl><dt>Command / When to use</dt><dd><code>spectra doctor</code> reports tool, runtime, launcher and adapter health without writing project files. <code>spectra doctor --fix</code> additionally repairs generated project assets.</dd><dt>Writes / Project result with --fix</dt><dd><ul class="diagram-paths"><li><code>.spectra/sdd/system/</code><span>Regenerated runtime.</span></li><li><code>.spectra/docs/spectra/</code><span>Refreshed owned guides.</span></li><li><code>.spectra/bin/ and .spectra/cli/</code><span>Local launcher and Node fallback.</span></li><li><code>.spectra/install.json</code><span>Repaired metadata.</span></li><li><code>Git info/exclude</code><span>Local exclusion policy, when applicable.</span></li></ul></dd><dt>Conditional adapter repair</dt><dd>A detected adapter set with missing files can be repaired only when its required tool CLI is available where defined and no sibling file is user-owned. Currently the Codex adapter requires the Codex CLI. Unconfigured tools are not automatically set up; unsafe sets are skipped, and remaining unhealthy state or manual problems are reported.</dd><dt>Difference from update</dt><dd>Doctor repairs the local project layer. It does not perform update’s published-version lookup and global CLI self-update. Repeated fixes refresh generated files without claiming user-owned documents.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#doctor"><code>spectra doctor</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="maint-preserved" aria-labelledby="maint-preserved-title">
+            <h3 id="maint-preserved-title">M3 · Preserved project information</h3>
+            <dl><dt>Preservation boundary</dt><dd>This area applies to refresh and repair. It is not a subsequent workflow step or a newly generated output.</dd><dt>Kept information</dt><dd><ul class="diagram-paths"><li><code>.spectra/sdd/memory-bank/</code><span>Existing project intent, core memory and business knowledge.</span></li><li><code>.spectra/sdd/features/ and .spectra/sdd/governance/</code><span>Existing feature and governance state.</span></li><li><code>.spectra/docs/&lt;project-name&gt;/&lt;plugin&gt;/</code><span>Project-generated plugin documents.</span></li><li><code>Unowned guide collisions and user adapter files</code><span>Remain outside automatic overwrite ownership.</span></li></ul></dd><dt>Conditions</dt><dd>Healthy existing adapters are not automatically regenerated by update. Doctor repairs only detected sets that meet tool prerequisites; user-owned siblings make automatic repair unsafe.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#update"><code>spectra update</code> reference</a> · <a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#doctor"><code>spectra doctor</code> reference</a></p>
+          </article>
+<article class="diagram-card" id="maint-adapters" aria-labelledby="maint-adapters-title">
+            <h3 id="maint-adapters-title">M4 · Explicit adapter regeneration</h3>
+            <dl><dt>Separate user action</dt><dd><code>spectra adapters --agents &lt;csv&gt;</code> deliberately regenerates Spectra instructions for selected tools. It is not an automatic update step.</dd><dt>Writes / Project result</dt><dd>Requested root/tool paths, such as <code>CLAUDE.md</code> or <code>.cursor/rules/</code>. Same-project local mode also updates installation ownership metadata and Git’s local exclude policy.</dd><dt>Conditions and preservation</dt><dd>Inspect existing instructions before deliberate regeneration. The command replaces selected Spectra projections; it does not move plugin documents or run a plugin.</dd></dl>
+            <p class="diagram-reference"><a href="https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adapters"><code>spectra adapters</code> reference</a></p>
+          </article>
+        </div>
       </section>
     </main>
 

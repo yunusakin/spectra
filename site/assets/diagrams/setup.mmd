@@ -1,0 +1,47 @@
+flowchart TB
+  accTitle: Spectra setup: starting project, installation, discovery and configuration
+  accDescr: Choose init for a new project or adopt for an existing codebase. Both install the Spectra layer; adopt additionally creates discovery evidence. Git mode changes tracking policy. Adapters are generated only when requested. Matching explanation groups S1 to S4 describe the paths and preservation rules.
+  subgraph SETUP_START["S1 · Starting project"]
+    direction TB
+    NEW["INPUT · New project"]
+    EXISTING["INPUT · Existing codebase"]
+  end
+  subgraph SETUP_INSTALL["S2 · Installation"]
+    direction TB
+    INIT["COMMAND · spectra init"]
+    ADOPT["COMMAND · spectra adopt"]
+    LAYER["RESULT · Installed Spectra<br/>layer<br/>Launcher, runtime and<br/>templates<br/>Guides, project docs area<br/>and<br/>metadata"]
+    INIT -->|creates| LAYER
+    ADOPT -->|creates| LAYER
+  end
+  NEW -->|choose| INIT
+  EXISTING -->|choose| ADOPT
+  subgraph SETUP_DISCOVERY["S3 · Existing-project discovery"]
+    direction TB
+    READ["PROCESS · Read manifests and<br/>source layout"]
+    EVIDENCE["RESULT · Repository index<br/>Discovery documents, module<br/>map<br/>and adoption review reports"]
+    READ -->|records observations| EVIDENCE
+  end
+  SETUP_INSTALL -.->|adopt only: inspect existing codebase| SETUP_DISCOVERY
+  subgraph SETUP_CHOICES["S4 · Configuration choices"]
+    direction TB
+    GIT{"CHOICE · Git mode"}
+    LOCAL["RESULT · local mode<br/>Git info/exclude updated<br/>.gitignore unchanged"]
+    SHARED["RESULT · shared mode<br/>Spectra state remains<br/>visible<br/>to Git"]
+    AGENTS{"OPTION · --agents supplied?"}
+    ADAPTERS["RESULT · Required tool<br/>instructions<br/>Root or tool-specific<br/>adapter<br/>paths"]
+    GIT -->|local: default| LOCAL
+    GIT -->|shared| SHARED
+    AGENTS -.->|yes: generate requested adapters| ADAPTERS
+    SHARED ~~~ AGENTS
+  end
+  SETUP_INSTALL -->|apply selected tracking policy and options| SETUP_CHOICES
+  SETUP_DISCOVERY ~~~ SETUP_CHOICES
+  classDef command fill:#f1eeff,stroke:#6c5ce7,color:#5143c6,stroke-width:2px;
+  classDef result fill:#effcf8,stroke:#007f68,color:#121827;
+  classDef condition fill:#fff5df,stroke:#8a5d00,color:#121827;
+  classDef neutral fill:#f2f5fa,stroke:#64748b,color:#121827;
+  class INIT,ADOPT command;
+  class LAYER,EVIDENCE,LOCAL,SHARED,ADAPTERS result;
+  class GIT,AGENTS condition;
+  class NEW,EXISTING,READ neutral;
