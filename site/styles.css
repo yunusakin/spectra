@@ -744,9 +744,10 @@ pre {
 .command-effects-table th, .command-effects-table td { padding: .8rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border, #ddd); }
 .command-effects-table th:first-child { min-width: 10rem; }
 .command-flow { margin: 1rem 0; min-width: 0; }
-.diagram-scroll { overflow: auto; max-height: min(75vh, 800px); border: 1px solid #c7d0df; border-radius: 14px; background: var(--paper); padding: 16px; }
+.docs-command-effects { max-width: 1120px; }
+.diagram-scroll { overflow-x: auto; border: 1px solid #c7d0df; border-radius: 14px; background: var(--paper); padding: 12px; }
 .diagram-scroll:focus-visible { outline: 3px solid var(--purple); outline-offset: 4px; }
-.diagram-scroll img { display: block; width: var(--diagram-min-width); min-width: var(--diagram-min-width); height: auto; margin-inline: auto; }
+.diagram-scroll img { display: block; width: 100%; min-width: var(--diagram-min-width); max-width: calc(var(--diagram-min-width) * 1.125); height: auto; margin-inline: auto; }
 .command-flow figcaption { margin-top: .75rem; color: var(--soft-text); font-size: 1rem; }
 .diagram-open, .diagram-reference a { color: var(--purple-ink); text-underline-offset: 3px; }
 .diagram-section { scroll-margin-top: 110px; }
@@ -756,7 +757,7 @@ pre {
 .diagram-key { display: inline-block; flex: 0 0 14px; height: 14px; border: 2px solid; border-radius: 4px; }
 .diagram-key-command { background: #f1eeff; border-color: var(--purple); }
 .diagram-key-result { background: var(--paper-teal); border-color: var(--teal-dark); }
-.diagram-key-condition { background: #fff5df; border-color: var(--amber-ink); transform: rotate(45deg); border-radius: 2px; }
+.diagram-key-condition { background: #fff5df; border-color: var(--amber-ink); border-radius: 4px; }
 .diagram-key-neutral { background: #f2f5fa; border-color: #64748b; }
 .diagram-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 12px; scroll-margin-top: 110px; }
 .diagram-card { min-width: 0; padding: 22px; border: 1px solid #c7d0df; border-top: 4px solid var(--purple); border-radius: 14px; background: #fff; scroll-margin-top: 110px; }

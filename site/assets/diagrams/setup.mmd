@@ -10,7 +10,7 @@ flowchart TB
     direction TB
     INIT["COMMAND · spectra init"]
     ADOPT["COMMAND · spectra adopt"]
-    LAYER["RESULT · Installed Spectra<br/>layer<br/>Launcher, runtime and<br/>templates<br/>Guides, project docs area<br/>and<br/>metadata"]
+    LAYER["RESULT · Installed Spectra<br/>layer<br/>Launcher, runtime and<br/>templates<br/>Guides, project docs area<br/>and metadata"]
     INIT -->|creates| LAYER
     ADOPT -->|creates| LAYER
   end
@@ -22,20 +22,22 @@ flowchart TB
     EVIDENCE["RESULT · Repository index<br/>Discovery documents, module<br/>map<br/>and adoption review reports"]
     READ -->|records observations| EVIDENCE
   end
-  SETUP_INSTALL -.->|adopt only: inspect existing codebase| SETUP_DISCOVERY
+  ADOPT -.->|adopt only:<br/>inspect existing codebase| READ
   subgraph SETUP_CHOICES["S4 · Configuration choices"]
     direction TB
-    GIT{"CHOICE · Git mode"}
+    GIT["CHOICE · Git mode"]
     LOCAL["RESULT · local mode<br/>Git info/exclude updated<br/>.gitignore unchanged"]
-    SHARED["RESULT · shared mode<br/>Spectra state remains<br/>visible<br/>to Git"]
-    AGENTS{"OPTION · --agents supplied?"}
-    ADAPTERS["RESULT · Required tool<br/>instructions<br/>Root or tool-specific<br/>adapter<br/>paths"]
+    SHARED["RESULT · shared mode<br/>Spectra state remains visible<br/>to Git"]
+    AGENTS["OPTION · --agents supplied?"]
+    ADAPTERS["RESULT · Required tool<br/>instructions<br/>Root or tool-specific<br/>adapter paths"]
     GIT -->|local: default| LOCAL
     GIT -->|shared| SHARED
     AGENTS -.->|yes: generate requested adapters| ADAPTERS
+    %% Layout only: local and shared are alternative outcomes.
+    LOCAL ~~~ SHARED
     SHARED ~~~ AGENTS
   end
-  SETUP_INSTALL -->|apply selected tracking policy and options| SETUP_CHOICES
+  LAYER -->|apply selected tracking<br/>policy and options| GIT
   SETUP_DISCOVERY ~~~ SETUP_CHOICES
   classDef command fill:#f1eeff,stroke:#6c5ce7,color:#5143c6,stroke-width:2px;
   classDef result fill:#effcf8,stroke:#007f68,color:#121827;

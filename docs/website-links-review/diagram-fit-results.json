@@ -1,0 +1,105 @@
+{
+  "passed": true,
+  "base": "http://127.0.0.1:8766/site/",
+  "results": [
+    {
+      "page": "commands",
+      "width": 1440,
+      "height": 1000,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "overflow": [],
+      "smallText": [],
+      "columns": 2,
+      "brokenLinks": []
+    },
+    {
+      "page": "workflow",
+      "width": 1440,
+      "height": 1000,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "overflow": [],
+      "smallText": [],
+      "columns": null,
+      "brokenLinks": []
+    },
+    {
+      "page": "commands",
+      "width": 768,
+      "height": 1024,
+      "viewport": 768,
+      "pageWidth": 768,
+      "overflow": [],
+      "smallText": [],
+      "columns": 2,
+      "brokenLinks": []
+    },
+    {
+      "page": "workflow",
+      "width": 768,
+      "height": 1024,
+      "viewport": 768,
+      "pageWidth": 768,
+      "overflow": [],
+      "smallText": [],
+      "columns": null,
+      "brokenLinks": []
+    },
+    {
+      "page": "commands",
+      "width": 390,
+      "height": 844,
+      "viewport": 390,
+      "pageWidth": 390,
+      "overflow": [],
+      "smallText": [],
+      "columns": 1,
+      "brokenLinks": []
+    },
+    {
+      "page": "workflow",
+      "width": 390,
+      "height": 844,
+      "viewport": 390,
+      "pageWidth": 390,
+      "overflow": [],
+      "smallText": [],
+      "columns": null,
+      "brokenLinks": []
+    },
+    {
+      "page": "commands",
+      "javaScriptEnabled": false,
+      "passed": true
+    },
+    {
+      "page": "workflow",
+      "javaScriptEnabled": false,
+      "passed": true
+    }
+  ],
+  "browserErrors": [],
+  "screenshots": "output/playwright/website-diagrams/",
+  "sourceSha256": {
+    "site/styles.css": "404c3e1a74cb576206e44ef5ab78009ec631cde93cd3ee9747ebdec0ffe16633",
+    "site/docs/commands.html": "c9a759d3ab952ed3ed2f156b4bdd519f53d453f384a34d79627bd65b837a5a58",
+    "site/docs/workflow.html": "17d19d5a7c3de1fc7007aa857f203d69cc2b50ba754d1735160e469875b891d4",
+    "tools/verify-website-diagrams.js": "93bec4616e343909e5bbf16c76b95852d17adb7d12981ec883af4420fee07749",
+    "site/assets/command-effects-setup.svg": "bd3513e649fea10e7059aefaa53aa11693d18958e345618217a38c8bbd048c49",
+    "site/assets/command-effects-maintenance.svg": "173fdbf20be43e43a343edf9b22383562e24d23342da3649a5093ef40331c60e",
+    "site/assets/command-effects-workflow.svg": "c64804424e0cfd75ff16ea603b233fd93df001a8efd4f5c2ae65fcc2eb66fd0c",
+    "site/assets/diagrams/maintenance.mmd": "5733f05fd2f19b018ad6130c05e9e801626f67ad426b44efaac59001e565c436",
+    "site/assets/diagrams/workflow.mmd": "067c787e615744b323a2a921fd02cf67445c2f9b0570a11ebc6cad65a065d063",
+    "site/assets/diagrams/setup.mmd": "0f9ef380037beaa4ebd8aa2f3168458507dfc549b7fcaf9602c019d83836d18f",
+    "site/assets/diagrams/theme.json": "475bdbcd2f08d4f4acc7b9896302b596e0fadfc2f9d1bf59e68e10d292d7bd7f"
+  },
+  "fullSuite": {
+    "tests": 230,
+    "passed": 230,
+    "failed": 0
+  },
+  "strictValidation": "Validation: OK",
+  "beforeFailure": "setup: diagram must not require nested vertical scrolling",
+  "svgLabelTextPreserved": true
+}

@@ -3,7 +3,7 @@ flowchart TB
   accDescr: The recommended workflow separates preparation, specification approval, human or agent implementation, and validation. Approval stages advance in order; app work requires valid implementation approval. Manual eval is optional and not a prerequisite for verify, which runs release evals itself. Supporting commands do not form required workflow steps. Groups W1 to W5 have matching HTML explanations.
   subgraph WORK_PREPARE["W1 · Prepare context and intent"]
     direction TB
-    ROUTE["COMMAND · route<br/>Select relevant references;<br/>no<br/>writes"]
+    ROUTE["COMMAND · route<br/>Select relevant references;<br/>no writes"]
     CONTEXT["COMMAND · context<br/>Read sources and refresh<br/>summary cache"]
     TASK["COMMAND · task<br/>Replace implementation brief"]
     ROUTE -.->|optional reference selection| CONTEXT
@@ -13,7 +13,7 @@ flowchart TB
     direction TB
     SPECS["HUMAN / AGENT WORK<br/>Prepare and review<br/>specifications"]
     STAGES["COMMAND · approve stages in<br/>order<br/>1. product-approved<br/>2. technical-approved<br/>3. implementation-approved"]
-    GATE{"CONDITION · Valid<br/>implementation approval?"}
+    GATE["CONDITION · Valid<br/>implementation approval?"]
     SPECS -->|meaningful brief and valid contracts| STAGES
     STAGES -->|each preceding stage must remain valid| GATE
   end
@@ -24,11 +24,11 @@ flowchart TB
   WORK_APPROVAL -->|only with valid implementation approval| WORK_APP
   subgraph WORK_VALIDATE["W4 · Validate and assess readiness"]
     direction TB
-    CHECK["COMMAND · check<br/>Validate Spectra structure<br/>and<br/>policy"]
+    CHECK["COMMAND · check<br/>Validate Spectra structure<br/>and policy"]
     EVAL["OPTIONAL COMMAND · eval<br/>Run selected suite; write<br/>reports"]
     VERIFY["COMMAND · verify<br/>Recompute approval validity<br/>Check readiness and run<br/>release evals"]
-    READY{"CONDITION · Readiness and<br/>release prerequisites satisfied?"}
-    RELEASE["COMMAND · approve<br/>release-approved<br/>Runs verification again<br/>before<br/>approval"]
+    READY["CONDITION · Readiness and release<br/>prerequisites satisfied?"]
+    RELEASE["COMMAND · approve<br/>release-approved<br/>Runs verification again before approval"]
     CHECK -.->|optional selected suite| EVAL
     EVAL ~~~ VERIFY
     CHECK -->|assess release readiness| VERIFY
@@ -38,7 +38,7 @@ flowchart TB
   WORK_APP -->|recommended validation after changes| WORK_VALIDATE
   subgraph WORK_SUPPORT["W5 · Supporting commands"]
     direction TB
-    STATUS["COMMAND · status<br/>Read current state; no<br/>writes"]
+    STATUS["COMMAND · status<br/>Read current state; no writes"]
     INDEX["COMMAND · index<br/>Rebuild repository evidence<br/>cache"]
     FRESH["COMMAND · index --check<br/>Report freshness; no writes"]
     STATUS ~~~ INDEX
