@@ -1,5 +1,16 @@
 # Release Summary
 
+## v3.1.2
+
+Improves adoption discovery, project documentation ownership and the command-effect guides following 3.1.1. The `spectra/v2` schema identifier and installation schema version 3 remain unchanged.
+
+- Adoption projects repository evidence into discovery documents without running application commands or treating technical findings as confirmed business intent.
+- Compatible plugin and skill documents are directed by generated agent guidance to `.spectra/docs/<project-name>/<plugin-or-skill>/`; tool-required paths remain supported. Install metadata keeps the project documentation name stable across later brief changes.
+- Runtime refresh preserves user memory, plugin documents and unowned guide collisions. Explicit adapter generation follows the target project's ownership policy.
+- Refreshing through the project-local npm launcher preserves its own CLI and runtime files, keeping `doctor --fix` and repeated installation usable.
+- All 21 public commands have documented file effects, and the website diagrams match the site's typography and cards while retaining complete explanations.
+- After updating an existing project, regenerate its agent instructions with `spectra adapters --agents <csv>` to receive the new output guidance. Existing plugin documents are not automatically moved.
+
 ## v3.1.1
 
 Consolidates installation around the Full runtime without profile selection and makes `spectra verify` release-ready by default, including nested release-checklist enforcement. Release approvals persist across invocations, reject dirty project changes, and become invalid after relevant semantic scope changes. Also fixes native context refresh, generated adapter state paths, and Lite context guidance. The `spectra/v2` schema identifier is unchanged.
