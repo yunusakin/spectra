@@ -16,6 +16,7 @@ import {
 import { fail, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 import { createInstallMetadata } from "../lib/install-metadata.js";
+import { assertProjectOperationAllowed, inspectProjectCompatibility } from "../lib/project-compatibility.js";
 
 function detectGitMode(repoRoot) {
   const metadata = readInstallMetadata(repoRoot);
@@ -147,6 +148,13 @@ function doctorCommand(argv) {
   const repoRoot = findSpectraRoot(startDir);
 
   if (repoRoot) {
+    const compatibility = options["--fix"] ? assertProjectOperationAllowed(repoRoot, "doctor-fix") : inspectProjectCompatibility(repoRoot);
+    if (compatibility.status !== "CURRENT") {
+      title(`Compatibility: ${compatibility.status}`);
+      title(`Application: ${compatibility.applicationVersion}; project schema: ${compatibility.projectSchemaVersion ?? "unknown"}; readable schema: ${compatibility.minimumReadableSchema}-${compatibility.maximumReadableSchema}`);
+      title(compatibility.reason);
+      return 1;
+    }
     ok(`Spectra runtime found at ${repoRoot}`);
     ok(`Packaged runtime scripts resolved from ${path.join(getRuntimeAssetsDir(), "scripts")}`);
 

@@ -140,3 +140,147 @@ scenario("fallback pinning: standalone stays pinned and Node fallback remains us
   fs.unlinkSync(standalone);
   const fallback = execute(root, ["version"], localSpectra); unchanged(report); success(fallback); assert.ok(fallback.stdout.includes(source.version));
 });
+
+// Compatibility failure modes: invalid or competing authorities, damaged markers,
+// unsafe metadata paths, incomplete migrations, alias/target/discovery bypasses,
+// and diagnostic commands accidentally loading incompatible governance state.
+const inspect = (root, args, env) => spawnSync(process.execPath, ["--input-type=module", "-e",
+  `import { inspectProjectCompatibility } from ${JSON.stringify(path.join(cliRoot, "src/lib/project-compatibility.js"))}; console.log(JSON.stringify(inspectProjectCompatibility(process.argv[1])));`, root], { encoding: "utf8", env: { ...process.env, ...env } });
+const programmaticInstall = (root, args, env) => spawnSync(process.execPath, ["--input-type=module", "-e",
+  `import { installSpectra } from ${JSON.stringify(path.join(cliRoot, "src/lib/install.js"))}; installSpectra({ targetDir: process.argv[1], refresh: true });`, root], { encoding: "utf8", env: { ...process.env, ...env } });
+const rejectionCommands = [
+  ["init", "."], ["adopt", "."], ["onboard"], ["context"], ["task"], ["route"], ["knowledge"],
+  ["check"], ["index"], ["verify"], ["validate"], ["approve"], ["eval"], ["diff"], ["quick"], ["skills"],
+  ["adapters", "--agents", "cursor"], ["doctor", "--fix"], ["__update-project"],
+  ["context-pack"], ["discuss-task"], ["spec", "diff"], ["eval", "run"], ["skills", "resolve"], ["adapters", "generate", "--agents", "cursor"],
+  ...["approve", "eval", "diff", "adapters", "skills", "quick"].map(command => ["admin", command]), ["admin", "doctor", "--fix"]
+];
+scenario("compatibility commands: every project command and alias rejects newer schema without writes", ({ project, execute, report }) => {
+  const root = project(4);
+  for (const args of rejectionCommands) {
+    const result = execute(root, args); unchanged(report);
+    assert.equal(result.status, 1, args.join(" "));
+    assert.match(result.stdout + result.stderr, /TOO_NEW|newer|too.new/i, args.join(" "));
+  }
+  const result = execute(root, [], programmaticInstall); unchanged(report);
+  assert.equal(result.status, 1); assert.match(result.stderr, /TOO_NEW|newer|too.new/i);
+});
+const invalidStates = [
+  ["negative schema", root => setMetadata(root, { schemaVersion: -1 })],
+  ["zero schema", root => setMetadata(root, { schemaVersion: 0 })],
+  ["unsafe integer schema", root => setMetadata(root, { schemaVersion: Number.MAX_SAFE_INTEGER + 1 })],
+  ["fraction schema", root => setMetadata(root, { schemaVersion: 2.5 })],
+  ["string schema", root => setMetadata(root, { schemaVersion: "3" })],
+  ["missing schema", root => setMetadata(root, { schemaVersion: undefined })],
+  ["malformed JSON", root => fs.writeFileSync(path.join(root, ".spectra/install.json"), "{broken")],
+  ["array metadata", root => fs.writeFileSync(path.join(root, ".spectra/install.json"), "[]")],
+  ["missing manifest", root => fs.unlinkSync(path.join(root, ".spectra/sdd/system/manifest.env"))],
+  ["missing metadata", root => fs.unlinkSync(path.join(root, ".spectra/install.json"))],
+  ["parallel roots", root => fs.cpSync(path.join(root, ".spectra/sdd"), path.join(root, "spectra/sdd"), { recursive: true })],
+  ["secondary malformed authority", root => { fs.mkdirSync(path.join(root, "spectra")); fs.writeFileSync(path.join(root, "spectra/install.json"), "{broken"); }],
+  ["config mismatch", root => fs.writeFileSync(path.join(root, ".spectra/config.yaml"), "schemaVersion: 2\ngitMode: local\n")],
+  ["config string schema", root => fs.writeFileSync(path.join(root, ".spectra/config.yaml"), 'schemaVersion: "3"\ngitMode: local\n')],
+  ["malformed config", root => fs.writeFileSync(path.join(root, ".spectra/config.yaml"), 'schemaVersion: [\n')],
+  ["Git mode mismatch", root => fs.writeFileSync(path.join(root, ".spectra/config.yaml"), 'schemaVersion: 3\ngitMode: shared\n')],
+  ["invalid Git mode", root => setMetadata(root, { gitMode: "remote" })],
+  ["escaping ownership", root => setMetadata(root, { ownedPaths: ["../outside"] })],
+  ["escaping docs", root => setMetadata(root, { docsGuidePaths: ["../outside"] })],
+  ["incomplete marker", root => fs.writeFileSync(path.join(root, ".spectra/migration.json"), '{"phase":"metadata"}')],
+  ["symlink authority", root => { const file = path.join(root, ".spectra/install.json"); const foreign = path.join(runRoot, "foreign-metadata.json"); fs.copyFileSync(file, foreign); fs.unlinkSync(file); fs.symlinkSync(foreign, file); }]
+];
+function setMetadata(root, values) {
+  const file = path.join(root, ".spectra/install.json");
+  fs.writeFileSync(file, JSON.stringify({ ...JSON.parse(fs.readFileSync(file, "utf8")), ...values }));
+}
+for (const [name, damage] of invalidStates) scenario(`compatibility ${name}: broken state remains untouched`, ({ project, execute, report }) => {
+  const root = project(); damage(root);
+  for (const args of [["task"], ["doctor", "--fix"], ["init", "."]]) {
+    const result = execute(root, args); unchanged(report); assert.equal(result.status, 1);
+    assert.match(result.stdout + result.stderr, /BROKEN|incomplete|conflict|invalid|missing|malformed/i);
+  }
+  const result = execute(root, [], inspect); unchanged(report); success(result);
+  assert.equal(JSON.parse(result.stdout).status, "BROKEN");
+});
+scenario("compatibility inspection: current and migratable schemas expose stable facts", ({ project, execute, report }) => {
+  for (const schema of [1, 2, 3, 4]) {
+    const root = project(schema); const result = execute(root, [], inspect); unchanged(report); success(result);
+    const facts = JSON.parse(result.stdout);
+    assert.equal(facts.status, schema < 3 ? "MIGRATION_REQUIRED" : schema === 3 ? "CURRENT" : "TOO_NEW");
+    assert.equal(facts.applicationVersion, source.version); assert.equal(facts.projectSchemaVersion, schema);
+    assert.equal(facts.currentSchemaVersion, 3); assert.equal(facts.minimumReadableSchema, 3); assert.equal(facts.maximumReadableSchema, 3);
+    assert.equal(facts.layout, "canonical"); assert.equal(facts.migrationAvailable, schema < 3);
+    assert.deepEqual(facts.migrationPath, []); // Registry steps are supplied by the migration task.
+    assert.equal(typeof facts.reason, "string"); assert.deepEqual(facts.conflicts, []);
+    if (schema < 3) { const rejected = execute(root, ["check"]); unchanged(report); assert.equal(rejected.status, 1); assert.match(rejected.stderr, /MIGRATION_REQUIRED|migrat/i); }
+  }
+});
+scenario("compatibility diagnostics: old and new projects report facts without governance writers", ({ project, execute, report }) => {
+  for (const schema of [2, 4]) {
+    const root = project(schema);
+    fs.writeFileSync(path.join(root, ".spectra/sdd/governance/approval-state.yaml"), "unknown future contract: [");
+    for (const command of ["status", "doctor"]) {
+      const result = execute(root, [command]); unchanged(report);
+      assert.equal(result.status, 1); assert.match(result.stdout + result.stderr, schema === 2 ? /MIGRATION_REQUIRED/ : /TOO_NEW/);
+    }
+  }
+});
+scenario("compatibility targets: nested upward symlink and adapter destination share preflight", ({ project, execute, report }) => {
+  const current = project(); const newer = project(4);
+  const nested = path.join(newer, "src/nested"); fs.mkdirSync(nested, { recursive: true });
+  const alias = path.join(runRoot, "newer-link"); fs.symlinkSync(newer, alias);
+  for (const cwd of [nested, path.join(newer, ".spectra/sdd/system"), alias]) {
+    const result = execute(current, ["task", "--cwd", cwd]); unchanged(report);
+    assert.equal(result.status, 1); assert.match(result.stderr, /TOO_NEW|newer/i);
+  }
+  for (const command of ["init", "adopt"]) {
+    const result = execute(current, [command, newer]); unchanged(report);
+    assert.equal(result.status, 1); assert.match(result.stderr, /TOO_NEW|newer/i);
+  }
+  for (const args of [["adapters"], ["adapters", "generate"], ["admin", "adapters"]]) {
+    const result = execute(current, [...args, "--agents", "cursor", "--target", newer]); unchanged(report);
+    assert.equal(result.status, 1); assert.match(result.stderr, /TOO_NEW|newer/i);
+  }
+  for (const args of [["help"], ["version"], ["task", "--help"]]) { const result = execute(newer, args); unchanged(report); success(result); }
+});
+scenario("compatibility history: known unversioned legacy differs from missing canonical schema", ({ project, execute, report }) => {
+  const root = project();
+  fs.renameSync(path.join(root, ".spectra"), path.join(root, "spectra"));
+  setLegacyUnversioned(root);
+  const result = execute(root, [], inspect); unchanged(report); success(result);
+  const facts = JSON.parse(result.stdout); assert.equal(facts.status, "LEGACY_LAYOUT"); assert.equal(facts.projectSchemaVersion, null); assert.equal(facts.migrationAvailable, true);
+});
+function setLegacyUnversioned(root) {
+  const file = path.join(root, "spectra/install.json");
+  const metadata = JSON.parse(fs.readFileSync(file, "utf8")); delete metadata.schemaVersion; metadata.cliVersion = "3.0.8"; metadata.runtimeVersion = "3.0.8";
+  fs.writeFileSync(file, JSON.stringify(metadata)); fs.writeFileSync(path.join(root, "spectra/config.yaml"), "profile: lite\ngitMode: local\n");
+  fs.writeFileSync(path.join(root, "spectra/sdd/system/manifest.env"), "spectra_version=3.0.8\nrepo_mode=consumer\n");
+}
+scenario("compatibility source guard: source repository remains protected beside stray canonical data", ({ project, execute, report }) => {
+  const root = project(); const manifest = path.join(root, "sdd/system/manifest.env"); fs.mkdirSync(path.dirname(manifest), { recursive: true }); fs.writeFileSync(manifest, "repo_mode=canonical\n");
+  const result = execute(root, ["init", "."]); unchanged(report); assert.equal(result.status, 1); assert.match(result.stderr, /source repository/);
+  const facts = execute(root, [], inspect); unchanged(report); success(facts); assert.equal(JSON.parse(facts.stdout).sourceRepository, true);
+});
+for (const name of ["install.json", "config.yaml"]) scenario(`compatibility dangling ${name}: broken links cannot authorize a fresh install`, ({ project, execute, report }) => {
+  const root = project(); const foreign = project();
+  fs.rmSync(path.join(root, ".spectra"), { recursive: true }); fs.mkdirSync(path.join(root, ".spectra"));
+  fs.symlinkSync(path.join(foreign, ".spectra", `foreign-${name}`), path.join(root, ".spectra", name));
+  const result = execute(root, ["init", "."]); unchanged(report); assert.equal(result.status, 1); assert.match(result.stderr, /BROKEN|symlink/i);
+  const inspected = execute(root, [], inspect); unchanged(report); success(inspected); assert.equal(JSON.parse(inspected.stdout).status, "BROKEN");
+});
+scenario("compatibility overridden help: final false flag cannot bypass preflight", ({ project, execute, report }) => {
+  const root = project(4);
+  const result = execute(root, ["task", "--help", "--help=false", "--item", "TASK-001", "--task-type", "feature", "--goal", "Unsafe"]);
+  unchanged(report); assert.equal(result.status, 1); assert.match(result.stderr, /TOO_NEW|newer/i);
+});
+scenario("compatibility nested bootstrap: init and adopt cannot write inside a newer parent project", ({ project, execute, report }) => {
+  const root = project(4); const nested = path.join(root, "child"); fs.mkdirSync(nested);
+  for (const command of ["init", "adopt"]) {
+    const result = execute(root, [command, nested]); unchanged(report); assert.equal(result.status, 1); assert.match(result.stderr, /TOO_NEW|newer/i);
+  }
+});
+scenario("compatibility nested symlink: actual project wins over the alias parent", ({ project, execute, report }) => {
+  const current = project(); const newer = project(4); const nested = path.join(newer, "src/deep"); fs.mkdirSync(nested, { recursive: true });
+  const alias = path.join(current, "linked-directory"); fs.symlinkSync(nested, alias);
+  const result = execute(current, ["task", "--cwd", alias, "--item", "TASK-001", "--task-type", "feature", "--goal", "Unsafe"]);
+  unchanged(report); assert.equal(result.status, 1); assert.match(result.stderr, /TOO_NEW|newer/i);
+});

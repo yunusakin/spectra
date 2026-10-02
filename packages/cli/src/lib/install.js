@@ -20,7 +20,7 @@ import { buildAdoptionArtifacts, ensureV2Scaffolding } from "./specs.js";
 import { migrateLegacyLayout } from "./migration.js";
 import { assertPathsUntracked, beginLocalGitPolicy, finishLocalGitPolicy } from "./git-policy.js";
 import { getAdapterOutputPaths } from "./adapter-paths.js";
-import { getProjectLayout } from "./project-layout.js";
+import { findProjectRoot, getProjectLayout } from "./project-layout.js";
 import { SCHEMA_VERSION, createInstallMetadata } from "./install-metadata.js";
 import { buildRepoIndex } from "./index/engine.js";
 import { writeIndex } from "./index/cache.js";
@@ -28,6 +28,7 @@ import { enrichDiscovery } from "./index/discovery.js";
 import { parseProjectSummary } from "./context/memory-summaries.js";
 import { normalize } from "./business/parser.js";
 import { warn } from "./output.js";
+import { assertProjectOperationAllowed } from "./project-compatibility.js";
 
 function replaceDirectory(sourceDir, targetDir) {
   if (!fs.existsSync(sourceDir)) {
@@ -158,6 +159,7 @@ function installSpectra({
   refreshV2Scaffolding = true
 }) {
   const absoluteTarget = path.resolve(targetDir);
+  assertProjectOperationAllowed(findProjectRoot(absoluteTarget) ?? absoluteTarget, refresh ? "refresh" : "install");
   if (agents) {
     // Adapters are projections Spectra may regenerate; a same-named file it did
     // not generate is the user's, so refuse before anything is written.

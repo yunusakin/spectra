@@ -46,6 +46,16 @@ function detectLayout(projectRoot) {
   return null;
 }
 
+// Discovery retains damaged installs so preflight can diagnose them instead of
+// treating missing manifests as permission to bootstrap over existing state.
+function hasProjectMarkers(projectRoot) {
+  const root = path.resolve(projectRoot);
+  return detectLayout(root) !== null || [
+    ".spectra/install.json", ".spectra/config.yaml", ".spectra/sdd", ".spectra/migration.json",
+    "spectra/install.json", "spectra/config.yaml", "spectra/sdd"
+  ].some(relative => fs.lstatSync(path.join(root, relative), { throwIfNoEntry: false }) !== undefined);
+}
+
 // The directory that holds sdd/ (and, for non-root layouts, bin/, docs/,
 // install.json, cache/). For pre-3.0 root-sdd installs this is the
 // project root itself.
@@ -100,19 +110,31 @@ function findProjectRoot(startDir = process.cwd()) {
   while (true) {
     const layout = detectLayout(current);
 
-    if (layout) {
+    if (layout || hasProjectMarkers(current)) {
       // A root-sdd hit inside a directory that also carries install.json
       // means `current` is itself a data directory (.spectra/ or spectra/);
       // the project root is its parent.
-      const looksLikeDataDir = layout === "root-sdd" && fs.existsSync(path.join(current, "install.json"));
-      if (looksLikeDataDir && path.dirname(current) !== current) {
-        return path.dirname(current);
+      const looksLikeDataDir = [CANONICAL_DIR, LEGACY_SPECTRA_DIR].includes(path.basename(current)) &&
+        (path.basename(current) === CANONICAL_DIR || fs.existsSync(path.join(current, "install.json")) || fs.existsSync(path.join(current, "config.yaml")));
+      const project = looksLikeDataDir && path.dirname(current) !== current ? path.dirname(current) : current;
+      const start = path.resolve(startDir);
+      if (fs.existsSync(start)) {
+        const realStart = fs.realpathSync(start);
+        if (realStart !== start) {
+          const realProject = findProjectRoot(realStart);
+          if (!realProject || fs.realpathSync(project) !== realProject) return realProject;
+        }
       }
-      return current;
+      return project;
     }
 
     const parent = path.dirname(current);
     if (parent === current) {
+      const start = path.resolve(startDir);
+      if (fs.existsSync(start)) {
+        const realStart = fs.realpathSync(start);
+        if (realStart !== start) return findProjectRoot(realStart);
+      }
       return null;
     }
     current = parent;
@@ -131,6 +153,7 @@ export {
   findProjectRoot,
   getActiveRoot,
   hasSpectraInstall,
+  hasProjectMarkers,
   getCacheRoot,
   getDataRoot,
   getInstallMetadataPaths,
