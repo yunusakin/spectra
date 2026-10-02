@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { parse, stringify } from "yaml";
 import { checkAgentsHealth, findForeignAdapterFiles, normalizeAgents } from "./agent-health.js";
 import {
   copyDirectory,
@@ -143,9 +144,11 @@ function writeRepoLocalLauncher(targetRoot, nativeBinaryPath) {
 function writeProjectConfig(targetRoot, { gitMode, write = fs.writeFileSync }) {
   const configPath = getProjectLayout(targetRoot).config;
   ensureDirectory(path.dirname(configPath));
-  const existing = fs.existsSync(configPath) ? fs.readFileSync(configPath, "utf8").split(/\r?\n/) : [];
-  const preserved = existing.filter((line) => line.trim() && !/^(?:profile|gitMode|schemaVersion):/.test(line));
-  write(configPath, [`gitMode: ${gitMode}`, `schemaVersion: ${SCHEMA_VERSION}`, ...preserved, ""].join("\n"));
+  const config = fs.existsSync(configPath) ? parse(fs.readFileSync(configPath, "utf8")) : {};
+  config.gitMode = gitMode;
+  config.schemaVersion = SCHEMA_VERSION;
+  delete config.profile;
+  write(configPath, stringify(config));
 }
 
 const migrationRefresh = Symbol("migration refresh");

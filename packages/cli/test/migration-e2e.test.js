@@ -5,6 +5,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+import { parse } from "yaml";
 import { cliPath, cliRoot, createGitProject, initProject } from "./helpers/project.js";
 
 // Failure modes recorded before implementation: skipped adjacent schema steps,
@@ -161,4 +162,20 @@ scenario('tagged v3.0.8 launcher fault resumes exact derived refresh',({execute,
 });
 scenario('tagged refresh refuses a user-edited authority',({execute,report})=>{
  const root=taggedProject(report);execute(root,['migrate','--yes','--json'],'launcher');const file=path.join(root,'.spectra/sdd/system/manifest.env');fs.appendFileSync(file,'user_edit=preserve\n');const r=execute(root,['migrate','--yes','--json']);assert.equal(r.status,1);unchanged(report);assert.match(json(r).reason,/authority changed|manual recovery/);
+});
+
+// Review P1: filtering text lines destroys empty paragraphs in YAML block
+// scalars. Check actual parsed unknown values through both migration and repair.
+for(const route of ['migration','resume','repair']) scenario(`multiline config survives ${route}`,({fixture,execute,report})=>{
+ const root=fixture(route==='repair'?3:2);const config=path.join(root,'.spectra/config.yaml');
+ fs.writeFileSync(config,`gitMode: local\nschemaVersion: ${route==='repair'?3:2}\ncustom: |\n  first paragraph\n\n  second paragraph\nnested:\n  custom: |\n    gitMode: this is user text\n\n    schemaVersion: also user text\n`);
+ const original=parse(fs.readFileSync(config,'utf8'));
+ const compare=()=>{const current=parse(fs.readFileSync(config,'utf8'));assert.equal(current.custom,original.custom);assert.deepEqual(current.nested,original.nested);assert.equal(current.schemaVersion,3);assert.equal(current.gitMode,'local');};
+ if(route==='resume'){const failed=execute(root,['migrate','--yes','--json'],'launcher');assert.equal(failed.status,1);compare();success(execute(root,['migrate','--yes','--json']));compare();}
+ else{success(execute(root,route==='repair'?['doctor','--fix']:['migrate','--yes','--json']));compare();}
+});
+
+scenario('nested user config is valuable and blocks edited resume',({fixture,execute,report})=>{
+ const root=fixture();const file=path.join(root,'.spectra/docs/plugin/config.yaml');fs.writeFileSync(file,'custom: original user value\n');const failed=execute(root,['migrate','--yes','--json'],'interrupt');assert.equal(failed.status,87);
+ fs.writeFileSync(file,'custom: edited during interruption\n');const result=execute(root,['migrate','--yes','--json']);assert.equal(result.status,1);unchanged(report);assert.match(json(result).reason,/Valuable content changed: .*docs\/plugin\/config.yaml/);assert.equal(fs.readFileSync(file,'utf8'),'custom: edited during interruption\n');
 });

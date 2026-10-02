@@ -102,7 +102,7 @@ function readSnapshot(root, marker) {
 }
 function verifyValues(root, marker, files) {
   for (const file of files) {
-    if (file.kind === "git-exclude" || /(?:^|\/)(?:install\.json|config\.yaml)$/.test(file.sourcePath)) continue;
+    if (file.kind === "git-exclude" || [".spectra/install.json", ".spectra/config.yaml", "spectra/install.json", "spectra/config.yaml"].includes(file.sourcePath)) continue;
     const candidate = marker.completed.includes("layout") || marker.originalLayout === "canonical" ? file.targetPath : file.sourcePath;
     if (!exists(path.join(root, candidate)) || hash(fs.readFileSync(path.join(root, candidate))) !== file.sha256) throw new Error(`Valuable content changed: ${candidate}; manual recovery required.`);
   }
