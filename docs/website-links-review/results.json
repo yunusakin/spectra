@@ -1,0 +1,157 @@
+{
+  "base": "http://127.0.0.1:8766/site/",
+  "results": [
+    {
+      "path": "index.html",
+      "width": 1440,
+      "links": 10
+    },
+    {
+      "path": "docs/",
+      "width": 1440,
+      "links": 9
+    },
+    {
+      "path": "docs/install.html",
+      "width": 1440,
+      "links": 7
+    },
+    {
+      "path": "docs/commands.html",
+      "width": 1440,
+      "links": 35
+    },
+    {
+      "path": "docs/workflow.html",
+      "width": 1440,
+      "links": 10
+    },
+    {
+      "path": "docs/troubleshooting.html",
+      "width": 1440,
+      "links": 8
+    },
+    {
+      "path": "index.html",
+      "width": 390,
+      "links": 10
+    },
+    {
+      "path": "docs/",
+      "width": 390,
+      "links": 9
+    },
+    {
+      "path": "docs/install.html",
+      "width": 390,
+      "links": 7
+    },
+    {
+      "path": "docs/commands.html",
+      "width": 390,
+      "links": 35
+    },
+    {
+      "path": "docs/workflow.html",
+      "width": 390,
+      "links": 10
+    },
+    {
+      "path": "docs/troubleshooting.html",
+      "width": 390,
+      "links": 8
+    }
+  ],
+  "external": [
+    "https://github.com/yunusakin/spectra",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adapters",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#adopt",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#approve",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#check",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#context",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#diff",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#doctor",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#eval",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#help",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#index",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#init",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#knowledge",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#onboard",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#quick",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#route",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#skills",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#status",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#task",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#update",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#verify",
+    "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#version",
+    "https://github.com/yunusakin/spectra/issues",
+    "https://github.com/yunusakin/spectra/releases/latest",
+    "https://www.npmjs.com/package/spectra-pack"
+  ],
+  "failures": [],
+  "beforeFailures": [
+    "Home contains a fixed release label",
+    "Home omits required adapter paths outside .spectra",
+    "Home onboarding omits interactive answers",
+    "Home contains a fixed release label",
+    "Home omits required adapter paths outside .spectra",
+    "Home onboarding omits interactive answers"
+  ],
+  "externalChecks": {
+    "http": [
+      {
+        "url": "https://github.com/yunusakin/spectra",
+        "status": 200,
+        "final": "https://github.com/yunusakin/spectra"
+      },
+      {
+        "url": "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md",
+        "error": "HTTP Error 504: Gateway Time-out"
+      },
+      {
+        "url": "https://github.com/yunusakin/spectra/issues",
+        "status": 200,
+        "final": "https://github.com/yunusakin/spectra/issues"
+      },
+      {
+        "url": "https://github.com/yunusakin/spectra/releases/latest",
+        "status": 200,
+        "final": "https://github.com/yunusakin/spectra/releases/tag/v3.1.1"
+      },
+      {
+        "url": "https://www.npmjs.com/package/spectra-pack",
+        "error": "HTTP Error 403: Forbidden"
+      }
+    ],
+    "missingReferenceAnchors": [],
+    "followUp": [
+      {
+        "url": "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md",
+        "error": "HTTP Error 504: Gateway Time-out"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh",
+        "status": 200,
+        "final": "https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh"
+      },
+      {
+        "url": "https://registry.npmjs.org/spectra-pack/latest",
+        "status": 200,
+        "final": "https://registry.npmjs.org/spectra-pack/latest",
+        "version": "3.1.1"
+      }
+    ],
+    "githubApiConfirmation": {
+      "path": "docs/cli-reference.md",
+      "html_url": "https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md",
+      "sha": "fa975a7fee0e6784b53a64c19ea16bde2e62782a"
+    }
+  },
+  "sourceSha256": {
+    "site/index.html": "1b26ede4ed77fb542e380b3a94f31911eed38b435fa93c12d29c3818ac567cc1",
+    "tools/verify-website-links.js": "e11469c63f9a7efed962d250b25ff900b0dc7822de13d19da9777d0f66c053f0"
+  },
+  "strictValidation": "Validation: OK"
+}
