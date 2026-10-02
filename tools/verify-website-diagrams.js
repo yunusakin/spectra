@@ -31,6 +31,20 @@ async page => {
           expect(svgResponse.ok(), `${id}: broken SVG link`);
           const svg = await svgResponse.text();
           expect(svg.includes("<title") && svg.includes("<desc"), `${id}: SVG needs title and description`);
+          expect(!svg.includes("<foreignObject"), `${id}: use native SVG text so typography is portable`);
+          expect(svg.includes(".cluster-label tspan") && svg.includes("font-weight:750"), `${id}: site heading style must override Mermaid's normal tspan weight`);
+          if (size.width === 1440) {
+            const preview = await page.context().newPage();
+            try {
+              await preview.goto(new URL(href, `${base}docs/commands.html`).href);
+              const typography = await preview.evaluate(() => ({
+                headingWeight: getComputedStyle(document.querySelector(".cluster-label tspan")).fontWeight,
+                commandFont: getComputedStyle(document.querySelector(".command .label text > .row:first-child")).fontFamily,
+                commandWeight: getComputedStyle(document.querySelector(".command .label text > .row:first-child tspan")).fontWeight
+              }));
+              expect(typography.headingWeight === "750" && typography.commandWeight === "700" && typography.commandFont.includes("mono"), `${id}: rendered SVG typography must match site headings and command code`);
+            } finally { await preview.close(); }
+          }
           const svgText = await page.evaluate(source => new DOMParser().parseFromString(source, "image/svg+xml").documentElement.textContent.replace(/\s+/g, " "), svg);
           const labels = await section.locator(".diagram-card h3").allTextContents();
           for (const label of labels) expect(svgText.includes(label.trim()), `${id}: SVG/card label mismatch: ${label}`);
@@ -55,7 +69,8 @@ async page => {
         const scroll = section.locator(".diagram-scroll");
         expect(await scroll.getAttribute("tabindex") === "0", `${id}: scroll area is not keyboard accessible`);
         expect(!!await scroll.getAttribute("aria-label"), `${id}: unnamed scroll area`);
-        expect(await scroll.evaluate(el => el.clientHeight <= 800 && el.scrollHeight > el.clientHeight), `${id}: long diagram must scroll within a bounded panel`);
+        expect(await scroll.evaluate(el => el.scrollHeight <= el.clientHeight + 1), `${id}: diagram must not require nested vertical scrolling`);
+        if (size.width >= 1024) expect(await scroll.evaluate(el => el.scrollWidth <= el.clientWidth + 1), `${id}: diagram must fit desktop width`);
         await scroll.focus();
         expect(await scroll.evaluate(el => el === document.activeElement && getComputedStyle(el).outlineStyle !== "none"), `${id}: no visible keyboard focus`);
         await scroll.evaluate(el => { el.scrollLeft = 0; });
@@ -64,10 +79,6 @@ async page => {
         await page.waitForFunction(() => [...document.querySelectorAll(".diagram-scroll")].some(el => el === document.activeElement && (el.scrollWidth <= el.clientWidth || el.scrollLeft > 0)));
         expect(await scroll.evaluate((el, previous) => el.scrollWidth <= el.clientWidth || el.scrollLeft > previous, before), `${id}: arrow key did not scroll`);
         await scroll.evaluate(el => { el.scrollLeft = 0; });
-        await scroll.evaluate(el => { el.scrollTop = 0; });
-        await page.keyboard.press("ArrowDown");
-        await page.waitForFunction(() => document.activeElement?.classList.contains("diagram-scroll") && document.activeElement.scrollTop > 0);
-        expect(await scroll.evaluate(el => el.scrollTop > 0), `${id}: arrow key did not scroll vertically`);
         await scroll.evaluate(el => el.scrollTo({ top: 0, left: 0, behavior: "instant" }));
         await scroll.evaluate(el => el.blur());
         await section.screenshot({ path: `output/playwright/website-diagrams/${name}-${id}-${size.width}.png`, style: ".site-header { visibility: hidden; }" });

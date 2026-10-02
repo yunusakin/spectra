@@ -4,10 +4,10 @@ flowchart TB
   subgraph MAINT_UPDATE["M1 · Update installed versions and layout"]
     direction TB
     UPDATE["COMMAND · spectra update<br/>Read published version and<br/>project metadata"]
-    NEED{"CONDITION · Change needed?<br/>CLI, runtime, schema or layout"}
+    NEED["CONDITION · Change needed?<br/>CLI, runtime,<br/>schema or layout"]
     CHOICE["RESULT / CHOICE<br/>Already current: no project<br/>refresh<br/>Change needed: ask<br/>confirmation<br/>Declined: project unchanged<br/>--yes skips the prompt, not<br/>validation"]
-    REFRESH["RESULT · When needed and<br/>confirmed<br/>Refresh runtime, owned<br/>guides,<br/>launcher and install<br/>metadata"]
-    CLI["CONDITIONAL RESULT<br/>Newer CLI: update<br/>installation<br/>outside the project<br/>Legacy layout: migrate<br/>recognized<br/>Spectra paths into .spectra/"]
+    REFRESH["RESULT · When needed and<br/>confirmed<br/>Refresh runtime, owned<br/>guides, launcher<br/>and install metadata"]
+    CLI["CONDITIONAL RESULT<br/>Newer CLI: update installation<br/>outside the project<br/>Legacy layout: migrate<br/>recognized<br/>Spectra paths into .spectra/"]
     UPDATE -->|compares versions and layout| NEED
     NEED -->|report result and request consent if needed| CHOICE
     CHOICE -.->|change needed and confirmed| REFRESH
@@ -19,7 +19,7 @@ flowchart TB
     REPORT["RESULT · Health report<br/>No project files written"]
     FIX["COMMAND · spectra doctor<br/>--fix"]
     REPAIR["RESULT · Refresh generated<br/>project assets<br/>Runtime, guides, launcher,<br/>metadata and exclude"]
-    SAFE{"CONDITION · All true?<br/>Detected set missing files<br/>Required tool available<br/>No user-owned siblings"}
+    SAFE["CONDITION · All true?<br/>Detected set missing files<br/>Required tool available<br/>No user-owned siblings"]
     ADAPTER_REPAIR["RESULT · Repair safe missing<br/>adapter set"]
     MANUAL["RESULT · Report remaining<br/>health state<br/>Unsafe repairs skipped;<br/>report any manual problems"]
     DOCTOR -->|inspect only| REPORT
@@ -43,10 +43,10 @@ flowchart TB
   MAINT_UPDATE ~~~ MAINT_DOCTOR
   MAINT_DOCTOR ~~~ MAINT_PRESERVED
   MAINT_PRESERVED ~~~ MAINT_ADAPTERS
-  classDef command fill:#f1eeff,stroke:#6c5ce7,color:#5143c6,stroke-width:2px;
-  classDef result fill:#effcf8,stroke:#007f68,color:#121827;
-  classDef condition fill:#fff5df,stroke:#8a5d00,color:#121827;
-  classDef neutral fill:#f2f5fa,stroke:#64748b,color:#121827;
+  classDef command fill:#ffffff,stroke:#6c5ce7,color:#5143c6,stroke-width:2px;
+  classDef result fill:#effcf8,stroke:#007f68,color:#121827,stroke-width:1.5px;
+  classDef condition fill:#fff5df,stroke:#8a5d00,color:#121827,stroke-width:1.5px;
+  classDef neutral fill:#f2f8ff,stroke:#64748b,color:#121827;
   class UPDATE,DOCTOR,FIX,ADAPTERS command;
   class CHOICE,REFRESH,CLI,REPORT,REPAIR,ADAPTER_REPAIR,MANUAL result;
   class NEED,SAFE,HEALTHY condition;

@@ -17,9 +17,19 @@ and links to those explanations. No browser-side renderer or JavaScript is neede
   labels. Invisible Mermaid links control layout only; they do not indicate steps.
 - `theme.json` uses the existing site palette and system font stack. SVG text uses
   native SVG labels, so opening a file does not require HTML `foreignObject` support.
-- The diagram viewport is bounded to 75vh / 800px. Native scrolling preserves
-  readable labels while keeping the HTML explanations close to the graphic.
-  Arrow keys work in both directions; full-size links offer an unbounded view.
+  Set `htmlLabels: false` at the top level; the deprecated flowchart-only setting
+  does not reliably disable HTML labels in Mermaid 11.12.0. Group and node heading
+  styles target the generated `tspan` elements, whose normal font-weight attributes
+  otherwise override inherited heading styles.
+  White command cards have purple borders and monospace command headings; results
+  use paper-teal, conditions use amber, and inputs use paper-blue. Rounded corners,
+  subtle card shadows and group headings match the website documentation panels.
+- Condition nodes use compact rounded rectangles with explicit CONDITION / CHOICE
+  labels. This avoids the large empty corners required by diamond shapes.
+- Diagrams use their full height in the page, without a nested vertical scrollbar.
+  Desktop diagrams fit the content width. Narrow screens retain horizontal
+  scrolling when needed to keep labels at least 16px; left/right arrow keys and
+  full-size links remain available. HTML explanations retain all detail.
 
 ## Reproduce the SVGs
 
@@ -55,7 +65,8 @@ Update the workflow minimum width on both Commands and Workflow pages together.
 The standalone E2E function is `tools/verify-website-diagrams.js`. It is run by
 Playwright CLI rather than the CLI runtime test runner. Failure scenarios are
 listed at its start. It verifies both pages at 1440×1000, 768×1024 and 390×844;
-keyboard scrolling/focus, labels, local links, responsive text and no-JavaScript
+keyboard horizontal scrolling/focus, absence of nested vertical scrolling,
+desktop fit, labels, local links, responsive text and no-JavaScript
 rendering. It retains screenshots and a JSON result for review.
 
 From the repository root, create the output directory and start a local server:
