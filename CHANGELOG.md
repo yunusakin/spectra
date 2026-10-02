@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.1.2] - 2026-10-02
+
+### Added
+- Generated agent guidance directs compatible plugin and skill documents to `.spectra/docs/<project-name>/<plugin-or-skill>/`, while preserving paths required by the tool or artifact contract.
+- Installation records a stable project documentation name; shipped Spectra guides use `.spectra/docs/spectra/`.
+
+### Fixed
+- Refresh commands launched from the project-local npm fallback preserve the executing CLI instead of deleting its own runtime files.
+- `adopt` discovery uses repository index evidence for module, source, test and command summaries, including Maven source overrides and unnamed root modules. Discovered business responsibilities remain unconfirmed; application commands are not executed during discovery.
+- Runtime refresh and `doctor --fix` preserve unowned guide collisions and plugin documents; adapter generation honors the target project's ownership and Git policy.
+- Website release notes follow the latest published release, and onboarding/storage descriptions match the CLI behavior.
+
+### Documentation
+- README, CLI Reference, installed guides and website describe the project effects of all 21 public commands, including cache/state/report writes and conditional behavior.
+- Website setup, daily work and maintenance diagrams use the site's card styling and native SVG typography, with complete HTML explanations, compact shapes and no nested vertical scrolling.
+
 ## [3.1.1] - 2026-09-28
 
 ### Added

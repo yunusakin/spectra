@@ -68,6 +68,11 @@ function materializeLocalNodeCli(targetRoot) {
     return;
   }
 
+  // A refresh launched from this fallback must not delete its own source files.
+  if (fs.existsSync(localCliRoot) && fs.realpathSync(cliPackageRoot) === fs.realpathSync(localCliRoot)) {
+    return;
+  }
+
   fs.rmSync(localCliRoot, { recursive: true, force: true });
   ensureDirectory(localCliRoot);
 

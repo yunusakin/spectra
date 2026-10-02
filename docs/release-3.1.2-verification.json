@@ -1,0 +1,103 @@
+{
+  "version": "3.1.2",
+  "baseCommit": "9cdb262436ce37bdd22db692bf8f6a6bed1b9139",
+  "fullSuite": {
+    "tests": 230,
+    "passed": 230,
+    "failed": 0
+  },
+  "strictValidation": "Validation: OK",
+  "versionParity": "Version parity OK: 3.1.2",
+  "npmPublishDryRun": "passed; actual publication not performed",
+  "packagedE2E": {
+    "passed": true,
+    "commandCount": 35,
+    "localArtifact": ".tmp/release-3.1.2/e2e/run-pbaKT0/results.json",
+    "artifactSha256": "8bd3d90cd3ece482a23fce49511319096acb9a83647e92d9226e2357c1957c0d",
+    "modes": [
+      {
+        "name": "npm",
+        "docsProjectName": "npm-acme",
+        "beforeFileCount": 2,
+        "afterFileCount": 789,
+        "protectedFileCount": 2
+      },
+      {
+        "name": "native",
+        "docsProjectName": "native-acme",
+        "beforeFileCount": 2,
+        "afterFileCount": 206,
+        "protectedFileCount": 2
+      }
+    ],
+    "reproducedFailure": "Before fix, doctor --fix deleted the executing npm fallback and could not find validate-repo.sh.",
+    "checks": [
+      "npm tarball installation",
+      "native installer with local transport and real checksum verification",
+      "bad checksum rejected before installation",
+      "native runs without Node on PATH",
+      "adopt does not run application test scripts",
+      "guides and adapter plugin output policy installed",
+      "index freshness and check",
+      "local launcher context",
+      "doctor repair through normal and symlink project paths",
+      "current-version update with version lookup pinned",
+      "repeat adoption preserves brief/plugin documents and stable docs name",
+      "different-target installation through the local launcher"
+    ]
+  },
+  "npmPacks": [
+    {
+      "name": "spectra-pack",
+      "version": "3.1.2",
+      "filename": "spectra-pack-3.1.2.tgz",
+      "size": 176179,
+      "unpackedSize": 682044,
+      "integrity": "sha512-qdOTIKIlbjhZ2WPyOc5L7xoepb9v/DpIQbQGYi07j2ZpXhm1kZfni0k7sipd1g62X/vXKI3gCnve7yftW1FM1g==",
+      "shasum": "ddf9381dd3fb71e71faa8f7b3e94163add22f63e",
+      "entryCount": 350
+    },
+    {
+      "name": "@spectra/core",
+      "version": "3.1.2",
+      "filename": "spectra-core-3.1.2.tgz",
+      "size": 57102,
+      "unpackedSize": 188149,
+      "integrity": "sha512-dxHSz5P1fMbJqbTap+aGylLDwPVv6JG9iy+A5nRK4uEFgf2Mddxf4STEoAWWeB+oiID8AoRI3U/y3aS8OX52AA==",
+      "shasum": "8c1ab619b9dd49d3f1ec19408979986c65e5445f",
+      "entryCount": 109
+    },
+    {
+      "name": "@spectra/templates",
+      "version": "3.1.2",
+      "filename": "spectra-templates-3.1.2.tgz",
+      "size": 65918,
+      "unpackedSize": 186013,
+      "integrity": "sha512-L2uSyJJfxoY7++p4D+FSGF5HxqQ4dHxiU2ehJkARoGqZgomRMDs5Ir2R0cgABM6wTswwQQsofaxhlgb3fwDI8g==",
+      "shasum": "202648c4faad25787f2d244f1e0ee8654c0413cb",
+      "entryCount": 158
+    }
+  ],
+  "native": {
+    "target": "darwin-arm64",
+    "buildNode": "24.19.0",
+    "smoke": "passed with PATH=/usr/bin:/bin",
+    "archiveSha256": "df591f452add4127e9d31e01d1a0fc2d29bfcb9ec13038121235491d71743b89",
+    "otherTargets": "PR native-release CI matrix; results linked from the PR"
+  },
+  "sourceSha256": {
+    "package.json": "f5a65b88d83f75104112794d353571b09665f23cd232d60ef429d1bfc6ef6846",
+    "package-lock.json": "266d585f4d0efef2b9251c16ffa3235a53527a9d0bd1c8b0ddeceb71d4e96b1d",
+    "packages/cli/package.json": "990a0053c72bef52e1c0b2d8388456b463a9ddae87c0c2e0d91d5222ffc29c77",
+    "packages/core/package.json": "83e832d4ce5becd40024c6341c278c00884f4b14f32e6b4d08cca0a034727331",
+    "packages/templates/package.json": "5c6dddd185171319d76d63532e2649f83071819fd46357b34ae4cbee1a19fa5f",
+    "packages/cli/src/lib/version.js": "2863caf1d97fefdfc37a9d1cbbd5c4b85409e35d8c098f505fa0dec8e6fb8457",
+    "packages/cli/src/lib/install.js": "f66a8ae98c25b464c47881d313fec25f4c45035d8d34135a8b213401c871a331",
+    "profiles/full/sdd/system/manifest.env": "f01a464418827b51582abdd8492bb540aba5b51908c3bbbed01b7f60aea65100",
+    "scripts/init.sh": "9621552f61c8871cdd74a90415710582e9190f0ff9f9e0ef35b15f2097dc596f",
+    "packages/core/assets/runtime/scripts/init.sh": "9621552f61c8871cdd74a90415710582e9190f0ff9f9e0ef35b15f2097dc596f",
+    "packages/core/assets/runtime/sdd/system/manifest.env": "f01a464418827b51582abdd8492bb540aba5b51908c3bbbed01b7f60aea65100",
+    "packages/templates/assets/profiles/full/sdd/system/manifest.env": "f01a464418827b51582abdd8492bb540aba5b51908c3bbbed01b7f60aea65100",
+    "tools/verify-release.mjs": "7570e24d3f132e47f0afde584f3968544fc16a1ef93d816a079a4d2776e023ce"
+  }
+}
