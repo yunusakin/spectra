@@ -94,7 +94,7 @@ test("setup rejects Git-mode changes for an existing installation", () => {
 
   const gitModeChange = run(root, process.execPath, [cliPath, "adopt", ".", "--git-mode", "shared"]);
   assert.equal(gitModeChange.status, 1);
-  assert.match(gitModeChange.stderr, /Git mode changes require an explicit migration/);
+  assert.match(gitModeChange.stderr, /Git mode changes are not supported/);
 
   const config = fs.readFileSync(path.join(root, ".spectra", "config.yaml"), "utf8");
   assert.doesNotMatch(config, /^profile:/m);

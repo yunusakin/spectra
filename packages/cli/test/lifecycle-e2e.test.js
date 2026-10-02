@@ -296,3 +296,91 @@ scenario("compatibility nested symlink: actual project wins over the alias paren
   const result = execute(current, ["task", "--cwd", alias, "--item", "TASK-001", "--task-type", "feature", "--goal", "Unsafe"]);
   unchanged(report); assert.equal(result.status, 1); assert.match(result.stderr, /TOO_NEW|newer/i);
 });
+
+// Task 3 failures: software update discovers/mutates projects, spawns npx/global
+// mutation from a local runtime, hangs on piped stdin, or refresh loses provenance.
+scenario("software update independence: all project states and fallback preserve bytes", ({ project, execute, report }) => {
+  const roots = [project(), project(2), project(4), project()];
+  fs.writeFileSync(path.join(roots[3], ".spectra/install.json"), "{broken");
+  const blockedBin = path.join(runRoot, "update-transport"); fs.mkdirSync(blockedBin);
+  const calls = path.join(blockedBin, "calls");
+  for (const command of ["npm", "npx", "curl"]) fs.writeFileSync(path.join(blockedBin, command), `#!/bin/sh\nprintf '%s\\n' '${command}' >> '${calls}'\nexit 73\n`, { mode: 0o755 });
+  const env = { PATH: `${blockedBin}:${process.env.PATH}`, SPECTRA_LATEST_VERSION: "99.0.0" };
+  for (const cwd of [runRoot, ...roots]) {
+    const current = execute(cwd, ["update", "--yes", "--cwd", roots[3]]); unchanged(report); success(current);
+    const newer = execute(cwd, ["update", "--yes"], spectra, env); unchanged(report);
+    assert.equal(newer.status, 1); assert.match(newer.stdout + newer.stderr, /install|package.manager|npm/i);
+  }
+  const local = execute(roots[0], ["update", "--yes"], localSpectra, env); unchanged(report);
+  assert.equal(local.status, 1); assert.match(local.stdout + local.stderr, /install|package.manager|npm/i);
+  assert.equal(fs.existsSync(calls), false, "local/software update must not spawn mutation transports");
+});
+scenario("software update confirmation: non-TTY newer update requires explicit yes", ({ project, execute, report }) => {
+  const root = project();
+  const result = execute(root, ["update"], spectra, { SPECTRA_LATEST_VERSION: "99.0.0" }); unchanged(report);
+  assert.equal(result.status, 1); assert.match(result.stdout + result.stderr, /--yes/);
+  assert.doesNotMatch(result.stdout + result.stderr, /Continue\?/);
+});
+scenario("software update internal command: deprecated refresh gives guidance without writes", ({ project, execute, report }) => {
+  for (const schema of [2, 3]) {
+    const root = project(schema); const result = execute(root, ["__update-project"]); unchanged(report);
+    assert.equal(result.status, 1); assert.match(result.stdout + result.stderr, schema === 2 ? /spectra migrate/ : /spectra doctor --fix/);
+  }
+});
+scenario("software update repair provenance: explicit current repair preserves valuable metadata", ({ project, execute, report }) => {
+  const root = project(); const file = path.join(root, ".spectra/install.json");
+  const initial = JSON.parse(fs.readFileSync(file, "utf8"));
+  const original = { ...initial, installedAt: "2001-02-03T04:05:06.000Z", createdWith: "1.2.3", cliVersion: "0.0.1", runtimeVersion: "0.0.1",
+    vendorField: { retained: true }, binaryPath: "/unavailable/standalone/spectra", ownedPaths: [...initial.ownedPaths, ".spectra/custom/value"],
+    docsGuidePaths: [...initial.docsGuidePaths, "old-guide.md"] };
+  fs.writeFileSync(file, JSON.stringify(original));
+  fs.unlinkSync(path.join(root, ".spectra/bin/spectra"));
+  fs.unlinkSync(path.join(root, ".spectra/sdd/system/runtime/minimal.md"));
+  const before = inventory(root);
+  const result = execute(root, ["doctor", "--fix"]); success(result);
+  const fixed = JSON.parse(fs.readFileSync(file, "utf8"));
+  for (const key of ["installedAt", "createdWith", "vendorField", "installMode", "gitMode", "docsProjectName", "binaryPath"]) assert.deepEqual(fixed[key], original[key], key);
+  assert.ok(original.ownedPaths.every(value => fixed.ownedPaths.includes(value))); assert.ok(original.docsGuidePaths.every(value => fixed.docsGuidePaths.includes(value)));
+  assert.equal(fixed.cliVersion, source.version); assert.equal(fixed.runtimeVersion, source.version); assert.ok(Number.isFinite(Date.parse(fixed.updatedAt)));
+  const after = inventory(root);
+  for (const key of [".spectra/sdd/memory-bank/core/projectbrief.md", ".spectra/docs/custom-plugin/plan.md", ".git/info/exclude"]) assert.equal(after[key], before[key], key);
+  assert.ok(after[".spectra/bin/spectra"]); assert.ok(after[".spectra/sdd/system/runtime/minimal.md"]);
+  delete fixed.createdWith; fs.writeFileSync(file, JSON.stringify(fixed));
+  success(execute(root, ["doctor", "--fix"])); assert.equal(Object.hasOwn(JSON.parse(fs.readFileSync(file, "utf8")), "createdWith"), false, "repair must not invent creation history");
+});
+scenario("software update old repair: doctor and bootstrap cannot hide schema migration", ({ project, execute, report }) => {
+  const root = project(2);
+  for (const args of [["doctor", "--fix"], ["init", "."], ["adopt", "."]]) {
+    const result = execute(root, args); unchanged(report); assert.equal(result.status, 1); assert.match(result.stdout + result.stderr, /spectra migrate/);
+  }
+});
+
+scenario("software update local transport: newer source and fallback never run npx", ({ project, execute, report }) => {
+  const root = project(); const bin = path.join(runRoot, "local-update-transport"); fs.mkdirSync(bin);
+  const log = path.join(bin, "calls");
+  for (const command of ["npm", "npx", "curl"]) fs.writeFileSync(path.join(bin, command), `#!/bin/sh\nprintf '%s\\n' '${command}' >> '${log}'\nexit 73\n`, { mode: 0o755 });
+  const env = { PATH: `${bin}:${process.env.PATH}`, SPECTRA_LATEST_VERSION: "99.0.0" };
+  for (const invoke of [spectra, localSpectra]) {
+    const result = execute(root, ["update", "--yes"], invoke, env); unchanged(report);
+    assert.equal(result.status, 1); assert.match(result.stdout + result.stderr, /install|package.manager|npm/i);
+  }
+  assert.equal(fs.existsSync(log), false, "no update transport may run without installation ownership");
+});
+scenario("software update creation provenance: fresh bootstrap records its creating release", ({ project }) => {
+  const root = project(); assert.equal(JSON.parse(fs.readFileSync(path.join(root, ".spectra/install.json"), "utf8")).createdWith, source.version);
+});
+
+// Existing isolated migration entrypoint can reset provenance through the shared
+// metadata builder. Verify its real filesystem effects before adapting the caller.
+scenario("software update metadata caller: legacy utility preserves original provenance", ({ project, execute }) => {
+  const root = project(); fs.renameSync(path.join(root, ".spectra"), path.join(root, "spectra")); setLegacyUnversioned(root);
+  const file = path.join(root, "spectra/install.json"); const previous = JSON.parse(fs.readFileSync(file, "utf8"));
+  previous.installedAt = "2001-02-03T04:05:06.000Z"; delete previous.createdWith;
+  previous.vendorField = { retained: true }; fs.writeFileSync(file, JSON.stringify(previous));
+  const migrateUtility = (cwd, args, env) => spawnSync(process.execPath, ["--input-type=module", "-e",
+    `import { migrateLegacyLayout } from ${JSON.stringify(path.join(cliRoot, "src/lib/migration.js"))}; console.log(JSON.stringify(migrateLegacyLayout(process.argv[1])));`, cwd], { encoding: "utf8", env: { ...process.env, ...env } });
+  success(execute(root, [], migrateUtility));
+  const next = JSON.parse(fs.readFileSync(path.join(root, ".spectra/install.json"), "utf8"));
+  assert.equal(next.installedAt, previous.installedAt); assert.deepEqual(next.vendorField, previous.vendorField);
+  assert.equal(Object.hasOwn(next, "createdWith"), false, "legacy normalization must not invent creation provenance");
+});

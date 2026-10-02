@@ -124,7 +124,7 @@ function writeMigratedMetadata(layout, oldMetadata, { gitMode, installMode }) {
     : oldMetadata.excludePatterns ?? [];
   const metadata = {
     ...previousMetadata,
-    ...createInstallMetadata({ gitMode, installMode }),
+    ...createInstallMetadata({ gitMode, installMode, previous: previousMetadata }),
     localLauncher: ".spectra/bin/spectra",
     excludePatterns
   };

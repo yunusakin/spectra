@@ -5,7 +5,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { resolveInstalledNativeCommand, runSelfUpdate } from "../src/lib/update.js";
+import { resolveInstalledNativeCommand } from "../src/lib/update.js";
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const cliRoot = path.resolve(testDir, "..");
@@ -45,7 +45,7 @@ test("update reports an already-current CLI and runtime", () => {
   assert.match(result.stdout, /Spectra is already up to date/);
 });
 
-test("migrate confirms and migrates a legacy layout", () => {
+test("migrate --yes migrates a legacy layout", () => {
   const root = createGitProject();
   fs.mkdirSync(path.join(root, ".spectra"), { recursive: true });
   fs.mkdirSync(path.join(root, "sdd", "system"), { recursive: true });
@@ -166,21 +166,6 @@ test("native update resolves the installed command without relying on PATH", () 
     resolveInstalledNativeCommand({ HOME: "/home/test" }),
     path.join("/home/test", ".local", "bin", "spectra")
   );
-});
-
-test("newer Node CLI update dispatches the requested package version", () => {
-  const calls = [];
-  const status = runSelfUpdate("3.1.0", "/projects/orders", {
-    execPath: "/usr/local/bin/node",
-    spawn(command, args, options) {
-      calls.push({ command, args, options });
-      return { status: 0 };
-    }
-  });
-
-  assert.equal(status, 0);
-  assert.deepEqual(calls[0].command, "npx");
-  assert.deepEqual(calls[0].args, ["-y", "spectra-pack@3.1.0", "__update-project", "--cwd", "/projects/orders"]);
 });
 
 test("migrate returns a failure when the post-migration project check fails", () => {

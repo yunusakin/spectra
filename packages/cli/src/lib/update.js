@@ -1,5 +1,6 @@
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { fail } from "./output.js";
 
 function versionParts(version) {
   const match = String(version).trim().replace(/^v/, "").match(/^(\d+)\.(\d+)\.(\d+)/);
@@ -33,16 +34,14 @@ function resolveInstalledNativeCommand(env = process.env) {
   return path.join(binaryDir, process.platform === "win32" ? "spectra.exe" : "spectra");
 }
 
-function runSelfUpdate(latest, projectRoot, { spawn = spawnSync, execPath = process.execPath, env = process.env } = {}) {
-  if (path.basename(execPath).toLowerCase().startsWith("node")) {
-    return spawn("npx", ["-y", `spectra-pack@${latest}`, "__update-project", "--cwd", projectRoot], { stdio: "inherit" }).status ?? 1;
-  }
-  const install = spawn("sh", ["-c", "curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh"], {
-    stdio: "inherit",
-    env: { ...env, SPECTRA_VERSION: `v${latest}`, SPECTRA_BIN: path.dirname(execPath) }
-  });
-  if (install.status !== 0) return install.status ?? 1;
-  return spawn(execPath, ["__update-project", "--cwd", projectRoot], { stdio: "inherit" }).status ?? 1;
+function runSelfUpdate(latest, installation = { kind: "unmanaged" }) {
+  // Machine mutation requires the ownership proof supplied by the native installer.
+  // A Node/npx/project-local invocation is never permission to update another install.
+  const guidance = installation.kind === "npm"
+    ? `Use your package manager: npm install -g spectra-pack@${latest}.`
+    : `Install Spectra ${latest} with the machine installer, or use npm install -g spectra-pack@${latest}.`;
+  fail(`Software update was not applied: ${installation.reason ?? "machine installation ownership is not verified"}. ${guidance}`);
+  return 1;
 }
 
 export { compareVersions, latestVersion, resolveInstalledNativeCommand, runSelfUpdate };
