@@ -179,3 +179,15 @@ scenario('nested user config is valuable and blocks edited resume',({fixture,exe
  const root=fixture();const file=path.join(root,'.spectra/docs/plugin/config.yaml');fs.writeFileSync(file,'custom: original user value\n');const failed=execute(root,['migrate','--yes','--json'],'interrupt');assert.equal(failed.status,87);
  fs.writeFileSync(file,'custom: edited during interruption\n');const result=execute(root,['migrate','--yes','--json']);assert.equal(result.status,1);unchanged(report);assert.match(json(result).reason,/Valuable content changed: .*docs\/plugin\/config.yaml/);assert.equal(fs.readFileSync(file,'utf8'),'custom: edited during interruption\n');
 });
+
+for(const route of ['migration','resume','repair']) scenario(`config documentation survives ${route}`,({fixture,execute,report})=>{
+ const root=fixture(route==='repair'?3:2);const config=path.join(root,'.spectra/config.yaml');
+ fs.writeFileSync(config,`# Operator notes must survive upgrades\ngitMode: local # Keep project artifacts local\nschemaVersion: ${route==='repair'?3:2} # Storage schema explanation\n# Customer documentation for custom fields\ncustom: | # Blank paragraphs are meaningful\n  first paragraph\n\n  second paragraph\nnested:\n  # Nested user documentation\n  value: retained # Nested inline note\n`);
+ const original=parse(fs.readFileSync(config,'utf8'));const comments=['Operator notes must survive upgrades','Keep project artifacts local','Storage schema explanation','Customer documentation for custom fields','Blank paragraphs are meaningful','Nested user documentation','Nested inline note'];
+ const compare=()=>{const text=fs.readFileSync(config,'utf8');const current=parse(text);for(const comment of comments)assert.ok(text.includes(comment),comment);assert.equal(current.custom,original.custom);assert.deepEqual(current.nested,original.nested);};
+ if(route==='resume'){assert.equal(execute(root,['migrate','--yes','--json'],'launcher').status,1);compare();success(execute(root,['migrate','--yes','--json']));compare();}
+ else{success(execute(root,route==='repair'?['doctor','--fix']:['migrate','--yes','--json']));compare();}
+});
+for(const content of ['', '# Configuration intentionally contains only operator comments\n']) scenario(`empty config ${content ? 'comments' : 'blank'} is rejected read-only`,({fixture,execute,report})=>{
+ const root=fixture();fs.writeFileSync(path.join(root,'.spectra/config.yaml'),content);for(const args of [['migrate','--check','--json'],['migrate','--yes','--json']]){const r=execute(root,args);assert.equal(r.status,1);unchanged(report);assert.equal(json(r).outcome,'incompatible');assert.match(json(r).reason,/Malformed .*config.yaml.*expected an object/);assert.equal(fs.existsSync(path.join(root,'.spectra/migration.json')),false);assert.equal(fs.existsSync(path.join(root,'.spectra/recovery')),false);}
+});

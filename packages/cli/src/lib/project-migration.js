@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import { parse, stringify } from "yaml";
+import { parseDocument } from "yaml";
 import { inspectProjectCompatibility, MIGRATION_MARKER } from "./project-compatibility.js";
 import { getProjectLayout, detectLayout } from "./project-layout.js";
 import { migrateLegacyLayout, preflightLegacyMigration } from "./migration.js";
@@ -180,10 +180,13 @@ function executeProjectMigration(projectRoot, plan) {
       progress("step-validation"); step.validation(root); verifyValues(root, { ...marker, completed: id === "layout" ? [...marker.completed, id] : marker.completed }, files);
       if (step.toSchema !== null) {
         const metadata = JSON.parse(fs.readFileSync(layout.installMetadata, "utf8"));
-        const config = exists(layout.config) ? parse(fs.readFileSync(layout.config, "utf8")) : {};
-        metadata.schemaVersion = step.toSchema; config.schemaVersion = step.toSchema; config.gitMode = metadata.gitMode ?? "shared";
-        if (step.toSchema === 3) { delete metadata.profile; delete config.profile; }
-        marker.pending = { schema: step.toSchema, metadata: JSON.stringify(metadata, null, 2), config: stringify(config) };
+        const config = parseDocument(exists(layout.config) ? fs.readFileSync(layout.config, "utf8") : "");
+        if (config.errors.length) throw config.errors[0];
+        metadata.schemaVersion = step.toSchema;
+        config.set("schemaVersion", step.toSchema);
+        config.set("gitMode", metadata.gitMode ?? "shared");
+        if (step.toSchema === 3) { delete metadata.profile; config.delete("profile"); }
+        marker.pending = { schema: step.toSchema, metadata: JSON.stringify(metadata, null, 2), config: config.toString() };
         progress("schema-commit"); commitPending();
       } else { marker.completed.push(id); marker.checkpoint = authorityHashes(root); progress("step-complete"); }
     }
