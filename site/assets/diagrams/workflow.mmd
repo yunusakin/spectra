@@ -46,9 +46,9 @@ flowchart TB
   end
   %% Layout only: supporting commands are not a required next step.
   WORK_VALIDATE ~~~ WORK_SUPPORT
-  classDef command fill:#f1eeff,stroke:#6c5ce7,color:#5143c6,stroke-width:2px;
-  classDef condition fill:#fff5df,stroke:#8a5d00,color:#121827;
-  classDef neutral fill:#f2f5fa,stroke:#64748b,color:#121827;
+  classDef command fill:#ffffff,stroke:#6c5ce7,color:#5143c6,stroke-width:2px;
+  classDef condition fill:#fff5df,stroke:#8a5d00,color:#121827,stroke-width:1.5px;
+  classDef neutral fill:#f2f8ff,stroke:#64748b,color:#121827;
   class ROUTE,CONTEXT,TASK,STAGES,CHECK,EVAL,VERIFY,RELEASE,STATUS,INDEX,FRESH command;
   class GATE,READY condition;
   class SPECS,APP neutral;

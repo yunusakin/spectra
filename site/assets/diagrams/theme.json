@@ -4,17 +4,16 @@
   "themeVariables": {
     "fontFamily": "Inter, ui-sans-serif, system-ui, sans-serif",
     "fontSize": "18px",
-    "primaryColor": "#f1eeff",
+    "primaryColor": "#ffffff",
     "primaryTextColor": "#121827",
     "primaryBorderColor": "#6c5ce7",
     "lineColor": "#526077",
-    "clusterBkg": "#fbfcff",
-    "clusterBorder": "#c7d0df",
+    "clusterBkg": "#f2f8ff",
+    "clusterBorder": "#dce3f4",
     "titleColor": "#121827",
-    "edgeLabelBackground": "#fbfcff"
+    "edgeLabelBackground": "#ffffff"
   },
   "flowchart": {
-    "htmlLabels": false,
     "curve": "linear",
     "nodeSpacing": 20,
     "rankSpacing": 28,
@@ -24,5 +23,6 @@
       "bottom": 16
     }
   },
-  "themeCSS": ".node rect { rx: 12; ry: 12; } .cluster rect { rx: 18; ry: 18; } .cluster-label { font-weight: 700; } .edgeLabel { font-size: 16px; }"
+  "themeCSS": "svg, text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .node rect { rx: 14; ry: 14; filter: drop-shadow(0px 2px 3px rgba(18,24,39,0.08)); } .cluster rect { rx: 18; ry: 18; } .cluster-label tspan { font-weight:750; fill:#121827; } .node .label text > .row:first-child tspan { font-weight:700; } .command .label text > .row:first-child { font-family: \"SFMono-Regular\", Consolas, \"Liberation Mono\", monospace; } .edgeLabel { font-size:16px; } .edgeLabel rect { rx:6; ry:6; fill:#ffffff; opacity:1; } .flowchart-link { stroke-width:1.5px; }",
+  "htmlLabels": false
 }

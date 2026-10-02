@@ -31,6 +31,20 @@ async page => {
           expect(svgResponse.ok(), `${id}: broken SVG link`);
           const svg = await svgResponse.text();
           expect(svg.includes("<title") && svg.includes("<desc"), `${id}: SVG needs title and description`);
+          expect(!svg.includes("<foreignObject"), `${id}: use native SVG text so typography is portable`);
+          expect(svg.includes(".cluster-label tspan") && svg.includes("font-weight:750"), `${id}: site heading style must override Mermaid's normal tspan weight`);
+          if (size.width === 1440) {
+            const preview = await page.context().newPage();
+            try {
+              await preview.goto(new URL(href, `${base}docs/commands.html`).href);
+              const typography = await preview.evaluate(() => ({
+                headingWeight: getComputedStyle(document.querySelector(".cluster-label tspan")).fontWeight,
+                commandFont: getComputedStyle(document.querySelector(".command .label text > .row:first-child")).fontFamily,
+                commandWeight: getComputedStyle(document.querySelector(".command .label text > .row:first-child tspan")).fontWeight
+              }));
+              expect(typography.headingWeight === "750" && typography.commandWeight === "700" && typography.commandFont.includes("mono"), `${id}: rendered SVG typography must match site headings and command code`);
+            } finally { await preview.close(); }
+          }
           const svgText = await page.evaluate(source => new DOMParser().parseFromString(source, "image/svg+xml").documentElement.textContent.replace(/\s+/g, " "), svg);
           const labels = await section.locator(".diagram-card h3").allTextContents();
           for (const label of labels) expect(svgText.includes(label.trim()), `${id}: SVG/card label mismatch: ${label}`);

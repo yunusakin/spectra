@@ -17,6 +17,13 @@ and links to those explanations. No browser-side renderer or JavaScript is neede
   labels. Invisible Mermaid links control layout only; they do not indicate steps.
 - `theme.json` uses the existing site palette and system font stack. SVG text uses
   native SVG labels, so opening a file does not require HTML `foreignObject` support.
+  Set `htmlLabels: false` at the top level; the deprecated flowchart-only setting
+  does not reliably disable HTML labels in Mermaid 11.12.0. Group and node heading
+  styles target the generated `tspan` elements, whose normal font-weight attributes
+  otherwise override inherited heading styles.
+  White command cards have purple borders and monospace command headings; results
+  use paper-teal, conditions use amber, and inputs use paper-blue. Rounded corners,
+  subtle card shadows and group headings match the website documentation panels.
 - Condition nodes use compact rounded rectangles with explicit CONDITION / CHOICE
   labels. This avoids the large empty corners required by diamond shapes.
 - Diagrams use their full height in the page, without a nested vertical scrollbar.
