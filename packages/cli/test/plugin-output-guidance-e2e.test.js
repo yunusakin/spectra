@@ -129,8 +129,8 @@ test("refresh preserves unowned files colliding with shipped guide paths", t => 
   fs.writeFileSync(guidePath, "# Existing plugin workflow\n");
   const installed = spectra(root, ["init", "."]);
   assert.equal(installed.status, 0, installed.stderr || installed.stdout);
-  for (const args of [["doctor", "--fix", "--cwd", root], ["doctor", "--fix", "--cwd", root]]) {
-    const result = spectra(root, args);
+  for (const invoke of [spectra, localSpectra]) {
+    const result = invoke(root, ["doctor", "--fix", "--cwd", root]);
     assert.equal(result.status, 0, result.stderr || result.stdout);
     assert.match(result.stdout + result.stderr, /Preserving existing documentation/);
     assert.equal(fs.readFileSync(guidePath, "utf8"), "# Existing plugin workflow\n");
