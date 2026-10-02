@@ -43,8 +43,8 @@ test("legacy migration moves Spectra-owned state into .spectra and preserves com
   assert.equal(fs.existsSync(path.join(root, "docs", "company.md")), true);
 
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.equal(Object.hasOwn(metadata, "profile"), false);
-  assert.equal(metadata.schemaVersion, 3);
+  assert.equal(metadata.profile, metadata.schemaVersion === undefined && metadata.installMode === "init" ? "lite" : undefined);
+  assert.equal(metadata.schemaVersion, undefined);
   assert.equal(metadata.localLauncher, ".spectra/bin/spectra");
   assert.ok(metadata.excludePatterns.includes("/.spectra/"));
   assert.ok(!metadata.excludePatterns.includes("/spectra/"));
@@ -125,7 +125,7 @@ test("shared migration leaves repository-local exclusions unchanged", () => {
   assert.deepEqual(migrated.excludePatterns, []);
 });
 
-test("legacy migration adds business context scaffolding without replacing existing memory", () => {
+test("layout utility preserves memory and leaves schema scaffolding to the explicit engine", () => {
   const root = createLegacyProject();
   fs.mkdirSync(path.join(root, "sdd", "memory-bank", "core"), { recursive: true });
   fs.writeFileSync(path.join(root, "sdd", "memory-bank", "core", "project.md"), "Existing project memory\n");
@@ -133,11 +133,11 @@ test("legacy migration adds business context scaffolding without replacing exist
   migrateLegacyLayout(root);
 
   assert.equal(fs.readFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "core", "project.md"), "utf8"), "Existing project memory\n");
-  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "tech", "modules.md")), true);
-  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md")), true);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "tech", "modules.md")), false);
+  assert.equal(fs.existsSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md")), false);
 
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.equal(metadata.schemaVersion, 3);
+  assert.equal(metadata.schemaVersion, undefined);
 });
 
 // 3.0.8 installs live entirely under spectra/; migration must move each
@@ -174,7 +174,7 @@ test("spectra-dir migration moves the 3.0.8 layout into .spectra and merges cach
   assert.equal(fs.existsSync(path.join(root, ".spectra", "docs")), false); // no docs in this fixture
 
   const metadata = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "install.json"), "utf8"));
-  assert.equal(Object.hasOwn(metadata, "profile"), false);
+  assert.equal(metadata.profile, metadata.schemaVersion === undefined && metadata.installMode === "init" ? "lite" : undefined);
   assert.equal(metadata.localLauncher, ".spectra/bin/spectra");
   assert.ok(metadata.excludePatterns.includes("/.spectra/"));
 

@@ -1,3 +1,4 @@
+import { migrateCommand } from "./commands/migrate.js";
 import { adaptersCommand } from "./commands/adapters.js";
 import { approveCommand } from "./commands/approve.js";
 import { contextCommand } from "./commands/context.js";
@@ -125,6 +126,8 @@ function dispatch(argv) {
       return indexCommand(args);
     case "onboard":
       return onboardCommand(args);
+    case "migrate":
+      return migrateCommand(args);
     case "update":
       return updateCommand(args);
     case "__update-project":

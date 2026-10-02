@@ -3,6 +3,7 @@ import path from "node:path";
 import { parse } from "yaml";
 import { SCHEMA_VERSION } from "./install-metadata.js";
 import { getCliVersion } from "./version.js";
+import { projectMigrationPath } from "./project-migration.js";
 import { detectLayout, hasProjectMarkers } from "./project-layout.js";
 
 const MIGRATION_MARKER = ".spectra/migration.json";
@@ -114,10 +115,12 @@ function inspectProjectCompatibility(projectRoot) {
   if (conflicts.length) return finish("BROKEN", conflicts.join(" "));
   if (layout !== "canonical") {
     facts.migrationAvailable = true;
+    facts.migrationPath = projectMigrationPath(facts.projectSchemaVersion, layout);
     return finish("LEGACY_LAYOUT", "Legacy project layout requires explicit spectra migrate.");
   }
   if (facts.projectSchemaVersion < SCHEMA_VERSION) {
     facts.migrationAvailable = true;
+    facts.migrationPath = projectMigrationPath(facts.projectSchemaVersion, layout);
     return finish("MIGRATION_REQUIRED", `Project schema ${facts.projectSchemaVersion} requires explicit spectra migrate to schema ${SCHEMA_VERSION}.`);
   }
   return finish("CURRENT", "Project schema and canonical layout are current.");

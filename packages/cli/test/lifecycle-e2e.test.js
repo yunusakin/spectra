@@ -209,7 +209,7 @@ scenario("compatibility inspection: current and migratable schemas expose stable
     assert.equal(facts.applicationVersion, source.version); assert.equal(facts.projectSchemaVersion, schema);
     assert.equal(facts.currentSchemaVersion, 3); assert.equal(facts.minimumReadableSchema, 3); assert.equal(facts.maximumReadableSchema, 3);
     assert.equal(facts.layout, "canonical"); assert.equal(facts.migrationAvailable, schema < 3);
-    assert.deepEqual(facts.migrationPath, []); // Registry steps are supplied by the migration task.
+    assert.deepEqual(facts.migrationPath, schema === 1 ? ["1-to-2", "2-to-3"] : schema === 2 ? ["2-to-3"] : []);
     assert.equal(typeof facts.reason, "string"); assert.deepEqual(facts.conflicts, []);
     if (schema < 3) { const rejected = execute(root, ["check"]); unchanged(report); assert.equal(rejected.status, 1); assert.match(rejected.stderr, /MIGRATION_REQUIRED|migrat/i); }
   }

@@ -24,7 +24,8 @@ const WORKFLOWS = [
     ["status", "Show project status"]
   ]],
   ["Maintenance", [
-    ["update", "Update Spectra and the project runtime"],
+    ["update", "Update the machine application"],
+    ["migrate", "Inspect and explicitly migrate a project"],
     ["doctor", "Check local tools, runtime, and adapters"]
   ]]
 ];

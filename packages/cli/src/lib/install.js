@@ -27,7 +27,7 @@ import { enrichDiscovery } from "./index/discovery.js";
 import { parseProjectSummary } from "./context/memory-summaries.js";
 import { normalize } from "./business/parser.js";
 import { warn } from "./output.js";
-import { assertProjectOperationAllowed } from "./project-compatibility.js";
+import { assertProjectOperationAllowed, inspectProjectCompatibility, MIGRATION_MARKER } from "./project-compatibility.js";
 
 function replaceDirectory(sourceDir, targetDir) {
   if (!fs.existsSync(sourceDir)) {
@@ -140,13 +140,15 @@ function writeRepoLocalLauncher(targetRoot, nativeBinaryPath) {
   );
 }
 
-function writeProjectConfig(targetRoot, { gitMode }) {
+function writeProjectConfig(targetRoot, { gitMode, write = fs.writeFileSync }) {
   const configPath = getProjectLayout(targetRoot).config;
   ensureDirectory(path.dirname(configPath));
   const existing = fs.existsSync(configPath) ? fs.readFileSync(configPath, "utf8").split(/\r?\n/) : [];
   const preserved = existing.filter((line) => line.trim() && !/^(?:profile|gitMode|schemaVersion):/.test(line));
-  fs.writeFileSync(configPath, [`gitMode: ${gitMode}`, `schemaVersion: ${SCHEMA_VERSION}`, ...preserved, ""].join("\n"));
+  write(configPath, [`gitMode: ${gitMode}`, `schemaVersion: ${SCHEMA_VERSION}`, ...preserved, ""].join("\n"));
 }
+
+const migrationRefresh = Symbol("migration refresh");
 
 function installSpectra({
   targetDir,
@@ -155,10 +157,11 @@ function installSpectra({
   gitMode = "local",
   refresh = false,
   refreshMemoryBank = true,
-  refreshV2Scaffolding = true
+  refreshV2Scaffolding = true,
+  [migrationRefresh]: authorizedMigration = false
 }) {
   const absoluteTarget = path.resolve(targetDir);
-  assertProjectOperationAllowed(findProjectRoot(absoluteTarget) ?? absoluteTarget, refresh ? "refresh" : "install");
+  if (!authorizedMigration) assertProjectOperationAllowed(findProjectRoot(absoluteTarget) ?? absoluteTarget, refresh ? "refresh" : "install");
   if (agents) {
     // Adapters are projections Spectra may regenerate; a same-named file it did
     // not generate is the user's, so refuse before anything is written.
@@ -171,6 +174,8 @@ function installSpectra({
   }
   const layout = getProjectLayout(absoluteTarget);
   const profileAssetsDir = getProjectAssetsDir();
+  const writeMigrationMetadata = metadata => authorizedMigration ?
+    authorizedMigration.writeAuthority(layout.installMetadata, JSON.stringify(metadata, null, 2)) : writeInstallMetadata(absoluteTarget, metadata);
 
   const existingMetadata = readInstallMetadata(absoluteTarget);
   const docsProjectName = existingMetadata?.docsProjectName ?? (normalize(parseProjectSummary(layout.root).projectName || path.basename(absoluteTarget)) || "project");
@@ -189,7 +194,8 @@ function installSpectra({
   ensureDirectory(absoluteTarget);
 
   if (refresh) {
-    replaceDirectory(path.join(profileAssetsDir, "sdd", "system"), path.join(layout.sdd, "system"));
+    if (authorizedMigration) fs.cpSync(path.join(profileAssetsDir, "sdd", "system"), path.join(layout.sdd, "system"), { recursive: true });
+    else replaceDirectory(path.join(profileAssetsDir, "sdd", "system"), path.join(layout.sdd, "system"));
   } else {
     copyDirectory(path.join(profileAssetsDir, "sdd", "system"), path.join(layout.sdd, "system"));
   }
@@ -206,7 +212,7 @@ function installSpectra({
       const target = path.join(guidesRoot, relative);
       const exists = fs.existsSync(target);
       if (exists && !ownedGuides.has(relative)) {
-        warn(`Preserving existing documentation not installed by Spectra: ${target}`);
+        if (!authorizedMigration) warn(`Preserving existing documentation not installed by Spectra: ${target}`);
         continue;
       }
       if (refresh || !exists) {
@@ -220,7 +226,7 @@ function installSpectra({
   if (refreshMemoryBank) {
     copyDirectory(path.join(profileAssetsDir, "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
   }
-  writeProjectConfig(absoluteTarget, { gitMode });
+  writeProjectConfig(absoluteTarget, { gitMode, ...(authorizedMigration ? { write: authorizedMigration.writeAuthority } : {}) });
   ensureDirectory(path.join(layout.docs, stableDocsName));
   updateManifestRepoMode(absoluteTarget, "consumer");
   if (refreshV2Scaffolding) {
@@ -237,7 +243,7 @@ function installSpectra({
     docsGuidePaths: [...new Set([...(existingMetadata?.docsGuidePaths ?? []), ...docsGuidePaths])],
     localLauncher: ".spectra/bin/spectra"
   };
-  writeInstallMetadata(absoluteTarget, metadata);
+  writeMigrationMetadata(metadata);
 
   if (adopt && !refresh) {
     runInstalledScript({
@@ -289,7 +295,7 @@ function installSpectra({
     });
     ownedPaths = localResult.ownedPaths;
     excludePatterns = localResult.excludePatterns;
-    writeInstallMetadata(absoluteTarget, { ...metadata, ownedPaths, excludePatterns });
+    writeMigrationMetadata({ ...metadata, ownedPaths, excludePatterns });
   }
 
   return {
@@ -314,4 +320,21 @@ function refreshProjectRuntime(projectRoot) {
   });
 }
 
-export { installSpectra, refreshProjectRuntime };
+// The executor keeps the marker in place through refresh and policy validation.
+// This entry point is limited to its exact root/id/phase and coherent schema 3;
+// ordinary install/refresh callers cannot supply the module-private token.
+function refreshProjectRuntimeForMigration(projectRoot, migrationId, writeAuthority) {
+  const root = fs.realpathSync(projectRoot);
+  const markerPath = path.join(root, MIGRATION_MARKER);
+  if (fs.lstatSync(markerPath).isSymbolicLink()) throw new Error("Unsafe migration marker symlink.");
+  const marker = JSON.parse(fs.readFileSync(markerPath, "utf8"));
+  const compatibility = inspectProjectCompatibility(root);
+  if (typeof writeAuthority !== "function" || marker.id !== migrationId || marker.projectRoot !== root || marker.phase !== "refresh" ||
+      compatibility.sourceRepository || compatibility.layout !== "canonical" || compatibility.projectSchemaVersion !== SCHEMA_VERSION ||
+      compatibility.conflicts.some(conflict => conflict !== `Incomplete migration marker: ${MIGRATION_MARKER}`)) throw new Error("Unauthorized migration runtime refresh.");
+  const metadata = readInstallMetadata(root);
+  return installSpectra({ targetDir: root, adopt: metadata.installMode === "adopt", gitMode: metadata.gitMode ?? "shared",
+    refresh: true, refreshMemoryBank: false, refreshV2Scaffolding: false, [migrationRefresh]: { writeAuthority } });
+}
+
+export { installSpectra, refreshProjectRuntime, refreshProjectRuntimeForMigration };

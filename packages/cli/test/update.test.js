@@ -75,9 +75,10 @@ test("migrate migrates a 3.0.8 spectra/ layout and its scripts still resolve SPE
   fs.renameSync(path.join(root, ".spectra"), path.join(root, "spectra"));
   fs.writeFileSync(
     path.join(root, "spectra", "install.json"),
-    JSON.stringify({ profile: "lite", gitMode: "local", installMode: "adopt" })
+    JSON.stringify({ profile: "lite", gitMode: "local", installMode: "adopt", schemaVersion: 2 })
   );
 
+  fs.writeFileSync(path.join(root, "spectra", "config.yaml"), "gitMode: local\nschemaVersion: 2\n");
   const result = run(root, ["migrate", "--yes"], { input: "" });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(result.stdout, /Validation and policy checks passed/);
