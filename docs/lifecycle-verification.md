@@ -36,16 +36,17 @@ by its full SHA in the report. A source is covered only when its archived CLI
 successfully generated the project; a failed or unreachable source is recorded
 as a limitation, never substituted with current assets.
 
-## Recorded run
+## Recorded runs
 
-The committed [results artifact](lifecycle-verification-artifacts/results.json)
-records all seven source SHAs, archive/CLI/assets hashes, generated layout,
-schema, Git mode, project key-file hashes, check-only inventory hashes, command
-results, and current validation output. Six refs completed migration or were
-already current and passed the current `check`. The v2.0.3 project correctly
-reported migration-required, but explicit migration failed in step `2-to-3`:
-the current migrator rewrote the historical
-`sdd/governance/decision-graph.yaml`, and its recovery check reported
-`Valuable content changed`. The harness directly compares historical project
-key-file hashes after migration, so this remains a reproducible red finding;
-the overall command exits nonzero while preserving the full JSON evidence.
+The committed [baseline red artifact](lifecycle-verification-artifacts/results-baseline-red.json)
+records the original v2.0.3 migration failure: the migrator rewrote
+`sdd/governance/decision-graph.yaml` and recovery reported `Valuable content
+changed`. This run is retained as regression evidence, not as the current result.
+
+The canonical [fixed-source results artifact](lifecycle-verification-artifacts/results.json)
+records all seven sources passing migration or already-current checks. It captures
+the current source identity, archive/CLI/assets hashes, generated layout, schema,
+Git mode, project key-file hashes, check-only inventories, command results, and
+current validation output. The verification harness and source hashes in the
+artifact identify the exact run inputs; the run's current-source commit and dirty
+paths are recorded in `current` so the report does not imply a clean checkout.

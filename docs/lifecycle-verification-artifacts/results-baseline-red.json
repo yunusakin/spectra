@@ -1,18 +1,19 @@
 {
   "current": {
-    "commit": "cedb41a355f5a6b1fe2a4b769f6d90e18fcc0edd",
+    "commit": "1f92927f95bec56ebcb066edf982c87cf0085c35",
     "version": "3.1.2",
     "dirtyPaths": [
       " M packages/cli/src/commands/help.js",
       " M packages/cli/src/lib/application-installation.js",
-      " M packages/cli/src/lib/project-migration.js",
-      " M packages/cli/src/lib/specs/feature-bundles.js",
       " M packages/cli/src/main.js",
       " M packages/cli/test/lifecycle-e2e.test.js",
       " M packages/cli/test/native-installation-e2e.test.js",
       " M tools/verify-release.mjs",
+      "?? docs/lifecycle-verification-artifacts/",
+      "?? docs/lifecycle-verification.md",
       "?? docs/superpowers/",
-      "?? packages/cli/src/commands/uninstall.js"
+      "?? packages/cli/src/commands/uninstall.js",
+      "?? tools/verify-lifecycle-history.mjs"
     ],
     "yamlDependencyVersion": "2.9.1"
   },
@@ -25,7 +26,7 @@
             "git",
             "archive",
             "--format=tar",
-            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/e8c99bc8963d76e3f827e6ca4753bfa62ec647da.tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/e8c99bc8963d76e3f827e6ca4753bfa62ec647da.tar",
             "e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
@@ -37,9 +38,9 @@
           "command": [
             "tar",
             "-xf",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/e8c99bc8963d76e3f827e6ca4753bfa62ec647da.tar",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/e8c99bc8963d76e3f827e6ca4753bfa62ec647da.tar",
             "-C",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -49,7 +50,7 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da/packages/cli/scripts/sync-assets.mjs"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da/packages/cli/scripts/sync-assets.mjs"
           ],
           "cwd": "sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
           "exitCode": 0,
@@ -59,13 +60,13 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da/packages/cli/bin/spectra.js",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da/packages/cli/bin/spectra.js",
             "init",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
           ],
           "cwd": "sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
           "exitCode": 0,
-          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da\nNEXT spectra validate\n",
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da\nNEXT spectra validate\n",
           "stderr": ""
         },
         {
@@ -74,7 +75,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
             "--check",
             "--json"
           ],
@@ -89,56 +90,17 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
             "--yes",
             "--json"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
-          "exitCode": 0,
-          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-iXsM1k\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
-          "stderr": ""
-        },
-        {
-          "command": [
-            "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
-            "migrate",
-            "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
-            "--check",
-            "--json"
-          ],
-          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
-          "exitCode": 0,
-          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
-          "stderr": ""
-        },
-        {
-          "command": [
-            "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
-            "version"
-          ],
-          "cwd": "projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
-          "exitCode": 0,
-          "stdout": "spectra 3.1.2\n",
-          "stderr": ""
-        },
-        {
-          "command": [
-            "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
-            "check",
-            "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
-          ],
-          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
-          "exitCode": 0,
-          "stdout": "Validation: OK\nPolicy check: OK\nOK Validation and policy checks passed\n",
+          "exitCode": 1,
+          "stdout": "{\"outcome\":\"failed\",\"status\":\"failed\",\"reason\":\"Valuable content changed: .spectra/sdd/governance/decision-graph.yaml; manual recovery required.. Recovery: .spectra/recovery/migration-PvRk6L.\",\"projectSchemaVersion\":2,\"recoveryPath\":\".spectra/recovery/migration-PvRk6L\",\"phase\":\"step-validation\",\"validationStatus\":\"not-run\",\"logs\":\"\"}\n",
           "stderr": ""
         }
       ],
-      "passed": true,
+      "passed": false,
       "sourceSha": "e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
       "sourceVersion": "2.0.3",
       "sourceArchiveSha256": "bcf16ad8f6395bf11fb52f3bd3906898737dbf5d06ff0ffa9bce3014eca6f705",
@@ -173,29 +135,29 @@
           "1-to-2",
           "2-to-3"
         ],
-        "inventorySha256": "966050d3102a33edb07f76b448de20899dbd9b427e93c11e50f47ab2c21b8787"
+        "inventorySha256": "e326a541b3d8e497cadd9487748c58646d29c9884cb794f7d22c6a1f4fc73c9b"
       },
       "migration": {
-        "outcome": "current",
-        "status": "migrated",
-        "reason": "Migration complete.",
-        "projectSchemaVersion": 3,
-        "recoveryPath": ".spectra/recovery/migration-iXsM1k",
-        "phase": "validation",
-        "validationStatus": "passed",
-        "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
+        "outcome": "failed",
+        "status": "failed",
+        "reason": "Valuable content changed: .spectra/sdd/governance/decision-graph.yaml; manual recovery required.. Recovery: .spectra/recovery/migration-PvRk6L.",
+        "projectSchemaVersion": 2,
+        "recoveryPath": ".spectra/recovery/migration-PvRk6L",
+        "phase": "step-validation",
+        "validationStatus": "not-run",
+        "logs": ""
       },
-      "projectKeyFileChanges": [],
-      "finalState": {
-        "layout": "canonical",
-        "schemaVersion": 3,
-        "gitMode": "shared",
-        "manifestPath": ".spectra/sdd/system/manifest.env",
-        "metadataPath": ".spectra/install.json",
-        "configPath": ".spectra/config.yaml"
-      },
-      "finalInventorySha256": "2c051207515666f4c541495d61b188bd54ac83a536ecdb3db1c7006f64cc93f5",
-      "finalFileCount": 877
+      "projectKeyFileChanges": [
+        {
+          "suffix": "sdd/governance/decision-graph.yaml",
+          "expected": "08a184e652247f7448d9af1e6d5d31d493688825915ecdff1549d4fb23010c89",
+          "actual": "d82ff2ea46a2afbc54848d4cb10f2ae8f2fad3971a726b5539bc984eccf0d861"
+        }
+      ],
+      "failure": {
+        "message": "Historical project key files changed during migration\n+ actual - expected\n\n+ [\n+   {\n+     actual: 'd82ff2ea46a2afbc54848d4cb10f2ae8f2fad3971a726b5539bc984eccf0d861',\n+     expected: '08a184e652247f7448d9af1e6d5d31d493688825915ecdff1549d4fb23010c89',\n+     suffix: 'sdd/governance/decision-graph.yaml'\n+   }\n+ ]\n- []\n",
+        "stack": "AssertionError [ERR_ASSERTION]: Historical project key files changed during migration\n+ actual - expected\n\n+ [\n+   {\n+     actual: 'd82ff2ea46a2afbc54848d4cb10f2ae8f2fad3971a726b5539bc984eccf0d861',\n+     expected: '08a184e652247f7448d9af1e6d5d31d493688825915ecdff1549d4fb23010c89',\n+     suffix: 'sdd/governance/decision-graph.yaml'\n+   }\n+ ]\n- []\n\n    at file:///Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/tools/verify-lifecycle-history.mjs:144:16\n    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:655:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)"
+      }
     },
     {
       "ref": "13287b4",
@@ -205,7 +167,7 @@
             "git",
             "archive",
             "--format=tar",
-            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/13287b4fa51ec46d14590e87352f2169a1464dbe.tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/13287b4fa51ec46d14590e87352f2169a1464dbe.tar",
             "13287b4fa51ec46d14590e87352f2169a1464dbe"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
@@ -217,9 +179,9 @@
           "command": [
             "tar",
             "-xf",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/13287b4fa51ec46d14590e87352f2169a1464dbe.tar",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/13287b4fa51ec46d14590e87352f2169a1464dbe.tar",
             "-C",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/13287b4fa51ec46d14590e87352f2169a1464dbe"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/13287b4fa51ec46d14590e87352f2169a1464dbe"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -229,7 +191,7 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/13287b4fa51ec46d14590e87352f2169a1464dbe/packages/cli/scripts/sync-assets.mjs"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/13287b4fa51ec46d14590e87352f2169a1464dbe/packages/cli/scripts/sync-assets.mjs"
           ],
           "cwd": "sources/13287b4fa51ec46d14590e87352f2169a1464dbe",
           "exitCode": 0,
@@ -239,15 +201,15 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/13287b4fa51ec46d14590e87352f2169a1464dbe/packages/cli/bin/spectra.js",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/13287b4fa51ec46d14590e87352f2169a1464dbe/packages/cli/bin/spectra.js",
             "init",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
             "--git-mode",
             "shared"
           ],
           "cwd": "sources/13287b4fa51ec46d14590e87352f2169a1464dbe",
           "exitCode": 0,
-          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/13287b4fa51ec46d14590e87352f2169a1464dbe\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/13287b4fa51ec46d14590e87352f2169a1464dbe\nNEXT spectra check\n",
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/13287b4fa51ec46d14590e87352f2169a1464dbe\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/13287b4fa51ec46d14590e87352f2169a1464dbe\nNEXT spectra check\n",
           "stderr": ""
         },
         {
@@ -256,7 +218,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
             "--check",
             "--json"
           ],
@@ -271,13 +233,13 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
             "--yes",
             "--json"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
-          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-wRoKo4\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
+          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-mEJXqQ\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
           "stderr": ""
         },
         {
@@ -286,7 +248,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
             "--check",
             "--json"
           ],
@@ -312,7 +274,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "check",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/13287b4fa51ec46d14590e87352f2169a1464dbe"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/13287b4fa51ec46d14590e87352f2169a1464dbe"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -353,14 +315,14 @@
           "1-to-2",
           "2-to-3"
         ],
-        "inventorySha256": "3e9e2c91617891a7c3ba259dd22d2f91d7bd012b2a99ec040c5d0b4033a260df"
+        "inventorySha256": "e491eb24b904d48f7f48ad3a8363338d8acff2a02cfa01883384927e3419345b"
       },
       "migration": {
         "outcome": "current",
         "status": "migrated",
         "reason": "Migration complete.",
         "projectSchemaVersion": 3,
-        "recoveryPath": ".spectra/recovery/migration-wRoKo4",
+        "recoveryPath": ".spectra/recovery/migration-mEJXqQ",
         "phase": "validation",
         "validationStatus": "passed",
         "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
@@ -374,7 +336,7 @@
         "metadataPath": ".spectra/install.json",
         "configPath": ".spectra/config.yaml"
       },
-      "finalInventorySha256": "84c0205c11a21608f152aaa688eb698d1e83b3306e2a6055219a8d7ee98921bc",
+      "finalInventorySha256": "e7fa318e9f3ae71a913c5112fcec7cfdec8abed5f4c50e895642284c188a6307",
       "finalFileCount": 846
     },
     {
@@ -385,7 +347,7 @@
             "git",
             "archive",
             "--format=tar",
-            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/23f1abed6dd61b60cd78838f2ed36f935cab415b.tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/23f1abed6dd61b60cd78838f2ed36f935cab415b.tar",
             "23f1abed6dd61b60cd78838f2ed36f935cab415b"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
@@ -397,9 +359,9 @@
           "command": [
             "tar",
             "-xf",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/23f1abed6dd61b60cd78838f2ed36f935cab415b.tar",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/23f1abed6dd61b60cd78838f2ed36f935cab415b.tar",
             "-C",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/23f1abed6dd61b60cd78838f2ed36f935cab415b"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/23f1abed6dd61b60cd78838f2ed36f935cab415b"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -409,7 +371,7 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/23f1abed6dd61b60cd78838f2ed36f935cab415b/packages/cli/scripts/sync-assets.mjs"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/23f1abed6dd61b60cd78838f2ed36f935cab415b/packages/cli/scripts/sync-assets.mjs"
           ],
           "cwd": "sources/23f1abed6dd61b60cd78838f2ed36f935cab415b",
           "exitCode": 0,
@@ -419,15 +381,15 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/23f1abed6dd61b60cd78838f2ed36f935cab415b/packages/cli/bin/spectra.js",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/23f1abed6dd61b60cd78838f2ed36f935cab415b/packages/cli/bin/spectra.js",
             "init",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
             "--git-mode",
             "shared"
           ],
           "cwd": "sources/23f1abed6dd61b60cd78838f2ed36f935cab415b",
           "exitCode": 0,
-          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b\nNEXT ./spectra/bin/spectra check\n",
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b\nNEXT ./spectra/bin/spectra check\n",
           "stderr": ""
         },
         {
@@ -436,7 +398,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
             "--check",
             "--json"
           ],
@@ -451,13 +413,13 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
             "--yes",
             "--json"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
-          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-hPhkq3\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
+          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-Oc6CGu\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
           "stderr": ""
         },
         {
@@ -466,7 +428,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
             "--check",
             "--json"
           ],
@@ -492,7 +454,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "check",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -532,14 +494,14 @@
           "layout",
           "2-to-3"
         ],
-        "inventorySha256": "a7bc42058e07b06cb3b8ff1f62835e04f3de0985ce2326e375baa1b31ac17477"
+        "inventorySha256": "38e9aac8bbfaad21978d4ca3165d318d8de75bcd0309d520396beda4e4a18333"
       },
       "migration": {
         "outcome": "current",
         "status": "migrated",
         "reason": "Migration complete.",
         "projectSchemaVersion": 3,
-        "recoveryPath": ".spectra/recovery/migration-hPhkq3",
+        "recoveryPath": ".spectra/recovery/migration-Oc6CGu",
         "phase": "validation",
         "validationStatus": "passed",
         "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
@@ -553,7 +515,7 @@
         "metadataPath": ".spectra/install.json",
         "configPath": ".spectra/config.yaml"
       },
-      "finalInventorySha256": "dea07fa5532c2e7131b8966620812f0a9c951a38221300aa0565fa1e9ea80108",
+      "finalInventorySha256": "bf364a6c49922bf86cc27c7fed03c87c3a4f1ff1e4832e2b59ad80644af0ddb9",
       "finalFileCount": 849
     },
     {
@@ -564,7 +526,7 @@
             "git",
             "archive",
             "--format=tar",
-            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/a257721978a531f4237869703275b75527be7bd2.tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/a257721978a531f4237869703275b75527be7bd2.tar",
             "a257721978a531f4237869703275b75527be7bd2"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
@@ -576,9 +538,9 @@
           "command": [
             "tar",
             "-xf",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/a257721978a531f4237869703275b75527be7bd2.tar",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/a257721978a531f4237869703275b75527be7bd2.tar",
             "-C",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/a257721978a531f4237869703275b75527be7bd2"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/a257721978a531f4237869703275b75527be7bd2"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -588,7 +550,7 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/a257721978a531f4237869703275b75527be7bd2/packages/cli/scripts/sync-assets.mjs"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/a257721978a531f4237869703275b75527be7bd2/packages/cli/scripts/sync-assets.mjs"
           ],
           "cwd": "sources/a257721978a531f4237869703275b75527be7bd2",
           "exitCode": 0,
@@ -598,15 +560,15 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/a257721978a531f4237869703275b75527be7bd2/packages/cli/bin/spectra.js",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/a257721978a531f4237869703275b75527be7bd2/packages/cli/bin/spectra.js",
             "init",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/a257721978a531f4237869703275b75527be7bd2",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/a257721978a531f4237869703275b75527be7bd2",
             "--git-mode",
             "shared"
           ],
           "cwd": "sources/a257721978a531f4237869703275b75527be7bd2",
           "exitCode": 0,
-          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/a257721978a531f4237869703275b75527be7bd2\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/a257721978a531f4237869703275b75527be7bd2\nNEXT ./.spectra/bin/spectra check\n",
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/a257721978a531f4237869703275b75527be7bd2\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/a257721978a531f4237869703275b75527be7bd2\nNEXT ./.spectra/bin/spectra check\n",
           "stderr": ""
         },
         {
@@ -615,7 +577,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/a257721978a531f4237869703275b75527be7bd2",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/a257721978a531f4237869703275b75527be7bd2",
             "--check",
             "--json"
           ],
@@ -630,13 +592,13 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/a257721978a531f4237869703275b75527be7bd2",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/a257721978a531f4237869703275b75527be7bd2",
             "--yes",
             "--json"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
-          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-wh9M92\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
+          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-rnfBZS\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
           "stderr": ""
         },
         {
@@ -645,7 +607,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/a257721978a531f4237869703275b75527be7bd2",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/a257721978a531f4237869703275b75527be7bd2",
             "--check",
             "--json"
           ],
@@ -671,7 +633,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "check",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/a257721978a531f4237869703275b75527be7bd2"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/a257721978a531f4237869703275b75527be7bd2"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -710,14 +672,14 @@
         "steps": [
           "2-to-3"
         ],
-        "inventorySha256": "ef42cc3a07f058ed8c6ee87981c31c85940703b603d285524de9748eb27ee04c"
+        "inventorySha256": "87cf16637c9e659ee17a4dd71d258b0fdc6774c46a1959589a2c39d3cdf8a30b"
       },
       "migration": {
         "outcome": "current",
         "status": "migrated",
         "reason": "Migration complete.",
         "projectSchemaVersion": 3,
-        "recoveryPath": ".spectra/recovery/migration-wh9M92",
+        "recoveryPath": ".spectra/recovery/migration-rnfBZS",
         "phase": "validation",
         "validationStatus": "passed",
         "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
@@ -731,7 +693,7 @@
         "metadataPath": ".spectra/install.json",
         "configPath": ".spectra/config.yaml"
       },
-      "finalInventorySha256": "6f42d66d8dc91d875f6c165b553e73a965f25e859afac1737720e6a5ee8fccf8",
+      "finalInventorySha256": "2f55ffa60a51c6708b3e6eaf34754db82bfcf5ab420d3b2581b4f9c4726fc5ab",
       "finalFileCount": 849
     },
     {
@@ -742,7 +704,7 @@
             "git",
             "archive",
             "--format=tar",
-            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545.tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545.tar",
             "fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
@@ -754,9 +716,9 @@
           "command": [
             "tar",
             "-xf",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545.tar",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545.tar",
             "-C",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -766,7 +728,7 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545/packages/cli/scripts/sync-assets.mjs"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545/packages/cli/scripts/sync-assets.mjs"
           ],
           "cwd": "sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
           "exitCode": 0,
@@ -776,15 +738,15 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545/packages/cli/bin/spectra.js",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545/packages/cli/bin/spectra.js",
             "init",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
             "--git-mode",
             "shared"
           ],
           "cwd": "sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
           "exitCode": 0,
-          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545\nNEXT ./.spectra/bin/spectra check\n",
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545\nNEXT ./.spectra/bin/spectra check\n",
           "stderr": ""
         },
         {
@@ -793,7 +755,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
             "--check",
             "--json"
           ],
@@ -808,13 +770,13 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
             "--yes",
             "--json"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
-          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-iPTVME\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
+          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-fB71Xf\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
           "stderr": ""
         },
         {
@@ -823,7 +785,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
             "--check",
             "--json"
           ],
@@ -849,7 +811,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "check",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -888,14 +850,14 @@
         "steps": [
           "2-to-3"
         ],
-        "inventorySha256": "870ca3e2bcdb275bb5b6ecb86c4e8624829c4feaab3ae1489b1d1a1a7c473b47"
+        "inventorySha256": "c3b22163b9b0127684c2efcddb89def5e7224516f709e967bd5c8972f74a8d92"
       },
       "migration": {
         "outcome": "current",
         "status": "migrated",
         "reason": "Migration complete.",
         "projectSchemaVersion": 3,
-        "recoveryPath": ".spectra/recovery/migration-iPTVME",
+        "recoveryPath": ".spectra/recovery/migration-fB71Xf",
         "phase": "validation",
         "validationStatus": "passed",
         "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
@@ -909,7 +871,7 @@
         "metadataPath": ".spectra/install.json",
         "configPath": ".spectra/config.yaml"
       },
-      "finalInventorySha256": "3ca01042146f9dfcff2bc40d18e1378db4880c79acd7c1b4328a1fd6c9b51970",
+      "finalInventorySha256": "ce010b11471d56b45b4be62af1514da7f39a75ad672dfa17f5b56c10d35d81c3",
       "finalFileCount": 849
     },
     {
@@ -920,7 +882,7 @@
             "git",
             "archive",
             "--format=tar",
-            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/df76f909a53ce6426c43bf312c9a4571706684a7.tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/df76f909a53ce6426c43bf312c9a4571706684a7.tar",
             "df76f909a53ce6426c43bf312c9a4571706684a7"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
@@ -932,9 +894,9 @@
           "command": [
             "tar",
             "-xf",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/df76f909a53ce6426c43bf312c9a4571706684a7.tar",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/df76f909a53ce6426c43bf312c9a4571706684a7.tar",
             "-C",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/df76f909a53ce6426c43bf312c9a4571706684a7"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/df76f909a53ce6426c43bf312c9a4571706684a7"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -944,7 +906,7 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/df76f909a53ce6426c43bf312c9a4571706684a7/packages/cli/scripts/sync-assets.mjs"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/df76f909a53ce6426c43bf312c9a4571706684a7/packages/cli/scripts/sync-assets.mjs"
           ],
           "cwd": "sources/df76f909a53ce6426c43bf312c9a4571706684a7",
           "exitCode": 0,
@@ -954,15 +916,15 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/df76f909a53ce6426c43bf312c9a4571706684a7/packages/cli/bin/spectra.js",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/df76f909a53ce6426c43bf312c9a4571706684a7/packages/cli/bin/spectra.js",
             "init",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/df76f909a53ce6426c43bf312c9a4571706684a7",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/df76f909a53ce6426c43bf312c9a4571706684a7",
             "--git-mode",
             "shared"
           ],
           "cwd": "sources/df76f909a53ce6426c43bf312c9a4571706684a7",
           "exitCode": 0,
-          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/df76f909a53ce6426c43bf312c9a4571706684a7\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/df76f909a53ce6426c43bf312c9a4571706684a7\nNEXT ./.spectra/bin/spectra check\n",
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/df76f909a53ce6426c43bf312c9a4571706684a7\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/df76f909a53ce6426c43bf312c9a4571706684a7\nNEXT ./.spectra/bin/spectra check\n",
           "stderr": ""
         },
         {
@@ -971,7 +933,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/df76f909a53ce6426c43bf312c9a4571706684a7",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/df76f909a53ce6426c43bf312c9a4571706684a7",
             "--check",
             "--json"
           ],
@@ -986,7 +948,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/df76f909a53ce6426c43bf312c9a4571706684a7",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/df76f909a53ce6426c43bf312c9a4571706684a7",
             "--check",
             "--json"
           ],
@@ -1012,7 +974,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "check",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/df76f909a53ce6426c43bf312c9a4571706684a7"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/df76f909a53ce6426c43bf312c9a4571706684a7"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -1051,7 +1013,7 @@
       "migrationCheck": {
         "outcome": "current",
         "steps": [],
-        "inventorySha256": "c3ddc78fe6bc48f3953755264caa9f4cde160403a4cf5e611c46052cdb26e268"
+        "inventorySha256": "d0b04abcbc9a4adbb0886967dd581025ef09c7cfaed562d7b2c6e6a2c22429b9"
       },
       "finalState": {
         "layout": "canonical",
@@ -1061,7 +1023,7 @@
         "metadataPath": ".spectra/install.json",
         "configPath": ".spectra/config.yaml"
       },
-      "finalInventorySha256": "c3ddc78fe6bc48f3953755264caa9f4cde160403a4cf5e611c46052cdb26e268",
+      "finalInventorySha256": "d0b04abcbc9a4adbb0886967dd581025ef09c7cfaed562d7b2c6e6a2c22429b9",
       "finalFileCount": 755
     },
     {
@@ -1072,7 +1034,7 @@
             "git",
             "archive",
             "--format=tar",
-            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/e3aca7154a5cc255fa1469d50c124ceab1d48b29.tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/e3aca7154a5cc255fa1469d50c124ceab1d48b29.tar",
             "e3aca7154a5cc255fa1469d50c124ceab1d48b29"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
@@ -1084,9 +1046,9 @@
           "command": [
             "tar",
             "-xf",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/e3aca7154a5cc255fa1469d50c124ceab1d48b29.tar",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/e3aca7154a5cc255fa1469d50c124ceab1d48b29.tar",
             "-C",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -1096,7 +1058,7 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29/packages/cli/scripts/sync-assets.mjs"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29/packages/cli/scripts/sync-assets.mjs"
           ],
           "cwd": "sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
           "exitCode": 0,
@@ -1106,15 +1068,15 @@
         {
           "command": [
             "/opt/homebrew/Cellar/node/25.6.0/bin/node",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29/packages/cli/bin/spectra.js",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29/packages/cli/bin/spectra.js",
             "init",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
             "--git-mode",
             "shared"
           ],
           "cwd": "sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
           "exitCode": 0,
-          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29\nNEXT ./.spectra/bin/spectra check\n",
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29\nNEXT ./.spectra/bin/spectra check\n",
           "stderr": ""
         },
         {
@@ -1123,7 +1085,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
             "--check",
             "--json"
           ],
@@ -1138,7 +1100,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "migrate",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
             "--check",
             "--json"
           ],
@@ -1164,7 +1126,7 @@
             "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
             "check",
             "--cwd",
-            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xbQFus/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29"
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-xmDUyR/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29"
           ],
           "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
           "exitCode": 0,
@@ -1203,7 +1165,7 @@
       "migrationCheck": {
         "outcome": "current",
         "steps": [],
-        "inventorySha256": "fe5e85739a11df89a0fdcf3a27462c3abd8b8535514527c39414f6b3c9c0ceb9"
+        "inventorySha256": "8d19945eca2dcc8f7074f41f0154cfeff09ee238dcc13ec96598c142a07648bb"
       },
       "finalState": {
         "layout": "canonical",
@@ -1213,10 +1175,10 @@
         "metadataPath": ".spectra/install.json",
         "configPath": ".spectra/config.yaml"
       },
-      "finalInventorySha256": "fe5e85739a11df89a0fdcf3a27462c3abd8b8535514527c39414f6b3c9c0ceb9",
+      "finalInventorySha256": "8d19945eca2dcc8f7074f41f0154cfeff09ee238dcc13ec96598c142a07648bb",
       "finalFileCount": 756
     }
   ],
-  "passed": true,
-  "artifactDirectory": "/private/tmp/spectra-lifecycle-history-fixed"
+  "passed": false,
+  "artifactDirectory": "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/docs/lifecycle-verification-artifacts"
 }
