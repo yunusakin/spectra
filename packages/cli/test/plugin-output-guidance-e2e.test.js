@@ -43,7 +43,7 @@ test("installed adapters share generic plugin output guidance and preserve user 
   const guideFile = path.join(root, ".spectra/docs/spectra/workflow.md");
   const guide = fs.readFileSync(guideFile, "utf8");
   fs.writeFileSync(guideFile, "obsolete shipped guide\n");
-  const refreshed = spectra(root, ["doctor", "--fix", "--cwd", root]);
+  const refreshed = spectra(root, ["doctor", "--fix", "--cwd", root], env);
   assert.equal(refreshed.status, 0, refreshed.stderr || refreshed.stdout);
   assert.equal(fs.readFileSync(pluginFile, "utf8"), "# Plugin plan\n");
   assert.equal(fs.readFileSync(guideFile, "utf8"), guide);
