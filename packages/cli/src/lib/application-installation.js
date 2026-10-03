@@ -76,14 +76,17 @@ function inspectLegacyNativeInstallation(executable, env) {
   if (!bin) throw new Error("Legacy stable command location is unknown; provide SPECTRA_BIN");
   const commandPath = path.join(assertSafeInstallationPath(bin, env), "spectra");
   if (commandPath.startsWith(`${home}/`) || !fs.lstatSync(commandPath).isSymbolicLink() || fs.readlinkSync(commandPath) !== executable) throw new Error("Legacy stable command does not point to the executing native application");
-  for (const record of [path.join(home, "installation.env"), path.join(directory, "ownership.env")]) {
+  for (const record of [path.join(home, "installation.env")]) {
     try { fs.lstatSync(record); throw new Error(`Existing ownership data must not be replaced: ${record}`); }
     catch (error) { if (error.code !== "ENOENT") throw error; }
   }
   if (fs.readFileSync(assertSafeInstallationPath(path.join(directory, "VERSION"), env), "utf8") !== `${version}\n`) throw new Error("Legacy VERSION does not match the executing application");
   const manifest = fs.readFileSync(assertSafeInstallationPath(path.join(directory, "assets/runtime/sdd/system/manifest.env"), env), "utf8");
   if (!manifest.split(/\r?\n/).includes(`spectra_version=${version}`)) throw new Error("Legacy runtime does not match the executing application version");
-  const expected = new Set(["bin/", "bin/spectra", "VERSION", "LICENSE", "install.sh", ...SPECTRA_NATIVE_LAYOUT]);
+  let resuming = false;
+  try { fs.lstatSync(path.join(directory, "ownership.env")); resuming = true; }
+  catch (error) { if (error.code !== "ENOENT") throw error; }
+  const expected = new Set(["bin/", "bin/spectra", "VERSION", "LICENSE", "install.sh", ...SPECTRA_NATIVE_LAYOUT, ...(resuming ? ["ownership.env"] : [])]);
   const found = new Set();
   const visit = (dir, prefix = "") => {
     for (const name of fs.readdirSync(dir)) {
@@ -98,7 +101,11 @@ function inspectLegacyNativeInstallation(executable, env) {
   for (const relative of expected) if (relative !== "install.sh" && !found.has(relative)) throw new Error(`Legacy runtime is incomplete: ${relative}`);
   if (found.has("install.sh") && fs.readFileSync(path.join(directory, "install.sh"), "utf8") !== SPECTRA_INSTALLER_SOURCE) throw new Error("Existing legacy installer cannot be verified from the executing application");
   const owned = { format: "1", method: "native-legacy", home, commandPath, version, executablePath: executable, sha256: hash(executable), archiveSha256: "unknown", installerSha256: createHash("sha256").update(SPECTRA_INSTALLER_SOURCE).digest("hex"), directory, recordPath: path.join(directory, "ownership.env") };
-  return { kind: "native-managed", legacy: true, home, commandPath, execPath: executable, currentVersion: version, activeVersion: version, versions: [owned], reason: "Executing native identity, VERSION, complete runtime layout and stable command are verified for adoption" };
+  if (resuming) {
+    const existing = readOwnedVersion(home, commandPath, version, env);
+    if (existing.method !== "native-legacy" || existing.installerSha256 !== owned.installerSha256) throw new Error("Interrupted legacy ownership does not match executing native evidence");
+  }
+  return { kind: "native-managed", legacy: true, resuming, home, commandPath, execPath: executable, currentVersion: version, activeVersion: version, versions: [owned], reason: "Executing native identity, VERSION, complete runtime layout and stable command are verified for adoption" };
 }
 function adoptLegacyNativeInstallation(installation) {
   if (!installation.legacy) return installation;
@@ -111,9 +118,11 @@ function adoptLegacyNativeInstallation(installation) {
     const owned = fresh.versions[0];
     const installer = path.join(owned.directory, "install.sh");
     if (!fs.existsSync(installer)) create(installer, SPECTRA_INSTALLER_SOURCE);
-    create(owned.recordPath, serialize(owned, ["format", "method", "home", "commandPath", "version", "executablePath", "sha256", "archiveSha256", "installerSha256"]));
+    if (!fresh.resuming) create(owned.recordPath, serialize(owned, ["format", "method", "home", "commandPath", "version", "executablePath", "sha256", "archiveSha256", "installerSha256"]));
     create(path.join(fresh.home, "installation.env"), serialize({ format: "1", method: "native", home: fresh.home, commandPath: fresh.commandPath, currentVersion: fresh.currentVersion }, ["format", "method", "home", "commandPath", "currentVersion"]));
-    return inspectApplicationInstallation();
+    const managed = inspectApplicationInstallation();
+    if (managed.kind !== "native-managed" || managed.legacy) throw new Error("Native adoption ownership changed before completion");
+    return managed;
   } catch (error) {
     for (const { file, contents } of created.reverse()) {
       try { assertSafeInstallationPath(file); if (fs.lstatSync(file).isFile() && fs.readFileSync(file, "utf8") === contents) fs.unlinkSync(file); } catch { /* Preserve anything changed by another actor. */ }

@@ -190,3 +190,31 @@ scenario("recordless native lookalikes and unexpected contents require a safe tr
     const partial = path.join(env.SPECTRA_HOME, "installation.env"); if (fs.existsSync(partial)) fs.unlinkSync(partial);
   }
 });
+
+// Failure mode: interruption after the exact native-legacy version record is
+// created but before the machine record must resume; partial/foreign records
+// must remain protected. The real staged SEA supplies execution/runtime proof.
+scenario("interrupted legacy adoption resumes only exact version ownership", ({ dir, env, run, install, command, editedArchive }) => {
+  const older = stagedOlderArchive({ dir, run, editedArchive });
+  success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
+  const oldDir = path.join(env.SPECTRA_HOME, "3.1.1");
+  const ownership = path.join(oldDir, "ownership.env");
+  const record = fs.readFileSync(ownership, "utf8").replace("method=native\n", "method=native-legacy\n").replace(/^archiveSha256=.*$/m, "archiveSha256=unknown");
+  fs.unlinkSync(path.join(env.SPECTRA_HOME, "installation.env"));
+  const projects = ["interrupted-a", "interrupted-b"].map(name => path.join(dir, name));
+  for (const project of projects) { fs.mkdirSync(project); success(run("git", ["init", "-q", project])); success(run(command, ["init", project], env)); }
+  const projectBefore = projects.map(inventory);
+  for (const invalid of ["format=1\nmethod=native-legacy\n", record.replace(/^sha256=.*$/m, `sha256=${"0".repeat(64)}`)]) {
+    fs.writeFileSync(ownership, invalid); const before = inventory(env.SPECTRA_HOME);
+    rejected(run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" }));
+    assert.deepEqual(inventory(env.SPECTRA_HOME), before);
+    assert.equal(fs.readlinkSync(command), path.join(oldDir, "bin/spectra"));
+    assert.deepEqual(projects.map(inventory), projectBefore);
+  }
+  fs.writeFileSync(ownership, record); const oldBefore = inventory(oldDir);
+  success(run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" }));
+  assert.equal(fs.realpathSync(command), path.join(env.SPECTRA_HOME, "3.1.2/bin/spectra"));
+  assert.deepEqual(inventory(oldDir), oldBefore, "Resumption must not replace its verified version record or installer");
+  assert.deepEqual(projects.map(inventory), projectBefore);
+  assert(fs.existsSync(path.join(env.SPECTRA_HOME, "installation.env")));
+});
