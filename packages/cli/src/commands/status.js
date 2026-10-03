@@ -4,6 +4,7 @@ import { parseOptions } from "../lib/options.js";
 import { computeApprovalState } from "../lib/specs.js";
 import { buildStatusReport } from "../lib/status-report.js";
 import { STAGES, stageOrder } from "../lib/specs/stages.js";
+import { inspectProjectCompatibility } from "../lib/project-compatibility.js";
 
 function statusCommand(argv) {
   const { options } = parseOptions(argv, {
@@ -20,6 +21,14 @@ function statusCommand(argv) {
   const repoRoot = findSpectraRoot(cwd);
   if (!repoRoot) {
     throw new Error(`Could not find a Spectra runtime from ${cwd}`);
+  }
+  const compatibility = inspectProjectCompatibility(repoRoot);
+  const sourceRuntime = compatibility.sourceRepository && compatibility.layout === "root-sdd" && compatibility.conflicts.length === 0;
+  if (compatibility.status !== "CURRENT" && !sourceRuntime) {
+    title(`Compatibility: ${compatibility.status}`);
+    title(`Application: ${compatibility.applicationVersion}; project schema: ${compatibility.projectSchemaVersion ?? "unknown"}; readable schema: ${compatibility.minimumReadableSchema}-${compatibility.maximumReadableSchema}`);
+    title(compatibility.reason);
+    return 1;
   }
   const report = buildStatusReport(repoRoot);
 

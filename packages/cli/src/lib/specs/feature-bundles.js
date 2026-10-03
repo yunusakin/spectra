@@ -5,32 +5,35 @@ import { buildFeatureBundle } from "./bundle-defaults/index.js";
 import { ensureFile, writeJsonContract } from "./primitives.js";
 
 
-function ensureV2Scaffolding(targetRoot, { adopt = false } = {}) {
+function ensureV2Scaffolding(targetRoot, { adopt = false, preserveExisting = false } = {}) {
   const projectName = path.basename(path.resolve(targetRoot));
   const bundle = buildFeatureBundle(projectName);
   const sddRoot = getSddRoot(targetRoot);
   const featureDir = path.join(sddRoot, "features", bundle.featureId);
   const evalDir = path.join(featureDir, "evals");
+  const writeContract = (file, contract) => {
+    if (!preserveExisting || !fs.existsSync(file)) writeJsonContract(file, contract);
+  };
 
-  writeJsonContract(path.join(featureDir, "feature.spec.yaml"), bundle.featureSpec);
-  writeJsonContract(path.join(featureDir, "technical-decisions.yaml"), bundle.technicalDecisions);
-  writeJsonContract(path.join(featureDir, "ai-behavior-spec.yaml"), bundle.behaviorSpec);
-  writeJsonContract(path.join(featureDir, "telemetry-contract.yaml"), bundle.telemetryContract);
-  writeJsonContract(path.join(featureDir, "release-thresholds.yaml"), bundle.releaseThresholds);
-  writeJsonContract(path.join(evalDir, "release-thresholds.yaml"), bundle.evalThresholds);
-  writeJsonContract(path.join(evalDir, "golden-scenarios.yaml"), bundle.goldenScenarios);
-  writeJsonContract(path.join(evalDir, "regression-suite.yaml"), bundle.regressionSuite);
-  writeJsonContract(path.join(evalDir, "failure-modes.yaml"), bundle.failureModes);
+  writeContract(path.join(featureDir, "feature.spec.yaml"), bundle.featureSpec);
+  writeContract(path.join(featureDir, "technical-decisions.yaml"), bundle.technicalDecisions);
+  writeContract(path.join(featureDir, "ai-behavior-spec.yaml"), bundle.behaviorSpec);
+  writeContract(path.join(featureDir, "telemetry-contract.yaml"), bundle.telemetryContract);
+  writeContract(path.join(featureDir, "release-thresholds.yaml"), bundle.releaseThresholds);
+  writeContract(path.join(evalDir, "release-thresholds.yaml"), bundle.evalThresholds);
+  writeContract(path.join(evalDir, "golden-scenarios.yaml"), bundle.goldenScenarios);
+  writeContract(path.join(evalDir, "regression-suite.yaml"), bundle.regressionSuite);
+  writeContract(path.join(evalDir, "failure-modes.yaml"), bundle.failureModes);
   ensureFile(path.join(featureDir, "brief.md"), bundle.briefMarkdown);
   ensureFile(path.join(featureDir, "release-checklist.md"), bundle.releaseChecklistMarkdown);
 
-  writeJsonContract(path.join(sddRoot, "governance", "approval-state.yaml"), bundle.approvalState);
-  writeJsonContract(path.join(sddRoot, "governance", "decision-graph.yaml"), bundle.decisionGraph);
+  writeContract(path.join(sddRoot, "governance", "approval-state.yaml"), bundle.approvalState);
+  writeContract(path.join(sddRoot, "governance", "decision-graph.yaml"), bundle.decisionGraph);
 
   if (adopt) {
-    writeJsonContract(path.join(sddRoot, "adoption", "current-state.summary.yaml"), bundle.adoption.currentState);
-    writeJsonContract(path.join(sddRoot, "adoption", "gap-analysis.yaml"), bundle.adoption.gapAnalysis);
-    writeJsonContract(path.join(sddRoot, "adoption", "review-queue.yaml"), bundle.adoption.reviewQueue);
+    writeContract(path.join(sddRoot, "adoption", "current-state.summary.yaml"), bundle.adoption.currentState);
+    writeContract(path.join(sddRoot, "adoption", "gap-analysis.yaml"), bundle.adoption.gapAnalysis);
+    writeContract(path.join(sddRoot, "adoption", "review-queue.yaml"), bundle.adoption.reviewQueue);
   }
 }
 

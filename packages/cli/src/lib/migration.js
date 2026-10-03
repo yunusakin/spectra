@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { parse } from "yaml";
 import { detectLayout, getProjectLayout } from "./project-layout.js";
-import { createInstallMetadata, SCHEMA_VERSION } from "./install-metadata.js";
-import { copyDirectory, ensureDirectory, getProjectAssetsDir } from "./runtime.js";
+import { ensureDirectory, getProjectAssetsDir } from "./runtime.js";
 
 // Patterns that describe Spectra's old homes. They are stripped during
 // migration and replaced with the canonical /.spectra/ exclusion.
@@ -36,6 +36,7 @@ function listRelativeFiles(rootDir) {
   const files = [];
   function visit(directory, relativeDir = "") {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isSymbolicLink()) throw new Error(`Unsafe migration symlink: ${path.join(directory, entry.name)}`);
       const relativePath = relativeDir ? path.join(relativeDir, entry.name) : entry.name;
       if (entry.isDirectory()) {
         visit(path.join(directory, entry.name), relativePath);
@@ -110,21 +111,27 @@ function readMetadata(metadataPath) {
   if (!fs.existsSync(metadataPath)) {
     return {};
   }
-  try {
-    return JSON.parse(fs.readFileSync(metadataPath, "utf8"));
-  } catch {
-    return {};
-  }
+  const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) throw new Error(`Malformed ${metadataPath}: expected an object.`);
+  return metadata;
+}
+
+function configGitMode(metadataPath) {
+  const file = path.join(path.dirname(metadataPath), "config.yaml");
+  if (!fs.existsSync(file)) return undefined;
+  const config = parse(fs.readFileSync(file, "utf8"));
+  if (!config || typeof config !== "object" || Array.isArray(config)) throw new Error(`Malformed ${file}: expected an object.`);
+  return config.gitMode;
 }
 
 function writeMigratedMetadata(layout, oldMetadata, { gitMode, installMode }) {
-  const { profile: legacyProfile, ...previousMetadata } = oldMetadata;
+  const previousMetadata = oldMetadata;
   const excludePatterns = gitMode === "local"
     ? [...new Set([...(oldMetadata.excludePatterns ?? []).filter((pattern) => !LEGACY_EXCLUSIONS.has(pattern)), CANONICAL_EXCLUSION])]
     : oldMetadata.excludePatterns ?? [];
   const metadata = {
     ...previousMetadata,
-    ...createInstallMetadata({ gitMode, installMode }),
+    gitMode, installMode,
     localLauncher: ".spectra/bin/spectra",
     excludePatterns
   };
@@ -144,7 +151,7 @@ function migrateRootSddLayout(absoluteRoot, layout) {
   }
 
   const oldMetadata = readMetadata(legacyInstall);
-  const gitMode = oldMetadata.gitMode ?? "shared";
+  const gitMode = oldMetadata.gitMode ?? configGitMode(legacyInstall) ?? "shared";
 
   const sddTarget = path.join(layout.root, "sdd");
   const docsTarget = path.join(layout.root, "docs");
@@ -169,12 +176,11 @@ function migrateRootSddLayout(absoluteRoot, layout) {
     gitMode,
     installMode: oldMetadata.installMode ?? "adopt"
   });
-  fs.writeFileSync(layout.config, `gitMode: ${gitMode}\nschemaVersion: ${SCHEMA_VERSION}\n`);
+  if (!fs.existsSync(layout.config)) fs.writeFileSync(layout.config, `gitMode: ${gitMode}\n`);
   for (const [sourcePath, targetPath] of docMoves) {
     movePath(sourcePath, targetPath);
   }
   movePath(legacySdd, sddTarget);
-  copyDirectory(path.join(getProjectAssetsDir(), "sdd", "memory-bank"), path.join(layout.sdd, "memory-bank"));
 
   return { migrated: true, gitMode, localLauncher: metadata.localLauncher };
 }
@@ -200,7 +206,7 @@ function mergeCacheDirectories(sourceDir, targetDir) {
 function migrateSpectraDirLayout(absoluteRoot, layout) {
   const legacyRoot = path.join(absoluteRoot, "spectra");
   const oldMetadata = readMetadata(path.join(legacyRoot, "install.json"));
-  const gitMode = oldMetadata.gitMode ?? "shared";
+  const gitMode = oldMetadata.gitMode ?? configGitMode(path.join(legacyRoot, "install.json")) ?? "shared";
 
   // install.json is rewritten (not moved) below, and sdd/ moves last: the
   // sdd/ manifest is what flips detectLayout() to "canonical", and a
@@ -269,6 +275,47 @@ function needsMigration(projectRoot) {
   return false;
 }
 
+function preflightLegacyMigration(projectRoot) {
+  const root = path.resolve(projectRoot);
+  if (isSourceRepository(root)) throw new Error("Refusing migration of a Spectra source repository.");
+  const layout = getProjectLayout(root);
+  const detected = detectLayout(root);
+  const metadataPath = path.join(root, detected === "spectra-dir" ? "spectra/install.json" : ".spectra/install.json");
+  const metadata = readMetadata(metadataPath);
+  const gitMode = metadata.gitMode ?? configGitMode(metadataPath) ?? "shared";
+  if (!["local", "shared"].includes(gitMode)) throw new Error("Invalid migration Git mode.");
+  const moves = detected === "root-sdd" ? [[path.join(root, "sdd"), layout.sdd], ...knownDocMoves(root, layout.docs)] :
+    detected === "spectra-dir" ? fs.readdirSync(path.join(root, "spectra")).filter(name => !["cache", "install.json"].includes(name)).map(name => [path.join(root, "spectra", name), path.join(layout.root, name)]) : [];
+  for (const candidate of [...[".spectra", "spectra", "sdd"].map(name => path.join(root, name)), ...moves.flat()]) {
+    let parent = candidate;
+    while (parent !== root) {
+      if (fs.lstatSync(parent, { throwIfNoEntry: false })?.isSymbolicLink()) throw new Error(`Unsafe migration symlink: ${parent}`);
+      parent = path.dirname(parent);
+    }
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) listRelativeFiles(candidate);
+  }
+  preflightMoves(moves);
+  let excludePath = null;
+  if (gitMode === "local") {
+    const result = spawnSync("git", ["-C", root, "rev-parse", "--git-path", "info/exclude"], { encoding: "utf8" });
+    if (result.status !== 0) throw new Error("Cannot migrate local Git mode outside a Git worktree.");
+    excludePath = path.resolve(root, result.stdout.trim());
+    // The Git directory may live outside the project for a linked worktree,
+    // but no component below that actual directory may redirect exclusions.
+    const gitDirectory = spawnSync("git", ["-C", root, "rev-parse", "--git-common-dir"], { encoding: "utf8" });
+    if (gitDirectory.status !== 0) throw new Error("Cannot resolve migration Git directory.");
+    const common = path.resolve(root, gitDirectory.stdout.trim());
+    let candidate = excludePath;
+    while (candidate !== common) {
+      if (!candidate.startsWith(common + path.sep)) throw new Error("Unsafe Git exclusion path.");
+      if (fs.lstatSync(candidate, { throwIfNoEntry: false })?.isSymbolicLink()) throw new Error("Unsafe Git exclude symlink.");
+      candidate = path.dirname(candidate);
+    }
+    excludePath = path.join(fs.realpathSync(path.dirname(excludePath)), path.basename(excludePath));
+  }
+  return { moves, excludePath };
+}
+
 function migrateLegacyLayout(projectRoot) {
   const absoluteRoot = path.resolve(projectRoot);
   const layout = getProjectLayout(absoluteRoot);
@@ -283,6 +330,7 @@ function migrateLegacyLayout(projectRoot) {
     return { migrated: false, reason: "source-repo" };
   }
 
+  preflightLegacyMigration(absoluteRoot);
   const detected = detectLayout(absoluteRoot);
 
   if (detected === "canonical") {
@@ -332,4 +380,4 @@ function migrateLegacyLayout(projectRoot) {
   return migrateRootSddLayout(absoluteRoot, layout);
 }
 
-export { migrateLegacyLayout, needsMigration };
+export { migrateLegacyLayout, needsMigration, preflightLegacyMigration };

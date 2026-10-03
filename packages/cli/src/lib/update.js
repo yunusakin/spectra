@@ -1,8 +1,12 @@
 import path from "node:path";
+import { inspectApplicationInstallation, planApplicationUpdate, adoptLegacyNativeInstallation, forwardRetainedExecutables, VERSION_PATTERN } from "./application-installation.js";
 import { spawnSync } from "node:child_process";
+import { fail } from "./output.js";
 
 function versionParts(version) {
-  const match = String(version).trim().replace(/^v/, "").match(/^(\d+)\.(\d+)\.(\d+)/);
+  const normalized = String(version).trim().replace(/^v/, "");
+  if (!VERSION_PATTERN.test(normalized)) throw new Error(`Invalid Spectra version: ${version}`);
+  const match = normalized.match(/^(\d+)\.(\d+)\.(\d+)/);
   if (!match) throw new Error(`Invalid Spectra version: ${version}`);
   return match.slice(1).map(Number);
 }
@@ -33,16 +37,37 @@ function resolveInstalledNativeCommand(env = process.env) {
   return path.join(binaryDir, process.platform === "win32" ? "spectra.exe" : "spectra");
 }
 
-function runSelfUpdate(latest, projectRoot, { spawn = spawnSync, execPath = process.execPath, env = process.env } = {}) {
-  if (path.basename(execPath).toLowerCase().startsWith("node")) {
-    return spawn("npx", ["-y", `spectra-pack@${latest}`, "__update-project", "--cwd", projectRoot], { stdio: "inherit" }).status ?? 1;
+function runSelfUpdate(latest, installation = inspectApplicationInstallation()) {
+  latest = String(latest).replace(/^v/, "");
+  if (installation.kind !== "native-managed") {
+    const guidance = installation.kind === "npm"
+      ? `Use your package manager: npm install -g spectra-pack@${latest}.`
+      : `Install the machine application with curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/v${latest}/install.sh | sh, or npm install -g spectra-pack@${latest}.`;
+    const transition = installation.nativeRuntime
+      ? ` To preserve the unverified installation, create a fresh managed home without deleting it:\n  spectra_root="$(mktemp -d \"$HOME/spectra-XXXXXX\")"\n  curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/v${latest}/install.sh | SPECTRA_VERSION=v${latest} SPECTRA_HOME="$spectra_root/runtime" SPECTRA_BIN="$spectra_root/bin" sh\n  export PATH="$spectra_root/bin:$PATH"`
+      : "";
+    fail(`Software update was not applied: ${installation.reason}. ${guidance}${transition}`);
+    return 1;
   }
-  const install = spawn("sh", ["-c", "curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh"], {
-    stdio: "inherit",
-    env: { ...env, SPECTRA_VERSION: `v${latest}`, SPECTRA_BIN: path.dirname(execPath) }
-  });
-  if (install.status !== 0) return install.status ?? 1;
-  return spawn(execPath, ["__update-project", "--cwd", projectRoot], { stdio: "inherit" }).status ?? 1;
+  try {
+    const plan = planApplicationUpdate(installation, latest);
+    const ownedInstallation = adoptLegacyNativeInstallation(plan.installation);
+    const executing = ownedInstallation.versions.find(version => version.executablePath === installation.execPath);
+    const installer = path.join(executing.directory, "install.sh");
+    const result = spawnSync("sh", [installer], {
+      env: { ...process.env, SPECTRA_HOME: plan.home, SPECTRA_BIN: path.dirname(plan.commandPath), SPECTRA_VERSION: `v${plan.version}` },
+      stdio: "inherit"
+    });
+    if (result.error) throw result.error;
+    if (result.status !== 0) throw new Error(`Native installer did not activate Spectra ${plan.version} (status ${result.status}).`);
+    const activated = spawnSync(plan.commandPath, ["version"], { encoding: "utf8" });
+    if (activated.status !== 0 || activated.stdout.trim() !== `spectra ${plan.version}`) throw new Error(`Activated application version does not equal requested version ${plan.version}.`);
+    forwardRetainedExecutables(plan.installation);
+    return 0;
+  } catch (error) {
+    fail(`Software update was not applied: ${error.message}`);
+    return 1;
+  }
 }
 
 export { compareVersions, latestVersion, resolveInstalledNativeCommand, runSelfUpdate };

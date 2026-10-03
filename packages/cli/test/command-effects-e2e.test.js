@@ -17,7 +17,6 @@ test("documented command effects match installed CLI behavior and retain evidenc
   assert.equal(fs.readFileSync(path.join(repo, "profiles/full/docs/cli-reference.md"), "utf8"), guide);
   for (const command of commands) assert.ok(guide.includes(`## ${command}\n`), `Missing command: ${command}`);
   assert.equal((guide.match(/```mermaid/g) ?? []).length, 3);
-  assert.match(guide.split("## update\n")[1].split("## doctor\n")[0], /installed or recognized legacy Spectra project/);
   assert.match(guide, /--task <legacy_pack>/);
   const root = createGitProject();
   t.diagnostic(`Temporary command project: ${root}`);
@@ -48,9 +47,6 @@ test("documented command effects match installed CLI behavior and retain evidenc
     assert.equal(result.status, expected, `${result.stdout}\n${result.stderr}`);
     return { added, changed, removed, result };
   };
-  const outsideUpdate = execute(["update", "--yes"], 1, spectra);
-  assert.deepEqual([...outsideUpdate.added, ...outsideUpdate.changed, ...outsideUpdate.removed], []);
-  assert.match(outsideUpdate.result.stderr + outsideUpdate.result.stdout, /Could not find/);
   execute(["init", "."], 0, spectra);
   assert.ok(fs.existsSync(path.join(root, ".spectra/docs/spectra/cli-reference.md")));
   assert.equal(fs.readFileSync(path.join(root, ".spectra/docs/spectra/cli-reference.md"), "utf8"), guide);

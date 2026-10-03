@@ -154,7 +154,7 @@ function readInstallMetadata(targetRoot) {
 
 const findSpectraRoot = findProjectRoot;
 
-function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
+function runInstalledScript({ cwd, scriptName, args = [], strict = false, capture = false }) {
   const repoRoot = findSpectraRoot(cwd);
 
   if (!repoRoot) {
@@ -186,13 +186,15 @@ function runInstalledScript({ cwd, scriptName, args = [], strict = false }) {
       SPECTRA_PROJECT_DOCS_NAME: readInstallMetadata(docsTarget)?.docsProjectName ?? "",
       SPECTRA_RUNTIME_ROOT: runtimeDir
     },
-    stdio: "inherit"
+    stdio: capture ? "pipe" : "inherit",
+    ...(capture ? { encoding: "utf8" } : {})
   });
 
   if (result.error) {
     throw result.error;
   }
 
+  if (capture) return result;
   const status = result.status ?? 1;
   if (strict && status !== 0) {
     throw new Error(`${scriptName} exited with status ${status}`);

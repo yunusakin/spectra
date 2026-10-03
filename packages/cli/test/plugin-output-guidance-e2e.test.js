@@ -43,7 +43,7 @@ test("installed adapters share generic plugin output guidance and preserve user 
   const guideFile = path.join(root, ".spectra/docs/spectra/workflow.md");
   const guide = fs.readFileSync(guideFile, "utf8");
   fs.writeFileSync(guideFile, "obsolete shipped guide\n");
-  const refreshed = spectra(root, ["__update-project", "--cwd", root]);
+  const refreshed = spectra(root, ["doctor", "--fix", "--cwd", root], env);
   assert.equal(refreshed.status, 0, refreshed.stderr || refreshed.stdout);
   assert.equal(fs.readFileSync(pluginFile, "utf8"), "# Plugin plan\n");
   assert.equal(fs.readFileSync(guideFile, "utf8"), guide);
@@ -80,7 +80,7 @@ test("project documentation names use existing briefs and avoid guide collisions
 
 // Failure cases: upgrading an old install deletes legacy documents or plugin
 // artifacts; doctor changes the persisted name or rewrites business memory.
-test("legacy documentation survives update and doctor repair", t => {
+test("legacy documentation survives explicit doctor repair", t => {
   const root = createGitProject();
   const installed = spectra(root, ["init", "."]);
   assert.equal(installed.status, 0, installed.stderr || installed.stdout);
@@ -97,7 +97,7 @@ test("legacy documentation survives update and doctor repair", t => {
     fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
     fs.writeFileSync(path.join(root, file), content);
   }
-  const refreshed = spectra(root, ["__update-project", "--cwd", root]);
+  const refreshed = spectra(root, ["doctor", "--fix", "--cwd", root]);
   assert.equal(refreshed.status, 0, refreshed.stderr || refreshed.stdout);
   const stableName = JSON.parse(fs.readFileSync(metadataPath, "utf8")).docsProjectName;
   const pluginFile = `.spectra/docs/${stableName}/example-plugin/plans/new.md`;
@@ -129,8 +129,8 @@ test("refresh preserves unowned files colliding with shipped guide paths", t => 
   fs.writeFileSync(guidePath, "# Existing plugin workflow\n");
   const installed = spectra(root, ["init", "."]);
   assert.equal(installed.status, 0, installed.stderr || installed.stdout);
-  for (const args of [["__update-project", "--cwd", root], ["doctor", "--fix", "--cwd", root]]) {
-    const result = spectra(root, args);
+  for (const invoke of [spectra, localSpectra]) {
+    const result = invoke(root, ["doctor", "--fix", "--cwd", root]);
     assert.equal(result.status, 0, result.stderr || result.stdout);
     assert.match(result.stdout + result.stderr, /Preserving existing documentation/);
     assert.equal(fs.readFileSync(guidePath, "utf8"), "# Existing plugin workflow\n");

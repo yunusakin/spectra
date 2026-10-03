@@ -28,13 +28,15 @@ Some packaged runtime checks still invoke `bash`. Node and npm are not required.
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | sh
 ```
 
-The installer:
+Install the native application once. The installer:
 
 1. detects the operating system and CPU architecture
 2. downloads the matching artifact from the latest GitHub Release
 3. downloads and verifies the SHA-256 checksum
-4. installs the versioned runtime under `$HOME/.local/share/spectra/`
+4. installs the versioned runtime under `$HOME/.local/share/spectra/<version>/`
 5. links the command at `$HOME/.local/bin/spectra`
+
+Initialize or adopt each repository separately with `spectra init` or `spectra adopt`. Installing the application does not create or migrate project state.
 
 Make the command available in the current shell:
 
@@ -91,10 +93,37 @@ curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh |
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | \
-  SPECTRA_VERSION=v3.0.9 sh
+  SPECTRA_VERSION=v3.1.2 sh
 ```
 
 Version values use the Git tag form, such as `v3.0.9`.
+
+## Update the Application
+
+For a managed native install, update the machine application independently of project migration:
+
+```bash
+spectra update --yes
+```
+
+This updates the installed native CLI/runtime and active command. It does not search for projects or change their files. The updater retains verified version directories; older recorded launch paths forward to the active command, with the previous executable bytes kept as `.rollback` for update recovery. There is no public command to switch back to an older version.
+
+For a global npm install, update the package with `npm install -g spectra-pack@latest`. npx has no global package to update; request a version on the next invocation with `npx spectra-pack@latest`.
+
+Project migrations are separate and explicit. Run the check and migration from the project directory:
+
+```bash
+spectra migrate --check
+spectra migrate --yes
+```
+
+`--check` never writes and exits nonzero when a migration is required. `--yes` applies the reported layout/schema steps and validates the project. Use `--json` for machine-readable results. A current-schema project can refresh generated assets with `spectra doctor --fix`; that command does not migrate an older schema.
+
+## Versions and Distribution Source
+
+The public application release version (for example, `3.1.2`) identifies the npm package, CLI, native binary and packaged runtime. `install.json` separately records `cliVersion`, `runtimeVersion` and the numeric project `schemaVersion` (currently `3`). Feature, evaluation and governance contracts use `apiVersion: spectra/v2`; that contract format is separate from both the application release and the installation schema. Installer pins use the Git tag spelling, such as `SPECTRA_VERSION=v3.1.2`.
+
+Native update discovery checks the configured npm registry, then the GitHub Releases API. The installer downloads its script from GitHub and the archive/checksum from GitHub Releases. `SPECTRA_REPO=owner/repository` selects the release repository for archive downloads; it is not a generic mirror or offline-install switch. If company network policy blocks those endpoints, use an approved package distribution path or ask the administrator for an accessible release source.
 
 ## Repo-Local Launcher
 
@@ -109,12 +138,38 @@ Use it when global PATH setup is unavailable or when a repository should invoke 
 ```bash
 ./.spectra/bin/spectra status
 ./.spectra/bin/spectra check
-./.spectra/bin/spectra update
 ```
 
-The launcher tries the recorded native binary first, then a local Node CLI fallback if present, then `spectra` on PATH. It contains no product logic. `spectra update` checks for a newer release, asks once before changing anything, and also refreshes or migrates the project runtime.
+The launcher tries its recorded stable machine command, recorded native executable, project-local Node CLI when present, then `spectra` on PATH. A Node/npm project usually includes that local fallback; a native-only project may rely on its recorded native path or another `spectra` on PATH. If every fallback is removed, the launcher exits with an error until you reinstall or provide another command.
 
-`spectra update` changes the CLI/runtime version and refreshes the project runtime.
+For older standalone native binaries without a machine ownership record, `spectra uninstall` refuses and leaves the installation untouched. Update it to a newer managed version, then retry removal:
+
+```bash
+spectra update --yes
+spectra uninstall --yes
+```
+
+If update cannot manage that installation, install a managed native version in a separate home/bin location, then use its command. Project-local launchers pinned to the older standalone binary remain pinned until that project is bootstrapped again.
+
+## Uninstall
+
+For a verified managed native installation:
+
+```bash
+spectra uninstall
+```
+
+The command asks before removing the stable command and every verified managed native version; non-interactive use requires `spectra uninstall --yes`. It never changes `.spectra/`, project code, adapters or Git exclusions. A project-local Node CLI can continue to work when Node is available; a native-only project needs another native/PATH command or a reinstall after removal.
+
+Other distributions use their own lifecycle:
+
+| Installation | Update or remove |
+| --- | --- |
+| Managed native | `spectra update`; `spectra uninstall [--yes]` |
+| Legacy native without ownership record | `spectra update --yes`, then `spectra uninstall --yes` |
+| Global npm | `npm install -g spectra-pack@latest`; `npm uninstall -g spectra-pack` |
+| npx | Choose `npx spectra-pack@latest` per invocation; no machine package to uninstall |
+| Project-local fallback or development checkout | No managed machine installation; the project files remain in that checkout |
 
 ## Release Artifacts
 

@@ -60,7 +60,7 @@ test("init installs Full capabilities by default without recording an installati
   assert.doesNotMatch(config, /^profile:/m);
 });
 
-test("update silently brings a same-version legacy Lite install to the unified runtime and preserves user files", () => {
+test("explicit migrate brings a same-version legacy Lite install to the unified runtime and preserves user files", () => {
   const root = createGitProject();
   const adapterPath = path.join(root, "CLAUDE.md");
   fs.writeFileSync(adapterPath, "# User adapter\nKeep this content.\n");
@@ -82,10 +82,10 @@ test("update silently brings a same-version legacy Lite install to the unified r
   write(root, ".spectra/sdd/system/runtime/minimal.md", "Legacy Lite runtime\n");
   write(root, ".spectra/sdd/memory-bank/core/projectbrief.md", "# Private project brief\nKeep my requirements.\n");
 
-  const result = run(root, ["update", "--yes"]);
+  const result = run(root, ["migrate", "--yes"]);
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  assert.match(result.stdout, /Update complete/);
+  assert.match(result.stdout, /Migration complete/);
   assert.doesNotMatch(result.stdout + result.stderr, /profile/i);
   assert.equal(
     fs.readFileSync(path.join(root, ".spectra/sdd/memory-bank/core/projectbrief.md"), "utf8"),
@@ -99,9 +99,9 @@ test("update silently brings a same-version legacy Lite install to the unified r
   const config = fs.readFileSync(path.join(root, ".spectra/config.yaml"), "utf8");
   assert.doesNotMatch(config, /^profile:/m);
 
-  const secondUpdate = run(root, ["update", "--yes"]);
-  assert.equal(secondUpdate.status, 0, secondUpdate.stderr || secondUpdate.stdout);
-  assert.match(secondUpdate.stdout, /already up to date/i);
+  const secondMigration = run(root, ["migrate", "--yes"]);
+  assert.equal(secondMigration.status, 0, secondMigration.stderr || secondMigration.stdout);
+  assert.match(secondMigration.stdout, /already.*current|no migration|nothing to migrate/i);
 });
 
 test("installation help and status expose no profile choice or state", () => {

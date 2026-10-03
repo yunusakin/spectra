@@ -1,0 +1,1222 @@
+{
+  "current": {
+    "commit": "4d4ea82487b3e2fae6b5fa90ba991591faa1ac5b",
+    "version": "3.1.2",
+    "dirtyPaths": [
+      " M .github/workflows/native-release.yml",
+      " M .github/workflows/validate.yml",
+      " M packages/cli/src/commands/help.js",
+      " M packages/cli/src/lib/application-installation.js",
+      " M packages/cli/src/main.js",
+      " M packages/cli/test/lifecycle-e2e.test.js",
+      " M packages/cli/test/native-installation-e2e.test.js",
+      " M tools/verify-release.mjs",
+      "?? docs/superpowers/",
+      "?? packages/cli/src/commands/uninstall.js"
+    ],
+    "yamlDependencyVersion": "2.9.1"
+  },
+  "projects": [
+    {
+      "ref": "v2.0.3",
+      "commands": [
+        {
+          "command": [
+            "git",
+            "archive",
+            "--format=tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/e8c99bc8963d76e3f827e6ca4753bfa62ec647da.tar",
+            "e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "tar",
+            "-xf",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/e8c99bc8963d76e3f827e6ca4753bfa62ec647da.tar",
+            "-C",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da/packages/cli/scripts/sync-assets.mjs"
+          ],
+          "cwd": "sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da/packages/cli/bin/spectra.js",
+            "init",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
+          ],
+          "cwd": "sources/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
+          "exitCode": 0,
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da\nNEXT spectra validate\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 1,
+          "stdout": "{\"outcome\":\"migration-required\",\"compatibility\":{\"status\":\"LEGACY_LAYOUT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":null,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"root-sdd\",\"migrationAvailable\":true,\"migrationPath\":[\"layout\",\"unversioned-to-1\",\"1-to-2\",\"2-to-3\"],\"reason\":\"Legacy project layout requires explicit spectra migrate.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[{\"id\":\"layout\",\"fromSchema\":null,\"toSchema\":null},{\"id\":\"unversioned-to-1\",\"fromSchema\":null,\"toSchema\":1},{\"id\":\"1-to-2\",\"fromSchema\":1,\"toSchema\":2},{\"id\":\"2-to-3\",\"fromSchema\":2,\"toSchema\":3}],\"conflicts\":[],\"required\":true,\"reason\":\"Migration required: layout -> unversioned-to-1 -> 1-to-2 -> 2-to-3\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
+            "--yes",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-rSGWnF\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "version"
+          ],
+          "cwd": "projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
+          "exitCode": 0,
+          "stdout": "spectra 3.1.2\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "check",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e8c99bc8963d76e3f827e6ca4753bfa62ec647da"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "Validation: OK\nPolicy check: OK\nOK Validation and policy checks passed\n",
+          "stderr": ""
+        }
+      ],
+      "passed": true,
+      "sourceSha": "e8c99bc8963d76e3f827e6ca4753bfa62ec647da",
+      "sourceVersion": "2.0.3",
+      "sourceArchiveSha256": "bcf16ad8f6395bf11fb52f3bd3906898737dbf5d06ff0ffa9bce3014eca6f705",
+      "historicalDependency": {
+        "name": "yaml",
+        "version": "2.9.1",
+        "source": "existing workspace node_modules symlink; no install or network"
+      },
+      "archivedCliSha256": "c45ffc987405593abf671948d726989e1e73e482ed45de71b7753ca2c72499e1",
+      "archivedAssetsSha256": "17096d797c3fd2310c505fe566e752c2909816251f4773fab8c249d1482ca198",
+      "sourceSchemaVersion": null,
+      "generated": {
+        "layout": "root-sdd",
+        "schemaVersion": null,
+        "gitMode": "shared",
+        "manifestPath": "sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "generationMode": "shared"
+      },
+      "projectKeyFiles": {
+        "sdd/memory-bank/core/projectbrief.md": "ab4ae7975a9cbe06bf7496b0b68baf0c172b9171dcf9bfdbfdd970617b0b0ff8",
+        "sdd/governance/approval-state.yaml": "f872da73a64c1a781905416810573db71ce3cfba7923bb98abbd09b482e2f832",
+        "sdd/governance/decision-graph.yaml": "08a184e652247f7448d9af1e6d5d31d493688825915ecdff1549d4fb23010c89",
+        "historical-user-data.md": "53fca231126e9dd2bfeca8191805f356340f9f26e9db9ac0fc3167f5619155d8"
+      },
+      "sentinelSha256": "53fca231126e9dd2bfeca8191805f356340f9f26e9db9ac0fc3167f5619155d8",
+      "migrationCheck": {
+        "outcome": "migration-required",
+        "steps": [
+          "layout",
+          "unversioned-to-1",
+          "1-to-2",
+          "2-to-3"
+        ],
+        "inventorySha256": "15c0ecc72b985120311849174a10fed49731ec962925806089a4bb2f28662686"
+      },
+      "migration": {
+        "outcome": "current",
+        "status": "migrated",
+        "reason": "Migration complete.",
+        "projectSchemaVersion": 3,
+        "recoveryPath": ".spectra/recovery/migration-rSGWnF",
+        "phase": "validation",
+        "validationStatus": "passed",
+        "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
+      },
+      "projectKeyFileChanges": [],
+      "finalState": {
+        "layout": "canonical",
+        "schemaVersion": 3,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml"
+      },
+      "finalInventorySha256": "ae9786f69db898cdfea86754021683ea85e6d1f940425dc7f10042f665fabff6",
+      "finalFileCount": 877
+    },
+    {
+      "ref": "13287b4",
+      "commands": [
+        {
+          "command": [
+            "git",
+            "archive",
+            "--format=tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/13287b4fa51ec46d14590e87352f2169a1464dbe.tar",
+            "13287b4fa51ec46d14590e87352f2169a1464dbe"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "tar",
+            "-xf",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/13287b4fa51ec46d14590e87352f2169a1464dbe.tar",
+            "-C",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/13287b4fa51ec46d14590e87352f2169a1464dbe"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/13287b4fa51ec46d14590e87352f2169a1464dbe/packages/cli/scripts/sync-assets.mjs"
+          ],
+          "cwd": "sources/13287b4fa51ec46d14590e87352f2169a1464dbe",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/13287b4fa51ec46d14590e87352f2169a1464dbe/packages/cli/bin/spectra.js",
+            "init",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
+            "--git-mode",
+            "shared"
+          ],
+          "cwd": "sources/13287b4fa51ec46d14590e87352f2169a1464dbe",
+          "exitCode": 0,
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/13287b4fa51ec46d14590e87352f2169a1464dbe\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/13287b4fa51ec46d14590e87352f2169a1464dbe\nNEXT spectra check\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 1,
+          "stdout": "{\"outcome\":\"migration-required\",\"compatibility\":{\"status\":\"LEGACY_LAYOUT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":1,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"spectra-dir\",\"migrationAvailable\":true,\"migrationPath\":[\"layout\",\"1-to-2\",\"2-to-3\"],\"reason\":\"Legacy project layout requires explicit spectra migrate.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[{\"id\":\"layout\",\"fromSchema\":null,\"toSchema\":null},{\"id\":\"1-to-2\",\"fromSchema\":1,\"toSchema\":2},{\"id\":\"2-to-3\",\"fromSchema\":2,\"toSchema\":3}],\"conflicts\":[],\"required\":true,\"reason\":\"Migration required: layout -> 1-to-2 -> 2-to-3\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
+            "--yes",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-6VamYC\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "version"
+          ],
+          "cwd": "projects/13287b4fa51ec46d14590e87352f2169a1464dbe",
+          "exitCode": 0,
+          "stdout": "spectra 3.1.2\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "check",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/13287b4fa51ec46d14590e87352f2169a1464dbe"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "Validation: OK\nPolicy check: OK\nOK Validation and policy checks passed\n",
+          "stderr": ""
+        }
+      ],
+      "passed": true,
+      "sourceSha": "13287b4fa51ec46d14590e87352f2169a1464dbe",
+      "sourceVersion": "3.0.0",
+      "sourceArchiveSha256": "ad673f8d998ffcd7fcc344a2a484782337b145cabf6c07ace0b3c348e0b46db8",
+      "historicalDependency": {
+        "name": "yaml",
+        "version": "2.9.1",
+        "source": "existing workspace node_modules symlink; no install or network"
+      },
+      "archivedCliSha256": "c45ffc987405593abf671948d726989e1e73e482ed45de71b7753ca2c72499e1",
+      "archivedAssetsSha256": "b771b4adcb45e330cc5a34a9ba1904af10c3d519ca628ea84a4310f0ecca5f8a",
+      "sourceSchemaVersion": 1,
+      "generated": {
+        "layout": "spectra-dir",
+        "schemaVersion": 1,
+        "gitMode": "shared",
+        "manifestPath": "spectra/sdd/system/manifest.env",
+        "metadataPath": "spectra/install.json",
+        "configPath": "spectra/config.yaml",
+        "generationMode": "shared"
+      },
+      "projectKeyFiles": {
+        "sdd/memory-bank/core/projectbrief.md": "ab4ae7975a9cbe06bf7496b0b68baf0c172b9171dcf9bfdbfdd970617b0b0ff8",
+        "historical-user-data.md": "798322dd83d284f8c359d1c4cf834120125c1a3a718662a91efcc5cc833a3bb5"
+      },
+      "sentinelSha256": "798322dd83d284f8c359d1c4cf834120125c1a3a718662a91efcc5cc833a3bb5",
+      "migrationCheck": {
+        "outcome": "migration-required",
+        "steps": [
+          "layout",
+          "1-to-2",
+          "2-to-3"
+        ],
+        "inventorySha256": "dc7c306bbc7b8bf30efcaf68a3689e8bf63497ee210a276fca2ba61d0a1b4013"
+      },
+      "migration": {
+        "outcome": "current",
+        "status": "migrated",
+        "reason": "Migration complete.",
+        "projectSchemaVersion": 3,
+        "recoveryPath": ".spectra/recovery/migration-6VamYC",
+        "phase": "validation",
+        "validationStatus": "passed",
+        "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
+      },
+      "projectKeyFileChanges": [],
+      "finalState": {
+        "layout": "canonical",
+        "schemaVersion": 3,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml"
+      },
+      "finalInventorySha256": "34d70f090bdfa58b17e84ff6574614a34555a374d4f115510f537f1725bd2e46",
+      "finalFileCount": 846
+    },
+    {
+      "ref": "v3.0.8",
+      "commands": [
+        {
+          "command": [
+            "git",
+            "archive",
+            "--format=tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/23f1abed6dd61b60cd78838f2ed36f935cab415b.tar",
+            "23f1abed6dd61b60cd78838f2ed36f935cab415b"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "tar",
+            "-xf",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/23f1abed6dd61b60cd78838f2ed36f935cab415b.tar",
+            "-C",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/23f1abed6dd61b60cd78838f2ed36f935cab415b"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/23f1abed6dd61b60cd78838f2ed36f935cab415b/packages/cli/scripts/sync-assets.mjs"
+          ],
+          "cwd": "sources/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/23f1abed6dd61b60cd78838f2ed36f935cab415b/packages/cli/bin/spectra.js",
+            "init",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+            "--git-mode",
+            "shared"
+          ],
+          "cwd": "sources/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+          "exitCode": 0,
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b\nNEXT ./spectra/bin/spectra check\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 1,
+          "stdout": "{\"outcome\":\"migration-required\",\"compatibility\":{\"status\":\"LEGACY_LAYOUT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":2,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"spectra-dir\",\"migrationAvailable\":true,\"migrationPath\":[\"layout\",\"2-to-3\"],\"reason\":\"Legacy project layout requires explicit spectra migrate.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[{\"id\":\"layout\",\"fromSchema\":null,\"toSchema\":null},{\"id\":\"2-to-3\",\"fromSchema\":2,\"toSchema\":3}],\"conflicts\":[],\"required\":true,\"reason\":\"Migration required: layout -> 2-to-3\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+            "--yes",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-yTB8kD\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "version"
+          ],
+          "cwd": "projects/23f1abed6dd61b60cd78838f2ed36f935cab415b",
+          "exitCode": 0,
+          "stdout": "spectra 3.1.2\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "check",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/23f1abed6dd61b60cd78838f2ed36f935cab415b"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "Validation: OK\nPolicy check: OK\nOK Validation and policy checks passed\n",
+          "stderr": ""
+        }
+      ],
+      "passed": true,
+      "sourceSha": "23f1abed6dd61b60cd78838f2ed36f935cab415b",
+      "sourceVersion": "3.0.8",
+      "sourceArchiveSha256": "99b31dbc650bee0c5750c1d3c4b6860c1e73ba0df94509c2eefedb56ef99dfb7",
+      "historicalDependency": {
+        "name": "yaml",
+        "version": "2.9.1",
+        "source": "existing workspace node_modules symlink; no install or network"
+      },
+      "archivedCliSha256": "c45ffc987405593abf671948d726989e1e73e482ed45de71b7753ca2c72499e1",
+      "archivedAssetsSha256": "dc2e4d3f19d078cc73c2a38f4bb12f6d96a58337a1e828363bdee182b7df0708",
+      "sourceSchemaVersion": 2,
+      "generated": {
+        "layout": "spectra-dir",
+        "schemaVersion": 2,
+        "gitMode": "shared",
+        "manifestPath": "spectra/sdd/system/manifest.env",
+        "metadataPath": "spectra/install.json",
+        "configPath": "spectra/config.yaml",
+        "generationMode": "shared"
+      },
+      "projectKeyFiles": {
+        "sdd/memory-bank/core/projectbrief.md": "ab4ae7975a9cbe06bf7496b0b68baf0c172b9171dcf9bfdbfdd970617b0b0ff8",
+        "historical-user-data.md": "0783f55f9e0d3c537c45ecc7aba390d4c779204917cf5e6d1943c36b2d32f4f2"
+      },
+      "sentinelSha256": "0783f55f9e0d3c537c45ecc7aba390d4c779204917cf5e6d1943c36b2d32f4f2",
+      "migrationCheck": {
+        "outcome": "migration-required",
+        "steps": [
+          "layout",
+          "2-to-3"
+        ],
+        "inventorySha256": "cdf4214455ad97ef76eea2da030d71c38a6c40a6a36c01f431777e826eb8b289"
+      },
+      "migration": {
+        "outcome": "current",
+        "status": "migrated",
+        "reason": "Migration complete.",
+        "projectSchemaVersion": 3,
+        "recoveryPath": ".spectra/recovery/migration-yTB8kD",
+        "phase": "validation",
+        "validationStatus": "passed",
+        "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
+      },
+      "projectKeyFileChanges": [],
+      "finalState": {
+        "layout": "canonical",
+        "schemaVersion": 3,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml"
+      },
+      "finalInventorySha256": "eaf5b0a274e4cedcf72dd134c1bb904e5352ff9904703e77c267144a787aff10",
+      "finalFileCount": 849
+    },
+    {
+      "ref": "v3.0.9",
+      "commands": [
+        {
+          "command": [
+            "git",
+            "archive",
+            "--format=tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/a257721978a531f4237869703275b75527be7bd2.tar",
+            "a257721978a531f4237869703275b75527be7bd2"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "tar",
+            "-xf",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/a257721978a531f4237869703275b75527be7bd2.tar",
+            "-C",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/a257721978a531f4237869703275b75527be7bd2"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/a257721978a531f4237869703275b75527be7bd2/packages/cli/scripts/sync-assets.mjs"
+          ],
+          "cwd": "sources/a257721978a531f4237869703275b75527be7bd2",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/a257721978a531f4237869703275b75527be7bd2/packages/cli/bin/spectra.js",
+            "init",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/a257721978a531f4237869703275b75527be7bd2",
+            "--git-mode",
+            "shared"
+          ],
+          "cwd": "sources/a257721978a531f4237869703275b75527be7bd2",
+          "exitCode": 0,
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/a257721978a531f4237869703275b75527be7bd2\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/a257721978a531f4237869703275b75527be7bd2\nNEXT ./.spectra/bin/spectra check\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/a257721978a531f4237869703275b75527be7bd2",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 1,
+          "stdout": "{\"outcome\":\"migration-required\",\"compatibility\":{\"status\":\"MIGRATION_REQUIRED\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":2,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":true,\"migrationPath\":[\"2-to-3\"],\"reason\":\"Project schema 2 requires explicit spectra migrate to schema 3.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[{\"id\":\"2-to-3\",\"fromSchema\":2,\"toSchema\":3}],\"conflicts\":[],\"required\":true,\"reason\":\"Migration required: 2-to-3\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/a257721978a531f4237869703275b75527be7bd2",
+            "--yes",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-vrVIde\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/a257721978a531f4237869703275b75527be7bd2",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "version"
+          ],
+          "cwd": "projects/a257721978a531f4237869703275b75527be7bd2",
+          "exitCode": 0,
+          "stdout": "spectra 3.1.2\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "check",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/a257721978a531f4237869703275b75527be7bd2"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "Validation: OK\nPolicy check: OK\nOK Validation and policy checks passed\n",
+          "stderr": ""
+        }
+      ],
+      "passed": true,
+      "sourceSha": "a257721978a531f4237869703275b75527be7bd2",
+      "sourceVersion": "3.0.9",
+      "sourceArchiveSha256": "3979360a541e1f9708e5da39811b4a3f7c3c0e2450e804a8eb85006ca46eb3f4",
+      "historicalDependency": {
+        "name": "yaml",
+        "version": "2.9.1",
+        "source": "existing workspace node_modules symlink; no install or network"
+      },
+      "archivedCliSha256": "c45ffc987405593abf671948d726989e1e73e482ed45de71b7753ca2c72499e1",
+      "archivedAssetsSha256": "b1ec23b77a519de61c325441041126f9772e46bd108e7f683acb76a05c9954ac",
+      "sourceSchemaVersion": 2,
+      "generated": {
+        "layout": "canonical",
+        "schemaVersion": 2,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml",
+        "generationMode": "shared"
+      },
+      "projectKeyFiles": {
+        "sdd/memory-bank/core/projectbrief.md": "ab4ae7975a9cbe06bf7496b0b68baf0c172b9171dcf9bfdbfdd970617b0b0ff8",
+        "historical-user-data.md": "8e7c5ea748549a7d852bd42c5fc66b3d96c4bcefea0f87eb61157d952e501024"
+      },
+      "sentinelSha256": "8e7c5ea748549a7d852bd42c5fc66b3d96c4bcefea0f87eb61157d952e501024",
+      "migrationCheck": {
+        "outcome": "migration-required",
+        "steps": [
+          "2-to-3"
+        ],
+        "inventorySha256": "f94043302bb462012ee73905b8c248185392a237900676997ef28ac2a58c117e"
+      },
+      "migration": {
+        "outcome": "current",
+        "status": "migrated",
+        "reason": "Migration complete.",
+        "projectSchemaVersion": 3,
+        "recoveryPath": ".spectra/recovery/migration-vrVIde",
+        "phase": "validation",
+        "validationStatus": "passed",
+        "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
+      },
+      "projectKeyFileChanges": [],
+      "finalState": {
+        "layout": "canonical",
+        "schemaVersion": 3,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml"
+      },
+      "finalInventorySha256": "250e1d1e51475c65985e4a95556b3b2ff24d0f6c1b75270822ff76eade6e6b2a",
+      "finalFileCount": 849
+    },
+    {
+      "ref": "v3.1.0",
+      "commands": [
+        {
+          "command": [
+            "git",
+            "archive",
+            "--format=tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545.tar",
+            "fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "tar",
+            "-xf",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545.tar",
+            "-C",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545/packages/cli/scripts/sync-assets.mjs"
+          ],
+          "cwd": "sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545/packages/cli/bin/spectra.js",
+            "init",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+            "--git-mode",
+            "shared"
+          ],
+          "cwd": "sources/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+          "exitCode": 0,
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545\nNEXT ./.spectra/bin/spectra check\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 1,
+          "stdout": "{\"outcome\":\"migration-required\",\"compatibility\":{\"status\":\"MIGRATION_REQUIRED\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":2,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":true,\"migrationPath\":[\"2-to-3\"],\"reason\":\"Project schema 2 requires explicit spectra migrate to schema 3.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[{\"id\":\"2-to-3\",\"fromSchema\":2,\"toSchema\":3}],\"conflicts\":[],\"required\":true,\"reason\":\"Migration required: 2-to-3\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+            "--yes",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"status\":\"migrated\",\"reason\":\"Migration complete.\",\"projectSchemaVersion\":3,\"recoveryPath\":\".spectra/recovery/migration-0HMK1q\",\"phase\":\"validation\",\"validationStatus\":\"passed\",\"logs\":\"Validation: OK\\n\\n\\nPolicy check: OK\\n\\n\\nValidation and policy checks passed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "version"
+          ],
+          "cwd": "projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+          "exitCode": 0,
+          "stdout": "spectra 3.1.2\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "check",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "Validation: OK\nPolicy check: OK\nOK Validation and policy checks passed\n",
+          "stderr": ""
+        }
+      ],
+      "passed": true,
+      "sourceSha": "fa6b19a9f7f6c5243b9ddb72c0a806b1c7e81545",
+      "sourceVersion": "3.1.0",
+      "sourceArchiveSha256": "810a10d64916489096b44e7dea025c3c63e6cb7ef1e9b4758d454a9bca461be8",
+      "historicalDependency": {
+        "name": "yaml",
+        "version": "2.9.1",
+        "source": "existing workspace node_modules symlink; no install or network"
+      },
+      "archivedCliSha256": "c45ffc987405593abf671948d726989e1e73e482ed45de71b7753ca2c72499e1",
+      "archivedAssetsSha256": "a16e5f92abf5307c740f95cccf0fd27c8526777a6c65e72233e704eb5fae1973",
+      "sourceSchemaVersion": 2,
+      "generated": {
+        "layout": "canonical",
+        "schemaVersion": 2,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml",
+        "generationMode": "shared"
+      },
+      "projectKeyFiles": {
+        "sdd/memory-bank/core/projectbrief.md": "ab4ae7975a9cbe06bf7496b0b68baf0c172b9171dcf9bfdbfdd970617b0b0ff8",
+        "historical-user-data.md": "670ef989b5859ef73bd8ff2302288c394d34da08865290e0973e93093c0134a9"
+      },
+      "sentinelSha256": "670ef989b5859ef73bd8ff2302288c394d34da08865290e0973e93093c0134a9",
+      "migrationCheck": {
+        "outcome": "migration-required",
+        "steps": [
+          "2-to-3"
+        ],
+        "inventorySha256": "3328fd7590a1eabeab87643d9404716c51ad22fbd51be0905e7ad2877ad70ad7"
+      },
+      "migration": {
+        "outcome": "current",
+        "status": "migrated",
+        "reason": "Migration complete.",
+        "projectSchemaVersion": 3,
+        "recoveryPath": ".spectra/recovery/migration-0HMK1q",
+        "phase": "validation",
+        "validationStatus": "passed",
+        "logs": "Validation: OK\n\n\nPolicy check: OK\n\n\nValidation and policy checks passed"
+      },
+      "projectKeyFileChanges": [],
+      "finalState": {
+        "layout": "canonical",
+        "schemaVersion": 3,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml"
+      },
+      "finalInventorySha256": "81e8c10c3f0b695f98b63f5980d8f6ef102794b4524007b83381f6b68af18d7c",
+      "finalFileCount": 849
+    },
+    {
+      "ref": "v3.1.1",
+      "commands": [
+        {
+          "command": [
+            "git",
+            "archive",
+            "--format=tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/df76f909a53ce6426c43bf312c9a4571706684a7.tar",
+            "df76f909a53ce6426c43bf312c9a4571706684a7"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "tar",
+            "-xf",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/df76f909a53ce6426c43bf312c9a4571706684a7.tar",
+            "-C",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/df76f909a53ce6426c43bf312c9a4571706684a7"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/df76f909a53ce6426c43bf312c9a4571706684a7/packages/cli/scripts/sync-assets.mjs"
+          ],
+          "cwd": "sources/df76f909a53ce6426c43bf312c9a4571706684a7",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/df76f909a53ce6426c43bf312c9a4571706684a7/packages/cli/bin/spectra.js",
+            "init",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/df76f909a53ce6426c43bf312c9a4571706684a7",
+            "--git-mode",
+            "shared"
+          ],
+          "cwd": "sources/df76f909a53ce6426c43bf312c9a4571706684a7",
+          "exitCode": 0,
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/df76f909a53ce6426c43bf312c9a4571706684a7\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/df76f909a53ce6426c43bf312c9a4571706684a7\nNEXT ./.spectra/bin/spectra check\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/df76f909a53ce6426c43bf312c9a4571706684a7",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/df76f909a53ce6426c43bf312c9a4571706684a7",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "version"
+          ],
+          "cwd": "projects/df76f909a53ce6426c43bf312c9a4571706684a7",
+          "exitCode": 0,
+          "stdout": "spectra 3.1.2\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "check",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/df76f909a53ce6426c43bf312c9a4571706684a7"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "Validation: OK\nPolicy check: OK\nOK Validation and policy checks passed\n",
+          "stderr": ""
+        }
+      ],
+      "passed": true,
+      "sourceSha": "df76f909a53ce6426c43bf312c9a4571706684a7",
+      "sourceVersion": "3.1.1",
+      "sourceArchiveSha256": "c777ca742e5c076f4fd6eebb2a62a40d664193ebe241d82b7f6663a1f86f2c63",
+      "historicalDependency": {
+        "name": "yaml",
+        "version": "2.9.1",
+        "source": "existing workspace node_modules symlink; no install or network"
+      },
+      "archivedCliSha256": "c45ffc987405593abf671948d726989e1e73e482ed45de71b7753ca2c72499e1",
+      "archivedAssetsSha256": "14c2a9ac43bd4bdc35863ba1e1a5e2dbacb0367539f08395217ac71c7982334e",
+      "sourceSchemaVersion": 3,
+      "generated": {
+        "layout": "canonical",
+        "schemaVersion": 3,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml",
+        "generationMode": "shared"
+      },
+      "projectKeyFiles": {
+        "sdd/memory-bank/core/projectbrief.md": "ab4ae7975a9cbe06bf7496b0b68baf0c172b9171dcf9bfdbfdd970617b0b0ff8",
+        "sdd/governance/approval-state.yaml": "f872da73a64c1a781905416810573db71ce3cfba7923bb98abbd09b482e2f832",
+        "sdd/governance/decision-graph.yaml": "d82ff2ea46a2afbc54848d4cb10f2ae8f2fad3971a726b5539bc984eccf0d861",
+        "historical-user-data.md": "92af0817e720ac30c2d224ac34ef49f4f03128d04fe1d1c41ed146e48bf94948"
+      },
+      "sentinelSha256": "92af0817e720ac30c2d224ac34ef49f4f03128d04fe1d1c41ed146e48bf94948",
+      "migrationCheck": {
+        "outcome": "current",
+        "steps": [],
+        "inventorySha256": "2745989188629a63fd159bee7a4e6ec5f0b8ff045ec3f5953d72a8d921f63595"
+      },
+      "finalState": {
+        "layout": "canonical",
+        "schemaVersion": 3,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml"
+      },
+      "finalInventorySha256": "2745989188629a63fd159bee7a4e6ec5f0b8ff045ec3f5953d72a8d921f63595",
+      "finalFileCount": 755
+    },
+    {
+      "ref": "v3.1.2",
+      "commands": [
+        {
+          "command": [
+            "git",
+            "archive",
+            "--format=tar",
+            "--output=/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/e3aca7154a5cc255fa1469d50c124ceab1d48b29.tar",
+            "e3aca7154a5cc255fa1469d50c124ceab1d48b29"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "tar",
+            "-xf",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/e3aca7154a5cc255fa1469d50c124ceab1d48b29.tar",
+            "-C",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29/packages/cli/scripts/sync-assets.mjs"
+          ],
+          "cwd": "sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+          "exitCode": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29/packages/cli/bin/spectra.js",
+            "init",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+            "--git-mode",
+            "shared"
+          ],
+          "cwd": "sources/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+          "exitCode": 0,
+          "stdout": "OK Installed Spectra runtime in /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29\nNEXT cd /var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29\nNEXT ./.spectra/bin/spectra check\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "migrate",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+            "--check",
+            "--json"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "{\"outcome\":\"current\",\"compatibility\":{\"status\":\"CURRENT\",\"applicationVersion\":\"3.1.2\",\"projectSchemaVersion\":3,\"currentSchemaVersion\":3,\"minimumReadableSchema\":3,\"maximumReadableSchema\":3,\"layout\":\"canonical\",\"migrationAvailable\":false,\"migrationPath\":[],\"reason\":\"Project schema and canonical layout are current.\",\"conflicts\":[],\"sourceRepository\":false,\"incompleteMigration\":false},\"steps\":[],\"conflicts\":[],\"required\":false,\"reason\":\"Project is already current.\",\"validationStatus\":\"not-needed\"}\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "version"
+          ],
+          "cwd": "projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+          "exitCode": 0,
+          "stdout": "spectra 3.1.2\n",
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/private/tmp/spectra-native-node/node_modules/node/bin/node",
+            "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/packages/cli/bin/spectra.js",
+            "check",
+            "--cwd",
+            "/var/folders/zj/6hhyltbs04v4bnxfpvy03dwm0000gn/T/spectra-history-run-XMxOH0/projects/e3aca7154a5cc255fa1469d50c124ceab1d48b29"
+          ],
+          "cwd": "../../../../../../Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra",
+          "exitCode": 0,
+          "stdout": "Validation: OK\nPolicy check: OK\nOK Validation and policy checks passed\n",
+          "stderr": ""
+        }
+      ],
+      "passed": true,
+      "sourceSha": "e3aca7154a5cc255fa1469d50c124ceab1d48b29",
+      "sourceVersion": "3.1.2",
+      "sourceArchiveSha256": "1902911fd4130469e38c7be29bde8e1475b921478d128b6a5716c2ffade81f77",
+      "historicalDependency": {
+        "name": "yaml",
+        "version": "2.9.1",
+        "source": "existing workspace node_modules symlink; no install or network"
+      },
+      "archivedCliSha256": "c45ffc987405593abf671948d726989e1e73e482ed45de71b7753ca2c72499e1",
+      "archivedAssetsSha256": "03a9fa5070095abfe262e2209b877a5808ebfeb2622ffcc6a575dd14f0266f32",
+      "sourceSchemaVersion": 3,
+      "generated": {
+        "layout": "canonical",
+        "schemaVersion": 3,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml",
+        "generationMode": "shared"
+      },
+      "projectKeyFiles": {
+        "sdd/memory-bank/core/projectbrief.md": "ab4ae7975a9cbe06bf7496b0b68baf0c172b9171dcf9bfdbfdd970617b0b0ff8",
+        "sdd/governance/approval-state.yaml": "f872da73a64c1a781905416810573db71ce3cfba7923bb98abbd09b482e2f832",
+        "sdd/governance/decision-graph.yaml": "d82ff2ea46a2afbc54848d4cb10f2ae8f2fad3971a726b5539bc984eccf0d861",
+        "historical-user-data.md": "9b73c455aed2f0cc97e43912df342ba0b491968ef5d7ade3b853c4d83855fbf8"
+      },
+      "sentinelSha256": "9b73c455aed2f0cc97e43912df342ba0b491968ef5d7ade3b853c4d83855fbf8",
+      "migrationCheck": {
+        "outcome": "current",
+        "steps": [],
+        "inventorySha256": "4e4cddae225144d93fbf4a50ab7edf5a6f51b80e55a9fcffec9eb37b3fa33316"
+      },
+      "finalState": {
+        "layout": "canonical",
+        "schemaVersion": 3,
+        "gitMode": "shared",
+        "manifestPath": ".spectra/sdd/system/manifest.env",
+        "metadataPath": ".spectra/install.json",
+        "configPath": ".spectra/config.yaml"
+      },
+      "finalInventorySha256": "4e4cddae225144d93fbf4a50ab7edf5a6f51b80e55a9fcffec9eb37b3fa33316",
+      "finalFileCount": 756
+    }
+  ],
+  "passed": true,
+  "artifactDirectory": "/Users/yunus.akin/.codex/worktrees/machine-project-lifecycle/spectra/docs/lifecycle-verification-artifacts"
+}

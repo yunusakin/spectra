@@ -1,3 +1,4 @@
+import { migrateCommand } from "./commands/migrate.js";
 import { adaptersCommand } from "./commands/adapters.js";
 import { approveCommand } from "./commands/approve.js";
 import { contextCommand } from "./commands/context.js";
@@ -19,8 +20,13 @@ import { onboardCommand } from "./commands/onboard.js";
 import { verifyCommand } from "./commands/verify.js";
 import { printHelp as printCommandHelp } from "./commands/help.js";
 import { internalUpdateProjectCommand, updateCommand } from "./commands/update.js";
+import { uninstallCommand } from "./commands/uninstall.js";
 import { fail, title } from "./lib/output.js";
 import { getCliVersion } from "./lib/version.js";
+import path from "node:path";
+import { findProjectRoot } from "./lib/project-layout.js";
+import { assertProjectOperationAllowed } from "./lib/project-compatibility.js";
+import { parseOptions } from "./lib/options.js";
 
 // Compatibility adapter layer. The public vocabulary is canonical
 // internally: context, task, eval, skills, adapters, diff. Legacy forms
@@ -79,6 +85,33 @@ function dispatch(argv) {
   const { command, subcommand, rest } = normalized;
   const args = [subcommand, ...rest].filter(Boolean);
 
+  const projectCommands = new Set(["check", "index", "onboard", "__update-project", "init", "adopt", "validate", "approve", "context", "task", "route", "knowledge", "verify", "quick", "status", "doctor", "eval", "skills", "adapters", "diff", "migrate"]);
+  const helpFlag = args.filter(arg => arg === "--help" || arg.startsWith("--help=")).at(-1);
+  if (projectCommands.has(command) && !["--help", "--help=true"].includes(helpFlag)) {
+    if (command === "init" || command === "adopt") {
+      const { positional } = parseOptions(args, { booleanFlags: ["--help"], stringFlags: ["--agents", "--git-mode"] });
+      const target = path.resolve(positional[0] ?? ".");
+      assertProjectOperationAllowed(findProjectRoot(target) ?? target, command);
+    } else {
+      const optionValue = flag => {
+        let value;
+        for (let i = 0; i < args.length; i++) {
+          if (args[i] === flag) value = args[++i];
+          else if (args[i].startsWith(`${flag}=`)) value = args[i].slice(flag.length + 1);
+        }
+        return value;
+      };
+      const cwd = optionValue("--cwd") ?? process.cwd();
+      const projectRoot = findProjectRoot(cwd);
+      const operation = command === "doctor" && args.some(arg => arg === "--fix" || arg === "--fix=true") ? "doctor-fix" : command;
+      if (projectRoot) assertProjectOperationAllowed(projectRoot, operation);
+      if (command === "adapters") {
+        const target = path.resolve(optionValue("--target") ?? cwd);
+        assertProjectOperationAllowed(findProjectRoot(target) ?? target, "adapters-target");
+      }
+    }
+  }
+
   switch (command) {
     case undefined:
     case "--help":
@@ -94,8 +127,12 @@ function dispatch(argv) {
       return indexCommand(args);
     case "onboard":
       return onboardCommand(args);
+    case "migrate":
+      return migrateCommand(args);
     case "update":
       return updateCommand(args);
+    case "uninstall":
+      return uninstallCommand(args);
     case "__update-project":
       return internalUpdateProjectCommand(args);
     case "init":

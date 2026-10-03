@@ -1,6 +1,6 @@
 import path from "node:path";
 import { AGENT_DEFINITIONS, checkAgentsHealth, findForeignAdapterFiles } from "../lib/agent-health.js";
-import { installSpectra } from "../lib/install.js";
+import { refreshProjectRuntime } from "../lib/install.js";
 import { ensureLocalSpectraExclude } from "../lib/git-policy.js";
 import { validateBusinessContext } from "../lib/business-context.js";
 import { validateCommand } from "./validate.js";
@@ -15,7 +15,7 @@ import {
 } from "../lib/runtime.js";
 import { fail, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
-import { createInstallMetadata } from "../lib/install-metadata.js";
+import { assertProjectOperationAllowed, inspectProjectCompatibility } from "../lib/project-compatibility.js";
 
 function detectGitMode(repoRoot) {
   const metadata = readInstallMetadata(repoRoot);
@@ -25,17 +25,10 @@ function detectGitMode(repoRoot) {
   return "local";
 }
 
-function mergeMetadata(repoRoot, { gitMode, excludePatterns = null }) {
+function mergeMetadata(repoRoot, excludePatterns) {
   const current = readInstallMetadata(repoRoot) ?? {};
   writeInstallMetadata(repoRoot, {
     ...current,
-    ...createInstallMetadata({
-      gitMode,
-      installMode: current.installMode ?? "doctor-fix"
-    }),
-    installedAt: current.installedAt ?? new Date().toISOString(),
-    ...(current.binaryPath ? { binaryPath: current.binaryPath } : {}),
-    localLauncher: current.localLauncher ?? ".spectra/bin/spectra",
     ...(excludePatterns ? { excludePatterns: [...new Set([...(current.excludePatterns ?? []), ...excludePatterns])].sort() } : {})
   });
 }
@@ -44,23 +37,15 @@ function runFix(repoRoot) {
   const gitMode = detectGitMode(repoRoot);
   const fixed = [];
 
-  installSpectra({
-    targetDir: repoRoot,
-    gitMode,
-    refresh: true,
-    refreshMemoryBank: false,
-    refreshV2Scaffolding: false
-  });
+  refreshProjectRuntime(repoRoot);
   fixed.push("refreshed generated runtime, docs, system files, launcher, and install metadata");
 
   if (gitMode === "local") {
     const exclude = ensureLocalSpectraExclude(repoRoot);
-    mergeMetadata(repoRoot, { gitMode, excludePatterns: exclude.excludePatterns });
+    mergeMetadata(repoRoot, exclude.excludePatterns);
     if (exclude.changed) {
       fixed.push("restored local Git exclude policy for /.spectra/");
     }
-  } else {
-    mergeMetadata(repoRoot, { gitMode });
   }
 
   const repairableAdapters = checkAgentsHealth(repoRoot, Object.keys(AGENT_DEFINITIONS))
@@ -147,6 +132,14 @@ function doctorCommand(argv) {
   const repoRoot = findSpectraRoot(startDir);
 
   if (repoRoot) {
+    const compatibility = options["--fix"] ? assertProjectOperationAllowed(repoRoot, "doctor-fix") : inspectProjectCompatibility(repoRoot);
+    const sourceRuntime = compatibility.sourceRepository && compatibility.layout === "root-sdd" && compatibility.conflicts.length === 0;
+    if (compatibility.status !== "CURRENT" && !sourceRuntime) {
+      title(`Compatibility: ${compatibility.status}`);
+      title(`Application: ${compatibility.applicationVersion}; project schema: ${compatibility.projectSchemaVersion ?? "unknown"}; readable schema: ${compatibility.minimumReadableSchema}-${compatibility.maximumReadableSchema}`);
+      title(compatibility.reason);
+      return 1;
+    }
     ok(`Spectra runtime found at ${repoRoot}`);
     ok(`Packaged runtime scripts resolved from ${path.join(getRuntimeAssetsDir(), "scripts")}`);
 
