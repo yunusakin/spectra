@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { normalize, parseRuleStatement, rowValue, splitList, splitRawList } from "./parser.js";
+import { parseRuleSections, ruleStatuses } from "./rule-sections.js";
 import { getBusinessPaths, getContextRoot, readMarkdownTable, resolveBusinessPath } from "./repository.js";
 
 function validateKeywords({ row, domain, keywordOwners, errors }) {
@@ -95,34 +96,31 @@ function validateBusinessContext(repoRoot) {
         continue;
       }
       const content = fs.readFileSync(filePath, "utf8");
-      const sections = content.split(/^##\s+/m).slice(1);
-      for (const section of sections) {
-        const [heading, ...body] = section.split("\n");
-        const rule = heading.match(/^(RULE-[A-Z0-9-]+)\s+—\s+.+$/);
-        if (!rule) {
-          errors.push(`Malformed business rule heading in ${relativePath}: ${heading}`);
+      for (const section of parseRuleSections(content)) {
+        if (!section.id) {
+          errors.push(`Malformed business rule heading in ${relativePath}: ${section.heading}`);
           continue;
         }
-        const statuses = body.join("\n").match(/^Status:\s+(\S+)\s*$/gm) ?? [];
+        const statuses = ruleStatuses(section);
         if (statuses.length !== 1) {
-          errors.push(`Business rule ${rule[1]} must contain exactly one valid Status line.`);
+          errors.push(`Business rule ${section.id} must contain exactly one valid Status line.`);
           continue;
         }
-        const status = statuses[0].replace(/^Status:\s+/, "").trim();
-        if (ids.has(rule[1])) errors.push(`Duplicate business rule ID: ${rule[1]}`);
-        ids.add(rule[1]);
-        if (!["active", "unresolved", "superseded", "deprecated"].includes(status)) errors.push(`Invalid business-rule status for ${rule[1]}: ${status}`);
+        const status = statuses[0];
+        if (ids.has(section.id)) errors.push(`Duplicate business rule ID: ${section.id}`);
+        ids.add(section.id);
+        if (!["active", "unresolved", "superseded", "deprecated"].includes(status)) errors.push(`Invalid business-rule status for ${section.id}: ${status}`);
         const fileName = path.basename(relativePath);
-        if (fileName === "rules.md" && status === "unresolved") errors.push(`Business rule ${rule[1]} cannot be unresolved in rules.md.`);
-        if (fileName === "unresolved.md" && status !== "unresolved") errors.push(`Business rule ${rule[1]} must be unresolved in unresolved.md.`);
+        if (fileName === "rules.md" && status === "unresolved") errors.push(`Business rule ${section.id} cannot be unresolved in rules.md.`);
+        if (fileName === "unresolved.md" && status !== "unresolved") errors.push(`Business rule ${section.id} must be unresolved in unresolved.md.`);
         if (status === "active") {
-          const statement = normalize(parseRuleStatement(body.join("\n")));
+          const statement = normalize(parseRuleStatement(section.body));
           if (statement) {
             const statementKey = `${domain}:${statement}`;
             if (activeStatements.has(statementKey)) {
-              errors.push(`Duplicate active business-rule statement: ${activeStatements.get(statementKey)} and ${rule[1]}`);
+              errors.push(`Duplicate active business-rule statement: ${activeStatements.get(statementKey)} and ${section.id}`);
             } else {
-              activeStatements.set(statementKey, rule[1]);
+              activeStatements.set(statementKey, section.id);
             }
           }
         }

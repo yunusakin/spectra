@@ -1,7 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { normalize, readMarkdownTableContent } from "./parser.js";
+import { findRuleSection } from "./rule-sections.js";
 import { getBusinessPaths, requireProjectRoot, ruleFile } from "./repository.js";
+
+// Sections used to be matched together with their preceding newline; keep the
+// written bytes identical.
+const leadingNewline = (section) => (section.start > 0 ? "\n" : "");
+
+function spliceSection(content, section, replacement) {
+  return content.slice(0, section.start - (section.start > 0 ? 1 : 0)) + replacement + content.slice(section.end);
+}
 
 function nextRuleId(projectRoot, domain) {
   const prefix = `RULE-${normalize(domain).slice(0, 3).toUpperCase()}-`;
@@ -80,10 +89,10 @@ function promoteBusinessRule({ cwd, id }) {
     const unresolved = ruleFile(projectRoot, domain, "unresolved");
     if (!fs.existsSync(unresolved)) continue;
     const content = fs.readFileSync(unresolved, "utf8");
-    const match = content.match(new RegExp(`\\n## ${id}[^]*?(?=\\n## |$)`));
-    if (!match) continue;
-    fs.writeFileSync(unresolved, content.replace(match[0], "\n"));
-    fs.appendFileSync(ruleFile(projectRoot, domain, "active"), `${match[0].replace("Status: unresolved", "Status: active")}\n`);
+    const section = findRuleSection(content, id);
+    if (!section) continue;
+    fs.writeFileSync(unresolved, spliceSection(content, section, "\n"));
+    fs.appendFileSync(ruleFile(projectRoot, domain, "active"), `${leadingNewline(section)}${section.raw.replace("Status: unresolved", "Status: active")}\n`);
     return { id, domain };
   }
   throw new Error(`Unresolved business rule not found: ${id}`);
@@ -97,12 +106,12 @@ function transitionBusinessRule({ cwd, id, status }) {
     for (const filePath of [ruleFile(projectRoot, domain, "active"), ruleFile(projectRoot, domain, "unresolved")]) {
       if (!fs.existsSync(filePath)) continue;
       const content = fs.readFileSync(filePath, "utf8");
-      const match = content.match(new RegExp(`\\n## ${id}[^]*?(?=\\n## |$)`));
-      if (!match) continue;
+      const section = findRuleSection(content, id);
+      if (!section) continue;
       if (path.basename(filePath) === "unresolved.md") {
         throw new Error(`Business rule ${id} is unresolved. Promote it before changing it to ${status}.`);
       }
-      fs.writeFileSync(filePath, content.replace(match[0], match[0].replace(/^Status:\s+\S+$/m, `Status: ${status}`)));
+      fs.writeFileSync(filePath, spliceSection(content, section, `${leadingNewline(section)}${section.raw.replace(/^Status:\s+\S+$/m, `Status: ${status}`)}`));
       return { id, domain, status };
     }
   }
