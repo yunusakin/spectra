@@ -33,7 +33,7 @@ const registry = [
     validation: root => { if (detectLayout(root) !== "canonical") throw new Error("Canonical layout migration failed."); } },
   { id: "unversioned-to-1", fromSchema: null, toSchema: 1, preconditions: () => {}, mutation: () => {}, validation: () => {} },
   { id: "1-to-2", fromSchema: 1, toSchema: 2, preconditions: () => {}, mutation: memory, validation: validateMemory },
-  { id: "2-to-3", fromSchema: 2, toSchema: 3, preconditions: () => {}, mutation: root => { memory(root); ensureV2Scaffolding(getProjectLayout(root).root); }, validation: validateMemory }
+  { id: "2-to-3", fromSchema: 2, toSchema: 3, preconditions: () => {}, mutation: root => { memory(root); ensureV2Scaffolding(getProjectLayout(root).root, { preserveExisting: true }); }, validation: validateMemory }
 ];
 function projectMigrationPath(schema, layout) {
   const ids = [];
