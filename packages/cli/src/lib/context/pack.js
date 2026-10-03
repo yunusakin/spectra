@@ -234,12 +234,19 @@ function buildContextPack({
   // exact rule objects; the routing policy and the domain/module indexes stay.
   if (routeTask) {
     route = buildRoute({ cwd, task: routeTask, domains, modules });
-    const resolved = resolveKnowledgeEntries({ projectRoot, task: routeTask, route, changedFiles });
+    // Derived knowledge must never break context: on failure (for example a
+    // duplicate rule ID that `spectra check` reports) fall back to whole-file routing.
+    let resolved;
+    try {
+      resolved = resolveKnowledgeEntries({ projectRoot, task: routeTask, route, changedFiles });
+    } catch (error) {
+      resolved = { entries: [], mapStatus: "unavailable", error: error.message };
+    }
     const existingPaths = new Set(entries.map((entry) => entry.path));
     const replacedRuleFiles = [];
     for (const entry of route.entries) {
       if (existingPaths.has(entry.path)) continue;
-      if (entry.reason.startsWith("domain: ")) {
+      if (entry.reason.startsWith("domain: ") && !resolved.error) {
         replacedRuleFiles.push(entry.path);
         continue;
       }
@@ -257,7 +264,7 @@ function buildContextPack({
     }
     entries.push(...resolved.entries);
     avoid = [...new Set([...avoid, ...route.deferred, ...replacedRuleFiles])].filter((candidate) => !existingPaths.has(candidate));
-    knowledge = { map: resolved.mapStatus, resolved: resolved.entries.length };
+    knowledge = { map: resolved.mapStatus, resolved: resolved.entries.length, ...(resolved.error ? { error: resolved.error } : {}) };
   }
 
   const totals = entries.reduce(

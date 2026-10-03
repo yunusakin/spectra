@@ -287,6 +287,16 @@ test("dogfood: approval-gating task resolves FR-2, AC-2 and packages/cli evidenc
   assert.equal(pack.entries.some((entry) => entry.path === "sdd/system/runtime/minimal.md"), true, "baseline policy context stays");
 });
 
+test("a canonical knowledge error degrades to whole-file routing instead of failing context", () => {
+  const root = businessProject();
+  write(rulesFile(root, "payments"), `${fs.readFileSync(rulesFile(root, "loyalty"), "utf8")}`);
+  const { pack, resolved } = resolve(root, "Fix expired points");
+  assert.equal(pack.knowledge.map, "unavailable");
+  assert.match(pack.knowledge.error, /Duplicate business rule ID/);
+  assert.equal(resolved.length, 0);
+  assert.equal(pack.entries.some((entry) => entry.path === "sdd/memory-bank/business/loyalty/rules.md" && entry.source === "route"), true);
+});
+
 // ---- Regression --------------------------------------------------------------------------------
 
 test("plain `context` is unchanged: no knowledge fields, no knowledge cache", () => {

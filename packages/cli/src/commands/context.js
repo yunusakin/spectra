@@ -108,6 +108,10 @@ function contextCommand(argv) {
     domains: String(options["--domain"] ?? "").split(",").filter(Boolean),
     modules: String(options["--module"] ?? "").split(",").filter(Boolean)
   });
+  if (pack.knowledge?.error) {
+    warn(`Knowledge Map unavailable, using whole-file routing: ${pack.knowledge.error}`);
+  }
+
   switch (options["--format"] ?? "refs") {
     case "refs":
       printRefs(pack);
