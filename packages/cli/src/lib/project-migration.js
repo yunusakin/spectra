@@ -170,7 +170,10 @@ function executeProjectMigration(projectRoot, plan) {
     const progress = phase => { marker.phase = phase; atomicWrite(markerPath, JSON.stringify(marker, null, 2)); };
     const commitPending = () => {
       atomicWrite(layout.installMetadata, marker.pending.metadata); atomicWrite(layout.config, marker.pending.config);
-      const step = marker.steps.find(id => !marker.completed.includes(id)); marker.completed.push(step); delete marker.pending;
+      const step = marker.pending.stepId ?? marker.steps.find(id => !marker.completed.includes(id));
+      if (step && !marker.completed.includes(step)) marker.completed.push(step);
+      delete marker.pending;
+      if (marker.finalSchema) delete marker.finalSchema;
       marker.checkpoint = authorityHashes(root); progress("step-complete");
     };
     if (marker.phase === "schema-commit") commitPending();
@@ -186,8 +189,15 @@ function executeProjectMigration(projectRoot, plan) {
         config.set("schemaVersion", step.toSchema);
         config.set("gitMode", metadata.gitMode ?? "shared");
         if (step.toSchema === 3) { delete metadata.profile; config.delete("profile"); }
-        marker.pending = { schema: step.toSchema, metadata: JSON.stringify(metadata, null, 2), config: config.toString() };
-        progress("schema-commit"); commitPending();
+        const pending = { schema: step.toSchema, metadata: JSON.stringify(metadata, null, 2), config: config.toString() };
+        if (step.toSchema === 3) {
+          marker.finalSchema = pending;
+          marker.schemaBeforeFinal = inspectProjectCompatibility(root).projectSchemaVersion;
+          marker.completed.push(id); marker.checkpoint = authorityHashes(root); progress("step-complete");
+        } else {
+          marker.pending = { ...pending, stepId: id };
+          progress("schema-commit"); commitPending();
+        }
       } else { marker.completed.push(id); marker.checkpoint = authorityHashes(root); progress("step-complete"); }
     }
     if (marker.phase !== "validation") {
@@ -198,16 +208,42 @@ function executeProjectMigration(projectRoot, plan) {
       const writeAuthority = (file, content) => {
         const relativeFile = path.relative(root, file);
         if (![".spectra/install.json", ".spectra/config.yaml"].includes(relativeFile)) throw new Error("Invalid migration refresh authority.");
-        marker.refreshExpected[relativeFile] = [...new Set([...(marker.refreshExpected[relativeFile] ?? []), hash(content)])];
-        progress("refresh"); atomicWrite(file, content);
+        let persisted = content;
+        if (marker.finalSchema) {
+          if (relativeFile.endsWith("install.json")) {
+            const intended = JSON.parse(content); delete intended.profile;
+            marker.finalSchema.metadata = JSON.stringify(intended, null, 2);
+            const visible = { ...intended, schemaVersion: marker.schemaBeforeFinal };
+            const previous = exists(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};
+            if (Object.hasOwn(previous, "profile")) visible.profile = previous.profile;
+            persisted = JSON.stringify(visible, null, 2);
+          } else {
+            const intended = parseDocument(content);
+            if (intended.errors.length) throw intended.errors[0];
+            intended.set("schemaVersion", 3); intended.delete("profile");
+            marker.finalSchema.config = intended.toString();
+            const visible = parseDocument(content);
+            if (visible.errors.length) throw visible.errors[0];
+            visible.set("schemaVersion", marker.schemaBeforeFinal);
+            const previous = exists(file) ? parseDocument(fs.readFileSync(file, "utf8")) : parseDocument("");
+            if (previous.errors.length) throw previous.errors[0];
+            if (previous.has("profile")) visible.set("profile", previous.get("profile"));
+            persisted = visible.toString();
+          }
+          marker.pending = { ...marker.finalSchema, stepId: null };
+        }
+        marker.refreshExpected[relativeFile] = [...new Set([...(marker.refreshExpected[relativeFile] ?? []), hash(persisted)])];
+        progress("refresh"); atomicWrite(file, persisted);
       };
       refreshProjectRuntimeForMigration(root, marker.id, writeAuthority); verifyValues(root, marker, files);
       marker.checkpoint = authorityHashes(root); progress("validation");
     }
     const compatibility = inspectProjectCompatibility(root);
-    if (compatibility.layout !== "canonical" || compatibility.projectSchemaVersion !== 3 || compatibility.sourceRepository || compatibility.conflicts.some(conflict => conflict !== `Incomplete migration marker: ${MIGRATION_MARKER}`)) throw new Error("Final schema consistency failed.");
+    const expectedSchema = marker.finalSchema ? marker.schemaBeforeFinal : 3;
+    if (compatibility.layout !== "canonical" || compatibility.projectSchemaVersion !== expectedSchema || compatibility.sourceRepository || compatibility.conflicts.some(conflict => conflict !== `Incomplete migration marker: ${MIGRATION_MARKER}`)) throw new Error("Final schema consistency failed.");
     const validation = validateProject(root);
     if (validation.status !== "passed") return result("failed", "Migration applied, but post-migrate validation failed. Fix policy errors and resume with spectra migrate --yes.", "failed", validation.logs);
+    if (marker.finalSchema) { marker.pending = { ...marker.finalSchema, stepId: null }; progress("schema-commit"); commitPending(); }
     verifyValues(root, marker, files); fs.unlinkSync(markerPath);
     return result("migrated", "Migration complete.", "passed", validation.logs);
   } catch (error) {

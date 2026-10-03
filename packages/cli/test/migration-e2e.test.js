@@ -111,8 +111,12 @@ for(const fault of ['exclusions','schema-commit','step-validation','launcher','i
 });
 scenario('policy failure remains blocked then resumes validation', ({fixture,execute,report})=>{
  const root=fixture(); fs.writeFileSync(path.join(root,'company-source.js'),'export const change = true;'); const r=execute(root,['migrate','--yes','--json']); assert.equal(r.status,1); assert.equal(json(r).validationStatus,'failed'); assert.match(json(r).reason,/post-migrate validation failed/);
- assert.equal(JSON.parse(fs.readFileSync(path.join(root,'.spectra/migration.json'))).phase,'validation'); preserved(report,root);
+ assert.equal(JSON.parse(fs.readFileSync(path.join(root,'.spectra/migration.json'))).phase,'validation');
+ assert.equal(JSON.parse(fs.readFileSync(path.join(root,'.spectra/install.json'))).schemaVersion,2, 'failed final validation must not advance project schema metadata');
+ assert.match(fs.readFileSync(path.join(root,'.spectra/config.yaml'),'utf8'),/^schemaVersion: 2$/m);
+ preserved(report,root);
  fs.unlinkSync(path.join(root,'company-source.js')); success(execute(root,['migrate','--yes','--json']));
+ assert.equal(JSON.parse(fs.readFileSync(path.join(root,'.spectra/install.json'))).schemaVersion,3);
 });
 scenario('resume refuses edited valuable content and marker path injection',({fixture,execute,report})=>{
  for(const damage of ['value','path']) { const root=fixture(); execute(root,['migrate','--yes','--json'],'interrupt');
@@ -170,8 +174,8 @@ for(const route of ['migration','resume','repair']) scenario(`multiline config s
  const root=fixture(route==='repair'?3:2);const config=path.join(root,'.spectra/config.yaml');
  fs.writeFileSync(config,`gitMode: local\nschemaVersion: ${route==='repair'?3:2}\ncustom: |\n  first paragraph\n\n  second paragraph\nnested:\n  custom: |\n    gitMode: this is user text\n\n    schemaVersion: also user text\n`);
  const original=parse(fs.readFileSync(config,'utf8'));
- const compare=()=>{const current=parse(fs.readFileSync(config,'utf8'));assert.equal(current.custom,original.custom);assert.deepEqual(current.nested,original.nested);assert.equal(current.schemaVersion,3);assert.equal(current.gitMode,'local');};
- if(route==='resume'){const failed=execute(root,['migrate','--yes','--json'],'launcher');assert.equal(failed.status,1);compare();success(execute(root,['migrate','--yes','--json']));compare();}
+ const compare=(schema=3)=>{const current=parse(fs.readFileSync(config,'utf8'));assert.equal(current.custom,original.custom);assert.deepEqual(current.nested,original.nested);assert.equal(current.schemaVersion,schema);assert.equal(current.gitMode,'local');};
+ if(route==='resume'){const failed=execute(root,['migrate','--yes','--json'],'launcher');assert.equal(failed.status,1);compare(2);success(execute(root,['migrate','--yes','--json']));compare();}
  else{success(execute(root,route==='repair'?['doctor','--fix']:['migrate','--yes','--json']));compare();}
 });
 

@@ -344,7 +344,7 @@ function refreshProjectRuntime(projectRoot) {
 }
 
 // The executor keeps the marker in place through refresh and policy validation.
-// This entry point is limited to its exact root/id/phase and coherent schema 3;
+// This entry point is limited to its exact root/id/phase and coherent schema;
 // ordinary install/refresh callers cannot supply the module-private token.
 function refreshProjectRuntimeForMigration(projectRoot, migrationId, writeAuthority) {
   const root = fs.realpathSync(projectRoot);
@@ -352,8 +352,10 @@ function refreshProjectRuntimeForMigration(projectRoot, migrationId, writeAuthor
   if (fs.lstatSync(markerPath).isSymbolicLink()) throw new Error("Unsafe migration marker symlink.");
   const marker = JSON.parse(fs.readFileSync(markerPath, "utf8"));
   const compatibility = inspectProjectCompatibility(root);
+  const schemaIsAuthorized = compatibility.projectSchemaVersion === SCHEMA_VERSION ||
+    (marker.finalSchema && compatibility.projectSchemaVersion === marker.schemaBeforeFinal);
   if (typeof writeAuthority !== "function" || marker.id !== migrationId || marker.projectRoot !== root || marker.phase !== "refresh" ||
-      compatibility.sourceRepository || compatibility.layout !== "canonical" || compatibility.projectSchemaVersion !== SCHEMA_VERSION ||
+      compatibility.sourceRepository || compatibility.layout !== "canonical" || !schemaIsAuthorized ||
       compatibility.conflicts.some(conflict => conflict !== `Incomplete migration marker: ${MIGRATION_MARKER}`)) throw new Error("Unauthorized migration runtime refresh.");
   const metadata = readInstallMetadata(root);
   return installSpectra({ targetDir: root, adopt: metadata.installMode === "adopt", gitMode: metadata.gitMode ?? "shared",
