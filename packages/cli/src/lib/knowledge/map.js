@@ -14,7 +14,12 @@ function getKnowledgeMapPath(projectRoot) {
 // Lightweight pointer to an existing Repo Index record: the record keeps its id,
 // and its evidence/attributes stay in the index.
 function repoIndexReferences(projectRoot) {
-  const index = readIndex(projectRoot);
+  let index = null;
+  try {
+    index = readIndex(projectRoot);
+  } catch {
+    // A corrupt cached index is treated like a missing one (`spectra index` rebuilds it).
+  }
   return (index?.records ?? []).map((record) => ({
     reference: {
       ...createKnowledgeReference({

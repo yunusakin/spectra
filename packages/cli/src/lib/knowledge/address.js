@@ -125,7 +125,7 @@ function resolveFeatureObject(projectRoot, qualifiedId) {
   if (specs.length > 1) throw new Error(`Duplicate feature ID: ${featureId}`);
 
   const { specPath, spec } = specs[0];
-  const matches = [...featureObjects(spec)].filter(({ object }) => object.id === localId);
+  const matches = [...featureObjects(spec)].filter(({ object }) => String(object.id) === localId);
   if (matches.length === 0) throw new Error(`Feature object not found: ${qualifiedId}`);
   if (matches.length > 1) throw new Error(`Duplicate feature object ID: ${qualifiedId}`);
 

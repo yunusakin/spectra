@@ -358,6 +358,37 @@ test("canonical check rejects the same metadata.id in two feature directories", 
   assert.match(result.stderr, new RegExp(`Duplicate feature ID: ${spec.metadata.id}`));
 });
 
+// ---- Review findings (PR #35) ----------------------------------------------------
+
+test("numeric feature object ids are enumerated and resolve consistently", () => {
+  const root = createProject();
+  writeFeature(root, "num", featureSpec("num", { requirements: { functional: [{ id: 1, statement: "one" }], nonFunctional: [] } }));
+  const map = buildKnowledgeMap(root);
+  const reference = lookupKnowledgeReference(map, "num#1");
+  assert.deepEqual(withoutSignature(reference), resolveFeatureObject(root, "num#1").reference);
+  assert.equal(reference.address, "yaml:requirements.functional[id=1]");
+});
+
+test("check does not crash on a non-array acceptance.scenarios", () => {
+  const root = createProject();
+  const file = path.join(sdd(root), "features", "spectra-core", "feature.spec.yaml");
+  const spec = YAML.parse(fs.readFileSync(file, "utf8"));
+  spec.acceptance = { scenarios: { "AC-1": { given: "g" } } };
+  fs.writeFileSync(file, YAML.stringify(spec));
+  const result = run(root, ["check"]);
+  assert.doesNotMatch(`${result.stderr}${result.stdout}`, /is not a function|not iterable/);
+});
+
+test("a corrupt repo-index.json degrades to 'no repo records' and reports stale", () => {
+  const root = projectWithKnowledge();
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "demo", version: "1.0.0" }));
+  assert.equal(run(root, ["index"]).status, 0);
+  writeKnowledgeMap(root, buildKnowledgeMap(root));
+  fs.writeFileSync(path.join(root, ".spectra", "cache", "index", "repo-index.json"), "{truncated");
+  assert.equal(checkKnowledgeMapFreshness(root).status, "stale");
+  assert.equal(buildKnowledgeMap(root).references.some((reference) => reference.source === "repo-index"), false);
+});
+
 // ---- Lifecycle / approval / context regression ------------------------------------
 
 test("build, write and delete never touch canonical state, approvals, git or `spectra context`", () => {

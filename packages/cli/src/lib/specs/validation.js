@@ -42,7 +42,7 @@ function validateFeatureBundle(bundlePaths) {
   const featureId = featureSpec.metadata.id;
   const requirementIds = new Set(listRequirementIds(featureSpec));
   // `<feature-id>#<id>` is a global semantic identity (see knowledge/address.js).
-  const objectIds = [...listRequirementIds(featureSpec), ...(featureSpec.acceptance?.scenarios ?? []).map((scenario) => scenario?.id)];
+  const objectIds = [...listRequirementIds(featureSpec), ...(Array.isArray(featureSpec.acceptance?.scenarios) ? featureSpec.acceptance.scenarios : []).map((scenario) => scenario?.id)];
   for (const objectId of new Set(objectIds.filter((id, index) => id != null && objectIds.indexOf(id) !== index))) {
     errors.push(`${bundlePaths.featureSpecPath}: Duplicate feature object ID: ${featureId}#${objectId}`);
   }
