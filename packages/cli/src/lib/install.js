@@ -29,6 +29,7 @@ import { parseProjectSummary } from "./context/memory-summaries.js";
 import { normalize } from "./business/parser.js";
 import { warn } from "./output.js";
 import { assertProjectOperationAllowed, inspectProjectCompatibility, MIGRATION_MARKER } from "./project-compatibility.js";
+import { inspectApplicationInstallation, resolveStableMachineCommand } from "./application-installation.js";
 
 function replaceDirectory(sourceDir, targetDir) {
   if (!fs.existsSync(sourceDir)) {
@@ -59,6 +60,12 @@ function detectNativeBinaryPath() {
   }
 
   return null;
+}
+
+function detectStableMachineCommand(existingMetadata) {
+  const installation = inspectApplicationInstallation({ execPath: getExecutablePath() });
+  if (installation.kind === "native-managed") return installation.commandPath;
+  return resolveStableMachineCommand(existingMetadata?.stableCommandPath);
 }
 
 function materializeLocalNodeCli(targetRoot) {
@@ -100,19 +107,24 @@ function shellQuote(value) {
   return `'${String(value).replace(/'/g, "'\\''")}'`;
 }
 
-function writeRepoLocalLauncher(targetRoot, nativeBinaryPath) {
+function writeRepoLocalLauncher(targetRoot, nativeBinaryPath, stableCommandPath) {
   const launcherDir = getProjectLayout(targetRoot).bin;
   ensureDirectory(launcherDir);
 
   const launcherPath = path.join(launcherDir, "spectra");
   const recordedBinary = nativeBinaryPath ? shellQuote(nativeBinaryPath) : "''";
+  const recordedStableCommand = stableCommandPath ? shellQuote(stableCommandPath) : "''";
   fs.writeFileSync(
     launcherPath,
     [
       "#!/usr/bin/env sh",
       "set -eu",
-      "SCRIPT_DIR=$(CDPATH= cd -- \"$(dirname -- \"$0\")\" && pwd)",
+      "SCRIPT_DIR=$(CDPATH= cd -P -- \"$(dirname -- \"$0\")\" && pwd -P)",
+      "RECORDED_STABLE_COMMAND=" + recordedStableCommand,
       "RECORDED_BINARY=" + recordedBinary,
+      "if [ -n \"$RECORDED_STABLE_COMMAND\" ] && [ -x \"$RECORDED_STABLE_COMMAND\" ]; then",
+      "  exec \"$RECORDED_STABLE_COMMAND\" \"$@\"",
+      "fi",
       "if [ -n \"$RECORDED_BINARY\" ] && [ -x \"$RECORDED_BINARY\" ]; then",
       "  exec \"$RECORDED_BINARY\" \"$@\"",
       "fi",
@@ -120,8 +132,13 @@ function writeRepoLocalLauncher(targetRoot, nativeBinaryPath) {
       "  exec node \"$SCRIPT_DIR/../cli/bin/spectra.js\" \"$@\"",
       "fi",
       "FOUND_SPECTRA=$(command -v spectra 2>/dev/null || true)",
-      "if [ -n \"$FOUND_SPECTRA\" ] && [ \"$FOUND_SPECTRA\" != \"$SCRIPT_DIR/spectra\" ]; then",
-      "  exec \"$FOUND_SPECTRA\" \"$@\"",
+      "if [ -n \"$FOUND_SPECTRA\" ]; then",
+      "  FOUND_DIR=$(CDPATH= cd -P -- \"$(dirname -- \"$FOUND_SPECTRA\")\" && pwd -P)",
+      "  FOUND_BASE=$(basename -- \"$FOUND_SPECTRA\")",
+      "  SELF_BASE=$(basename -- \"$0\")",
+      "  if [ \"$FOUND_DIR/$FOUND_BASE\" != \"$SCRIPT_DIR/$SELF_BASE\" ] && [ \"${SPECTRA_LAUNCHER_CHAINED:-0}\" != 1 ]; then",
+      "    SPECTRA_LAUNCHER_CHAINED=1 exec \"$FOUND_SPECTRA\" \"$@\"",
+      "  fi",
       "fi",
       "echo \"Spectra launcher could not find a native binary, local Node CLI, or spectra on PATH.\" >&2",
       "exit 127",
@@ -237,12 +254,14 @@ function installSpectra({
     ensureV2Scaffolding(layout.root, { adopt });
   }
   const nativeBinaryPath = detectNativeBinaryPath() ?? existingMetadata?.binaryPath ?? null;
+  const stableCommandPath = detectStableMachineCommand(existingMetadata);
   materializeLocalNodeCli(absoluteTarget);
-  writeRepoLocalLauncher(absoluteTarget, nativeBinaryPath);
+  writeRepoLocalLauncher(absoluteTarget, nativeBinaryPath, stableCommandPath);
   removeFinderArtifacts(layout.root);
   const metadata = {
     ...createInstallMetadata({ gitMode, installMode: existingMetadata?.installMode ?? (adopt ? "adopt" : "init"), previous: existingMetadata }),
     binaryPath: nativeBinaryPath,
+    stableCommandPath,
     docsProjectName: stableDocsName,
     docsGuidePaths: [...new Set([...(existingMetadata?.docsGuidePaths ?? []), ...docsGuidePaths])],
     localLauncher: ".spectra/bin/spectra"

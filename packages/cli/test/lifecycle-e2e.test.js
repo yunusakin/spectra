@@ -11,6 +11,11 @@ import { getCliVersion } from "../src/lib/version.js";
 // Failure modes: update requires a project or implicitly migrates it; newer schema
 // writes; missing/corrupt state is repaired destructively; unsafe uninstall;
 // unmanaged fallback pinning breaks; briefs/plugin docs lose value on migration.
+// Task 6 failures: an old generated launcher stays pinned after native update,
+// stable custom commands require PATH, Node and PATH fallbacks are skipped,
+// standalone pins change unexpectedly, symlink aliases recurse, source refresh
+// deletes its active local CLI, old executable rollback bytes are lost, or a
+// machine update scans/mutates projects or trusts project metadata as ownership.
 // Repeat one case with node --test --test-name-pattern='migration check' <this file>.
 // Every case keeps JSON evidence and its fixture roots, including on failure.
 const output = process.env.SPECTRA_LIFECYCLE_ARTIFACT_DIR || path.join(os.tmpdir(), "spectra-lifecycle-e2e");
@@ -139,6 +144,51 @@ scenario("fallback pinning: standalone stays pinned and Node fallback remains us
   const pinned = execute(root, ["version"], localSpectra); unchanged(report); success(pinned); assert.match(pinned.stdout, /standalone-pinned/);
   fs.unlinkSync(standalone);
   const fallback = execute(root, ["version"], localSpectra); unchanged(report); success(fallback); assert.ok(fallback.stdout.includes(source.version));
+});
+scenario("PATH fallback remains available when project-local Node files are missing", ({ project, execute, report }) => {
+  const root = project();
+  const metadataPath = path.join(root, ".spectra/install.json");
+  const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+  delete metadata.binaryPath; delete metadata.stableCommandPath;
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2) + "\n");
+  fs.rmSync(path.join(root, ".spectra/cli"), { recursive: true, force: true });
+  const fallback = path.join(runRoot, "path-fallback"); fs.mkdirSync(fallback);
+  fs.writeFileSync(path.join(fallback, "spectra"), '#!/bin/sh\necho "path-fallback-ok"\n', { mode: 0o755 });
+  const tools = path.join(runRoot, "path-tools"); fs.mkdirSync(tools);
+  fs.symlinkSync(fs.realpathSync("/usr/bin/dirname"), path.join(tools, "dirname"));
+  fs.symlinkSync(fs.realpathSync("/usr/bin/basename"), path.join(tools, "basename"));
+  fs.symlinkSync(fs.realpathSync("/usr/bin/env"), path.join(tools, "env"));
+  fs.symlinkSync(fs.realpathSync("/bin/sh"), path.join(tools, "sh"));
+  const result = execute(root, ["version"], localSpectra, { PATH: fallback + ":" + tools });
+  unchanged(report); success(result); assert.match(result.stdout, /path-fallback-ok/);
+});
+scenario("local launcher refresh through a symlinked project path preserves its active CLI source", ({ project, execute, report }) => {
+  const root = project();
+  const alias = path.join(runRoot, "self-refresh-alias"); fs.symlinkSync(root, alias, "dir");
+  const sourceCli = path.join(root, ".spectra/cli/bin/spectra.js");
+  const beforeCli = digest(sourceCli);
+  const result = execute(alias, ["doctor", "--fix"], localSpectra);
+  success(result);
+  assert.equal(digest(sourceCli), beforeCli);
+  success(execute(alias, ["version"], localSpectra));
+});
+scenario("launcher aliases do not recurse when every fallback is unavailable", ({ project, execute, report }) => {
+  const root = project();
+  const metadataPath = path.join(root, ".spectra/install.json");
+  const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+  delete metadata.binaryPath; delete metadata.stableCommandPath;
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2) + "\n");
+  fs.rmSync(path.join(root, ".spectra/cli"), { recursive: true, force: true });
+  const alias = path.join(runRoot, "recursive-alias"); fs.symlinkSync(root, alias, "dir");
+  const tools = path.join(runRoot, "recursive-tools"); fs.mkdirSync(tools);
+  fs.symlinkSync(fs.realpathSync("/usr/bin/dirname"), path.join(tools, "dirname"));
+  fs.symlinkSync(fs.realpathSync("/usr/bin/basename"), path.join(tools, "basename"));
+  fs.symlinkSync(fs.realpathSync("/usr/bin/env"), path.join(tools, "env"));
+  fs.symlinkSync(fs.realpathSync("/bin/sh"), path.join(tools, "sh"));
+  const result = execute(root, ["version"], localSpectra, { PATH: path.join(alias, ".spectra/bin") + ":" + tools });
+  unchanged(report); assert.equal(result.status, 127);
+  assert.match(result.stderr, /could not find|managed command/i);
+  assert.doesNotMatch(result.stderr, /resource temporarily unavailable|too many levels/i);
 });
 
 // Compatibility failure modes: invalid or competing authorities, damaged markers,

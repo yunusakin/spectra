@@ -1,5 +1,5 @@
 import path from "node:path";
-import { inspectApplicationInstallation, planApplicationUpdate, adoptLegacyNativeInstallation, VERSION_PATTERN } from "./application-installation.js";
+import { inspectApplicationInstallation, planApplicationUpdate, adoptLegacyNativeInstallation, forwardRetainedExecutables, VERSION_PATTERN } from "./application-installation.js";
 import { spawnSync } from "node:child_process";
 import { fail } from "./output.js";
 
@@ -62,6 +62,7 @@ function runSelfUpdate(latest, installation = inspectApplicationInstallation()) 
     if (result.status !== 0) throw new Error(`Native installer did not activate Spectra ${plan.version} (status ${result.status}).`);
     const activated = spawnSync(plan.commandPath, ["version"], { encoding: "utf8" });
     if (activated.status !== 0 || activated.stdout.trim() !== `spectra ${plan.version}`) throw new Error(`Activated application version does not equal requested version ${plan.version}.`);
+    forwardRetainedExecutables(plan.installation);
     return 0;
   } catch (error) {
     fail(`Software update was not applied: ${error.message}`);

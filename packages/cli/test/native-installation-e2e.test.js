@@ -138,16 +138,70 @@ scenario("native provenance refuses spoofed roots and source invocation", ({ ins
 scenario("managed native update retains prior version and two independent projects", ({ dir, env, run, install, command, editedArchive }) => {
   const older = stagedOlderArchive({ dir, run, editedArchive });
   success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
-  const previous = inventory(path.join(env.SPECTRA_HOME, "3.1.1"));
+  const previousDir = path.join(env.SPECTRA_HOME, "3.1.1");
+  const previous = inventory(previousDir); const previousBytes = hash(path.join(previousDir, "bin/spectra"));
   const projects = ["project-a", "project-b"].map(name => path.join(dir, name));
   for (const project of projects) { fs.mkdirSync(project); success(run("git", ["init", "-q", project])); success(run(command, ["init", project], env)); }
   const before = projects.map(inventory);
   success(run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" }));
   assert.equal(fs.realpathSync(command), path.join(env.SPECTRA_HOME, "3.1.2/bin/spectra"));
   assert.match(run(command, ["version"], env).stdout, /3\.1\.2/);
-  assert.deepEqual(inventory(path.join(env.SPECTRA_HOME, "3.1.1")), previous);
+  const retained = inventory(previousDir);
+  for (const file of ["bin/spectra", "bin/spectra.rollback", "ownership.env"]) { delete retained[file]; delete previous[file]; }
+  assert.deepEqual(retained, previous, "Forwarding may change only executable ownership files");
+  assert.equal(hash(path.join(previousDir, "bin/spectra.rollback")), previousBytes);
+  assert.match(fs.readFileSync(path.join(previousDir, "ownership.env"), "utf8"), /^forwarderSha256=/m);
   assert.deepEqual(projects.map(inventory), before);
   assert(fs.existsSync(path.join(env.SPECTRA_HOME, "3.1.1/ownership.env")));
+});
+
+scenario("old native project launcher follows the stable command after machine update", ({ dir, env, run, install, command, editedArchive }) => {
+  const older = stagedOlderArchive({ dir, run, editedArchive });
+  success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
+  const project = path.join(dir, "old-launcher-project"); fs.mkdirSync(project);
+  success(run("git", ["init", "-q", project])); success(run(command, ["init", project], env));
+  const launcher = path.join(project, ".spectra/bin/spectra");
+  const legacyBinary = path.join(env.SPECTRA_HOME, "3.1.1/bin/spectra");
+  fs.writeFileSync(launcher, [
+    "#!/usr/bin/env sh", "set -eu", "RECORDED_BINARY=" + quote(legacyBinary),
+    "if [ -x \"$RECORDED_BINARY\" ]; then exec \"$RECORDED_BINARY\" \"$@\"; fi",
+    "exit 127", ""
+  ].join("\n"), { mode: 0o755 });
+  assert.match(run(launcher, ["version"], env).stdout, /3\.1\.1/);
+  const projectBefore = inventory(project); const oldExecutable = legacyBinary;
+  const oldBytes = hash(oldExecutable);
+  success(run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" }));
+  assert.match(run(launcher, ["version"], { ...env, PATH: "/usr/bin:/bin" }).stdout, /3\.1\.2/);
+  assert.match(run(oldExecutable, ["version"], { ...env, PATH: "/usr/bin:/bin" }).stdout, /3\.1\.2/);
+  assert.equal(hash(path.join(env.SPECTRA_HOME, "3.1.1/bin/spectra.rollback")), oldBytes, "Forwarding must preserve original executable bytes for rollback");
+  assert.deepEqual(inventory(project), projectBefore, "Machine update must not visit project directories");
+});
+
+scenario("update retries an interrupted forwarding backup only when it matches the owned executable", ({ dir, env, run, install, command, editedArchive }) => {
+  const older = stagedOlderArchive({ dir, run, editedArchive });
+  success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
+  const oldExecutable = path.join(env.SPECTRA_HOME, "3.1.1/bin/spectra");
+  const oldBytes = hash(oldExecutable);
+  fs.copyFileSync(oldExecutable, oldExecutable + ".rollback", fs.constants.COPYFILE_EXCL);
+  assert.equal(hash(oldExecutable + ".rollback"), oldBytes, "Simulates a crash after preserving bytes, before replacing the executable");
+  success(run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" }));
+  assert.equal(hash(oldExecutable + ".rollback"), oldBytes, "Successful retry must retain the rollback copy");
+  assert.match(fs.readFileSync(path.join(env.SPECTRA_HOME, "3.1.1/ownership.env"), "utf8"), /^forwarderSha256=/m);
+  assert.match(run(oldExecutable, ["version"], { ...env, PATH: "/usr/bin:/bin" }).stdout, /3\.1\.2/);
+});
+
+scenario("recorded custom stable command works when it is absent from PATH", ({ dir, env, install, command, run }) => {
+  success(install());
+  const project = path.join(dir, "custom-command-project"); fs.mkdirSync(project);
+  success(run("git", ["init", "-q", project])); success(run(command, ["init", project], env));
+  const metadataPath = path.join(project, ".spectra/install.json");
+  const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+  assert.equal(metadata.stableCommandPath, command);
+  assert.match(fs.readFileSync(path.join(project, ".spectra/bin/spectra"), "utf8"), /RECORDED_STABLE_COMMAND/);
+  delete metadata.binaryPath;
+  fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2) + "\n");
+  const result = run(path.join(project, ".spectra/bin/spectra"), ["version"], { ...env, PATH: "/usr/bin:/bin" });
+  assert.match(result.stdout, /3\.1\.2/);
 });
 
 scenario("recordless executing native adoption updates safely and preserves projects", ({ dir, env, run, install, command, editedArchive }) => {
@@ -163,7 +217,9 @@ scenario("recordless executing native adoption updates safely and preserves proj
   success(run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" }));
   assert.equal(fs.realpathSync(command), path.join(env.SPECTRA_HOME, "3.1.2/bin/spectra"));
   const legacyAfter = inventory(oldDir);
-  for (const [name, digest] of Object.entries(legacyBefore)) assert.deepEqual(legacyAfter[name], digest, name);
+  for (const [name, digest] of Object.entries(legacyBefore)) if (name !== "bin/spectra") assert.deepEqual(legacyAfter[name], digest, name);
+  assert.equal(hash(path.join(oldDir, "bin/spectra.rollback")), legacyBefore["bin/spectra"]);
+  assert.match(fs.readFileSync(path.join(oldDir, "ownership.env"), "utf8"), /^forwarderSha256=/m);
   assert.match(fs.readFileSync(path.join(oldDir, "ownership.env"), "utf8"), /^method=native-legacy$/m);
   assert.match(fs.readFileSync(path.join(oldDir, "ownership.env"), "utf8"), /^archiveSha256=unknown$/m);
   assert.deepEqual(projects.map(inventory), projectBefore);
@@ -214,7 +270,12 @@ scenario("interrupted legacy adoption resumes only exact version ownership", ({ 
   fs.writeFileSync(ownership, record); const oldBefore = inventory(oldDir);
   success(run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" }));
   assert.equal(fs.realpathSync(command), path.join(env.SPECTRA_HOME, "3.1.2/bin/spectra"));
-  assert.deepEqual(inventory(oldDir), oldBefore, "Resumption must not replace its verified version record or installer");
+  const oldAfter = inventory(oldDir);
+  for (const [name, digest] of Object.entries(oldBefore)) if (name !== "bin/spectra" && name !== "ownership.env") assert.deepEqual(oldAfter[name], digest, name);
+  assert.equal(hash(path.join(oldDir, "bin/spectra.rollback")), oldBefore["bin/spectra"]);
+  assert.equal(hash(path.join(oldDir, "install.sh")), oldBefore["install.sh"]);
+  assert.match(fs.readFileSync(ownership, "utf8"), /^method=native-legacy$/m);
+  assert.match(fs.readFileSync(ownership, "utf8"), /^archiveSha256=unknown$/m);
   assert.deepEqual(projects.map(inventory), projectBefore);
   assert(fs.existsSync(path.join(env.SPECTRA_HOME, "installation.env")));
 });

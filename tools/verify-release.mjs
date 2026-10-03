@@ -96,6 +96,7 @@ try {
     const metaFile = path.join(project, ".spectra/install.json");
     const meta = JSON.parse(fs.readFileSync(metaFile, "utf8"));
     assert.equal(meta.cliVersion, version); assert.equal(meta.runtimeVersion, version); assert.equal(meta.schemaVersion, 3);
+    assert.equal(meta.stableCommandPath, mode.name === "native" ? installedNative : null);
     assert(meta.docsProjectName);
     const docs = `.spectra/docs/${meta.docsProjectName}`;
     assert(fs.readFileSync(path.join(project, "CLAUDE.md"), "utf8").includes(docs));

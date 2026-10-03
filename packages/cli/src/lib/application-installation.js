@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { isSea } from "node:sea";
 import { getCliPackageRoot } from "./runtime.js";
 import { getCliVersion } from "./version.js";
@@ -36,14 +36,25 @@ function readOwnedVersion(home, commandPath, version, env = process.env) {
   const directory = assertSafeInstallationPath(path.join(home, version), env);
   const executablePath = assertSafeInstallationPath(path.join(directory, "bin/spectra"), env);
   const recordPath = assertSafeInstallationPath(path.join(directory, "ownership.env"), env);
-  const record = readRecord(recordPath, ["format", "method", "home", "commandPath", "version", "executablePath", "sha256", "archiveSha256", "installerSha256"]);
+  const keys = ["format", "method", "home", "commandPath", "version", "executablePath", "sha256", "archiveSha256", "installerSha256"];
+  if (fs.readFileSync(recordPath, "utf8").includes("\nforwarderSha256=")) keys.push("forwarderSha256");
+  const record = readRecord(recordPath, keys);
   if (record.home !== home || record.commandPath !== commandPath || record.version !== version || record.executablePath !== executablePath || !(record.method === "native" ? /^[a-f0-9]{64}$/.test(record.archiveSha256) : record.archiveSha256 === "unknown")) throw new Error(`Ownership does not match version paths: ${directory}`);
   const versionPath = assertSafeInstallationPath(path.join(directory, "VERSION"), env);
   const installerPath = assertSafeInstallationPath(path.join(directory, "install.sh"), env);
   if (hash(installerPath) !== record.installerSha256) throw new Error(`Owned installer validation failed: ${directory}`);
   const assetsPath = assertSafeInstallationPath(path.join(directory, "assets/runtime"), env);
-  if (!fs.statSync(assetsPath).isDirectory() || fs.readFileSync(versionPath, "utf8").trim() !== version || !fs.statSync(executablePath).isFile() || hash(executablePath) !== record.sha256) throw new Error(`Owned runtime validation failed: ${directory}`);
-  return { ...record, directory, recordPath };
+  if (!fs.statSync(assetsPath).isDirectory() || fs.readFileSync(versionPath, "utf8").trim() !== version || !fs.statSync(executablePath).isFile()) throw new Error(`Owned runtime validation failed: ${directory}`);
+  let rollbackPath;
+  if (record.forwarderSha256) {
+    rollbackPath = assertSafeInstallationPath(executablePath + ".rollback", env);
+    if (hash(executablePath) !== record.forwarderSha256 || !fs.lstatSync(rollbackPath).isFile() || hash(rollbackPath) !== record.sha256) throw new Error("Forwarded executable validation failed: " + directory);
+    const expected = "#!/bin/sh\nexec '" + commandPath.replaceAll("'", "'\\''") + "' \"$@\"\n";
+    if (fs.readFileSync(executablePath, "utf8") !== expected) throw new Error("Forwarded executable target mismatch: " + directory);
+  } else if (hash(executablePath) !== record.sha256) {
+    throw new Error(`Owned runtime validation failed: ${directory}`);
+  }
+  return { ...record, directory, recordPath, ...(rollbackPath ? { rollbackPath, forwarded: true } : {}) };
 }
 function readMachineInstallation(home, env = process.env) {
   assertSafeInstallationPath(home, env);
@@ -63,6 +74,87 @@ function readMachineInstallation(home, env = process.env) {
     catch { preserved.push(path.join(home, entry)); }
   }
   return { ...record, recordPath, versions, preserved };
+}
+
+function resolveStableMachineCommand(commandPath, env = process.env) {
+  try {
+    if (typeof commandPath !== "string" || !path.isAbsolute(commandPath) || path.normalize(commandPath) !== commandPath || path.basename(commandPath) !== "spectra") return null;
+    assertSafeInstallationPath(path.dirname(commandPath), env);
+    if (!fs.lstatSync(commandPath).isSymbolicLink()) return null;
+    const target = fs.readlinkSync(commandPath);
+    if (!path.isAbsolute(target)) return null;
+    const home = path.resolve(path.dirname(target), "../..");
+    const installation = readMachineInstallation(home, env);
+    return installation.commandPath === commandPath ? commandPath : null;
+  } catch {
+    return null;
+  }
+}
+
+function forwardRetainedExecutables(installation) {
+  const current = readMachineInstallation(installation.home);
+  if (current.commandPath !== installation.commandPath) throw new Error("Native command changed before retained launchers were forwarded");
+  const shellQuote = value => "'" + value.replaceAll("'", "'\\''") + "'";
+  for (const version of current.versions) {
+    if (version.version === current.currentVersion || version.forwarded) continue;
+    const fresh = readOwnedVersion(current.home, current.commandPath, version.version);
+    const originalRecord = fs.readFileSync(fresh.recordPath, "utf8");
+    const originalBytes = fs.readFileSync(fresh.executablePath);
+    if (hash(fresh.executablePath) !== fresh.sha256) throw new Error("Retained executable changed before forwarding: " + fresh.executablePath);
+    const rollbackPath = fresh.executablePath + ".rollback";
+    try {
+      const rollback = fs.lstatSync(rollbackPath);
+      if (!rollback.isFile() || rollback.isSymbolicLink() || hash(rollbackPath) !== fresh.sha256) throw new Error("Unrecognized rollback bytes already exist: " + rollbackPath);
+      const retry = readOwnedVersion(current.home, current.commandPath, version.version);
+      if (retry.forwarded || retry.sha256 !== fresh.sha256 || hash(retry.executablePath) !== retry.sha256 || fs.readFileSync(retry.recordPath, "utf8") !== originalRecord) throw new Error("Cannot recover interrupted forwarding safely: " + fresh.directory);
+      fs.unlinkSync(rollbackPath);
+    }
+    catch (error) { if (error.code !== "ENOENT") throw error; }
+    const suffix = process.pid + "-" + randomBytes(6).toString("hex");
+    const rollbackTemp = rollbackPath + "." + suffix + ".tmp";
+    const forwardTemp = fresh.executablePath + "." + suffix + ".tmp";
+    const recordTemp = fresh.recordPath + "." + suffix + ".tmp";
+    const forwarder = "#!/bin/sh\nexec " + shellQuote(current.commandPath) + " \"$@\"\n";
+    const forwarderSha256 = createHash("sha256").update(forwarder).digest("hex");
+    const record = originalRecord.trimEnd() + "\nforwarderSha256=" + forwarderSha256 + "\n";
+    let saved = false;
+    let replaced = false;
+    try {
+      const latest = readOwnedVersion(current.home, current.commandPath, version.version);
+      if (latest.sha256 !== fresh.sha256 || fs.readFileSync(latest.recordPath, "utf8") !== originalRecord) throw new Error("Retained ownership changed before forwarding: " + fresh.directory);
+      fs.writeFileSync(rollbackTemp, originalBytes, { flag: "wx", mode: 0o755 });
+      fs.writeFileSync(forwardTemp, forwarder, { flag: "wx", mode: 0o755 });
+      fs.writeFileSync(recordTemp, record, { flag: "wx", mode: 0o600 });
+      if (hash(rollbackTemp) !== fresh.sha256 || hash(forwardTemp) !== forwarderSha256) throw new Error("Forwarding stage verification failed: " + fresh.directory);
+      fs.linkSync(rollbackTemp, rollbackPath); saved = true;
+      fs.unlinkSync(rollbackTemp);
+      const beforeSwitch = readOwnedVersion(current.home, current.commandPath, version.version);
+      if (beforeSwitch.sha256 !== fresh.sha256 || fs.readFileSync(beforeSwitch.recordPath, "utf8") !== originalRecord) throw new Error("Retained ownership changed during forwarding: " + fresh.directory);
+      fs.renameSync(forwardTemp, fresh.executablePath); replaced = true;
+      if (fs.readFileSync(fresh.recordPath, "utf8") !== originalRecord) throw new Error("Retained ownership changed during forwarding: " + fresh.directory);
+      fs.renameSync(recordTemp, fresh.recordPath);
+      readOwnedVersion(current.home, current.commandPath, version.version);
+    } catch (error) {
+      if (saved && hash(rollbackPath) === fresh.sha256 && replaced && hash(fresh.executablePath) === forwarderSha256) {
+        const restoreTemp = fresh.executablePath + "." + suffix + ".restore";
+        fs.copyFileSync(rollbackPath, restoreTemp, fs.constants.COPYFILE_EXCL);
+        fs.renameSync(restoreTemp, fresh.executablePath);
+      }
+      const currentRecord = fs.readFileSync(fresh.recordPath, "utf8");
+      if (replaced && currentRecord === record) {
+        const restoreRecord = fresh.recordPath + "." + suffix + ".restore";
+        fs.writeFileSync(restoreRecord, originalRecord, { flag: "wx", mode: 0o600 });
+        fs.renameSync(restoreRecord, fresh.recordPath);
+      }
+      if (saved && hash(fresh.executablePath) === fresh.sha256 && (currentRecord === originalRecord || currentRecord === record)) fs.unlinkSync(rollbackPath);
+      throw error;
+    } finally {
+      for (const file of [rollbackTemp, forwardTemp, recordTemp]) {
+        try { fs.unlinkSync(file); } catch (error) { if (error.code !== "ENOENT") throw error; }
+      }
+    }
+  }
+  return readMachineInstallation(current.home);
 }
 
 function inspectLegacyNativeInstallation(executable, env) {
@@ -171,4 +263,4 @@ function planApplicationUpdate(installation, version) {
   if (fresh.kind !== "native-managed" || fresh.home !== installation.home || fresh.commandPath !== installation.commandPath) throw new Error("Native ownership changed before update");
   return { kind: "native-managed", version, home: fresh.home, commandPath: fresh.commandPath, currentVersion: fresh.currentVersion, installation: fresh };
 }
-export { VERSION_PATTERN, assertSafeInstallationPath, readOwnedVersion, readMachineInstallation, inspectApplicationInstallation, planApplicationUpdate, adoptLegacyNativeInstallation };
+export { VERSION_PATTERN, assertSafeInstallationPath, readOwnedVersion, readMachineInstallation, resolveStableMachineCommand, forwardRetainedExecutables, inspectApplicationInstallation, planApplicationUpdate, adoptLegacyNativeInstallation };
