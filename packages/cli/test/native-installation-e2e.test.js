@@ -110,7 +110,7 @@ scenario("custom paths and same-version reinstall retain owned activation and sh
   assert.equal(fs.realpathSync(command), target); assert.deepEqual(inventory(env.SPECTRA_HOME), before);
   assert.equal(fs.readFileSync(path.join(env.SPECTRA_BIN, "other"), "utf8"), "shared\n");
   assert(fs.existsSync(path.join(env.SPECTRA_HOME, "installation.env"))); assert(fs.existsSync(path.join(env.SPECTRA_HOME, "3.1.2/ownership.env")));
-  assert.equal(run("sh", ["-c", "command -v node"], env).status, 1); assert.match(run(command, ["version"], env).stdout, /3\.1\.2/);
+  assert.notEqual(run("sh", ["-c", "command -v node"], env).status, 0, "Native smoke PATH must exclude Node"); assert.match(run(command, ["version"], env).stdout, /3\.1\.2/);
 });
 scenario("uninstall revalidates a stable command changed after planning", ({ dir, env, install, command, run }) => {
   success(install());

@@ -81,7 +81,7 @@ try {
   ];
   const releaseProjects = [];
   for (const mode of modes) {
-    if (mode.name === "native") assert.equal(spawnSync("sh", ["-c", "command -v node"], { env: { ...process.env, ...mode.env } }).status, 1, "Native smoke PATH must exclude Node");
+    if (mode.name === "native") assert.notEqual(spawnSync("sh", ["-c", "command -v node"], { env: { ...process.env, ...mode.env } }).status, 0, "Native smoke PATH must exclude Node");
     assert.match(run(mode.command, [...mode.prefix, "version"], root, mode.env), new RegExp(version.replaceAll(".", "\\.")));
     const project = path.join(root, `${mode.name}-acme`);
     releaseProjects.push(project);
