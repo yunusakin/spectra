@@ -1,5 +1,14 @@
 # Release Summary
 
+## Unreleased
+
+Separates application lifecycle from project migration. `spectra update` updates a managed native application only; global npm users update through npm, and npx users select a version per invocation. `spectra migrate` checks or explicitly advances one project's layout/schema, while `spectra uninstall` removes verified native machine files without touching projects.
+
+- Explains provenance-specific behavior for managed native, global npm, npx, project-local fallback and development checkouts.
+- Distinguishes the synchronized application release, numeric install schema version, and `spectra/v2` contract namespace.
+- Documents retained native versions and executable recovery bytes, plus the limits of native update sources on restricted networks.
+- Updates lifecycle diagrams, status-write effects and installed Full-guide mirrors.
+
 ## v3.1.2
 
 Improves adoption discovery, project documentation ownership and the command-effect guides following 3.1.1. The `spectra/v2` schema identifier and installation schema version 3 remain unchanged.

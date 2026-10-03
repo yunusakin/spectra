@@ -71,7 +71,16 @@ To generate agent-specific adapters during setup, pass the agents you use to `in
 npx spectra-pack@latest init . --agents codex,claude
 ```
 
-Use `./.spectra/bin/spectra update` to update an npm/npx installation, or `spectra update` after native installation. Project memory is preserved.
+Install a Spectra application once for the machine or user account, then run `init` or `adopt` in each project. Updating or removing the application is separate from changing project state: `spectra update` updates a verified native application only, and `spectra uninstall` never changes a project. Global npm users update with `npm install -g spectra-pack@latest`; npx users invoke `npx spectra-pack@latest` when they want a newer CLI.
+
+Migrate an older project explicitly:
+
+```bash
+./.spectra/bin/spectra migrate --check
+./.spectra/bin/spectra migrate --yes
+```
+
+`--check` reports required steps without writing. See [Getting Started](docs/getting-started.md) for the separate application and project update paths.
 
 An example after adopting `acme` with a Claude adapter:
 
@@ -120,12 +129,14 @@ Before shipping, run the feature's evaluation suite and `spectra verify`. Verify
 | [`spectra task`](docs/cli-reference.md#task) | Record implementation intent | Replaces memory-bank/core/implementation-brief.md. |
 | [`spectra check`](docs/cli-reference.md#check) | Validate the Spectra layer | Reports structure/policy/contract errors; no persistent project writes. |
 | [`spectra eval`](docs/cli-reference.md#eval) / [`verify`](docs/cli-reference.md#verify) | Evaluate contracts / assess readiness | Writes eval reports; verify also refreshes approval validity. Configured command-mode evals can execute application commands. |
-| [`spectra status`](docs/cli-reference.md#status) | Resume work | Reads Git and project memory; does not update memory files. |
+| [`spectra status`](docs/cli-reference.md#status) | Resume work | Recomputes approval validity and syncs approval status into project memory. |
 | [`spectra doctor`](docs/cli-reference.md#doctor) | Inspect or repair health | Read-only by default; --fix refreshes safe generated files and preserves user-owned documents/adapters. |
-| [`spectra update`](docs/cli-reference.md#update) | Upgrade Spectra | When needed, updates CLI/runtime and migrates legacy layouts; preserves project memory. |
+| [`spectra update`](docs/cli-reference.md#update) | Update application software | Updates a verified native machine installation; it does not inspect or migrate projects. Other distributions use their package manager or npx. |
+| [`spectra migrate`](docs/cli-reference.md#migrate) | Migrate one project | `--check` is read-only; `--yes` explicitly applies supported layout/schema steps to that project. |
+| [`spectra uninstall`](docs/cli-reference.md#uninstall) | Remove the native application | Removes verified machine-owned native files and leaves every project unchanged. |
 | [`spectra help`](docs/cli-reference.md#help) | Browse commands/options | Prints help; does not write project files. |
 
-Paths in this table are beneath `.spectra/` unless a Git or adapter path is stated. See the [complete command effects reference](docs/cli-reference.md#command-effects-at-a-glance) for all **21 public commands**, prerequisites, options, before/after file trees and workflow diagrams.
+Paths in this table are beneath `.spectra/` unless a Git or adapter path is stated. See the [complete command effects reference](docs/cli-reference.md#command-effects-at-a-glance) for all **23 public commands**, prerequisites, options, before/after file trees and workflow diagrams.
 
 ## Documentation
 

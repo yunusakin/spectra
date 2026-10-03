@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- `spectra update` updates application software only; project layout and installation-schema changes use the explicit, per-project `spectra migrate` command.
+- Documentation distinguishes the synchronized application release, numeric project `schemaVersion`, and the `spectra/v2` contract namespace.
+- Native application updates retain verified version directories and preserve original executable bytes for update recovery; no public rollback command is provided.
+
+### Added
+- `spectra uninstall` removes verified managed native application files while leaving projects, adapters and Git exclusions unchanged. npm, npx and project-local fallback guidance follows installation provenance.
+
+### Documentation
+- Setup and lifecycle guides explain install-once, application update, explicit migration, fallback behavior and network-source limits; the CLI reference covers all 23 public commands and their project effects.
+
 ## [3.1.2] - 2026-10-02
 
 ### Added

@@ -33,8 +33,10 @@ Local and installed invocations operate on the same project state. Most project 
 | [`index`](#index) | Refresh evidence after bootstrap or manifest changes | Default mode writes `.spectra/cache/index/repo-index.json` |
 | [`check`](#check) | Validate the Spectra layer after changes | Does not write persistent project files; validation smoke checks use temporary directories |
 | [`verify`](#verify) | Assess release readiness before handoff | Refreshes `.spectra/sdd/governance/approval-state.yaml` and intake approval status; runs release evals and overwrites each selected feature’s `evals/reports/latest.json` and `latest.md` |
-| [`status`](#status) | Resume work and see recent changes | Does not write project files |
-| [`update`](#update) | Upgrade the CLI/runtime or migrate an old layout | When needed, replaces runtime/system/local launcher assets, refreshes owned guides and install metadata, and migrates recognized legacy paths into `.spectra/` |
+| [`status`](#status) | Resume work and see recent changes | Recomputes `.spectra/sdd/governance/approval-state.yaml` and syncs approval status in `.spectra/sdd/memory-bank/core/intake-state.md` |
+| [`update`](#update) | Update application software | Updates a verified managed native installation; other provenances receive package-manager or installation guidance. Project files are not read or written |
+| [`migrate`](#migrate) | Migrate one project's layout or schema | `--check` is read-only; an explicit migration changes only the selected project and validates it |
+| [`uninstall`](#uninstall) | Remove the managed native application | Removes verified machine-owned versions and command; never accesses project files |
 | [`doctor`](#doctor) | Inspect local tools, runtime and adapter health | Without --fix: does not write project files |
 | [`approve`](#approve) | Advance the staged approval lifecycle | Updates `.spectra/sdd/governance/approval-state.yaml` with stage/baseline/timestamp and syncs `.spectra/sdd/memory-bank/core/intake-state.md`; release approval also writes eval reports |
 | [`eval`](#eval) | Evaluate feature contracts or configured application behavior | Overwrites `.spectra/sdd/features/<feature>/evals/reports/latest.json` and `latest.md` |
@@ -81,15 +83,14 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  U["update"] --> N{"Upgrade or migration needed?"}
-  N -->|no| O["Report already current"]
-  N -->|yes; confirmed| B["Update installed CLI only when newer"]
-  B --> R["Refresh project runtime, owned guides and metadata"]
+  U["update"] --> APP["Update machine application only"]
+  M["migrate --check"] --> N{"Migration required?"}
+  N -->|no| C["Project is current"]
+  N -->|yes; explicit --yes| P["Migrate and validate selected project"]
   D["doctor"] --> H["Report local health"]
-  D -->|--fix| R
-  R --> P["Preserve project memory, plugin docs and unowned guide collisions"]
-  R -.->|regenerate existing guidance explicitly| A["adapters: replace Spectra projections"]
-  R -.->|doctor repair: missing files and no foreign siblings| M["Repair safe adapter set"]
+  D -->|--fix, current schema| R["Refresh generated project files"]
+  R --> V["Preserve project memory and unowned documents"]
+  X["uninstall"] --> Y["Remove verified native application only"]
 ```
 
 ## init
@@ -367,11 +368,11 @@ spectra verify
 
 **Reads:** Git status/latest commit, install metadata and resume memory files.
 
-**Writes/changes:** Does not write project files.
+**Writes/changes:** Recomputes `.spectra/sdd/governance/approval-state.yaml` and syncs approval status in `.spectra/sdd/memory-bank/core/intake-state.md`.
 
 **Result:** Recent changes and suggested next action.
 
-**Modes and repeat runs:** `--cwd`. Reads timestamps and Git state; does not update progress or activeContext for you.
+**Modes and repeat runs:** `--cwd`. Each run recomputes approval validity and syncs its status; it does not update progress or activeContext for you.
 
 **Example:**
 
@@ -380,17 +381,17 @@ spectra status
 ```
 ## update
 
-**When to use:** Upgrade the CLI/runtime or migrate an old layout.
+**When to use:** Update the installed application software.
 
-**Prerequisites:** Installed CLI and an installed or recognized legacy Spectra project; network access for latest-version lookup.
+**Prerequisites:** An installed CLI and network access for latest-version lookup.
 
-**Reads:** Published version, CLI/install metadata, runtime/schema versions and legacy layout markers.
+**Reads:** Published application version and installation provenance/ownership.
 
-**Writes/changes:** When needed, replaces runtime/system/local launcher assets, refreshes owned guides and install metadata, and migrates recognized legacy paths into `.spectra/`. Self-update also changes the installed CLI outside the project.
+**Writes/changes:** A verified managed native install updates its machine runtime, active command and retained launchers. It never reads, migrates or writes project files.
 
-**Result:** Already-current message, confirmation prompt or update/migration result.
+**Result:** Already-current message, confirmation prompt, native update result or provenance-specific instructions. Global npm installations receive an `npm install -g` command; npx, project-local fallback and development invocations are not silently replaced.
 
-**Modes and repeat runs:** `--cwd <path>` selects a project when running elsewhere. `--yes` skips confirmation, not validation. If CLI/runtime/schema/layout are current, no project refresh occurs. Declining leaves the project unchanged. Runtime refresh preserves existing project memory and unowned guide collisions. Healthy existing adapters are not automatically regenerated; run adapters afterwards.
+**Modes and repeat runs:** `--yes` skips confirmation for a managed native update. `--cwd <path>` is accepted for compatibility but does not select a project. To update a global npm install, run `npm install -g spectra-pack@latest`; npx selects its package version per invocation.
 
 **Example:**
 
@@ -401,10 +402,63 @@ spectra update --yes
 **Before → after (affected paths only):**
 
 ```text
-.spectra/sdd/system/ → refreshed runtime
-.spectra/docs/spectra/ → owned guides refreshed; collisions preserved
-.spectra/install.json and bin/ (plus cli/ Node fallback) → refreshed
-legacy Spectra paths → .spectra/ after migration
+verified machine runtime/active command → newer release when available
+project files and Git excludes → unchanged
+```
+
+## migrate
+
+**When to use:** Inspect or explicitly migrate a recognized project's older layout or installation schema.
+
+**Prerequisites:** A compatible Spectra project. The command selects the project containing the current directory or `--cwd <path>`.
+
+**Reads:** Project layout markers, install metadata/configuration, and migration conflict inputs.
+
+**Writes/changes:** `--check` never writes. An explicit migration updates only the selected project, moves recognized legacy Spectra state into `.spectra/`, advances supported schema steps, and creates a recovery snapshot.
+
+**Result:** `current`, `migration-required`, `incompatible` or a migration failure with recovery details. `--check` exits 1 when a migration is required and 0 when the project is current.
+
+**Modes and repeat runs:** `--check`, `--yes`, `--json`, `--cwd <path>`. Interactive runs request confirmation; non-interactive runs require `--yes`. `--json` reports the plan/result as JSON and does not imply consent.
+
+**Example:**
+
+```bash
+spectra migrate --cwd . --check
+spectra migrate --cwd . --yes
+```
+
+**Before → after (affected paths only):**
+
+```text
+recognized old layout/schema → canonical .spectra/ project at the current schema
+unrelated application files → unchanged
+```
+
+## uninstall
+
+**When to use:** Remove a verified managed native Spectra installation.
+
+**Prerequisites:** Run from a managed native executable whose machine ownership records validate. Other installation types receive removal guidance instead. A verified legacy native install without a machine ownership record is left untouched; update it with `spectra update --yes`, then retry uninstall.
+
+**Reads:** Machine ownership records, version directories and stable command target.
+
+**Writes/changes:** Removes positively verified native version files and the matching stable command. Preserves unrecognized files and never reads or changes project state, adapters or Git exclusions.
+
+**Result:** Removed paths and any owned paths preserved because verification or removal failed. TTY use asks first; non-interactive use requires `--yes`.
+
+**Modes and repeat runs:** `--yes`. Legacy native path: `spectra update --yes`, then `spectra uninstall --yes`. For global npm use `npm uninstall -g spectra-pack`; npx has no persistent package to uninstall. A project-local Node fallback belongs to `.spectra/` and is not a machine installation.
+
+**Example:**
+
+```bash
+spectra uninstall --yes
+```
+
+**Before → after (affected paths only):**
+
+```text
+verified native versions and stable command → removed
+project .spectra/, application files and Git exclusions → unchanged
 ```
 ## doctor
 
@@ -670,6 +724,10 @@ The context `--task <legacy_pack>` compatibility option supplies these role/goal
 
 ## Versioning and migration
 
-One synchronized public version identifies npm, native binaries, CLI and packaged runtime. A separate project schema version records layout compatibility. `update` migrates recognized legacy Spectra paths into `.spectra/` and preserves unrelated company documents. Guide ownership and the stable project documentation name are recorded in install.json. Existing adapters receive new guidance after explicit regeneration.
+The application release version (for example, `3.1.2`) is synchronized across the npm package, CLI, native binary and packaged runtime. `install.json` records that software identity in `cliVersion` and `runtimeVersion`; the numeric `schemaVersion` (currently `3`) describes the project's installed layout and data contract. Feature, evaluation and governance YAML carries the separate `apiVersion: spectra/v2` contract namespace. A Git release tag such as `v3.1.2` adds the leading `v` to the application version.
+
+`update` changes application software only. `migrate` checks and explicitly advances a selected project's recognized layout/schema; it does not install a newer machine application. `doctor --fix` refreshes generated project assets only after the project is at the current schema. `uninstall` removes positively verified native machine files and does not touch project data. Global npm removal uses `npm uninstall -g spectra-pack`; npx has no persistent package to remove. Guide ownership and the stable project documentation name remain recorded in install metadata. Existing adapters receive new guidance after explicit regeneration.
+
+Managed native updates retain older version directories and preserve their original executable bytes as `.rollback` while old recorded launch paths forward to the active command. This supports update recovery; Spectra has no public version-switch or rollback command. Native update discovery checks npm, then the GitHub Releases API; native installation downloads from GitHub. `SPECTRA_REPO=owner/repository` selects a GitHub release repository for archives, not an offline or arbitrary mirror. Company network restrictions may require an approved npm distribution path or administrator-provided release access.
 
 See [Workflow](workflow.md), [Testing and Verification](testing.md), [Structure](structure.md), and [Business Context](https://github.com/yunusakin/spectra/blob/main/docs/business-context.md) for their respective policies. The command effects E2E check retains before/after SHA-256 inventories and output for its temporary project: `node --test packages/cli/test/command-effects-e2e.test.js` (source checkout only, after asset synchronization).

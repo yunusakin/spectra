@@ -68,9 +68,35 @@ The native installer downloads the matching release artifact and verifies its SH
 
 The remaining examples use `spectra`. In an npm/npx-only repository, replace it with `./.spectra/bin/spectra`.
 
-Run `spectra update` to bring an existing installation to the current runtime. Existing project memory is preserved.
+## 2. Update the Application or a Project
 
-## 2. Review Bootstrap Changes
+Install the application once per machine or user account; initialize or adopt each repository separately. Application updates do not scan, migrate, or rewrite projects.
+
+For a managed native installation:
+
+```bash
+spectra update --yes
+```
+
+For a globally installed npm package, update it through npm. npx uses the version requested for each invocation:
+
+```bash
+npm install -g spectra-pack@latest
+npx spectra-pack@latest version
+```
+
+Project layout and install-schema changes are explicit, per-project operations. Check first, then migrate only the selected project:
+
+```bash
+./.spectra/bin/spectra migrate --check
+./.spectra/bin/spectra migrate --yes
+```
+
+Use `npx spectra-pack@latest migrate --cwd . --check` and then `npx spectra-pack@latest migrate --cwd . --yes` when the project-local CLI is too old to provide `migrate`. The check is read-only; migration reports its steps and validates the result. On a current-schema project, `doctor --fix` refreshes generated runtime files from the CLI you invoked. It does not migrate an old schema.
+
+Remove only the application with `spectra uninstall --yes` for a managed native install or `npm uninstall -g spectra-pack` for a global npm package. These commands leave project files and Git exclusions unchanged. npx has no persistent package to remove; a project-local Node fallback remains under `.spectra/` when Node is available.
+
+## 3. Review Bootstrap Changes
 
 Run bootstrap on a clean branch and inspect the resulting diff before committing:
 
@@ -83,18 +109,20 @@ Spectra adds a repo-local operating layer rather than replacing application code
 
 In `local` mode, `git status --ignored` shows the generated paths with `!!`, while plain `git status --short` continues to show only project changes. Do not use `git clean -fdx` if the local Spectra files must be retained.
 
-## 3. Understand the Generated State
+## 4. Understand the Generated State
 
 Spectra creates an isolated SDD workspace under `.spectra/`:
 
 - `.spectra/sdd/memory-bank/`: active context, progress, and implementation intent
 - `.spectra/sdd/system/`: runtime rules, prompts, scaffolds, and adapters
 - `.spectra/docs/`: Spectra reference material
-- `.spectra/cache/`: disposable generated summaries
+- `.spectra/cache/`: disposable generated summaries and repo-index data
+
+For existing projects, `spectra adopt` writes an initial repo index when possible. Run `spectra onboard` while `projectbrief.md` is still a template, and run `spectra index` again after manifest changes or if adoption reports that indexing failed.
 
 Feature bundles, governance, evaluation contracts, and adoption analysis live under `.spectra/sdd/`. YAML contracts are canonical; Markdown is supporting context.
 
-## 4. Use the Daily Loop
+## 5. Use the Daily Loop
 
 ```bash
 spectra context --role planner --goal discover
@@ -105,7 +133,7 @@ spectra status
 
 `status` is the command to run when you return to a project. `check` confirms the Spectra layer is healthy.
 
-## 5. Review Brownfield Analysis
+## 6. Review Brownfield Analysis
 
 `spectra adopt` maps the existing codebase and creates:
 
@@ -115,7 +143,7 @@ spectra status
 
 Treat `matches`, `partial`, `missing`, `conflict`, and `unknown` as review classifications, not automatic proof that implementation is correct. Resolve low-confidence and unknown items with human review, then update the executable specs to reflect the intended target state.
 
-## 6. Load Minimum Planning Context
+## 7. Load Minimum Planning Context
 
 ```bash
 spectra context --role planner --goal discover
@@ -134,7 +162,7 @@ Recommended role and goal pairs:
 
 Context packs load compact contracts and summaries before long-form narrative files.
 
-## 7. Validate Before Approval
+## 8. Validate Before Approval
 
 ```bash
 spectra status
@@ -145,7 +173,7 @@ Validation should pass after bootstrap, after meaningful spec changes, and befor
 
 If you wire the same checks into GitHub Actions, prepare the Node environment first. Spectra's own `validate` workflow uses Node 22 and runs `npm ci` before calling CLI-based validation smoke checks.
 
-## 8. Advance Staged Approvals
+## 9. Advance Staged Approvals
 
 ```bash
 spectra approve --stage product-approved
@@ -158,7 +186,7 @@ spectra approve --stage implementation-approved
 - `implementation-approved`: implementation work may begin
 - `release-approved`: verified release signoff is complete
 
-## 9. Capture Implementation Intent
+## 10. Capture Implementation Intent
 
 ```bash
 spectra task --item FEAT-001 --task-type feature --goal "Implement core product flow"
@@ -167,7 +195,7 @@ spectra context --role implementer --goal implement
 
 The task command records intended work for implementation and review traceability.
 
-## 10. Evaluate Product Behavior
+## 11. Evaluate Product Behavior
 
 ```bash
 spectra eval <feature-id> --suite smoke
@@ -176,7 +204,7 @@ spectra eval <feature-id> --suite release
 
 Eval suites exercise golden scenarios, regression cases, failure modes, refusal behavior, and release thresholds declared in the feature bundle.
 
-## 11. Verify Release Confidence
+## 12. Verify Release Confidence
 
 ```bash
 spectra verify
@@ -190,7 +218,7 @@ After verification passes:
 spectra approve --stage release-approved
 ```
 
-## 12. Handle Later Spec Changes
+## 13. Handle Later Spec Changes
 
 Do not rerun `adopt` for normal spec evolution. Inspect semantic impact and revalidate:
 
@@ -205,6 +233,8 @@ Re-approve any stage invalidated by the semantic diff.
 ## Common Mistakes
 
 - assuming `npx` created a global `spectra` command
+- assuming `spectra update` also migrates every initialized project
+- uninstalling the native application removes project state (it does not)
 - starting implementation before `implementation-approved`
 - treating generated brownfield analysis as a complete code audit
 - duplicating canonical YAML state in Markdown
