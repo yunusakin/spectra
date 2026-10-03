@@ -216,6 +216,7 @@ fs.copyFileSync(executablePath, path.join(archiveRoot, "bin", "spectra"));
 makeExecutable(path.join(archiveRoot, "bin", "spectra"));
 copyDirectory(path.join(cliRoot, "assets"), path.join(archiveRoot, "assets"));
 fs.copyFileSync(path.join(cliRoot, "LICENSE"), path.join(archiveRoot, "LICENSE"));
+fs.copyFileSync(path.join(repoRoot, "install.sh"), path.join(archiveRoot, "install.sh"));
 fs.writeFileSync(path.join(archiveRoot, "VERSION"), `${packageJson.version}\n`);
 
 const archiveName = `${target}.tar.gz`;

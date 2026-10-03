@@ -1,3 +1,4 @@
+import { inspectApplicationInstallation } from "../lib/application-installation.js";
 import { createInterface } from "node:readline/promises";
 import { getCliVersion } from "../lib/version.js";
 import { ok, fail, title } from "../lib/output.js";
@@ -43,7 +44,7 @@ async function updateCommand(argv) {
   } else {
     title(details);
   }
-  return runSelfUpdate(latest);
+  return runSelfUpdate(latest, inspectApplicationInstallation());
 }
 
 function internalUpdateProjectCommand(argv) {

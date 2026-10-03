@@ -12,6 +12,7 @@ import { createHash } from "node:crypto";
 const [version, tgz, native, output] = process.argv.slice(2);
 assert.equal(JSON.parse(fs.readFileSync("package.json", "utf8")).version, version, "Release version not prepared");
 assert(tgz && native && output, "Provide version, npm archive, native binary and output directory");
+assert(fs.statSync(native).isFile(), "Native executable must be a file");
 const outputRoot = path.resolve(output);
 fs.mkdirSync(outputRoot, { recursive: true });
 const root = fs.mkdtempSync(path.join(outputRoot, "run-"));
@@ -34,6 +35,8 @@ function inventory(dir, prefix = "") {
   }).sort((a, b) => a.path.localeCompare(b.path));
 }
 try {
+  // Freeze the supplied native artifact before any installer/test child runs.
+  const expectedNativeHash = hash(path.resolve(native));
   const install = path.join(root, "npm-install");
   fs.mkdirSync(install, { recursive: true });
   run("npm", ["install", "--prefix", install, "--ignore-scripts", "--no-audit", "--no-fund", path.resolve(tgz)]);
@@ -41,6 +44,12 @@ try {
   // Use the real installer with a local transport for the not-yet-published archive.
   const asset = `spectra-${process.platform}-${process.arch}.tar.gz`;
   const archive = path.resolve("packages/cli/dist/native", asset);
+  const nativeArchive = path.resolve(native);
+  assert.equal(hash(nativeArchive), hash(archive), "Provided native archive must match packaged release asset");
+  const archiveExecutable = path.join(root, "bin/spectra");
+  run("tar", ["-xzf", nativeArchive, "-C", root]);
+  const nativeHash = hash(archiveExecutable);
+  run("tar", ["-xzf", archive, "-C", root]);
   const transport = path.join(root, "transport");
   fs.mkdirSync(transport);
   const quote = value => `'${value.replaceAll("'", "'\\''")}'`;
@@ -49,15 +58,23 @@ try {
     'test "$1" = -fsSL; test "$3" = -o',
     'case "$2" in',
     `${quote(`https://github.com/yunusakin/spectra/releases/download/v${version}/${asset}`)}) cp ${quote(archive)} "$4" ;;`,
-    `${quote(`https://github.com/yunusakin/spectra/releases/download/v${version}/${asset}.sha256`)}) if [ "\${SPECTRA_E2E_BAD_CHECKSUM:-0}" = 1 ]; then printf '%s  %s\\n' ${quote("0".repeat(64))} ${quote(asset)} > "$4"; else cp ${quote(archive + ".sha256")} "$4"; fi ;;`,
+    `${quote(`https://github.com/yunusakin/spectra/releases/download/v${version}/${asset}.sha256`)}) cp ${quote(archive + ".sha256")} "$4" ;;`,
     '*) exit 2 ;;', "esac", ""
   ].join("\n"), { mode: 0o755 });
   const installerEnv = { PATH: `${transport}:/usr/bin:/bin`, SPECTRA_VERSION: `v${version}`, SPECTRA_HOME: path.join(root, "native-home"), SPECTRA_BIN: path.join(root, "native-bin") };
-  run("sh", [path.resolve("install.sh")], root, { ...installerEnv, SPECTRA_E2E_BAD_CHECKSUM: "1" }, 1);
-  assert(!fs.existsSync(installerEnv.SPECTRA_HOME), "Rejected archive must not be installed");
   run("sh", [path.resolve("install.sh")], root, installerEnv);
   const installedNative = path.join(installerEnv.SPECTRA_BIN, "spectra");
-  assert.equal(hash(fs.realpathSync(installedNative)), hash(path.resolve(native)));
+  assert.equal(hash(fs.realpathSync(installedNative)), nativeHash);
+  const ownership = path.join(installerEnv.SPECTRA_HOME, version, "ownership.env");
+  const machine = path.join(installerEnv.SPECTRA_HOME, "installation.env");
+  assert(fs.readFileSync(machine, "utf8").includes(`commandPath=${installedNative}\n`));
+  assert(fs.readFileSync(ownership, "utf8").includes(`installerSha256=${hash(path.join(installerEnv.SPECTRA_HOME, version, "install.sh"))}\n`));
+  const nativeBeforeReinstall = inventory(installerEnv.SPECTRA_HOME);
+  run("sh", [path.resolve("install.sh")], root, installerEnv);
+  assert.deepEqual(inventory(installerEnv.SPECTRA_HOME), nativeBeforeReinstall, "Same-version reinstall must retain complete owned runtime");
+  report.nativeInstallation = { commandPath: installedNative, home: installerEnv.SPECTRA_HOME, ownership: fs.readFileSync(ownership, "utf8"), machine: fs.readFileSync(machine, "utf8"), inventory: nativeBeforeReinstall };
+  // Reuse the test-first real transport matrix for archive/path/ownership failures.
+  run(process.execPath, ["--test", path.resolve("packages/cli/test/native-installation-e2e.test.js")], root, { SPECTRA_NATIVE_ARCHIVE: archive, SPECTRA_NATIVE_ARTIFACT_DIR: root });
   const modes = [
     { name: "npm", command: process.execPath, prefix: [npmBin], env: {} },
     { name: "native", command: installedNative, prefix: [], env: { PATH: "/usr/bin:/bin" } }

@@ -1,9 +1,12 @@
 import path from "node:path";
+import { inspectApplicationInstallation, planApplicationUpdate, VERSION_PATTERN } from "./application-installation.js";
 import { spawnSync } from "node:child_process";
 import { fail } from "./output.js";
 
 function versionParts(version) {
-  const match = String(version).trim().replace(/^v/, "").match(/^(\d+)\.(\d+)\.(\d+)/);
+  const normalized = String(version).trim().replace(/^v/, "");
+  if (!VERSION_PATTERN.test(normalized)) throw new Error(`Invalid Spectra version: ${version}`);
+  const match = normalized.match(/^(\d+)\.(\d+)\.(\d+)/);
   if (!match) throw new Error(`Invalid Spectra version: ${version}`);
   return match.slice(1).map(Number);
 }
@@ -34,14 +37,31 @@ function resolveInstalledNativeCommand(env = process.env) {
   return path.join(binaryDir, process.platform === "win32" ? "spectra.exe" : "spectra");
 }
 
-function runSelfUpdate(latest, installation = { kind: "unmanaged" }) {
-  // Machine mutation requires the ownership proof supplied by the native installer.
-  // A Node/npx/project-local invocation is never permission to update another install.
-  const guidance = installation.kind === "npm"
-    ? `Use your package manager: npm install -g spectra-pack@${latest}.`
-    : `Install Spectra ${latest} with the machine installer, or use npm install -g spectra-pack@${latest}.`;
-  fail(`Software update was not applied: ${installation.reason ?? "machine installation ownership is not verified"}. ${guidance}`);
-  return 1;
+function runSelfUpdate(latest, installation = inspectApplicationInstallation()) {
+  if (installation.kind !== "native-managed") {
+    const guidance = installation.kind === "npm"
+      ? `Use your package manager: npm install -g spectra-pack@${latest}.`
+      : `Install the machine application with curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/v${latest}/install.sh | sh, or npm install -g spectra-pack@${latest}.`;
+    fail(`Software update was not applied: ${installation.reason}. ${guidance}`);
+    return 1;
+  }
+  try {
+    const plan = planApplicationUpdate(installation, latest);
+    const executing = plan.installation.versions.find(version => version.executablePath === installation.execPath);
+    const installer = path.join(executing.directory, "install.sh");
+    const result = spawnSync("sh", [installer], {
+      env: { ...process.env, SPECTRA_HOME: plan.home, SPECTRA_BIN: path.dirname(plan.commandPath), SPECTRA_VERSION: `v${plan.version}` },
+      stdio: "inherit"
+    });
+    if (result.error) throw result.error;
+    if (result.status !== 0) throw new Error(`Native installer did not activate Spectra ${plan.version} (status ${result.status}).`);
+    const activated = spawnSync(plan.commandPath, ["version"], { encoding: "utf8" });
+    if (activated.status !== 0 || activated.stdout.trim() !== `spectra ${plan.version}`) throw new Error(`Activated application version does not equal requested version ${plan.version}.`);
+    return 0;
+  } catch (error) {
+    fail(`Software update was not applied: ${error.message}`);
+    return 1;
+  }
 }
 
 export { compareVersions, latestVersion, resolveInstalledNativeCommand, runSelfUpdate };
