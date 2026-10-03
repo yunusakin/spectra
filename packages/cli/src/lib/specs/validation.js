@@ -41,6 +41,11 @@ function validateFeatureBundle(bundlePaths) {
 
   const featureId = featureSpec.metadata.id;
   const requirementIds = new Set(listRequirementIds(featureSpec));
+  // `<feature-id>#<id>` is a global semantic identity (see knowledge/address.js).
+  const objectIds = [...listRequirementIds(featureSpec), ...(featureSpec.acceptance?.scenarios ?? []).map((scenario) => scenario?.id)];
+  for (const objectId of new Set(objectIds.filter((id, index) => id != null && objectIds.indexOf(id) !== index))) {
+    errors.push(`${bundlePaths.featureSpecPath}: Duplicate feature object ID: ${featureId}#${objectId}`);
+  }
   const telemetryRequirementIds = [
     ...(telemetryContract?.tracked_events ?? []).flatMap((event) => event.requirement_ids ?? []),
     ...(telemetryContract?.success_signals ?? []).flatMap((signal) => signal.requirement_ids ?? []),
@@ -149,10 +154,17 @@ function validateSpectraV2(repoRoot) {
     warnings.push("No feature bundles found under sdd/features/");
   }
 
+  const featureIds = new Set();
   for (const featureDir of featureDirs) {
-    const result = validateFeatureBundle(getFeatureBundle(repoRoot, featureDir));
+    const bundlePaths = getFeatureBundle(repoRoot, featureDir);
+    const result = validateFeatureBundle(bundlePaths);
     errors.push(...result.errors);
     warnings.push(...result.warnings);
+    const featureId = readJsonContract(bundlePaths.featureSpecPath)?.metadata?.id;
+    if (featureId && featureIds.has(featureId)) {
+      errors.push(`${bundlePaths.featureSpecPath}: Duplicate feature ID: ${featureId}`);
+    }
+    if (featureId) featureIds.add(featureId);
   }
 
   return {

@@ -15,9 +15,11 @@
 
 ### Fixed
 - `spectra knowledge promote|supersede|deprecate` no longer matches a rule whose ID merely starts with the requested ID (for example `RULE-X-001` vs `RULE-X-0010`).
+- `spectra check` rejects duplicate feature `metadata.id` values and duplicate requirement/scenario IDs inside one feature spec.
 
 ### Internal
 - Business-rule section parsing is consolidated in `business/rule-sections.js`; `knowledge/address.js` resolves rules and feature objects (`<feature-id>#FR-2`) by stable ID. Internal only, no new command and no schema change.
+- A derived Knowledge Map (`.spectra/cache/knowledge/knowledge-map.json`) indexes business rules, feature objects and Repo Index records by stable ID with content signatures and fresh/stale/missing detection. Internal only: not used by `spectra context`, disposable, and needs no migration.
 
 ## [3.1.2] - 2026-10-02
 
