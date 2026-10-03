@@ -1,7 +1,5 @@
 import fs from "node:fs";
-import path from "node:path";
-import { buildContextPack, estimateTokensFromFile } from "../lib/context.js";
-import { buildRoute } from "../lib/business-context.js";
+import { buildContextPack } from "../lib/context.js";
 import { next, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
 
@@ -16,6 +14,10 @@ function printRefs(pack) {
   title("");
   title("Included:");
   for (const entry of pack.entries) {
+    if (entry.knowledgeId) {
+      title(`- ${entry.knowledgeId} [${entry.kind}; ${entry.reasons.map(({ reason }) => reason).join(", ")}] ${entry.path}#${entry.address}`);
+      continue;
+    }
     const changeTag = entry.changed ? ", changed" : "";
     const existsTag = entry.exists ? "" : ", missing";
     title(`- ${entry.path} [${entry.mode}${changeTag}${existsTag}]`);
@@ -64,8 +66,10 @@ function printInline(pack) {
       continue;
     }
 
-    title(`--- ${entry.path} [${entry.mode}] ---`);
-    if (entry.mode === "summary") {
+    title(`--- ${entry.knowledgeId ?? entry.path} [${entry.mode}] ---`);
+    if (entry.content) {
+      title(entry.content);
+    } else if (entry.mode === "summary") {
       title(fs.readFileSync(entry.absolutePath, "utf8").trim());
     } else {
       title(`REF ${entry.path}`);
@@ -73,17 +77,6 @@ function printInline(pack) {
     title("");
   }
   printRepoIndexSection(pack);
-}
-
-function recomputeTotals(entries) {
-  return entries.reduce(
-    (accumulator, entry) => {
-      accumulator.estimatedTokens += entry.estimatedTokens;
-      accumulator[entry.mode] += entry.estimatedTokens;
-      return accumulator;
-    },
-    { estimatedTokens: 0, summary: 0, full: 0 }
-  );
 }
 
 function contextCommand(argv) {
@@ -110,35 +103,11 @@ function contextCommand(argv) {
     task: options["--task"] ?? null,
     changed: Boolean(options["--changed"]),
     base: options["--base"] ?? null,
-    head: options["--head"] ?? null
+    head: options["--head"] ?? null,
+    routeTask: options["--route-task"] ?? null,
+    domains: String(options["--domain"] ?? "").split(",").filter(Boolean),
+    modules: String(options["--module"] ?? "").split(",").filter(Boolean)
   });
-  if (options["--route-task"]) {
-    const route = buildRoute({
-      cwd: options["--cwd"] ?? process.cwd(),
-      task: options["--route-task"],
-      domains: String(options["--domain"] ?? "").split(",").filter(Boolean),
-      modules: String(options["--module"] ?? "").split(",").filter(Boolean)
-    });
-    pack.route = route;
-    const existingPaths = new Set(pack.entries.map((entry) => entry.path));
-    for (const entry of route.entries) {
-      if (existingPaths.has(entry.path)) continue;
-      const absolutePath = path.join(route.repoRoot, entry.path);
-      pack.entries.push({
-        ...entry,
-        absolutePath,
-        exists: fs.existsSync(absolutePath),
-        changed: false,
-        changedRefs: [],
-        estimatedTokens: estimateTokensFromFile(absolutePath),
-        source: "route"
-      });
-      existingPaths.add(entry.path);
-    }
-    pack.avoid = [...new Set([...pack.avoid, ...route.deferred])].filter((candidate) => !existingPaths.has(candidate));
-    pack.totals = recomputeTotals(pack.entries);
-  }
-
   switch (options["--format"] ?? "refs") {
     case "refs":
       printRefs(pack);

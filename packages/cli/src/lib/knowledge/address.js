@@ -8,7 +8,9 @@ import { rowValue } from "../business/parser.js";
 import { getFeatureBundle, getFeatureDirs } from "../specs/feature-bundles.js";
 import { readYamlContract, toPosix } from "../specs/primitives.js";
 import { sortKeysDeep } from "../index/cache.js";
+import YAML from "yaml";
 import { createKnowledgeReference } from "./reference.js";
+import { termsOf } from "./terms.js";
 
 const PROVENANCE = "human-declared";
 
@@ -65,7 +67,7 @@ function enumerateBusinessRules(projectRoot) {
   return collectRuleSections(projectRoot).map((entry) => {
     if (seen.has(entry.section.id)) throw new Error(`Duplicate business rule ID: ${entry.section.id}`);
     seen.add(entry.section.id);
-    return { reference: ruleReference(projectRoot, entry), signature: sha256(entry.section.raw.trimEnd()) };
+    return { reference: ruleReference(projectRoot, entry), signature: sha256(entry.section.raw.trimEnd()), terms: termsOf(entry.section.raw) };
   });
 }
 
@@ -132,6 +134,13 @@ function resolveFeatureObject(projectRoot, qualifiedId) {
   return { reference: featureObjectReference(projectRoot, specPath, featureId, matches[0]), object: matches[0].object };
 }
 
+// Lookup terms come from every value except the identity/relationship keys.
+function textOf(value) {
+  if (Array.isArray(value)) return value.map(textOf).join(" ");
+  if (value && typeof value === "object") return Object.entries(value).filter(([key]) => key !== "id" && key !== "covers").map(([, item]) => textOf(item)).join(" ");
+  return String(value ?? "");
+}
+
 // Signature is over the canonical object (key order ignored), never the path.
 function enumerateFeatureObjects(projectRoot) {
   const entries = [];
@@ -145,10 +154,34 @@ function enumerateFeatureObjects(projectRoot) {
       const reference = featureObjectReference(projectRoot, specPath, featureId, entry);
       if (objectIds.has(reference.id)) throw new Error(`Duplicate feature object ID: ${reference.id}`);
       objectIds.add(reference.id);
-      entries.push({ reference, signature: sha256(JSON.stringify(sortKeysDeep(entry.object))) });
+      entries.push({ reference, signature: sha256(JSON.stringify(sortKeysDeep(entry.object))), terms: termsOf(textOf(entry.object)) });
     }
   }
   return entries;
 }
 
-export { enumerateBusinessRules, enumerateFeatureObjects, resolveBusinessRule, resolveFeatureObject, sha256 };
+// Files the Knowledge Map is derived from (for the cheap freshness fingerprint).
+function listKnowledgeSourceFiles(projectRoot) {
+  const { businessRoot, businessIndexPath, moduleIndexPath, domainRows } = readBusinessIndexes(projectRoot);
+  const ruleFiles = domainRows.flatMap((row) => [rowValue(row, "rules"), rowValue(row, "unresolved")].filter(Boolean)).map((relativePath) => resolveBusinessPath(businessRoot, relativePath));
+  const specFiles = getFeatureDirs(projectRoot).map((dir) => getFeatureBundle(projectRoot, dir).featureSpecPath);
+  return [businessIndexPath, moduleIndexPath, ...ruleFiles, ...specFiles];
+}
+
+// Exact source retrieval for a map reference: the rule section or YAML object
+// only, never the whole file. Returns null when the source no longer has it.
+function readKnowledgeObject(projectRoot, reference) {
+  const filePath = path.join(path.dirname(getSddRoot(projectRoot)), reference.source);
+  if (!fs.existsSync(filePath)) return null;
+  if (reference.address.startsWith("section:")) {
+    const section = parseRuleSections(fs.readFileSync(filePath, "utf8")).find((candidate) => candidate.id === reference.id);
+    return section ? section.raw.trim() : null;
+  }
+  const match = reference.address.match(/^yaml:(.+)\[id=(.+)\]$/);
+  if (!match) return null;
+  const items = match[1].split(".").reduce((node, key) => node?.[key], readYamlContract(filePath));
+  const object = (Array.isArray(items) ? items : []).find((candidate) => String(candidate?.id) === match[2]);
+  return object ? YAML.stringify(object, { indent: 2, lineWidth: 0 }).trim() : null;
+}
+
+export { listKnowledgeSourceFiles, readKnowledgeObject, enumerateBusinessRules, enumerateFeatureObjects, resolveBusinessRule, resolveFeatureObject, sha256 };

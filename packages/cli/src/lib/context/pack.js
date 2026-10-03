@@ -3,7 +3,9 @@ import path from "node:path";
 import { ensureDirectory, findSpectraRoot } from "../runtime.js";
 import { readIndex as readRepoIndex } from "../index/cache.js";
 import { getChangedFiles as collectChangedFiles } from "../git-diff.js";
+import { buildRoute } from "../business-context.js";
 import { ENTRY_DEFS } from "./sources.js";
+import { resolveKnowledgeEntries } from "./knowledge.js";
 import { GOAL_POLICIES, ROLE_POLICIES, normalizeGoal, normalizeRole, resolveTask } from "./policies.js";
 import { getCacheDir, getContextRoot } from "./roots.js";
 import { ensureContextSummaries } from "./summaries.js";
@@ -161,7 +163,10 @@ function buildContextPack({
   task,
   changed = false,
   base = null,
-  head = null
+  head = null,
+  routeTask = null,
+  domains = [],
+  modules = []
 }) {
   const projectRoot = findSpectraRoot(cwd);
 
@@ -220,10 +225,46 @@ function buildContextPack({
       entries.some((entry) => entry.changedRefs.includes(candidate) || entry.path === candidate)
   );
 
+  let avoid = rolePolicy.avoid.filter((candidate) => !entries.some((entry) => entry.path === candidate));
+  let route;
+  let knowledge;
+
+  // `--route-task`: business/module routing plus exact Knowledge Map candidates.
+  // The route's whole-file rule entries for matched domains are replaced by the
+  // exact rule objects; the routing policy and the domain/module indexes stay.
+  if (routeTask) {
+    route = buildRoute({ cwd, task: routeTask, domains, modules });
+    const resolved = resolveKnowledgeEntries({ projectRoot, task: routeTask, route, changedFiles });
+    const existingPaths = new Set(entries.map((entry) => entry.path));
+    const replacedRuleFiles = [];
+    for (const entry of route.entries) {
+      if (existingPaths.has(entry.path)) continue;
+      if (entry.reason.startsWith("domain: ")) {
+        replacedRuleFiles.push(entry.path);
+        continue;
+      }
+      const absolutePath = path.join(route.repoRoot, entry.path);
+      entries.push({
+        ...entry,
+        absolutePath,
+        exists: fs.existsSync(absolutePath),
+        changed: false,
+        changedRefs: [],
+        estimatedTokens: estimateTokensFromFile(absolutePath),
+        source: "route"
+      });
+      existingPaths.add(entry.path);
+    }
+    entries.push(...resolved.entries);
+    avoid = [...new Set([...avoid, ...route.deferred, ...replacedRuleFiles])].filter((candidate) => !existingPaths.has(candidate));
+    knowledge = { map: resolved.mapStatus, resolved: resolved.entries.length };
+  }
+
   const totals = entries.reduce(
     (accumulator, entry) => {
       accumulator.estimatedTokens += entry.estimatedTokens;
-      accumulator[entry.mode] += entry.estimatedTokens;
+      // Resolved objects are markdown-sized content: they count toward `full`.
+      accumulator[entry.mode === "object" ? "full" : entry.mode] += entry.estimatedTokens;
       return accumulator;
     },
     { estimatedTokens: 0, summary: 0, full: 0 }
@@ -236,11 +277,12 @@ function buildContextPack({
     task: task ?? null,
     changedFiles: relevantChangedFiles,
     budgets: rolePolicy.budgets,
-    avoid: rolePolicy.avoid.filter((candidate) => !entries.some((entry) => entry.path === candidate)),
+    avoid,
     escalation: goalPolicy.escalation.map((entryId) => ENTRY_DEFS[entryId].path),
     entries,
     totals,
-    repoIndex: buildRepoIndexSummary(projectRoot)
+    repoIndex: buildRepoIndexSummary(projectRoot),
+    ...(route ? { route, knowledge } : {})
   };
 }
 

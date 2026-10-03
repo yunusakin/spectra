@@ -137,7 +137,7 @@ function projectWithKnowledge() {
 
 const ids = (map) => map.references.map((reference) => reference.id);
 const bySig = (map, id) => lookupKnowledgeReference(map, id).signature;
-const withoutSignature = ({ signature, ...reference }) => reference;
+const withoutSignature = ({ signature, terms, ...reference }) => reference;
 
 // ---- Determinism -----------------------------------------------------------------
 
@@ -243,6 +243,15 @@ test("real Spectra feature objects appear in the map", () => {
   for (const id of ["spectra-core#FR-2", "spectra-core#AC-2", "spectra-core#NFR-1"]) {
     assert.deepEqual(withoutSignature(lookupKnowledgeReference(map, id)), resolveFeatureObject(repoRoot, id).reference);
   }
+});
+
+test("references carry sorted lookup terms, never prose", () => {
+  const root = projectWithKnowledge();
+  const rule = lookupKnowledgeReference(buildKnowledgeMap(root), "RULE-LOY-001");
+  assert.deepEqual(rule.terms, [...rule.terms].sort());
+  assert.ok(rule.terms.includes("expired") && rule.terms.includes("point"));
+  assert.equal(rule.terms.includes("cannot"), false);
+  assert.equal(lookupKnowledgeReference(buildKnowledgeMap(root), "alpha#FR-1").terms.includes("alpha"), true);
 });
 
 // ---- Signatures ------------------------------------------------------------------
