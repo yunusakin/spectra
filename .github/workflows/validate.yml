@@ -54,3 +54,14 @@ jobs:
 
       - name: Full test suite
         run: npm test
+
+      - name: Historical project lifecycle matrix
+        run: node tools/verify-lifecycle-history.mjs "$RUNNER_TEMP/spectra-lifecycle-history"
+
+      - name: Upload historical lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: historical-lifecycle-node-${{ matrix.node-version }}
+          path: ${{ runner.temp }}/spectra-lifecycle-history/results.json
+          if-no-files-found: warn

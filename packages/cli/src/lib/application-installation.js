@@ -7,6 +7,36 @@ import { getCliVersion } from "./version.js";
 
 const VERSION_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?(\+[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$/;
 const hash = file => createHash("sha256").update(fs.readFileSync(file)).digest("hex");
+function ownedTree(directory) {
+  return fs.readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)).flatMap(entry => {
+    const file = path.join(directory, entry.name), relative = path.relative(directory, file), stat = fs.lstatSync(file);
+    if (stat.isSymbolicLink()) throw new Error(`Unexpected symlink: ${file}`);
+    if (stat.isDirectory()) return [[relative + "/", stat.mode & 0o777], ...ownedTree(file).map(([name, mode, digest]) => digest === undefined ? [path.join(relative, name), mode] : [path.join(relative, name), mode, digest])];
+    if (!stat.isFile()) throw new Error(`Unexpected file type: ${file}`);
+    return [[relative, stat.mode & 0o777, hash(file)]];
+  });
+}
+function expectedAssetLayout() {
+  if (typeof SPECTRA_NATIVE_LAYOUT === "object") return new Set(SPECTRA_NATIVE_LAYOUT.filter(name => name.startsWith("assets/") && name !== "assets/"));
+  const root = path.join(getCliPackageRoot(), "assets");
+  const walk = (directory, prefix = "assets") => fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+    const name = path.posix.join(prefix, entry.name);
+    return entry.isDirectory() ? [name + "/", ...walk(path.join(directory, entry.name), name)] : [name];
+  });
+  return new Set(walk(root));
+}
+function assertOwnedAssets(directory) {
+  const expected = expectedAssetLayout();
+  const visit = (current, prefix = "assets") => fs.readdirSync(current, { withFileTypes: true }).flatMap(entry => {
+    const name = `${prefix}/${entry.name}`, child = path.join(current, entry.name), stat = fs.lstatSync(child);
+    if (stat.isSymbolicLink()) throw new Error(`Unexpected asset symlink: ${child}`);
+    if (stat.isDirectory()) return [name + "/", ...visit(child, name)];
+    if (!stat.isFile()) throw new Error(`Unexpected asset type: ${child}`);
+    return [name];
+  });
+  const actual = visit(path.join(directory, "assets"));
+  if (actual.length !== expected.size || actual.some(name => !expected.has(name))) throw new Error(`Unexpected runtime asset entry: ${directory}`);
+}
 function assertSafeInstallationPath(value, env = process.env) {
   if (typeof value !== "string" || !path.isAbsolute(value) || path.normalize(value) !== value || value.includes("\n") || value.includes("\r")) throw new Error(`Unsafe installation path: ${value}`);
   const dangerous = new Set(["/", "/bin", "/usr", "/usr/bin", "/usr/local", "/etc", "/var", "/private", "/private/tmp", "/tmp", env.HOME, env.USERPROFILE]);
@@ -31,7 +61,7 @@ function readRecord(file, expectedKeys) {
   if (record.format !== "1" || !new Set(["native", "native-legacy"]).has(record.method)) throw new Error(`Unrecognized ownership record: ${file}`);
   return record;
 }
-function readOwnedVersion(home, commandPath, version, env = process.env) {
+function readOwnedVersion(home, commandPath, version, env = process.env, allowUnexpectedAssets = false) {
   if (!VERSION_PATTERN.test(version)) throw new Error(`Invalid owned version: ${version}`);
   const directory = assertSafeInstallationPath(path.join(home, version), env);
   const executablePath = assertSafeInstallationPath(path.join(directory, "bin/spectra"), env);
@@ -45,6 +75,12 @@ function readOwnedVersion(home, commandPath, version, env = process.env) {
   if (hash(installerPath) !== record.installerSha256) throw new Error(`Owned installer validation failed: ${directory}`);
   const assetsPath = assertSafeInstallationPath(path.join(directory, "assets/runtime"), env);
   if (!fs.statSync(assetsPath).isDirectory() || fs.readFileSync(versionPath, "utf8").trim() !== version || !fs.statSync(executablePath).isFile()) throw new Error(`Owned runtime validation failed: ${directory}`);
+  let unexpectedAssets = false;
+  try { assertOwnedAssets(directory); } catch (error) { if (!allowUnexpectedAssets) throw error; unexpectedAssets = true; }
+  const rootEntries = fs.readdirSync(directory).sort();
+  const recordTemps = rootEntries.filter(name => /^ownership\.env\.\d+-[a-f0-9]{12}\.tmp$/.test(name));
+  for (const name of recordTemps) { const temp = fs.lstatSync(path.join(directory, name)); if (!temp.isFile() || temp.isSymbolicLink()) throw new Error(`Unsafe ownership stage: ${directory}/${name}`); }
+  if (rootEntries.filter(name => !recordTemps.includes(name)).join("\0") !== ["LICENSE", "VERSION", "assets", "bin", "install.sh", "ownership.env"].sort().join("\0")) throw new Error(`Unexpected version entry: ${directory}`);
   let rollbackPath;
   if (Object.hasOwn(record, "forwarderSha256")) {
     rollbackPath = assertSafeInstallationPath(executablePath + ".rollback", env);
@@ -61,8 +97,23 @@ function readOwnedVersion(home, commandPath, version, env = process.env) {
   } else if (hash(executablePath) !== record.sha256) {
     throw new Error(`Owned runtime validation failed: ${directory}`);
   }
+  const binDir = path.join(directory, "bin");
+  const binEntries = fs.readdirSync(binDir).sort();
+  const executableTemps = binEntries.filter(name => /^spectra(?:\.rollback)?\.\d+-[a-f0-9]{12}\.tmp$/.test(name));
+  for (const name of executableTemps) { const temp = fs.lstatSync(path.join(binDir, name)); if (!temp.isFile() || temp.isSymbolicLink()) throw new Error(`Unsafe executable stage: ${binDir}/${name}`); }
+  let rollbackPresent = Boolean(rollbackPath);
+  if (!rollbackPresent) {
+    const candidate = executablePath + ".rollback";
+    try {
+      const rollback = fs.lstatSync(candidate);
+      if (!rollback.isFile() || rollback.isSymbolicLink() || hash(candidate) !== record.sha256) throw new Error(`Unrecognized rollback bytes: ${candidate}`);
+      rollbackPresent = true;
+    } catch (error) { if (error.code !== "ENOENT") throw error; }
+  }
+  const expectedBinEntries = ["spectra", ...(rollbackPresent ? ["spectra.rollback"] : [])].sort();
+  if (binEntries.filter(name => !executableTemps.includes(name)).join("\0") !== expectedBinEntries.join("\0")) throw new Error(`Unexpected executable entry: ${directory}`);
   const executableSha256 = hash(executablePath);
-  return { ...record, directory, recordPath, ...(rollbackPath ? { rollbackPath, forwarded: executableSha256 === record.forwarderSha256, forwardingPending: executableSha256 === record.sha256 } : {}) };
+  return { ...record, directory, recordPath, ...(unexpectedAssets ? { unexpectedAssets: true } : {}), ...(rollbackPath ? { rollbackPath, forwarded: executableSha256 === record.forwarderSha256, forwardingPending: executableSha256 === record.sha256 } : {}) };
 }
 function readMachineInstallation(home, env = process.env) {
   assertSafeInstallationPath(home, env);
@@ -72,13 +123,14 @@ function readMachineInstallation(home, env = process.env) {
   // The command itself is the one expected symlink; all its parent components must be safe.
   assertSafeInstallationPath(path.dirname(record.commandPath), env);
   if (path.basename(record.commandPath) !== "spectra" || record.commandPath.startsWith(`${home}/`)) throw new Error("Unsafe machine command path");
-  const current = readOwnedVersion(home, record.commandPath, record.currentVersion, env);
+  const current = readOwnedVersion(home, record.commandPath, record.currentVersion, env, true);
   if (!fs.lstatSync(record.commandPath).isSymbolicLink() || fs.readlinkSync(record.commandPath) !== current.executablePath) throw new Error("Machine activation does not match ownership record");
-  const versions = [];
-  const preserved = [];
+  const versions = [current];
+  const preserved = current.unexpectedAssets ? [current.directory] : [];
   for (const entry of fs.readdirSync(home)) {
     if (entry === "installation.env") continue;
-    try { versions.push(readOwnedVersion(home, record.commandPath, entry, env)); }
+    if (entry === record.currentVersion) continue;
+    try { const version = readOwnedVersion(home, record.commandPath, entry, env); if (version.unexpectedAssets) preserved.push(version.directory); else versions.push(version); }
     catch { preserved.push(path.join(home, entry)); }
   }
   return { ...record, recordPath, versions, preserved };
@@ -236,12 +288,57 @@ function adoptLegacyNativeInstallation(installation) {
   }
 }
 
+function validatePendingPlan(plan, home) {
+  if (!plan || plan.home !== home || !Array.isArray(plan.versions) || !Array.isArray(plan.records) || plan.records.length !== 1 || !Array.isArray(plan.preserved)) throw new Error("Malformed pending uninstall plan");
+  const machine = plan.records[0], machineLines = machine.contents?.split("\n");
+  if (machine.path !== path.join(home, "installation.env") || machineLines?.length !== 6 || machineLines[0] !== "format=1" || machineLines[1] !== "method=native" || machineLines[2] !== `home=${home}` || machineLines[3] !== `commandPath=${plan.commandPath}` || !machineLines[4].startsWith("currentVersion=") || machineLines[5] !== "") throw new Error("Invalid pending machine record");
+  const currentVersion = machineLines[4].slice("currentVersion=".length);
+  if (!VERSION_PATTERN.test(currentVersion) || plan.commandTarget !== path.join(home, currentVersion, "bin/spectra") || !path.isAbsolute(plan.commandPath) || path.normalize(plan.commandPath) !== plan.commandPath || path.basename(plan.commandPath) !== "spectra" || plan.commandPath.startsWith(`${home}/`)) throw new Error("Pending uninstall paths do not match machine ownership");
+  const allowed = new Set(["assets/", "bin/", "bin/spectra", "bin/spectra.rollback", "LICENSE", "VERSION", "install.sh", "ownership.env", ...expectedAssetLayout()]);
+  const versions = new Set();
+  for (const version of plan.versions) {
+    if (!VERSION_PATTERN.test(version.version) || versions.has(version.version) || version.directory !== path.join(home, version.version) || !Number.isSafeInteger(version.dev) || !Number.isSafeInteger(version.ino) || !/^[a-f0-9]{64}$/.test(version.sha256) || typeof version.record !== "string" || !Array.isArray(version.tree)) throw new Error("Unsafe pending uninstall target");
+    versions.add(version.version);
+    const fields = Object.fromEntries(version.record.trimEnd().split("\n").map(line => { const index = line.indexOf("="); return [line.slice(0, index), line.slice(index + 1)]; }));
+    if (fields.format !== "1" || fields.method !== "native" || fields.home !== home || fields.commandPath !== plan.commandPath || fields.version !== version.version || fields.executablePath !== path.join(version.directory, "bin/spectra") || fields.sha256 !== version.sha256) throw new Error("Pending version record paths do not match");
+    const entries = new Set();
+    for (const entry of version.tree) {
+      if (!Array.isArray(entry) || typeof entry[0] !== "string" || entry[0].includes("\\") || (!allowed.has(entry[0]) && !(entry[0].endsWith("/") && [...allowed].some(name => name.startsWith(entry[0])))) || entries.has(entry[0])) throw new Error("Unsafe pending uninstall tree entry");
+      entries.add(entry[0]);
+      const directory = entry[0].endsWith("/"), relative = directory ? entry[0].slice(0, -1) : entry[0];
+      if (!relative || path.isAbsolute(relative) || path.normalize(relative) !== relative || relative.split("/").some(part => !part || part === "." || part === "..") || !Number.isInteger(entry[1]) || entry[1] < 0 || entry[1] > 0o777 || (directory ? entry.length !== 2 : entry.length !== 3 || !/^[a-f0-9]{64}$/.test(entry[2]))) throw new Error("Malformed pending uninstall tree entry");
+    }
+    for (const required of ["bin/", "bin/spectra", "LICENSE", "VERSION", "install.sh", "ownership.env", "assets/"]) if (!entries.has(required)) throw new Error("Incomplete pending uninstall tree");
+  }
+  if (!versions.has(currentVersion)) throw new Error("Pending uninstall omits the active version");
+  if (plan.manualRecovery !== undefined) {
+    if (!Array.isArray(plan.manualRecovery)) throw new Error("Malformed pending uninstall recovery paths");
+    for (const item of plan.manualRecovery) {
+      const prefix = item && `.${item.version}.uninstall-`, basename = item && typeof item.path === "string" ? path.basename(item.path) : "";
+      if (!item || !versions.has(item.version) || typeof item.path !== "string" || item.path !== path.join(home, basename) || !basename.startsWith(prefix) || !/^[a-f0-9]{12}$/.test(basename.slice(prefix.length))) throw new Error("Unsafe pending uninstall recovery path");
+    }
+  }
+  return currentVersion;
+}
+
 function inspectApplicationInstallation({ env = process.env, execPath = process.execPath, packageRoot = getCliPackageRoot() } = {}) {
   let executable;
   try { executable = fs.realpathSync(execPath); } catch { executable = execPath; }
   // Derive a candidate from the actual executing binary. Env/project paths never
   // select a machine installation, and records must bind every canonical path.
   const candidateHome = path.resolve(path.dirname(executable), "../..");
+  try {
+    const markerPath = path.join(candidateHome, "uninstall.pending.json"), markerStat = fs.lstatSync(markerPath);
+    if (!markerStat.isFile() || markerStat.isSymbolicLink()) throw new Error("Unsafe pending uninstall record");
+    const marker = JSON.parse(fs.readFileSync(markerPath, "utf8"));
+    const plan = marker.plan, currentVersion = validatePendingPlan(plan, candidateHome), active = plan.versions.find(version => version.version === currentVersion), machine = plan.records[0];
+    if (marker.format !== 1 || active.directory !== path.dirname(path.dirname(executable)) || path.join(active.directory, "bin/spectra") !== executable || !fs.lstatSync(executable).isFile() || fs.readFileSync(path.join(candidateHome, "installation.env"), "utf8") !== machine.contents) throw new Error("Invalid pending uninstall executable");
+    try { const link = fs.lstatSync(plan.commandPath); if (!link.isSymbolicLink() || fs.readlinkSync(plan.commandPath) !== plan.commandTarget) throw new Error("Stable command changed during uninstall"); }
+    catch (error) { if (error.code !== "ENOENT") throw error; }
+    return { ...plan, kind: "native-managed", home: candidateHome, execPath: executable, currentVersion: active.version, versions: plan.versions, preserved: plan.preserved, uninstallPending: true, pendingPlan: plan, reason: "Resuming verified machine uninstall" };
+  } catch (error) {
+    if (error.code !== "ENOENT" && fs.existsSync(path.join(candidateHome, "uninstall.pending.json"))) return { kind: "unmanaged", nativeRuntime: isSea(), execPath: executable, currentVersion: getCliVersion(), versions: [], reason: `Pending uninstall ownership is not verified: ${error.message}` };
+  }
   try {
     const machine = readMachineInstallation(candidateHome, env);
     const executing = machine.versions.find(version => version.executablePath === executable);
@@ -276,4 +373,161 @@ function planApplicationUpdate(installation, version) {
   if (fresh.kind !== "native-managed" || fresh.home !== installation.home || fresh.commandPath !== installation.commandPath) throw new Error("Native ownership changed before update");
   return { kind: "native-managed", version, home: fresh.home, commandPath: fresh.commandPath, currentVersion: fresh.currentVersion, installation: fresh };
 }
-export { VERSION_PATTERN, assertSafeInstallationPath, readOwnedVersion, readMachineInstallation, resolveStableMachineCommand, forwardRetainedExecutables, inspectApplicationInstallation, planApplicationUpdate, adoptLegacyNativeInstallation };
+function planApplicationUninstall(installation) {
+  if (installation.pendingPlan) return { ...installation.pendingPlan, pending: true };
+  if (installation.kind !== "native-managed" || installation.legacy) throw new Error("Uninstall requires a verified managed native installation");
+  const fresh = readMachineInstallation(installation.home);
+  if (fresh.commandPath !== installation.commandPath) throw new Error("Native ownership changed before uninstall");
+  const versions = fresh.versions.filter(version => !version.unexpectedAssets).map(version => {
+    const rootEntries = fs.readdirSync(version.directory);
+    const binEntries = fs.readdirSync(path.join(version.directory, "bin"));
+    if (rootEntries.some(name => /^ownership\.env\.\d+-[a-f0-9]{12}\.tmp$/.test(name)) || binEntries.some(name => /^spectra(?:\.rollback)?\.\d+-[a-f0-9]{12}\.tmp$/.test(name))) throw new Error(`Incomplete update transaction; finish the update before uninstalling: ${version.directory}`);
+    const stat = fs.lstatSync(version.directory);
+    return { version: version.version, directory: version.directory, dev: stat.dev, ino: stat.ino, sha256: version.sha256, record: fs.readFileSync(version.recordPath, "utf8"), tree: ownedTree(version.directory) };
+  });
+  return { home: fresh.home, commandPath: fresh.commandPath, commandTarget: path.join(fresh.home, fresh.currentVersion, "bin/spectra"), versions,
+    records: [{ path: fresh.recordPath, contents: fs.readFileSync(fresh.recordPath, "utf8") }], preserved: fresh.preserved };
+}
+function executeApplicationUninstall(plan) {
+  const removed = [], preserved = [...plan.preserved];
+  const pendingPath = path.join(plan.home, "uninstall.pending.json");
+  const suppliedPlan = plan.pendingPlan ?? plan;
+  const { pending: ignored, ...requestedPlan } = suppliedPlan;
+  let pending = false;
+  try {
+    const markerStat = fs.lstatSync(pendingPath);
+    if (!markerStat.isFile() || markerStat.isSymbolicLink()) throw new Error("Unsafe pending uninstall record");
+    const marker = JSON.parse(fs.readFileSync(pendingPath, "utf8"));
+    if (marker.format !== 1 || JSON.stringify(marker.plan) !== JSON.stringify(requestedPlan)) throw new Error("Pending uninstall plan changed");
+    pending = true;
+    plan = marker.plan;
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+    if (plan.pending || plan.pendingPlan) throw new Error("Pending uninstall record is missing");
+    plan = requestedPlan;
+  }
+  const activeVersion = path.basename(path.dirname(path.dirname(plan.commandTarget)));
+  const machineRecord = plan.records.find(record => record.path === path.join(plan.home, "installation.env"));
+  const activationMatches = (commandExpected = true) => {
+    if (fs.readFileSync(machineRecord.path, "utf8") !== machineRecord.contents) return false;
+    if (!commandExpected) {
+      try { fs.lstatSync(plan.commandPath); return false; }
+      catch (error) { return error.code === "ENOENT"; }
+    }
+    try { const link = fs.lstatSync(plan.commandPath); return link.isSymbolicLink() && fs.readlinkSync(plan.commandPath) === plan.commandTarget; }
+    catch (error) { return pending && error.code === "ENOENT"; }
+  };
+  const versionMatches = target => {
+    try {
+      const current = readOwnedVersion(plan.home, plan.commandPath, target.version);
+      const stat = fs.lstatSync(current.directory);
+      return !stat.isSymbolicLink() && stat.dev === target.dev && stat.ino === target.ino && current.sha256 === target.sha256 && fs.readFileSync(current.recordPath, "utf8") === target.record && JSON.stringify(ownedTree(current.directory)) === JSON.stringify(target.tree);
+    } catch { return false; }
+  };
+  const exists = file => { try { fs.lstatSync(file); return true; } catch (error) { if (error.code === "ENOENT") return false; throw error; } };
+  const quarantineName = target => path.join(plan.home, `.${target.version}.uninstall-${randomBytes(6).toString("hex")}`);
+  const restore = (target, quarantine) => {
+    if (!exists(quarantine)) return false;
+    try {
+      if (exists(target.directory)) return false;
+      fs.renameSync(quarantine, target.directory);
+      return true;
+    } catch { return false; }
+  };
+  const removeVersion = (target, commandExpected = true) => {
+    if (!exists(target.directory)) { removed.push(target.directory); return true; }
+    let quarantine;
+    try {
+      if (!activationMatches(commandExpected) || !versionMatches(target)) throw new Error("ownership changed");
+      quarantine = quarantineName(target);
+      fs.renameSync(target.directory, quarantine);
+      const moved = fs.lstatSync(quarantine);
+      if (moved.isSymbolicLink() || moved.dev !== target.dev || moved.ino !== target.ino || JSON.stringify(ownedTree(quarantine)) !== JSON.stringify(target.tree) || exists(target.directory) || !activationMatches(commandExpected)) {
+        restore(target, quarantine);
+        throw new Error("version changed during quarantine");
+      }
+      fs.rmSync(quarantine, { recursive: true });
+      if (exists(target.directory)) preserved.push(target.directory);
+      else removed.push(target.directory);
+      return true;
+    } catch {
+      if (quarantine && exists(quarantine)) {
+        let intact = false;
+        try { intact = JSON.stringify(ownedTree(quarantine)) === JSON.stringify(target.tree); } catch { /* Preserve an unverifiable quarantine for manual recovery. */ }
+        if (intact) {
+          if (!restore(target, quarantine)) preserved.push(quarantine);
+        } else {
+          plan.manualRecovery = [...(plan.manualRecovery || []), { version: target.version, path: quarantine }];
+          const temp = `${pendingPath}.${process.pid}-${randomBytes(6).toString("hex")}.tmp`;
+          fs.writeFileSync(temp, JSON.stringify({ format: 1, plan }) + "\n", { flag: "wx", mode: 0o600 });
+          fs.renameSync(temp, pendingPath);
+          preserved.push(quarantine);
+        }
+      }
+      preserved.push(target.directory);
+      return false;
+    }
+  };
+  const activeTarget = plan.versions.find(item => item.version === activeVersion);
+  if (!activeTarget) return { removed, preserved: [...new Set(preserved)] };
+  try {
+    if (!pending) {
+      if (!activationMatches() || !versionMatches(activeTarget)) throw new Error("machine activation changed");
+      fs.writeFileSync(pendingPath, JSON.stringify({ format: 1, plan }) + "\n", { flag: "wx", mode: 0o600 });
+      pending = true;
+    }
+    const manual = plan.manualRecovery || [];
+    if (manual.some(item => exists(item.path))) {
+      const paths = manual.filter(item => exists(item.path)).map(item => item.path);
+      preserved.push(...paths);
+      return { removed, preserved: [...new Set(preserved)], manualRecovery: paths };
+    }
+    if (manual.length) {
+      delete plan.manualRecovery;
+      const temp = `${pendingPath}.${process.pid}-${randomBytes(6).toString("hex")}.tmp`;
+      fs.writeFileSync(temp, JSON.stringify({ format: 1, plan }) + "\n", { flag: "wx", mode: 0o600 });
+      fs.renameSync(temp, pendingPath);
+    }
+    const oldVersions = plan.versions.filter(target => target.version !== activeVersion);
+    if (oldVersions.some(target => !removeVersion(target))) throw new Error("a retained version changed during uninstall");
+    const actual = ownedTree(activeTarget.directory), expected = new Map(activeTarget.tree.map(entry => [entry[0], JSON.stringify(entry)]));
+    if (actual.some(entry => expected.get(entry[0]) !== JSON.stringify(entry))) throw new Error("active version contents changed during uninstall");
+    const keep = new Set(["bin/", "bin/spectra", "LICENSE", "VERSION", "install.sh", "ownership.env"]);
+    for (const [name, mode, digest] of activeTarget.tree.filter(entry => !entry[0].endsWith("/") && !keep.has(entry[0]))) {
+      const file = path.join(activeTarget.directory, name);
+      if (!exists(file)) continue;
+      const stat = fs.lstatSync(file);
+      if (!stat.isFile() || stat.isSymbolicLink() || (stat.mode & 0o777) !== mode || hash(file) !== digest) throw new Error(`Active version file changed during uninstall: ${file}`);
+      fs.unlinkSync(file);
+    }
+    for (const [name] of activeTarget.tree.filter(entry => entry[0].endsWith("/")).sort((a, b) => b[0].split(path.sep).length - a[0].split(path.sep).length)) {
+      if (keep.has(name)) continue;
+      const directory = path.join(activeTarget.directory, name.slice(0, -1));
+      if (exists(directory)) fs.rmdirSync(directory);
+    }
+    if (!activationMatches() || exists(path.join(activeTarget.directory, "assets"))) throw new Error("active ownership changed before final removal");
+    if (exists(plan.commandPath)) {
+      if (!activationMatches()) throw new Error("stable command changed before final removal");
+      fs.unlinkSync(plan.commandPath);
+      removed.push(plan.commandPath);
+    }
+    for (const name of ["install.sh", "LICENSE", "VERSION", "ownership.env", "bin/spectra"]) {
+      const file = path.join(activeTarget.directory, name);
+      if (exists(file)) fs.unlinkSync(file);
+    }
+    fs.rmdirSync(path.join(activeTarget.directory, "bin"));
+    fs.rmdirSync(activeTarget.directory);
+    removed.push(activeTarget.directory);
+    if (fs.readFileSync(machineRecord.path, "utf8") !== machineRecord.contents) throw new Error("machine record changed during uninstall");
+    fs.unlinkSync(machineRecord.path);
+    removed.push(machineRecord.path);
+    fs.unlinkSync(pendingPath);
+    removed.push(pendingPath);
+    try { fs.rmdirSync(plan.home); } catch (error) { if (error.code !== "ENOENT") preserved.push(plan.home); }
+  } catch {
+    preserved.push(activeTarget.directory, plan.commandPath);
+    if (pending && exists(pendingPath)) preserved.push(pendingPath);
+  }
+  return { removed, preserved: [...new Set(preserved)], manualRecovery: (plan.manualRecovery || []).filter(item => exists(item.path)).map(item => item.path) };
+}
+export { VERSION_PATTERN, assertSafeInstallationPath, readOwnedVersion, readMachineInstallation, resolveStableMachineCommand, forwardRetainedExecutables, inspectApplicationInstallation, planApplicationUpdate, planApplicationUninstall, executeApplicationUninstall, adoptLegacyNativeInstallation };

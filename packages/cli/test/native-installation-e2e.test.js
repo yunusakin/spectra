@@ -5,6 +5,7 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { pathToFileURL } from "node:url";
 import test from "node:test";
 import { readMachineInstallation } from "../src/lib/application-installation.js";
 
@@ -13,7 +14,10 @@ import { readMachineInstallation } from "../src/lib/application-installation.js"
 // interrupted stage/activation, deleted prior activation, guessed provenance,
 // shared-file loss, custom-path failure, project mutation during application update,
 // a committed forwarder marker with the original executable after process death,
-// and mismatched transaction marker/rollback/executable hashes.
+// mismatched transaction marker/rollback/executable hashes, nested user data under
+// an owned runtime, active-removal failure after unlink, and target replacement
+// between validation and recursive deletion, plus pending-uninstall traversal
+// tampering and retained-version removal failure/retry.
 // Build the real archive first: npm run build:native --workspace spectra-pack.
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const asset = `spectra-${process.platform}-${process.arch}.tar.gz`;
@@ -107,6 +111,135 @@ scenario("custom paths and same-version reinstall retain owned activation and sh
   assert.equal(fs.readFileSync(path.join(env.SPECTRA_BIN, "other"), "utf8"), "shared\n");
   assert(fs.existsSync(path.join(env.SPECTRA_HOME, "installation.env"))); assert(fs.existsSync(path.join(env.SPECTRA_HOME, "3.1.2/ownership.env")));
   assert.equal(run("sh", ["-c", "command -v node"], env).status, 1); assert.match(run(command, ["version"], env).stdout, /3\.1\.2/);
+});
+scenario("uninstall revalidates a stable command changed after planning", ({ dir, env, install, command, run }) => {
+  success(install());
+  const foreign = path.join(dir, "foreign-command"); fs.writeFileSync(foreign, "foreign command\n");
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); fs.unlinkSync(plan.commandPath); fs.symlinkSync(process.env.SPECTRA_FOREIGN,plan.commandPath); const result=api.executeApplicationUninstall(plan); const afterFirst={result,versionExists:fs.existsSync(path.join(plan.home,machine.currentVersion)),machineRecord:fs.existsSync(path.join(plan.home,"installation.env"))}; fs.unlinkSync(plan.commandPath); fs.symlinkSync(plan.commandTarget,plan.commandPath); const retry=api.executeApplicationUninstall(api.planApplicationUninstall({...api.readMachineInstallation(plan.home),kind:"native-managed"})); console.log(JSON.stringify({afterFirst,retry}));`;
+  const result = run(process.execPath, ["--input-type=module", "-e", script], { ...env, SPECTRA_FOREIGN: foreign }); success(result);
+  const state = JSON.parse(result.stdout); assert(fs.existsSync(foreign));
+  assert.equal(state.afterFirst.versionExists, true); assert.equal(state.afterFirst.machineRecord, true);
+  assert(state.afterFirst.result.preserved.includes(command));
+  assert(state.retry.removed.includes(command)); assert.equal(fs.existsSync(env.SPECTRA_HOME), false);
+});
+scenario("uninstall preserves a version-root symlink introduced after planning", ({ dir, env, install, command, run }) => {
+  success(install());
+  const active = path.join(env.SPECTRA_HOME, "3.1.2"), saved = path.join(dir, "saved-owned-runtime"), foreign = path.join(dir, "foreign-version");
+  fs.mkdirSync(foreign); fs.writeFileSync(path.join(foreign, "keep.txt"), "foreign\n");
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); fs.renameSync(process.env.SPECTRA_ACTIVE,process.env.SPECTRA_SAVED); fs.symlinkSync(process.env.SPECTRA_FOREIGN,process.env.SPECTRA_ACTIVE,"dir"); const result=api.executeApplicationUninstall(plan); console.log(JSON.stringify(result));`;
+  const result = run(process.execPath, ["--input-type=module", "-e", script], { ...env, SPECTRA_ACTIVE: active, SPECTRA_SAVED: saved, SPECTRA_FOREIGN: foreign }); success(result);
+  assert.equal(fs.readlinkSync(command), path.join(active, "bin/spectra"));
+  assert.equal(fs.lstatSync(active).isSymbolicLink(), true); assert.equal(fs.readFileSync(path.join(foreign, "keep.txt"), "utf8"), "foreign\n");
+  assert(fs.existsSync(path.join(env.SPECTRA_HOME, "installation.env"))); assert(fs.existsSync(saved));
+});
+scenario("uninstall preserves unexpected nested runtime files", ({ env, install, command, run }) => {
+  success(install());
+  const userFile = path.join(env.SPECTRA_HOME, "3.1.2/assets/runtime/user-notes.txt"); fs.writeFileSync(userFile, "keep this\n");
+  const result = run(command, ["uninstall", "--yes"], env); rejected(result);
+  assert.match(result.stdout + result.stderr, /Preserved .*3\.1\.2/);
+  assert.equal(fs.readFileSync(userFile, "utf8"), "keep this\n");
+  assert.equal(fs.existsSync(command), true); assert.equal(fs.existsSync(path.join(env.SPECTRA_HOME, "installation.env")), true);
+});
+scenario("uninstall resumes after an injected partial active-tree deletion", ({ env, install, command, run }) => {
+  success(install());
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); const unlink=fs.unlinkSync; let failed=false; fs.unlinkSync=(target)=>{ if (!failed && String(target).includes("/assets/runtime/")) { failed=true; unlink(target); throw new Error("injected partial unlink"); } return unlink(target); }; const first=api.executeApplicationUninstall(plan); fs.unlinkSync=unlink; const pending=fs.existsSync(path.join(plan.home,"uninstall.pending.json")); const stable=fs.readlinkSync(plan.commandPath); console.log(JSON.stringify({first,pending,stable}));`;
+  const result = run(process.execPath, ["--input-type=module", "-e", script], env); success(result);
+  const state = JSON.parse(result.stdout); assert.equal(state.pending, true); assert.equal(state.stable, path.join(env.SPECTRA_HOME, "3.1.2/bin/spectra"));
+  assert(state.first.preserved.length > 0); success(run(command, ["uninstall", "--yes"], env)); assert.equal(fs.existsSync(env.SPECTRA_HOME), false);
+});
+scenario("uninstall resumes after an active file removal fails before changing bytes", ({ env, install, command, run }) => {
+  success(install());
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); const unlink=fs.unlinkSync; let failed=false; fs.unlinkSync=(target)=>{ if (!failed && String(target).includes("/assets/runtime/")) { failed=true; throw new Error("injected removal failure"); } return unlink(target); }; const result=api.executeApplicationUninstall(plan); fs.unlinkSync=unlink; console.log(JSON.stringify({result,link:fs.readlinkSync(plan.commandPath),version:fs.existsSync(path.join(plan.home,machine.currentVersion))}));`;
+  const result = run(process.execPath, ["--input-type=module", "-e", script], env); success(result);
+  const state = JSON.parse(result.stdout); assert.equal(state.link, path.join(env.SPECTRA_HOME, "3.1.2/bin/spectra")); assert.equal(state.version, true);
+  assert(state.result.preserved.includes(path.join(env.SPECTRA_HOME, "3.1.2"))); assert.match(run(command, ["version"], env).stdout, /3\.1\.2/);
+  const retry = run(command, ["uninstall", "--yes"], env); success(retry); assert.equal(fs.existsSync(env.SPECTRA_HOME), false);
+});
+scenario("uninstall can be resumed directly after the stable command is removed", ({ env, install, command, run }) => {
+  success(install());
+  const activeExecutable = path.join(env.SPECTRA_HOME, "3.1.2/bin/spectra");
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); const unlink=fs.unlinkSync; let failed=false; fs.unlinkSync=(target)=>{ if (!failed && String(target).endsWith("/install.sh")) { failed=true; unlink(target); throw new Error("injected final-stage interruption"); } return unlink(target); }; const result=api.executeApplicationUninstall(plan); fs.unlinkSync=unlink; console.log(JSON.stringify({result,command:fs.existsSync(plan.commandPath),executable:fs.existsSync(plan.commandTarget),pending:fs.existsSync(path.join(plan.home,"uninstall.pending.json"))}));`;
+  const first = run(process.execPath, ["--input-type=module", "-e", script], env); success(first);
+  const state = JSON.parse(first.stdout); assert.equal(state.command, false); assert.equal(state.executable, true); assert.equal(state.pending, true);
+  success(run(activeExecutable, ["uninstall", "--yes"], env)); assert.equal(fs.existsSync(env.SPECTRA_HOME), false);
+});
+scenario("uninstall rejects traversal in a pending ownership snapshot", ({ dir, env, install, run }) => {
+  success(install());
+  const victim = path.join(dir, "victim.txt"); fs.writeFileSync(victim, "valuable\n");
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const digest = hash(victim);
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); const unlink=fs.unlinkSync; fs.unlinkSync=(target)=>{ if (String(target).includes("/assets/runtime/")) throw new Error("injected stop"); return unlink(target); }; api.executeApplicationUninstall(plan); fs.unlinkSync=unlink; const markerPath=path.join(plan.home,"uninstall.pending.json"); const marker=JSON.parse(fs.readFileSync(markerPath,"utf8")); marker.plan.versions[0].tree.push(["../../victim.txt",0o600,process.env.SPECTRA_VICTIM_HASH]); fs.writeFileSync(markerPath,JSON.stringify(marker)+"\\n"); const inspected=api.inspectApplicationInstallation({execPath:plan.commandTarget}); let rejected=false; try { api.executeApplicationUninstall(plan); } catch { rejected=true; } console.log(JSON.stringify({kind:inspected.kind,rejected,victim:fs.readFileSync(process.env.SPECTRA_VICTIM,"utf8")}));`;
+  const result = run(process.execPath, ["--input-type=module", "-e", script], { ...env, SPECTRA_VICTIM: victim, SPECTRA_VICTIM_HASH: digest }); success(result);
+  const state = JSON.parse(result.stdout); assert.equal(state.kind, "unmanaged"); assert.equal(state.rejected, true); assert.equal(state.victim, "valuable\n");
+});
+scenario("uninstall keeps pending recovery when a retained version cannot be removed", ({ dir, env, install, command, run, editedArchive }) => {
+  success(install()); const older = stagedOlderArchive({ dir, run, editedArchive }); success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
+  const active = path.join(env.SPECTRA_HOME, "3.1.1/bin/spectra"), retained = path.join(env.SPECTRA_HOME, "3.1.2");
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); const rm=fs.rmSync; let failed=false; fs.rmSync=(target,options)=>{ if (!failed && String(target).includes(".3.1.2.uninstall-")) { failed=true; throw new Error("injected retained removal failure"); } return rm(target,options); }; const first=api.executeApplicationUninstall(plan); fs.rmSync=rm; const pending=fs.existsSync(path.join(plan.home,"uninstall.pending.json")); const retry=api.executeApplicationUninstall(api.planApplicationUninstall(api.inspectApplicationInstallation({execPath:process.env.SPECTRA_ACTIVE}))); console.log(JSON.stringify({first,pending,retry}));`;
+  const result = run(process.execPath, ["--input-type=module", "-e", script], { ...env, SPECTRA_ACTIVE: active }); success(result);
+  const state = JSON.parse(result.stdout); assert.equal(state.pending, true); assert(state.first.preserved.includes(retained));
+  assert(state.retry.removed.includes(command)); assert.equal(fs.existsSync(env.SPECTRA_HOME), false);
+});
+scenario("uninstall reports a partially removed retained version for manual recovery", ({ dir, env, install, command, run, editedArchive }) => {
+  success(install()); const older = stagedOlderArchive({ dir, run, editedArchive }); success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); const rm=fs.rmSync; let failed=false; fs.rmSync=(target,options)=>{ if (!failed && String(target).includes(".3.1.2.uninstall-")) { failed=true; fs.unlinkSync(path.join(target,"LICENSE")); throw new Error("injected partial retained deletion"); } return rm(target,options); }; const result=api.executeApplicationUninstall(plan); fs.rmSync=rm; console.log(JSON.stringify({result,pending:JSON.parse(fs.readFileSync(path.join(plan.home,"uninstall.pending.json"),"utf8")).plan.manualRecovery,command:fs.readlinkSync(plan.commandPath)}));`;
+  const first = run(process.execPath, ["--input-type=module", "-e", script], env); success(first);
+  const state = JSON.parse(first.stdout), recovery = state.pending[0].path;
+  assert.equal(state.command, path.join(env.SPECTRA_HOME, "3.1.1/bin/spectra")); assert(fs.existsSync(recovery)); assert(state.result.preserved.includes(recovery)); assert.deepEqual(state.result.manualRecovery, [recovery]);
+  const blocked = run(command, ["uninstall", "--yes"], env); rejected(blocked); assert.match(blocked.stdout + blocked.stderr, /partial owned runtime/); assert((blocked.stdout + blocked.stderr).includes(recovery));
+  fs.rmSync(recovery, { recursive: true }); success(run(command, ["uninstall", "--yes"], env)); assert.equal(fs.existsSync(env.SPECTRA_HOME), false);
+});
+scenario("uninstall does not delete a retained-version replacement installed after validation", ({ dir, env, install, command, run, editedArchive }) => {
+  success(install());
+  const older = stagedOlderArchive({ dir, run, editedArchive }); success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
+  const retained = path.join(env.SPECTRA_HOME, "3.1.2"), foreign = path.join(dir, "foreign-after-validation"); fs.mkdirSync(foreign); fs.writeFileSync(path.join(foreign, "keep.txt"), "foreign\n");
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); const rm=fs.rmSync; let swapped=false; fs.rmSync=(target,options)=>{ if (!swapped && String(target).includes(".3.1.2.uninstall-")) { swapped=true; fs.symlinkSync(process.env.SPECTRA_FOREIGN,process.env.SPECTRA_RETAINED,"dir"); } return rm(target,options); }; const result=api.executeApplicationUninstall(plan); fs.rmSync=rm; console.log(JSON.stringify(result));`;
+  const result = run(process.execPath, ["--input-type=module", "-e", script], { ...env, SPECTRA_FOREIGN: foreign, SPECTRA_RETAINED: retained }); success(result);
+  const state = JSON.parse(result.stdout); assert.equal(fs.readFileSync(path.join(foreign, "keep.txt"), "utf8"), "foreign\n");
+  assert.equal(fs.lstatSync(retained).isSymbolicLink(), true); assert.equal(fs.readlinkSync(retained), foreign);
+  assert(state.preserved.includes(retained)); assert.equal(fs.existsSync(command), false); assert.equal(fs.existsSync(path.join(env.SPECTRA_HOME, "installation.env")), false);
+});
+scenario("uninstall supports installer default HOME roots and leaves shared parents", ({ dir, env, install, run }) => {
+  const userHome = path.join(dir, "default home");
+  success(install({ HOME: userHome, SPECTRA_HOME: "", SPECTRA_BIN: "" }));
+  const home = path.join(userHome, ".local/share/spectra"), command = path.join(userHome, ".local/bin/spectra");
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.HOME+"/.local/share/spectra"); const result=api.executeApplicationUninstall(api.planApplicationUninstall({...machine,kind:"native-managed"})); console.log(JSON.stringify(result));`;
+  const result = run(process.execPath, ["--input-type=module", "-e", script], { HOME: userHome, SPECTRA_HOME: "" }); success(result);
+  assert.equal(fs.existsSync(home), false); assert.equal(fs.existsSync(command), false);
+  assert(fs.existsSync(path.join(userHome, ".local/share")));
+  assert(fs.existsSync(path.join(userHome, ".local/bin")));
+});
+scenario("uninstall removes verified versions while preserving unrelated machine and project data", ({ dir, env, install, command, run, editedArchive }) => {
+  success(install());
+  const oldArchive = stagedOlderArchive({ dir, run, editedArchive });
+  success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: oldArchive }));
+  const unrelated = path.join(env.SPECTRA_HOME, "user-data"); fs.mkdirSync(unrelated); fs.writeFileSync(path.join(unrelated, "keep.txt"), "keep\n");
+  const shared = path.join(env.SPECTRA_BIN, "other-command"); fs.writeFileSync(shared, "keep\n");
+  const projects = ["project-a", "project-b"].map(name => {
+    const root = path.join(dir, name); fs.mkdirSync(path.join(root, ".git/info"), { recursive: true });
+    fs.writeFileSync(path.join(root, "README.md"), `${name}\n`); fs.writeFileSync(path.join(root, ".git/info/exclude"), "/.spectra/\n");
+    return root;
+  });
+  const before = projects.map(inventory);
+  const api = pathToFileURL(path.join(repo, "packages/cli/src/lib/application-installation.js")).href;
+  const script = `import fs from "node:fs"; import * as api from ${JSON.stringify(api)}; const machine=api.readMachineInstallation(process.env.SPECTRA_HOME); const plan=api.planApplicationUninstall({...machine,kind:"native-managed"}); const result=api.executeApplicationUninstall(plan); console.log(JSON.stringify({result,versions:plan.versions.map(item=>fs.existsSync(item.directory))}));`;
+  const result = run(process.execPath, ["--input-type=module", "-e", script], env); success(result);
+  const state = JSON.parse(result.stdout);
+  assert.deepEqual(state.versions, [false, false]); assert.equal(fs.existsSync(command), false);
+  assert.equal(fs.existsSync(path.join(env.SPECTRA_HOME, "installation.env")), false);
+  assert.equal(fs.readFileSync(path.join(unrelated, "keep.txt"), "utf8"), "keep\n");
+  assert.equal(fs.readFileSync(shared, "utf8"), "keep\n");
+  assert(state.result.preserved.includes(unrelated));
+  assert.deepEqual(projects.map(inventory), before);
 });
 scenario("failed smoke retains prior activation and rejects replacement", ({ env, install, command, editedArchive }) => {
   success(install()); const before = inventory(env.SPECTRA_HOME); const target = fs.readlinkSync(command);

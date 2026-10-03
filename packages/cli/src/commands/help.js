@@ -25,6 +25,7 @@ const WORKFLOWS = [
   ]],
   ["Maintenance", [
     ["update", "Update the machine application"],
+    ["uninstall", "Remove a verified machine installation"],
     ["migrate", "Inspect and explicitly migrate a project"],
     ["doctor", "Check local tools, runtime, and adapters"]
   ]]

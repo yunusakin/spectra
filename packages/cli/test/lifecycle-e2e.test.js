@@ -16,6 +16,10 @@ import { getCliVersion } from "../src/lib/version.js";
 // standalone pins change unexpectedly, symlink aliases recurse, source refresh
 // deletes its active local CLI, old executable rollback bytes are lost, or a
 // machine update scans/mutates projects or trusts project metadata as ownership.
+// Uninstall failures: default/custom roots, multiple owned versions, unexpected
+// symlinks, foreign version entries, symlink traversal, target swaps after plan,
+// failed/missing removals, no-TTY without --yes, non-native provenance guidance,
+// and project or Git-exclude byte changes across uninstall/reinstall.
 // Repeat one case with node --test --test-name-pattern='migration check' <this file>.
 // Every case keeps JSON evidence and its fixture roots, including on failure.
 const output = process.env.SPECTRA_LIFECYCLE_ARTIFACT_DIR || path.join(os.tmpdir(), "spectra-lifecycle-e2e");
@@ -88,6 +92,16 @@ function scenario(name, action) {
   });
 }
 const success = result => assert.equal(result.status, 0, result.error?.message || result.stderr || result.stdout);
+let npmPackage;
+function npmSpectra(cwd, args, env = {}) {
+  if (!npmPackage) {
+    npmPackage = path.join(runRoot, "npm-fixture/node_modules/spectra-pack");
+    fs.mkdirSync(path.dirname(npmPackage), { recursive: true });
+    for (const entry of ["package.json", "bin", "src", "assets"]) fs.cpSync(path.join(cliRoot, entry), path.join(npmPackage, entry), { recursive: true });
+    fs.symlinkSync(path.join(cliRoot, "../../node_modules/yaml"), path.join(path.dirname(npmPackage), "yaml"), "dir");
+  }
+  return spawnSync(process.execPath, [path.join(npmPackage, "bin/spectra.js"), ...args], { cwd, encoding: "utf8", env: { ...process.env, ...env } });
+}
 function unchanged(report) {
   const command = report.commands.at(-1);
   assert.deepEqual(command.after, command.before, "Project bytes or Git exclusions changed");
@@ -132,10 +146,18 @@ scenario("unsafe uninstall: project paths never authorize machine deletion", ({ 
   const metadataPath = path.join(root, ".spectra/install.json"); const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
   metadata.binaryPath = executable; fs.writeFileSync(metadataPath, JSON.stringify(metadata));
   const before = inventory(foreign);
-  const result = execute(runRoot, ["uninstall", "--yes"], spectra, { SPECTRA_HOME: foreign, SPECTRA_BIN: foreign });
+  const result = execute(runRoot, ["uninstall", "--yes"], npmSpectra, { SPECTRA_HOME: foreign, SPECTRA_BIN: foreign });
   unchanged(report); assert.deepEqual(inventory(foreign), before);
   assert.doesNotMatch(result.stdout + result.stderr, /Unknown command/);
-  assert.match(result.stdout + result.stderr, /no managed|unowned|ownership|not.*managed/i);
+  assert.match(result.stdout + result.stderr, /no managed|unowned|ownership|not.*managed|npm uninstall/i);
+});
+scenario("uninstall guidance: npm invocation preserves two projects and their Git excludes", ({ project, execute, report }) => {
+  project(); project();
+  const before = report.projects.map(item => item.initialInventory);
+  const result = execute(runRoot, ["uninstall"], npmSpectra);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout + result.stderr, /npm uninstall -g spectra-pack/i);
+  assert.deepEqual(report.commands.at(-1).after.map(item => item.files), before);
 });
 scenario("fallback pinning: standalone stays pinned and Node fallback remains usable", ({ project, execute, report }) => {
   const root = project(); const standalone = path.join(runRoot, "standalone");

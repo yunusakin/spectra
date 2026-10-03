@@ -15,6 +15,8 @@ on:
       - "packages/core/**"
       - "packages/templates/**"
       - "profiles/**"
+      - "tools/verify-release.mjs"
+      - "tools/verify-lifecycle-history.mjs"
 
 permissions:
   contents: write
@@ -87,6 +89,27 @@ jobs:
           test -z "$(git -C "$local_dir" status --short)"
           git -C "$local_dir" check-ignore -q .spectra/install.json
           grep -F '"gitMode": "local"' "$local_dir/.spectra/install.json"
+
+      - name: Verify packaged npm and native lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./packages/cli/package.json').version")"
+          evidence="$RUNNER_TEMP/spectra-release"
+          mkdir -p "$evidence"
+          npm pack --workspace packages/cli --pack-destination "$evidence"
+          npm_archive="$evidence/spectra-pack-$version.tgz"
+          native_archive="packages/cli/dist/native/spectra-${{ matrix.target }}.tar.gz"
+          test -f "$npm_archive"
+          node tools/verify-release.mjs "$version" "$npm_archive" "$native_archive" "$evidence/results"
+
+      - name: Upload lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifecycle-${{ matrix.target }}
+          path: ${{ runner.temp }}/spectra-release/results/results.json
+          if-no-files-found: warn
 
       - uses: actions/upload-artifact@v4
         with:

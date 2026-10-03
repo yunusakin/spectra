@@ -20,6 +20,7 @@ import { onboardCommand } from "./commands/onboard.js";
 import { verifyCommand } from "./commands/verify.js";
 import { printHelp as printCommandHelp } from "./commands/help.js";
 import { internalUpdateProjectCommand, updateCommand } from "./commands/update.js";
+import { uninstallCommand } from "./commands/uninstall.js";
 import { fail, title } from "./lib/output.js";
 import { getCliVersion } from "./lib/version.js";
 import path from "node:path";
@@ -130,6 +131,8 @@ function dispatch(argv) {
       return migrateCommand(args);
     case "update":
       return updateCommand(args);
+    case "uninstall":
+      return uninstallCommand(args);
     case "__update-project":
       return internalUpdateProjectCommand(args);
     case "init":

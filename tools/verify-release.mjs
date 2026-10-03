@@ -79,10 +79,12 @@ try {
     { name: "npm", command: process.execPath, prefix: [npmBin], env: {} },
     { name: "native", command: installedNative, prefix: [], env: { PATH: "/usr/bin:/bin" } }
   ];
+  const releaseProjects = [];
   for (const mode of modes) {
     if (mode.name === "native") assert.equal(spawnSync("sh", ["-c", "command -v node"], { env: { ...process.env, ...mode.env } }).status, 1, "Native smoke PATH must exclude Node");
     assert.match(run(mode.command, [...mode.prefix, "version"], root, mode.env), new RegExp(version.replaceAll(".", "\\.")));
     const project = path.join(root, `${mode.name}-acme`);
+    releaseProjects.push(project);
     fs.mkdirSync(path.join(project, "src"), { recursive: true });
     fs.writeFileSync(path.join(project, "package.json"), JSON.stringify({ name: "acme", private: true, scripts: { test: "touch TESTS_EXECUTED" } }));
     fs.writeFileSync(path.join(project, "src/app.js"), "export const app = true;\n");
@@ -124,12 +126,31 @@ try {
     invoke(["adopt", ".", "--git-mode", "local"]);
     invoke(["check"]);
     const sibling = path.join(root, `${mode.name}-new-project`);
+    releaseProjects.push(sibling);
     invoke(["init", sibling, "--git-mode", "shared"]);
     assert.match(run(path.join(sibling, ".spectra/bin/spectra"), ["version"], sibling, mode.env), new RegExp(version.replaceAll(".", "\\.")));
     for (const [file, digest] of Object.entries(protectedFiles)) assert.equal(hash(file), digest, `User file changed: ${file}`);
     assert.equal(JSON.parse(fs.readFileSync(metaFile, "utf8")).docsProjectName, meta.docsProjectName);
     report.projects.push({ mode: mode.name, docsProjectName: meta.docsProjectName, before, after: inventory(project), protectedFiles });
   }
+  const npmUninstallGuidance = run(process.execPath, [npmBin, "uninstall"], root);
+  assert.match(npmUninstallGuidance, /npm uninstall -g spectra-pack/);
+  const nativeMode = modes.find(mode => mode.name === "native");
+  const nativeProjectsBefore = releaseProjects.map(project => inventory(project));
+  const nativeHomeBefore = inventory(installerEnv.SPECTRA_HOME);
+  const commandTargetBeforeUninstall = fs.readlinkSync(installedNative);
+  run(installedNative, ["uninstall"], root, nativeMode.env, 1);
+  assert.deepEqual(inventory(installerEnv.SPECTRA_HOME), nativeHomeBefore, "Non-TTY uninstall without --yes must not mutate the installation");
+  assert.equal(fs.readlinkSync(installedNative), commandTargetBeforeUninstall);
+  const uninstallOutput = run(installedNative, ["uninstall", "--yes"], root, nativeMode.env);
+  assert.match(uninstallOutput, /Removed/);
+  assert.deepEqual(releaseProjects.map(project => inventory(project)), nativeProjectsBefore, "Uninstall must preserve project trees and Git excludes");
+  assert.equal(fs.existsSync(installerEnv.SPECTRA_HOME), false);
+  run(path.join(root, "npm-acme/.spectra/bin/spectra"), ["check"], path.join(root, "npm-acme"));
+  assert.deepEqual(releaseProjects.map(project => inventory(project)), nativeProjectsBefore, "Local Node fallback must work without machine installation");
+  run("sh", [path.resolve("install.sh")], root, installerEnv);
+  assert.match(run(installedNative, ["version"], root, nativeMode.env), new RegExp(version.replaceAll(".", "\\.")));
+  run(path.join(root, "native-acme/.spectra/bin/spectra"), ["check"], path.join(root, "native-acme"), nativeMode.env);
   report.passed = true;
 } finally {
   fs.writeFileSync(path.join(root, "results.json"), JSON.stringify(report, null, 2) + "\n");

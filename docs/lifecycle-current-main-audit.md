@@ -16,8 +16,10 @@ identifies proposed behavior, which is not current behavior.
   (`@spectra/templates`) package versions are all 3.1.2. CLI constant is 3.1.2.
 - OBSERVED: `SCHEMA_VERSION` is 3 in `lib/install-metadata.js`. Feature,
   adoption, evaluation and governance contracts use `spectra/v2`.
-- OBSERVED: 21 documented canonical public commands, including help/version;
-  validate is a compatibility alias. `__update-project` is internal.
+- OBSERVED: 22 documented canonical public commands, including help/version
+  (20 operational commands plus help and version); `validate` is a compatibility
+  alias and `__update-project` is internal. The lifecycle help now exposes 23
+  canonical public commands after adding `uninstall`.
 - OBSERVED: version parity and `npm run check` passed during this audit.
 - OBSERVED: after correcting historical path wording, the final unchanged-product
   baseline at `e3aca7154a5cc255fa1469d50c124ceab1d48b29` passed 230/230 tests,
