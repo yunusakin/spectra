@@ -13,6 +13,12 @@
 ### Documentation
 - Setup and lifecycle guides explain install-once, application update, explicit migration, fallback behavior and network-source limits; the CLI reference covers all 23 public commands and their project effects.
 
+### Fixed
+- `spectra knowledge promote|supersede|deprecate` no longer matches a rule whose ID merely starts with the requested ID (for example `RULE-X-001` vs `RULE-X-0010`).
+
+### Internal
+- Business-rule section parsing is consolidated in `business/rule-sections.js`; `knowledge/address.js` resolves rules and feature objects (`<feature-id>#FR-2`) by stable ID. Internal only, no new command and no schema change.
+
 ## [3.1.2] - 2026-10-02
 
 ### Added
