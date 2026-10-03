@@ -6,11 +6,14 @@ import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { readMachineInstallation } from "../src/lib/application-installation.js";
 
 // Failure modes, before implementation: checksum/archive traversal, unsafe VERSION,
 // foreign command/version replacement, root symlinks, smoke/version mismatch,
 // interrupted stage/activation, deleted prior activation, guessed provenance,
-// shared-file loss, custom-path failure, project mutation during application update.
+// shared-file loss, custom-path failure, project mutation during application update,
+// a committed forwarder marker with the original executable after process death,
+// and mismatched transaction marker/rollback/executable hashes.
 // Build the real archive first: npm run build:native --workspace spectra-pack.
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const asset = `spectra-${process.platform}-${process.arch}.tar.gz`;
@@ -188,6 +191,51 @@ scenario("update retries an interrupted forwarding backup only when it matches t
   assert.equal(hash(oldExecutable + ".rollback"), oldBytes, "Successful retry must retain the rollback copy");
   assert.match(fs.readFileSync(path.join(env.SPECTRA_HOME, "3.1.1/ownership.env"), "utf8"), /^forwarderSha256=/m);
   assert.match(run(oldExecutable, ["version"], { ...env, PATH: "/usr/bin:/bin" }).stdout, /3\.1\.2/);
+});
+
+scenario("update completes a committed forwarder marker after activation but before executable replacement", ({ dir, env, run, install, command, editedArchive }) => {
+  const older = stagedOlderArchive({ dir, run, editedArchive });
+  success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
+  const oldExecutable = path.join(env.SPECTRA_HOME, "3.1.1/bin/spectra");
+  success(run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" }));
+  const originalBytes = fs.readFileSync(oldExecutable + ".rollback");
+  const forwarder = "#!/bin/sh\nexec " + quote(command) + " \"$@\"\n";
+  const recordPath = path.join(env.SPECTRA_HOME, "3.1.1/ownership.env");
+  const validRecord = fs.readFileSync(recordPath, "utf8");
+  assert.match(validRecord, /^forwarderSha256=/m);
+  fs.writeFileSync(oldExecutable + ".pending", originalBytes, { mode: 0o755 });
+  fs.renameSync(oldExecutable + ".pending", oldExecutable);
+  const pendingMachine = readMachineInstallation(env.SPECTRA_HOME);
+  assert.equal(pendingMachine.versions.find(version => version.version === "3.1.1")?.forwardingPending, true);
+  const retry = run(oldExecutable, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" });
+  success(retry);
+  assert.equal(fs.readFileSync(oldExecutable, "utf8") === forwarder, true, "Retry should replace the retained executable from its committed marker");
+  assert.deepEqual(fs.readFileSync(oldExecutable + ".rollback"), originalBytes, "Retry should preserve the exact original executable bytes");
+  assert.equal(fs.realpathSync(command), path.join(env.SPECTRA_HOME, "3.1.2/bin/spectra"));
+  fs.writeFileSync(oldExecutable + ".mismatch", "foreign executable\n", { mode: 0o755 });
+  fs.renameSync(oldExecutable + ".mismatch", oldExecutable);
+  const mismatchedInventory = inventory(env.SPECTRA_HOME);
+  assert(mismatchedInventory && readMachineInstallation(env.SPECTRA_HOME).preserved.includes(path.join(env.SPECTRA_HOME, "3.1.1")), "Mismatched retained bytes must be treated as unowned and preserved");
+  const mismatchResult = run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" });
+  success(mismatchResult);
+  assert.deepEqual(inventory(env.SPECTRA_HOME), mismatchedInventory, "Mismatched retained executable must remain preserved and untouched");
+
+  fs.writeFileSync(oldExecutable + ".restore", originalBytes, { mode: 0o755 });
+  fs.renameSync(oldExecutable + ".restore", oldExecutable);
+  fs.writeFileSync(recordPath, validRecord.replace(/^forwarderSha256=.*$/m, "forwarderSha256="));
+  const emptyMarkerInventory = inventory(env.SPECTRA_HOME);
+  const emptyMarkerMachine = readMachineInstallation(env.SPECTRA_HOME);
+  assert(emptyMarkerMachine.preserved.includes(path.join(env.SPECTRA_HOME, "3.1.1")), "An empty present forwarder marker must not be treated as an unforwarded ownership record");
+  const emptyMarkerUpdate = run(oldExecutable, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" });
+  rejected(emptyMarkerUpdate);
+  assert.deepEqual(inventory(env.SPECTRA_HOME), emptyMarkerInventory, "Malformed marker must fail closed without changing machine files");
+
+  fs.writeFileSync(recordPath, validRecord);
+  const foreignRollback = path.join(dir, "foreign-rollback"); fs.writeFileSync(foreignRollback, originalBytes);
+  fs.unlinkSync(oldExecutable + ".rollback"); fs.symlinkSync(foreignRollback, oldExecutable + ".rollback");
+  const symlinkRollbackMachine = readMachineInstallation(env.SPECTRA_HOME);
+  assert(symlinkRollbackMachine.preserved.includes(path.join(env.SPECTRA_HOME, "3.1.1")), "A symlink rollback must remain outside the owned set");
+  assert.deepEqual(fs.readFileSync(foreignRollback), originalBytes, "Validation must not mutate the symlink target");
 });
 
 scenario("recorded custom stable command works when it is absent from PATH", ({ dir, env, install, command, run }) => {

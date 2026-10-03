@@ -46,15 +46,23 @@ function readOwnedVersion(home, commandPath, version, env = process.env) {
   const assetsPath = assertSafeInstallationPath(path.join(directory, "assets/runtime"), env);
   if (!fs.statSync(assetsPath).isDirectory() || fs.readFileSync(versionPath, "utf8").trim() !== version || !fs.statSync(executablePath).isFile()) throw new Error(`Owned runtime validation failed: ${directory}`);
   let rollbackPath;
-  if (record.forwarderSha256) {
+  if (Object.hasOwn(record, "forwarderSha256")) {
     rollbackPath = assertSafeInstallationPath(executablePath + ".rollback", env);
-    if (hash(executablePath) !== record.forwarderSha256 || !fs.lstatSync(rollbackPath).isFile() || hash(rollbackPath) !== record.sha256) throw new Error("Forwarded executable validation failed: " + directory);
     const expected = "#!/bin/sh\nexec '" + commandPath.replaceAll("'", "'\\''") + "' \"$@\"\n";
-    if (fs.readFileSync(executablePath, "utf8") !== expected) throw new Error("Forwarded executable target mismatch: " + directory);
+    const expectedSha256 = createHash("sha256").update(expected).digest("hex");
+    const rollback = fs.lstatSync(rollbackPath);
+    const executableSha256 = hash(executablePath);
+    if (!/^[a-f0-9]{64}$/.test(record.forwarderSha256) || record.forwarderSha256 !== expectedSha256 || !rollback.isFile() || rollback.isSymbolicLink() || hash(rollbackPath) !== record.sha256) throw new Error("Forwarded executable validation failed: " + directory);
+    if (executableSha256 === record.forwarderSha256) {
+      if (fs.readFileSync(executablePath, "utf8") !== expected) throw new Error("Forwarded executable target mismatch: " + directory);
+    } else if (executableSha256 !== record.sha256) {
+      throw new Error("Forwarded executable transaction mismatch: " + directory);
+    }
   } else if (hash(executablePath) !== record.sha256) {
     throw new Error(`Owned runtime validation failed: ${directory}`);
   }
-  return { ...record, directory, recordPath, ...(rollbackPath ? { rollbackPath, forwarded: true } : {}) };
+  const executableSha256 = hash(executablePath);
+  return { ...record, directory, recordPath, ...(rollbackPath ? { rollbackPath, forwarded: executableSha256 === record.forwarderSha256, forwardingPending: executableSha256 === record.sha256 } : {}) };
 }
 function readMachineInstallation(home, env = process.env) {
   assertSafeInstallationPath(home, env);
@@ -99,54 +107,59 @@ function forwardRetainedExecutables(installation) {
     if (version.version === current.currentVersion || version.forwarded) continue;
     const fresh = readOwnedVersion(current.home, current.commandPath, version.version);
     const originalRecord = fs.readFileSync(fresh.recordPath, "utf8");
-    const originalBytes = fs.readFileSync(fresh.executablePath);
-    if (hash(fresh.executablePath) !== fresh.sha256) throw new Error("Retained executable changed before forwarding: " + fresh.executablePath);
     const rollbackPath = fresh.executablePath + ".rollback";
-    try {
-      const rollback = fs.lstatSync(rollbackPath);
-      if (!rollback.isFile() || rollback.isSymbolicLink() || hash(rollbackPath) !== fresh.sha256) throw new Error("Unrecognized rollback bytes already exist: " + rollbackPath);
-      const retry = readOwnedVersion(current.home, current.commandPath, version.version);
-      if (retry.forwarded || retry.sha256 !== fresh.sha256 || hash(retry.executablePath) !== retry.sha256 || fs.readFileSync(retry.recordPath, "utf8") !== originalRecord) throw new Error("Cannot recover interrupted forwarding safely: " + fresh.directory);
-      fs.unlinkSync(rollbackPath);
-    }
-    catch (error) { if (error.code !== "ENOENT") throw error; }
-    const suffix = process.pid + "-" + randomBytes(6).toString("hex");
-    const rollbackTemp = rollbackPath + "." + suffix + ".tmp";
-    const forwardTemp = fresh.executablePath + "." + suffix + ".tmp";
-    const recordTemp = fresh.recordPath + "." + suffix + ".tmp";
     const forwarder = "#!/bin/sh\nexec " + shellQuote(current.commandPath) + " \"$@\"\n";
     const forwarderSha256 = createHash("sha256").update(forwarder).digest("hex");
-    const record = originalRecord.trimEnd() + "\nforwarderSha256=" + forwarderSha256 + "\n";
+    let reuseRollback = false;
+    if (fresh.forwardingPending) {
+      if (fresh.forwarderSha256 !== forwarderSha256 || hash(fresh.executablePath) !== fresh.sha256 || hash(fresh.rollbackPath) !== fresh.sha256) throw new Error("Cannot resume interrupted forwarding safely: " + fresh.directory);
+    } else {
+      if (hash(fresh.executablePath) !== fresh.sha256) throw new Error("Retained executable changed before forwarding: " + fresh.executablePath);
+      try {
+        const rollback = fs.lstatSync(rollbackPath);
+        if (!rollback.isFile() || rollback.isSymbolicLink() || hash(rollbackPath) !== fresh.sha256) throw new Error("Unrecognized rollback bytes already exist: " + rollbackPath);
+        const retry = readOwnedVersion(current.home, current.commandPath, version.version);
+        if (retry.forwarded || retry.forwardingPending || retry.sha256 !== fresh.sha256 || hash(retry.executablePath) !== retry.sha256 || fs.readFileSync(retry.recordPath, "utf8") !== originalRecord) throw new Error("Cannot recover interrupted forwarding safely: " + fresh.directory);
+        reuseRollback = true;
+      }
+      catch (error) { if (error.code !== "ENOENT") throw error; }
+    }
+    const suffix = process.pid + "-" + randomBytes(6).toString("hex");
+    const forwardTemp = fresh.executablePath + "." + suffix + ".tmp";
+    const rollbackTemp = rollbackPath + "." + suffix + ".tmp";
+    const recordTemp = fresh.recordPath + "." + suffix + ".tmp";
+    const record = fresh.forwardingPending ? originalRecord : originalRecord.trimEnd() + "\nforwarderSha256=" + forwarderSha256 + "\n";
     let saved = false;
-    let replaced = false;
+    let markerCommitted = fresh.forwardingPending;
     try {
-      const latest = readOwnedVersion(current.home, current.commandPath, version.version);
-      if (latest.sha256 !== fresh.sha256 || fs.readFileSync(latest.recordPath, "utf8") !== originalRecord) throw new Error("Retained ownership changed before forwarding: " + fresh.directory);
-      fs.writeFileSync(rollbackTemp, originalBytes, { flag: "wx", mode: 0o755 });
       fs.writeFileSync(forwardTemp, forwarder, { flag: "wx", mode: 0o755 });
-      fs.writeFileSync(recordTemp, record, { flag: "wx", mode: 0o600 });
-      if (hash(rollbackTemp) !== fresh.sha256 || hash(forwardTemp) !== forwarderSha256) throw new Error("Forwarding stage verification failed: " + fresh.directory);
-      fs.linkSync(rollbackTemp, rollbackPath); saved = true;
-      fs.unlinkSync(rollbackTemp);
-      const beforeSwitch = readOwnedVersion(current.home, current.commandPath, version.version);
-      if (beforeSwitch.sha256 !== fresh.sha256 || fs.readFileSync(beforeSwitch.recordPath, "utf8") !== originalRecord) throw new Error("Retained ownership changed during forwarding: " + fresh.directory);
-      fs.renameSync(forwardTemp, fresh.executablePath); replaced = true;
-      if (fs.readFileSync(fresh.recordPath, "utf8") !== originalRecord) throw new Error("Retained ownership changed during forwarding: " + fresh.directory);
-      fs.renameSync(recordTemp, fresh.recordPath);
+      if (hash(forwardTemp) !== forwarderSha256) throw new Error("Forwarding stage verification failed: " + fresh.directory);
+      if (!fresh.forwardingPending) {
+        const originalBytes = fs.readFileSync(fresh.executablePath);
+        if (!reuseRollback) fs.writeFileSync(rollbackTemp, originalBytes, { flag: "wx", mode: 0o755 });
+        fs.writeFileSync(recordTemp, record, { flag: "wx", mode: 0o600 });
+        if (!reuseRollback && hash(rollbackTemp) !== fresh.sha256) throw new Error("Rollback staging verification failed: " + fresh.directory);
+        const latest = readOwnedVersion(current.home, current.commandPath, version.version);
+        if (latest.forwarded || latest.forwardingPending || latest.sha256 !== fresh.sha256 || fs.readFileSync(latest.recordPath, "utf8") !== originalRecord) throw new Error("Retained ownership changed before forwarding: " + fresh.directory);
+        if (reuseRollback) saved = true;
+        else {
+          try { fs.linkSync(rollbackTemp, rollbackPath); saved = true; }
+          catch (error) { if (error.code !== "EEXIST") throw error; throw new Error("Rollback bytes already exist: " + rollbackPath); }
+          fs.unlinkSync(rollbackTemp);
+        }
+        const beforeMarker = readOwnedVersion(current.home, current.commandPath, version.version);
+        if (beforeMarker.sha256 !== fresh.sha256 || hash(beforeMarker.executablePath) !== fresh.sha256 || fs.readFileSync(beforeMarker.recordPath, "utf8") !== originalRecord || hash(rollbackPath) !== fresh.sha256) throw new Error("Retained ownership changed before forwarding marker: " + fresh.directory);
+        fs.renameSync(recordTemp, fresh.recordPath);
+        markerCommitted = true;
+      }
+      const pending = readOwnedVersion(current.home, current.commandPath, version.version);
+      if (!pending.forwardingPending || pending.forwarderSha256 !== forwarderSha256 || hash(pending.rollbackPath) !== pending.sha256 || fs.readFileSync(pending.recordPath, "utf8") !== record) throw new Error("Forwarding transaction marker validation failed: " + fresh.directory);
+      fs.renameSync(forwardTemp, fresh.executablePath);
       readOwnedVersion(current.home, current.commandPath, version.version);
     } catch (error) {
-      if (saved && hash(rollbackPath) === fresh.sha256 && replaced && hash(fresh.executablePath) === forwarderSha256) {
-        const restoreTemp = fresh.executablePath + "." + suffix + ".restore";
-        fs.copyFileSync(rollbackPath, restoreTemp, fs.constants.COPYFILE_EXCL);
-        fs.renameSync(restoreTemp, fresh.executablePath);
-      }
-      const currentRecord = fs.readFileSync(fresh.recordPath, "utf8");
-      if (replaced && currentRecord === record) {
-        const restoreRecord = fresh.recordPath + "." + suffix + ".restore";
-        fs.writeFileSync(restoreRecord, originalRecord, { flag: "wx", mode: 0o600 });
-        fs.renameSync(restoreRecord, fresh.recordPath);
-      }
-      if (saved && hash(fresh.executablePath) === fresh.sha256 && (currentRecord === originalRecord || currentRecord === record)) fs.unlinkSync(rollbackPath);
+      // Once the ownership marker is committed, keep the validated rollback
+      // bytes and marker so the next updater can finish the atomic executable swap.
+      if (!markerCommitted && saved && hash(rollbackPath) !== fresh.sha256) throw new Error("Rollback bytes changed during forwarding: " + rollbackPath);
       throw error;
     } finally {
       for (const file of [rollbackTemp, forwardTemp, recordTemp]) {
