@@ -1,5 +1,5 @@
 import path from "node:path";
-import { inspectApplicationInstallation, planApplicationUpdate, VERSION_PATTERN } from "./application-installation.js";
+import { inspectApplicationInstallation, planApplicationUpdate, adoptLegacyNativeInstallation, VERSION_PATTERN } from "./application-installation.js";
 import { spawnSync } from "node:child_process";
 import { fail } from "./output.js";
 
@@ -38,16 +38,21 @@ function resolveInstalledNativeCommand(env = process.env) {
 }
 
 function runSelfUpdate(latest, installation = inspectApplicationInstallation()) {
+  latest = String(latest).replace(/^v/, "");
   if (installation.kind !== "native-managed") {
     const guidance = installation.kind === "npm"
       ? `Use your package manager: npm install -g spectra-pack@${latest}.`
       : `Install the machine application with curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/v${latest}/install.sh | sh, or npm install -g spectra-pack@${latest}.`;
-    fail(`Software update was not applied: ${installation.reason}. ${guidance}`);
+    const transition = installation.nativeRuntime
+      ? ` To preserve the unverified installation, create a fresh managed home without deleting it:\n  spectra_root="$(mktemp -d \"$HOME/spectra-XXXXXX\")"\n  curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/v${latest}/install.sh | SPECTRA_VERSION=v${latest} SPECTRA_HOME="$spectra_root/runtime" SPECTRA_BIN="$spectra_root/bin" sh\n  export PATH="$spectra_root/bin:$PATH"`
+      : "";
+    fail(`Software update was not applied: ${installation.reason}. ${guidance}${transition}`);
     return 1;
   }
   try {
     const plan = planApplicationUpdate(installation, latest);
-    const executing = plan.installation.versions.find(version => version.executablePath === installation.execPath);
+    const ownedInstallation = adoptLegacyNativeInstallation(plan.installation);
+    const executing = ownedInstallation.versions.find(version => version.executablePath === installation.execPath);
     const installer = path.join(executing.directory, "install.sh");
     const result = spawnSync("sh", [installer], {
       env: { ...process.env, SPECTRA_HOME: plan.home, SPECTRA_BIN: path.dirname(plan.commandPath), SPECTRA_VERSION: `v${plan.version}` },

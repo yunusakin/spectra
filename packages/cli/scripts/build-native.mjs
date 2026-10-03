@@ -48,6 +48,13 @@ function tryRun(command, args, options = {}) {
   return result.status ?? 1;
 }
 
+function nativeAssetLayout(dir, prefix = "assets") {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+    const relative = `${prefix}/${entry.name}`;
+    return entry.isDirectory() ? [`${relative}/`, ...nativeAssetLayout(path.join(dir, entry.name), relative)] : [relative];
+  }).sort();
+}
+
 function supportsBuildSea() {
   const result = spawnSync(nodeBinaryPath(), ["--help"], {
     cwd: cliRoot,
@@ -109,6 +116,7 @@ const bundledEntry = path.join(buildRoot, "spectra.cjs");
 await build({
   entryPoints: [path.join(cliRoot, "bin", "spectra.js")],
   bundle: true,
+  define: { SPECTRA_INSTALLER_SOURCE: JSON.stringify(fs.readFileSync(path.join(repoRoot, "install.sh"), "utf8")), SPECTRA_NATIVE_LAYOUT: JSON.stringify(["assets/", ...nativeAssetLayout(path.join(cliRoot, "assets"))]) },
   platform: "node",
   target: "node22",
   format: "cjs",

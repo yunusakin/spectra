@@ -26,7 +26,7 @@ digest() {
   else fail "missing checksum command: install shasum or sha256sum"; fi
 }
 machine_record() { printf 'format=1\nmethod=native\nhome=%s\ncommandPath=%s\ncurrentVersion=%s\n' "$SPECTRA_HOME" "$COMMAND" "$1"; }
-version_record() { printf 'format=1\nmethod=native\nhome=%s\ncommandPath=%s\nversion=%s\nexecutablePath=%s\nsha256=%s\narchiveSha256=%s\ninstallerSha256=%s\n' "$SPECTRA_HOME" "$COMMAND" "$1" "$SPECTRA_HOME/$1/bin/spectra" "$2" "$3" "$4"; }
+version_record() { printf 'format=1\nmethod=%s\nhome=%s\ncommandPath=%s\nversion=%s\nexecutablePath=%s\nsha256=%s\narchiveSha256=%s\ninstallerSha256=%s\n' "${5:-native}" "$SPECTRA_HOME" "$COMMAND" "$1" "$SPECTRA_HOME/$1/bin/spectra" "$2" "$3" "$4"; }
 owned_version() {
   candidate="$SPECTRA_HOME/$1"
   [ -d "$candidate" ] && [ ! -L "$candidate" ] && [ -f "$candidate/ownership.env" ] && [ ! -L "$candidate/ownership.env" ] || return 1
@@ -34,9 +34,14 @@ owned_version() {
   [ -x "$candidate/bin/spectra" ] && [ ! -L "$candidate/bin" ] && [ ! -L "$candidate/bin/spectra" ] || return 1
   [ -d "$candidate/assets/runtime" ] && [ ! -L "$candidate/assets" ] && [ ! -L "$candidate/assets/runtime" ] || return 1
   archive_digest=$(sed -n 's/^archiveSha256=//p' "$candidate/ownership.env")
-  printf '%s\n' "$archive_digest" | grep -Eq '^[a-f0-9]{64}$' || return 1
+  version_method=$(sed -n 's/^method=//p' "$candidate/ownership.env")
+  case "$version_method" in
+    native) printf '%s\n' "$archive_digest" | grep -Eq '^[a-f0-9]{64}$' || return 1 ;;
+    native-legacy) [ "$archive_digest" = unknown ] || return 1 ;;
+    *) return 1 ;;
+  esac
   [ -f "$candidate/install.sh" ] && [ ! -L "$candidate/install.sh" ] || return 1
-  version_record "$1" "$(digest "$candidate/bin/spectra")" "$archive_digest" "$(digest "$candidate/install.sh")" > "$TMP_DIR/expected-version"
+  version_record "$1" "$(digest "$candidate/bin/spectra")" "$archive_digest" "$(digest "$candidate/install.sh")" "$version_method" > "$TMP_DIR/expected-version"
   cmp -s "$TMP_DIR/expected-version" "$candidate/ownership.env"
 }
 
@@ -73,7 +78,11 @@ if [ -e "$SPECTRA_HOME/installation.env" ] || [ -L "$SPECTRA_HOME/installation.e
   owned_version "$OLD_VERSION" || fail "active version ownership is not verified"
   [ -L "$COMMAND" ] && [ "$(readlink "$COMMAND")" = "$SPECTRA_HOME/$OLD_VERSION/bin/spectra" ] || fail "command activation does not match ownership record"
 elif [ -e "$COMMAND" ] || [ -L "$COMMAND" ]; then
-  fail "refusing to replace foreign command: $COMMAND"
+  echo 'For an unverified old installation, preserve it and use a fresh managed location:' >&2
+  echo '  spectra_root="$(mktemp -d "$HOME/spectra-XXXXXX")"' >&2
+  echo '  curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | SPECTRA_HOME="$spectra_root/runtime" SPECTRA_BIN="$spectra_root/bin" sh' >&2
+  echo '  export PATH="$spectra_root/bin:$PATH"' >&2
+  fail "refusing to replace foreign command without executing-native ownership proof: $COMMAND"
 fi
 
 ASSET="spectra-${OS}-${ARCH}.tar.gz"

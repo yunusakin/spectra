@@ -27,7 +27,7 @@ function inventory(dir) {
   if (!fs.existsSync(dir)) return {};
   return Object.fromEntries(fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     const file = path.join(dir, entry.name);
-    if (entry.name === ".git") return [];
+    if (entry.name === ".git") { const exclude = path.join(file, "info/exclude"); return fs.existsSync(exclude) ? [[".git/info/exclude", hash(exclude)]] : []; }
     if (entry.isDirectory()) return Object.entries(inventory(file)).map(([name, digest]) => [`${entry.name}/${name}`, digest]);
     return [[entry.name, entry.isSymbolicLink() ? { link: fs.readlinkSync(file) } : hash(file)]];
   }));
@@ -59,6 +59,24 @@ function scenario(name, action) {
 }
 const success = result => assert.equal(result.status, 0, result.stderr || result.stdout || result.error?.message);
 const rejected = result => assert.equal(result.status, 1, result.stderr || result.stdout);
+function stagedOlderArchive({ dir, run, editedArchive }) {
+  // This is an explicitly staged build of current code with test version 3.1.1,
+  // not a claim about behavior of a published historical 3.1.1 executable.
+  const fixture = path.join(dir, "fixture"); fs.mkdirSync(fixture);
+  const bundle = fs.readFileSync(path.join(repo, "packages/cli/dist/native/build/spectra.cjs"), "utf8");
+  assert(bundle.includes('CLI_VERSION = "3.1.2"'));
+  fs.writeFileSync(path.join(fixture, "spectra.cjs"), bundle.replace('CLI_VERSION = "3.1.2"', 'CLI_VERSION = "3.1.1"'));
+  const node = process.env.SPECTRA_NATIVE_NODE || (fs.existsSync("/private/tmp/spectra-native-node/node_modules/node/bin/node") ? "/private/tmp/spectra-native-node/node_modules/node/bin/node" : process.execPath);
+  const binary = path.join(fixture, "spectra"); const blob = path.join(fixture, "sea.blob");
+  const config = path.join(fixture, "sea.json");
+  fs.writeFileSync(config, JSON.stringify({ main: path.join(fixture, "spectra.cjs"), output: blob, disableExperimentalSEAWarning: true }));
+  success(run(node, ["--experimental-sea-config", config])); fs.copyFileSync(node, binary); fs.chmodSync(binary, 0o755);
+  if (process.platform === "darwin") run("codesign", ["--remove-signature", binary]);
+  success(run(path.join(repo, "node_modules/.bin/postject"), [binary, "NODE_SEA_BLOB", blob, "--sentinel-fuse", "NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2", ...(process.platform === "darwin" ? ["--macho-segment-name", "NODE_SEA"] : [])]));
+  if (process.platform === "darwin") success(run("codesign", ["--force", "--sign", "-", binary]));
+  const older = editedArchive(extracted => { fs.copyFileSync(binary, path.join(extracted, "bin/spectra")); fs.writeFileSync(path.join(extracted, "VERSION"), "3.1.1\n"); const manifest = path.join(extracted, "assets/runtime/sdd/system/manifest.env"); fs.writeFileSync(manifest, fs.readFileSync(manifest, "utf8").replace("spectra_version=3.1.2", "spectra_version=3.1.1")); });
+  return older;
+}
 scenario("bad checksum never creates machine roots", ({ dir, env, install }) => {
   const bad = path.join(dir, asset); fs.copyFileSync(archive, bad); fs.writeFileSync(bad + ".sha256", `${"0".repeat(64)}  ${asset}\n`);
   rejected(install({ SPECTRA_E2E_ARCHIVE: bad })); assert.equal(fs.existsSync(env.SPECTRA_HOME), false);
@@ -118,21 +136,7 @@ scenario("native provenance refuses spoofed roots and source invocation", ({ ins
   assert.match(native.stderr + native.stdout, /version|3\.1\.3|mismatch/i); assert.deepEqual(inventory(env.SPECTRA_HOME), before);
 });
 scenario("managed native update retains prior version and two independent projects", ({ dir, env, run, install, command, editedArchive }) => {
-  // This is an explicitly staged build of current code with test version 3.1.1,
-  // not a claim about behavior of a published historical 3.1.1 executable.
-  const fixture = path.join(dir, "fixture"); fs.mkdirSync(fixture);
-  const bundle = fs.readFileSync(path.join(repo, "packages/cli/dist/native/build/spectra.cjs"), "utf8");
-  assert(bundle.includes('CLI_VERSION = "3.1.2"'));
-  fs.writeFileSync(path.join(fixture, "spectra.cjs"), bundle.replace('CLI_VERSION = "3.1.2"', 'CLI_VERSION = "3.1.1"'));
-  const node = process.env.SPECTRA_NATIVE_NODE || (fs.existsSync("/private/tmp/spectra-native-node/node_modules/node/bin/node") ? "/private/tmp/spectra-native-node/node_modules/node/bin/node" : process.execPath);
-  const binary = path.join(fixture, "spectra"); const blob = path.join(fixture, "sea.blob");
-  const config = path.join(fixture, "sea.json");
-  fs.writeFileSync(config, JSON.stringify({ main: path.join(fixture, "spectra.cjs"), output: blob, disableExperimentalSEAWarning: true }));
-  success(run(node, ["--experimental-sea-config", config])); fs.copyFileSync(node, binary); fs.chmodSync(binary, 0o755);
-  if (process.platform === "darwin") run("codesign", ["--remove-signature", binary]);
-  success(run(path.join(repo, "node_modules/.bin/postject"), [binary, "NODE_SEA_BLOB", blob, "--sentinel-fuse", "NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2", ...(process.platform === "darwin" ? ["--macho-segment-name", "NODE_SEA"] : [])]));
-  if (process.platform === "darwin") success(run("codesign", ["--force", "--sign", "-", binary]));
-  const older = editedArchive(extracted => { fs.copyFileSync(binary, path.join(extracted, "bin/spectra")); fs.writeFileSync(path.join(extracted, "VERSION"), "3.1.1\n"); });
+  const older = stagedOlderArchive({ dir, run, editedArchive });
   success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
   const previous = inventory(path.join(env.SPECTRA_HOME, "3.1.1"));
   const projects = ["project-a", "project-b"].map(name => path.join(dir, name));
@@ -144,4 +148,45 @@ scenario("managed native update retains prior version and two independent projec
   assert.deepEqual(inventory(path.join(env.SPECTRA_HOME, "3.1.1")), previous);
   assert.deepEqual(projects.map(inventory), before);
   assert(fs.existsSync(path.join(env.SPECTRA_HOME, "3.1.1/ownership.env")));
+});
+
+scenario("recordless executing native adoption updates safely and preserves projects", ({ dir, env, run, install, command, editedArchive }) => {
+  const older = stagedOlderArchive({ dir, run, editedArchive });
+  success(install({ SPECTRA_VERSION: "v3.1.1", SPECTRA_E2E_ARCHIVE: older }));
+  const oldDir = path.join(env.SPECTRA_HOME, "3.1.1");
+  fs.unlinkSync(path.join(oldDir, "ownership.env")); fs.unlinkSync(path.join(env.SPECTRA_HOME, "installation.env")); fs.unlinkSync(path.join(oldDir, "install.sh"));
+  const projects = ["legacy-a", "legacy-b"].map(name => path.join(dir, name));
+  for (const project of projects) { fs.mkdirSync(project); success(run("git", ["init", "-q", project])); success(run(command, ["init", project], env)); }
+  const projectBefore = projects.map(inventory); const legacyBefore = inventory(oldDir);
+  rejected(run(process.execPath, [path.join(repo, "packages/cli/bin/spectra.js"), "update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "99.0.0" }));
+  assert.deepEqual(inventory(oldDir), legacyBefore, "Source invocation cannot adopt a recordless native install");
+  success(run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.2" }));
+  assert.equal(fs.realpathSync(command), path.join(env.SPECTRA_HOME, "3.1.2/bin/spectra"));
+  const legacyAfter = inventory(oldDir);
+  for (const [name, digest] of Object.entries(legacyBefore)) assert.deepEqual(legacyAfter[name], digest, name);
+  assert.match(fs.readFileSync(path.join(oldDir, "ownership.env"), "utf8"), /^method=native-legacy$/m);
+  assert.match(fs.readFileSync(path.join(oldDir, "ownership.env"), "utf8"), /^archiveSha256=unknown$/m);
+  assert.deepEqual(projects.map(inventory), projectBefore);
+});
+scenario("recordless native lookalikes and unexpected contents require a safe transition", ({ env, run, install, command }) => {
+  success(install()); const versionDir = path.join(env.SPECTRA_HOME, "3.1.2");
+  fs.unlinkSync(path.join(versionDir, "ownership.env")); fs.unlinkSync(path.join(env.SPECTRA_HOME, "installation.env")); fs.unlinkSync(path.join(versionDir, "install.sh"));
+  const versionFile = path.join(versionDir, "VERSION");
+  const manifest = path.join(versionDir, "assets/runtime/sdd/system/manifest.env");
+  const originalManifest = fs.readFileSync(manifest, "utf8");
+  const foreign = path.join(versionDir, "assets/runtime/user-memory.md");
+  for (const invalid of ["VERSION", "runtime", "foreign", "partial-record"]) {
+    if (invalid === "VERSION") fs.writeFileSync(versionFile, "3.1.1\n");
+    if (invalid === "runtime") fs.unlinkSync(manifest);
+    if (invalid === "foreign") fs.writeFileSync(foreign, "valuable user data\n");
+    if (invalid === "partial-record") fs.writeFileSync(path.join(env.SPECTRA_HOME, "installation.env"), "unrecognized owner\n");
+    const before = inventory(env.SPECTRA_HOME); const target = fs.readlinkSync(command);
+    const result = run(command, ["update", "--yes"], { ...env, SPECTRA_LATEST_VERSION: "3.1.3" }); rejected(result);
+    assert.match(result.stdout + result.stderr, /mktemp/);
+    assert.match(result.stdout + result.stderr, /SPECTRA_HOME=/); assert.match(result.stdout + result.stderr, /SPECTRA_BIN=/); assert.match(result.stdout + result.stderr, /export PATH=/);
+    assert.deepEqual(inventory(env.SPECTRA_HOME), before); assert.equal(fs.readlinkSync(command), target);
+    fs.writeFileSync(versionFile, "3.1.2\n"); fs.writeFileSync(manifest, originalManifest);
+    if (fs.existsSync(foreign)) fs.unlinkSync(foreign);
+    const partial = path.join(env.SPECTRA_HOME, "installation.env"); if (fs.existsSync(partial)) fs.unlinkSync(partial);
+  }
 });
