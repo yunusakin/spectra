@@ -55,4 +55,4 @@ function checkIndexFreshness(projectRoot) {
   return { status: stale ? "stale" : "fresh", cached, fresh };
 }
 
-export { getIndexCacheDir, getIndexFilePath, writeIndex, readIndex, checkIndexFreshness };
+export { sortKeysDeep, getIndexCacheDir, getIndexFilePath, writeIndex, readIndex, checkIndexFreshness };
