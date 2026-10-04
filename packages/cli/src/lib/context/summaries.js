@@ -122,6 +122,11 @@ function ensureContextSummaries(repoRoot) {
   for (const [fileName, builder] of Object.entries(SUMMARY_BUILDERS)) {
     const outputPath = path.join(cacheDir, fileName);
     const sourcePaths = (SUMMARY_SOURCES[fileName] ?? []).map((relativePath) => path.join(repoRoot, relativePath));
+    // A derived markdown file must not outlive its source: no source, no file.
+    if (fileName.endsWith(".md") && sourcePaths.every((sourcePath) => !fs.existsSync(sourcePath))) {
+      fs.rmSync(outputPath, { force: true });
+      continue;
+    }
     if (!needsRebuild(outputPath, sourcePaths)) {
       continue;
     }

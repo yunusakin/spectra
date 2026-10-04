@@ -115,7 +115,7 @@ function resolveEntry(repoRoot, entryId, changedFiles, source) {
     id: entryId,
     label: definition.label,
     mode: definition.mode,
-    ...(definition.derived ? { derived: true } : {}),
+    ...(definition.derived ? { derived: true, derivedFrom: definition.sources } : {}),
     source,
     path: definition.path,
     absolutePath,
@@ -232,7 +232,8 @@ function buildContextPack({
       entries.some((entry) => entry.changedRefs.includes(candidate) || entry.path === candidate)
   );
 
-  let avoid = rolePolicy.avoid.filter((candidate) => !entries.some((entry) => entry.path === candidate));
+  // A derived entry stands in for the canonical file it is built from, so that file is not also "avoid".
+  let avoid = rolePolicy.avoid.filter((candidate) => !entries.some((entry) => entry.path === candidate || entry.derivedFrom?.includes(candidate)));
   let route;
   let knowledge;
   let selection;

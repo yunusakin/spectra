@@ -28,7 +28,6 @@ import { fileURLToPath } from "node:url";
 import { GOAL_POLICIES, ROLE_POLICIES } from "../src/lib/context/policies.js";
 
 const cliRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const repoRoot = path.resolve(cliRoot, "..", "..");
 const run = (cwd, args) => spawnSync(process.execPath, [path.join(cliRoot, "bin", "spectra.js"), ...args], { cwd, encoding: "utf8", env: { ...process.env, SPECTRA_ASSETS_DIR: path.join(cliRoot, "assets") } });
 const briefPath = (root) => path.join(root, ".spectra", "sdd", "memory-bank", "core", "projectbrief.md");
 
@@ -176,8 +175,8 @@ test("the canonical brief is untouched and the raw brief stays reachable", () =>
   assert.ok(result.escalation.some((candidate) => candidate.endsWith("sdd/memory-bank/core/projectbrief.md")));
 });
 
-test("on the real Spectra brief the architect fits and the planner stays honest", () => {
-  const root = project(fs.readFileSync(path.join(repoRoot, "sdd", "memory-bank", "core", "projectbrief.md"), "utf8"));
+test("on a frozen copy of the real Spectra brief (a fixture, not the live file) the architect fits and the planner stays honest", () => {
+  const root = project(fs.readFileSync(path.join(cliRoot, "test", "fixtures", "decide", "projectbrief.md"), "utf8"));
   const raw = Math.ceil(fs.statSync(briefPath(root)).size / 4);
   const architect = pack(root, "architect", "decide");
   const planner = pack(root, "planner", "decide");
@@ -215,6 +214,31 @@ test("other roles and goals are unchanged", () => {
   assert.equal(entry(implementer, "projectBrief"), undefined);
   assert.ok(implementer.selection.full.remaining > 500);
   assert.equal(pack(root, "release-manager", "ship").selection.mandatory.full, 375);
+});
+
+test("a deleted brief is not served from the cache and is reported missing", () => {
+  const root = project();
+  assert.ok(derived(pack(root)).includes("SEC-ONE"));
+  fs.rmSync(briefPath(root));
+  const result = pack(root);
+  assert.equal(entry(result, "projectBriefClean").exists, false);
+  assert.equal(fs.existsSync(entry(result, "projectBriefClean").absolutePath), false, "stale derived file removed");
+  const inline = run(root, ["context", "--role", "architect", "--goal", "decide", "--format", "inline"]);
+  // Other (JSON) summaries are out of scope here; the derived brief block itself must be gone.
+  assert.equal(inline.stdout.includes("--- .spectra/cache/context/projectbrief.decide.md"), false);
+  assert.ok(`${inline.stdout}${inline.stderr}`.includes("projectbrief.decide.md is missing"));
+});
+
+test("a project that never had a brief gets no empty derived entry", () => {
+  const root = project(null);
+  fs.rmSync(briefPath(root));
+  assert.equal(entry(pack(root), "projectBriefClean").exists, false);
+});
+
+test("an avoid list naming the raw brief does not contradict the derived copy it receives", () => {
+  const result = pack(project(), "implementer", "decide");
+  assert.ok(entry(result, "projectBriefClean"));
+  assert.equal(result.avoid.includes("sdd/memory-bank/core/projectbrief.md"), false);
 });
 
 test("repeated runs are identical, including the derived brief", () => {

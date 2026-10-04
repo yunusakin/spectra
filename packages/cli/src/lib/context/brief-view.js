@@ -38,7 +38,7 @@ function stripAuthoringComments(text) {
 // Decide context: the canonical project brief with authoring scaffolding removed, content verbatim.
 // Derived and disposable; the canonical file is never modified.
 function buildDecideBrief(repoRoot) {
-  return stripAuthoringComments(readTextIfExists(path.join(repoRoot, BRIEF_FILE)) ?? "").trimEnd().concat("\n");
+  return stripAuthoringComments(readTextIfExists(path.join(repoRoot, BRIEF_FILE))).trimEnd().concat("\n");
 }
 
 export { buildDecideBrief, stripAuthoringComments };
