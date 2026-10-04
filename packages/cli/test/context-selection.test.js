@@ -136,7 +136,8 @@ function tuneRule(root, target, task = "Fix expired points", extra = []) {
   let length = 40;
   for (let attempt = 0; attempt < 8; attempt += 1) {
     write(rulesFile(root, "loyalty"), `# Rules\n\n## RULE-LOY-001 — Expiration\n\nExpired points cannot pay. ${"z".repeat(length)}\n\nStatus: active\nAffected Modules: loyalty-api\n`);
-    const cost = resolve(root, task, extra).resolved.find((entry) => entry.knowledgeId === "RULE-LOY-001").estimatedTokens;
+    const probe = resolve(root, task, extra);
+    const cost = (probe.resolved.find((entry) => entry.knowledgeId === "RULE-LOY-001") ?? probe.selection.excluded.find((entry) => entry.id === "RULE-LOY-001")).estimatedTokens;
     if (cost === target) return;
     length = Math.max(1, length + (target - cost) * 4);
   }
@@ -188,6 +189,20 @@ test("optional candidates that do not fit are excluded in tier order and stay ob
   assert.ok(selection.full.used <= selection.full.budget);
   assert.equal(selection.full.used, pack.totals.full, "excluded entries never count");
   assert.equal(pack.entries.some((entry) => entry.knowledgeId === TEST_TARGET), false);
+});
+
+test("evidence is dropped with its anchor even when it would fit", () => {
+  const root = project();
+  const probe = resolve(root, "Fix expired points", TIGHT);
+  const room = probe.pack.budgets.markdownTokens - probe.baselineFull;
+  tuneRule(root, room + 20, "Fix expired points", TIGHT);
+  const { ids, selection } = resolve(root, "Fix expired points", TIGHT);
+  assert.deepEqual(ids, [], "the rule does not fit, so neither does evidence that only hangs off it");
+  const byId = Object.fromEntries(selection.excluded.map((entry) => [entry.id, entry.exclusion]));
+  assert.equal(byId["RULE-LOY-001"], "budget");
+  assert.equal(byId[MODULE], "anchor-excluded");
+  assert.equal(byId[TEST_TARGET], "anchor-excluded");
+  assert.equal(selection.status, "budget-exhausted");
 });
 
 // ---- Case C / explicit references: mandatory overflow ---------------------------------------------

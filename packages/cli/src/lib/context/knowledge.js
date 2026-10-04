@@ -138,7 +138,7 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
     if (reasons.some(({ reason, via }) => reason === "feature-relationship" && required.has(via) && byId.get(via).kind === "acceptance-scenario" && byId.get(id).kind !== "acceptance-scenario")) required.add(id);
   }
   const priorityOf = (id) => (required.has(id) ? 0 : Math.min(...candidates.get(id).map((reason) => reasonPriority(reason, byId.get(id).kind))));
-  const ordered = [...candidates.keys()].sort((a, b) => priorityOf(a) - priorityOf(b) || (a < b ? -1 : a > b ? 1 : 0)).map((id) => [id, candidates.get(id)]);
+  const ordered = [...candidates];
 
   const entries = [];
   for (const [id, reasons] of ordered) {
