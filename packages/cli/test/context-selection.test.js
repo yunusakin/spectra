@@ -417,6 +417,43 @@ test("refs and inline carry selection warnings on stdout, not only stderr", () =
   assert.match(overflow.stdout, /WARN Mandatory context exceeds the budget/);
 });
 
+// ---- 1B.2 cleanup: superseded means exact objects can stand in for the file ----------------------------------
+//
+// Failure modes enumerated before the fix:
+//  - a domain file with no addressable rule (empty, or prose without valid RULE headings) is labelled
+//    superseded and its content silently vanishes from the pack
+//  - the fix over-corrects: a file whose rules exist but were not selected stops being superseded
+//  - route.entries claims "superseded-by-exact-object" for a file that selection.superseded does not list
+//  - fallback (map unavailable) behaviour changes
+
+test("a domain file without addressable rules is kept whole, not labelled superseded", () => {
+  const root = project();
+  write(path.join(business(root), "payments", "rules.md"), "# Rules\n\nRefunds follow settlement, written as prose without a RULE heading.\n");
+  const { pack, selection } = resolve(root, "Handle refunds");
+  const rulesPath = "sdd/memory-bank/business/payments/rules.md";
+  assert.equal(selection.superseded.some((entry) => entry.path === rulesPath), false);
+  assert.equal(pack.route.entries.find((entry) => entry.path === rulesPath).selection, "included");
+  assert.equal(pack.entries.some((entry) => entry.path === rulesPath), true, "whole file is delivered instead");
+});
+
+test("a domain file with addressable rules stays superseded even when none of them was selected", () => {
+  const root = project();
+  const { pack, selection } = resolve(root, "Fix expired points");
+  const unresolved = "sdd/memory-bank/business/loyalty/unresolved.md";
+  assert.equal(selection.superseded.some((entry) => entry.path === unresolved), true);
+  assert.equal(pack.route.entries.find((entry) => entry.path === unresolved).selection, "superseded-by-exact-object");
+});
+
+test("route entries and selection.superseded agree on every domain file", () => {
+  const root = project();
+  write(path.join(business(root), "payments", "unresolved.md"), "# U\n\nNo structured rules yet.\n");
+  const { pack, selection } = resolve(root, "Handle refunds");
+  const listed = new Set(selection.superseded.map((entry) => entry.path));
+  for (const entry of pack.route.entries.filter((candidate) => candidate.reason.startsWith("domain: "))) {
+    assert.equal(entry.selection === "superseded-by-exact-object", listed.has(entry.path), entry.path);
+  }
+});
+
 // ---- Dogfood -----------------------------------------------------------------------------------------------
 
 test("dogfood: approval-gating task selects the approval rules as optional context without mandatory overflow", () => {

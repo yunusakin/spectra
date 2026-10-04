@@ -166,7 +166,9 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
       estimatedTokens: Math.ceil(content.length / 4)
     });
   }
-  return { entries, mapStatus };
+  // Source files the map can address rule by rule: only these may be replaced by exact objects.
+  const addressableSources = new Set(Object.keys(map.bySource).filter((source) => map.bySource[source].length > 0));
+  return { entries, mapStatus, addressableSources };
 }
 
 export { resolveKnowledgeEntries };

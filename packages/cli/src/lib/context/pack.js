@@ -252,8 +252,9 @@ function buildContextPack({
     for (const entry of route.entries) {
       if (existingPaths.has(entry.path)) continue;
       const absolutePath = path.join(route.repoRoot, entry.path);
-      if (entry.reason.startsWith("domain: ") && !resolved.error) {
-        // Exact rule objects replace the whole rules/unresolved file.
+      if (entry.reason.startsWith("domain: ") && !resolved.error && resolved.addressableSources.has(entry.path)) {
+        // Exact rule objects replace the whole rules/unresolved file, but only when the
+        // map can address rules in it; otherwise the whole file stays (it is not lost).
         supersededFiles.add(entry.path);
         continue;
       }
