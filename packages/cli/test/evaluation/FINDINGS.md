@@ -50,3 +50,13 @@ Retrieval met the safety gate and its errors are small and mechanical (findings 
 | 17 | Still open: no feature requirement for installation lifecycle, context resolver, or repo index/Knowledge Map; no release-approval requirement; no finer module than `packages-cli`; `packages/core` has no test script. | KNOWLEDGE COVERAGE GAP (needs product decisions) |
 | 18 | `RULE → FR/AC` has no canonical field, so traceability between the new rules and FR-2/AC-2 is not expressible. | RELATIONSHIP GAP (later traceability phase) |
 | 19 | `superseded-by-exact-object` still labels a domain's whole rules/unresolved file even when none of its rules resolved (pack.js `domain: ` entries). | OPEN 1B.2 ITEM |
+
+## Phase 1E addendum — deterministic retrieval tuning (corpus and labels unchanged)
+
+Before (main 2ca0537): relevant recall 80.8%, precision 71.7%, 17 FP, 9 FN, candidate tokens 9204, `business-rule-match` precision 36.8% (19 selected, 12 FP). Root cause, by overlap term across the normal-budget runs: `package` 0/5 useful, `change` 0/2, `spectra` 2/4, `point` 5/9, `project` 3/4, `require` 0/1 — while `approval`, `migrate`, `schema`, `expired`, `budget` were 100% useful. Three mechanisms produced the noise:
+
+1. rule terms came from the whole section including `Status`/`Affected Modules`/`Evidence`/`Confidence` lines, so evidence paths and tool names (`packages`, `commit`, `command`) selected unrelated rules;
+2. one shared term was enough, so a generic word rode along beside a real multi-term match;
+3. whole-domain fallback also fired for a domain reached only through a module's business-domains list, and for tasks that already named exact objects.
+
+Changes: rule terms use title and prose only (Knowledge Map contract 2 → 3, derived cache); a single shared term counts only when no rule in the domain shares two; whole-domain fallback needs a direct domain signal (`--domain`, domain name, keyword) and no explicit reference. Domain fallback, explicit references, requiredness, relationship expansion, budgets and feature matching are untouched. The measured effect is in `REPORT.md`.
