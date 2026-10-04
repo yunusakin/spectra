@@ -1,3 +1,5 @@
+import { isRuleMetadataLine } from "./parser.js";
+
 // Single parser for `## RULE-… — title` sections in business-rule Markdown.
 // Sections run from a `## ` heading to the next `\n## ` (so `###` sub-headings
 // stay inside their rule). Identity is the full ID token in the heading, never
@@ -38,4 +40,10 @@ function ruleAffectedModules(section) {
   return line ? line[1].split(",").map((name) => name.trim()).filter(Boolean) : [];
 }
 
-export { findRuleSection, parseRuleSections, ruleAffectedModules, ruleStatuses };
+// What the rule says: its title and statement lines, without the ID or the
+// metadata lines (Status, Affected Modules, Evidence, Confidence).
+function ruleMeaning(section) {
+  return [section.title ?? "", ...section.body.split(/\r?\n/).filter((line) => !isRuleMetadataLine(line.trim()))].join("\n");
+}
+
+export { findRuleSection, parseRuleSections, ruleAffectedModules, ruleMeaning, ruleStatuses };
