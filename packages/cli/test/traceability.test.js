@@ -240,6 +240,54 @@ test("evidence goes stale when the rule, the requirement, the test target or the
   }
 });
 
+test("evidence never verifies a path it did not observe: a rule added after the result is stale for that rule", () => {
+  const root = project();
+  recordVerificationEvidence(root, { testTarget: "node:test-target:packages/loyalty", result: "passed", command: "node --test" });
+  fs.appendFileSync(rulesFile(root, "loyalty"), "\n## RULE-LOY-003 — Late rule\n\nA rule added after the result was recorded.\n\nStatus: active\nAffected Modules: loyalty-api\nGoverns: alpha#FR-2\n");
+  touch(rulesFile(root, "loyalty"));
+  const trace = buildTraceability(root);
+  const late = concludeVerification(trace, readVerificationEvidence(root), "RULE-LOY-003");
+  assert.equal(late.verification, "stale", late.reason);
+  assert.equal(concludeVerification(trace, readVerificationEvidence(root), "alpha#FR-2").verification, "stale");
+  assert.equal(concludeVerification(trace, readVerificationEvidence(root), "RULE-LOY-001").verification, "verified", "the originally observed path stays verified");
+});
+
+test("an empty Governs line is reported and never captures the next line", () => {
+  const errors = validateBusinessContext(project({ governs: "Governs:\nConfidence: high" }));
+  assert.ok(errors.some((error) => /RULE-LOY-001.*empty Governs/i.test(error)), JSON.stringify(errors));
+  assert.equal(errors.some((error) => error.includes("Confidence")), false, "the next metadata line is not read as a target");
+});
+
+test("only active rules govern: superseded and deprecated rules confer no coverage", () => {
+  for (const status of ["superseded", "deprecated"]) {
+    const root = project();
+    recordVerificationEvidence(root, { testTarget: "node:test-target:packages/loyalty", result: "passed", command: "node --test" });
+    editRule(root, "Status: active\nAffected Modules: loyalty-api", `Status: ${status}\nAffected Modules: loyalty-api`);
+    const trace = buildTraceability(root);
+    assert.deepEqual(traceSubject(trace, "alpha#FR-1").governedBy, [], status);
+    const conclusion = concludeVerification(trace, readVerificationEvidence(root), "alpha#FR-1");
+    assert.equal(conclusion.verification, "unverified", status);
+    assert.equal(traceabilityMetrics(trace, readVerificationEvidence(root)).requirementsWithGoverningRule, 0, status);
+  }
+});
+
+test("metrics stay fast on a large synthetic trace (edges are indexed, not rescanned per subject)", () => {
+  const subjects = {};
+  const edges = [];
+  const signatures = {};
+  for (let i = 0; i < 1500; i += 1) {
+    const rule = `RULE-X-${i}`, requirement = `f#FR-${i}`, module = `node:module:m${i}`, test = `node:test-target:m${i}`;
+    subjects[rule] = { kind: "business-rule", status: "active" };
+    subjects[requirement] = { kind: "functional-requirement", status: null };
+    edges.push({ type: "governs", from: rule, to: requirement }, { type: "affectsModule", from: rule, to: module }, { type: "testedBy", from: module, to: test });
+    for (const id of [rule, requirement, module, test]) signatures[id] = id;
+  }
+  const started = Date.now();
+  const metrics = traceabilityMetrics({ subjects, edges, unresolved: [], signatures }, { records: [] });
+  assert.equal(metrics.rulesWithCompletePath, 1500);
+  assert.ok(Date.now() - started < 3000, `took ${Date.now() - started} ms`);
+});
+
 test("an unrelated edit does not stale the evidence", () => {
   const root = project();
   recordVerificationEvidence(root, { testTarget: "node:test-target:packages/loyalty", result: "passed", command: "node --test" });
