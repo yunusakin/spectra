@@ -1,5 +1,5 @@
 import { collectRuleSections, enumerateFeatureObjects } from "../knowledge/address.js";
-import { ruleGoverns, ruleGovernsLines } from "../business/rule-sections.js";
+import { ruleGoverns, ruleGovernsLines, ruleHasEmptyGoverns } from "../business/rule-sections.js";
 
 const TARGET_SYNTAX = /^[A-Za-z0-9][A-Za-z0-9._-]*#[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
@@ -15,6 +15,7 @@ function validateGovernsLinks(projectRoot) {
   }
   for (const { section } of collectRuleSections(projectRoot)) {
     if (!section.id) continue;
+    if (ruleHasEmptyGoverns(section)) errors.push(`Business rule ${section.id} has an empty Governs line.`);
     if (ruleGovernsLines(section).length > 1) errors.push(`Business rule ${section.id} has more than one Governs line.`);
     const seen = new Set();
     for (const target of ruleGoverns(section)) {

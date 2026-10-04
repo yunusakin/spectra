@@ -83,16 +83,36 @@ function buildTraceability(projectRoot) {
   };
 }
 
+// Edges indexed once per trace (not per subject): lookups by type+source, each rule's requirements,
+// and the reverse requirement -> active rules index. Only active rules confer governance.
+const indexes = new WeakMap();
+function indexOf(trace) {
+  let index = indexes.get(trace);
+  if (index) return index;
+  const bySource = new Map();
+  const byTypeSource = new Map();
+  const push = (map, key, value) => (map.get(key) ?? map.set(key, []).get(key)).push(value);
+  for (const edge of trace.edges) {
+    push(byTypeSource, `${edge.type}\t${edge.from}`, edge.to);
+    push(bySource, edge.from, edge);
+  }
+  const from = (type, source) => byTypeSource.get(`${type}\t${source}`) ?? [];
+  const requirementsOfRule = (rule) => unique(from("governs", rule).flatMap((target) => (REQUIREMENT_KINDS.has(trace.subjects[target]?.kind) ? [target] : from("covers", target))));
+  const governingRules = new Map();
+  for (const id of Object.keys(trace.subjects)) {
+    if (trace.subjects[id].kind !== "business-rule" || trace.subjects[id].status !== "active") continue;
+    for (const requirement of requirementsOfRule(id)) push(governingRules, requirement, id);
+  }
+  index = { from, bySource, requirementsOfRule, governing: (requirements) => unique(requirements.flatMap((requirement) => governingRules.get(requirement) ?? [])) };
+  indexes.set(trace, index);
+  return index;
+}
+
 // One subject's bounded chain: rule -> requirement -> module -> test target (each hop one lookup,
 // AC `covers` followed one hop). Missing hops are listed, never omitted.
 function traceSubject(trace, id) {
-  const subject = trace.subjects[id];
-  const from = (type, source) => trace.edges.filter((edge) => edge.type === type && edge.from === source).map((edge) => edge.to);
-  const requirementsOfRule = (rule) => unique(from("governs", rule).flatMap((target) => (REQUIREMENT_KINDS.has(trace.subjects[target]?.kind) ? [target] : from("covers", target))));
-  const rules = Object.keys(trace.subjects).filter((candidate) => trace.subjects[candidate].kind === "business-rule");
-  const governing = (requirements) => rules.filter((rule) => requirementsOfRule(rule).some((requirement) => requirements.includes(requirement)));
-
-  const kind = subject?.kind ?? null;
+  const { from, bySource, requirementsOfRule, governing } = indexOf(trace);
+  const kind = trace.subjects[id]?.kind ?? null;
   const requirements = kind === "business-rule" ? requirementsOfRule(id) : kind === "acceptance-scenario" ? from("covers", id) : kind ? [id] : [];
   const involved = kind === "business-rule" ? [id] : governing(requirements);
   const modules = unique(involved.flatMap((rule) => from("affectsModule", rule)));
@@ -102,7 +122,6 @@ function traceSubject(trace, id) {
   if (kind === "business-rule" ? requirements.length === 0 : involved.length === 0) missing.push(kind === "business-rule" ? "requirement" : "rule");
   if (modules.length === 0) missing.push("module");
   if (modules.every((module) => testsOf(module).length === 0)) missing.push("test-target");
-  const reasons = trace.edges.filter((edge) => [id, ...involved, ...requirements, ...modules].includes(edge.from));
   return {
     id,
     kind,
@@ -113,7 +132,7 @@ function traceSubject(trace, id) {
     paths: [...new Map(paths.map((path) => [JSON.stringify(path), path])).values()].sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1)),
     missing,
     complete: missing.length === 0 && paths.length > 0,
-    edges: reasons
+    edges: unique([id, ...involved, ...requirements, ...modules]).flatMap((source) => bySource.get(source) ?? [])
   };
 }
 

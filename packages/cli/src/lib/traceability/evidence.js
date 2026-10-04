@@ -63,6 +63,13 @@ function staleBecause(record, trace) {
   return Object.entries(record.observed ?? {}).filter(([id, signature]) => (trace.signatures[id] ?? null) !== signature).map(([id]) => id).sort();
 }
 
+// A result only supports a path it observed: ids on the path that the record never saw (a rule or
+// requirement added after the result was recorded) make it stale for that path.
+function staleForPath(record, trace, entry) {
+  const unobserved = [entry.rule, entry.requirement, entry.module, entry.testTarget].filter((id) => !(id in (record.observed ?? {})));
+  return [...new Set([...staleBecause(record, trace), ...unobserved])].sort();
+}
+
 function concludeVerification(trace, evidence, id) {
   const subject = traceSubject(trace, id);
   const base = { id, traceability: { complete: subject.complete, missing: subject.missing } };
@@ -72,7 +79,7 @@ function concludeVerification(trace, evidence, id) {
   const paths = subject.paths.map((entry) => {
     const record = records.find((candidate) => candidate.testTarget === entry.testTarget);
     if (!record) return { ...entry, evidence: null };
-    const stale = staleBecause(record, trace);
+    const stale = staleForPath(record, trace, entry);
     return { ...entry, evidence: { result: record.result, fresh: stale.length === 0, staleBecause: stale } };
   });
   const fresh = paths.filter((entry) => entry.evidence?.fresh);

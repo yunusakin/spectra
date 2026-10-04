@@ -41,7 +41,12 @@ function ruleAffectedModules(section) {
 // `Governs: <feature-id>#<object-id>, ...`: the requirements/scenarios this rule governs (canonical
 // intent). A rule may carry at most one such line; validation reports more.
 function ruleGovernsLines(section) {
-  return [...section.body.matchAll(/^Governs:\s+(.+?)\s*$/gm)].map((match) => match[1]);
+  return [...section.body.matchAll(/^Governs:[ \t]+(.+?)[ \t]*$/gm)].map((match) => match[1]);
+}
+
+// `Governs:` with nothing after it (reported by validation, never read as a link).
+function ruleHasEmptyGoverns(section) {
+  return /^Governs:[ \t]*$/m.test(section.body);
 }
 
 function ruleGoverns(section) {
@@ -57,4 +62,4 @@ function ruleMeaning(section) {
   return [section.title ?? "", ...section.body.split(/\r?\n/).filter((line) => !RULE_METADATA_LINE.test(line.trim()))].join("\n");
 }
 
-export { findRuleSection, parseRuleSections, ruleAffectedModules, ruleGoverns, ruleGovernsLines, ruleMeaning, ruleStatuses };
+export { findRuleSection, parseRuleSections, ruleAffectedModules, ruleGoverns, ruleGovernsLines, ruleHasEmptyGoverns, ruleMeaning, ruleStatuses };
