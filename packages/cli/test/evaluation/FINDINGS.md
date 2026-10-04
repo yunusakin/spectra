@@ -103,3 +103,36 @@ Diagnosis. For `implementer/implement` in this repository the markdown pool held
 Not done on purpose: budgets, retrieval, the decide/ship whole-file entries, and any reserved Project Intelligence floor.
 
 Scope note: the fallback lives in `chooseDynamicEntries`, so it applies to plain `spectra context` as well as `--route-task`; both had the same avoid-list contradiction, so it was not restricted to route mode. The `budget-matrix.*.json` artifacts are snapshots of this repository's corpus and cache at the time of the run; regenerate them with the command above rather than diffing against a different checkout.
+
+## Phase 1F.1 addendum — whole-file baseline calibration (retrieval and corpus frozen)
+
+Measured with `budget-matrix.mjs` (`budget-matrix.*.1f1-before.json` / `.1f1-after.json`; `shipDogfood` is new). The evaluation report is byte-identical before and after (required recall 100.0%, relevant recall 93.0%, precision 82.7%, FP 13, FN 4, candidate tokens 7601). Candidate IDs are identical in every role and dogfood task.
+
+### release-manager / ship — fixed (REPRESENTATION PROBLEM)
+
+`RELEASE_SUMMARY.md` is narrative release notes that every release prepends to (`## Unreleased`, `## vX.Y.Z`). Nothing parses it except the context pack; approvals, review findings and progress reach the role through their own structured summaries. The ship role needs the section being shipped (highlights, risks, migration, rollback), not every release since v2.0.0. The `releaseSummary` entry is now a derived summary-pool entry (`release.summary.json`): the current section in full (`Unreleased` when it has content, otherwise the highest version; file order is not trusted) plus the latest released version and up to three earlier headings. The whole file remains available as the `releaseHistory` escalation entry. Tradeoff: `ship` now defaults to the current section only, so history is escalation-only.
+
+| | markdown mandatory | summary mandatory | markdown headroom | summary headroom | status | optional included | pack total |
+|---|---:|---:|---:|---:|---|---:|---:|
+| before | 1670 | 714 | −970 | 1886 | mandatory-overflow | 0/945 | 2384 |
+| after | 375 | 990 | 325 | 1610 | budget-exhausted | 282/945 | 1647 |
+
+Canonical source 1295 tokens → mandatory representation 276 tokens, in the summary pool; total pack −737 tokens. The representation depends on the current section, not on history length (tested with 3 vs 60 releases). Fresh init has no release file at the data root: summary pool +14 tokens (`{"present":false}`), everything else unchanged.
+
+### planner / decide and architect / decide — investigation only, no change
+
+The goal policy lists both `projectSummary` and `projectBrief`; the `intake-core` task alias maps to planner/decide, so the brief is the artifact decisions are made about. `projectSummary` is lossy: it keeps the first three bullets of Requirements and Constraints across all subsections (drops the fourth functional requirement and every non-functional requirement, the security/organizational constraints) and bullets only from Product Context (the prose is dropped). It is not semantically sufficient (not D1). Of the 681 whole-file tokens, 255 are HTML-comment template examples; a comment-stripped brief is about 426 tokens, which would fit architect/decide (375 + 426 + 116 = 917 of 1000) but not planner/decide (801 of 700). Obvious deterministic representation exists but changes what agents read from a canonical file, so it is reported, not implemented.
+
+| Role | Classification | Recommended action |
+|---|---|---|
+| planner / decide | D2 — compact representation obvious (comment-stripped brief), still ~100 over budget after it | product decision: representation and/or planner budget |
+| architect / decide | D2 — same representation would remove the overflow | product decision on comment stripping for full entries |
+
+### Remaining findings
+
+| Finding | Class |
+|---|---|
+| planner/decide −356, architect/decide −172 | PRODUCT SEMANTICS DECISION |
+| Full-file entries include HTML-comment template examples (255 of 681 brief tokens) | BUDGET POLICY REMAINS |
+| In the standard layout the release entry resolves `<root>/.spectra/RELEASE_SUMMARY.md`; a project-root file is never read | KNOWLEDGE COVERAGE GAP (pre-existing, unchanged) |
+| No RULE → FR schema; no feature requirements for install lifecycle, resolver, repo index, release approval | TRACEABILITY GAP / DEFER BEYOND PHASE 1 |
