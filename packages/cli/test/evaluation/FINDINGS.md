@@ -50,3 +50,39 @@ Retrieval met the safety gate and its errors are small and mechanical (findings 
 | 17 | Still open: no feature requirement for installation lifecycle, context resolver, or repo index/Knowledge Map; no release-approval requirement; no finer module than `packages-cli`; `packages/core` has no test script. | KNOWLEDGE COVERAGE GAP (needs product decisions) |
 | 18 | `RULE → FR/AC` has no canonical field, so traceability between the new rules and FR-2/AC-2 is not expressible. | RELATIONSHIP GAP (later traceability phase) |
 | 19 | `superseded-by-exact-object` still labels a domain's whole rules/unresolved file even when none of its rules resolved (pack.js `domain: ` entries). | OPEN 1B.2 ITEM |
+
+## Phase 1E addendum — deterministic retrieval tuning (budgets, canonical knowledge and schema unchanged)
+
+Frozen baseline: the unchanged Phase 1C harness on `main` 2ca0537 (20 cases). Root-cause tool: `node test/evaluation/analyze.mjs`. Three changes, each measured on its own before the next:
+
+1. **Rule terms from meaning, not metadata** (`ruleMeaning`, Knowledge Map contract 2 → 3). `Evidence:` paths and `Affected Modules:` made `package` appear in 11/11 spectra-product rules and caused 9 of 17 false positives. Finding 3 (metadata leaking into terms) is closed.
+2. **Domain-common terms are ignored** for that domain (in ≥ 2 rules and in more than 1/3 of them). Threshold sweep on the corpus: 1/2 → 6 false negatives, 1/3 and 2/5 identical (4), 1/4 added a regression; unguarded 1/3 broke `rule-affected-module` (a 2-rule domain), hence the "≥ 2 rules" guard.
+3. **Whole-domain fallback needs stated domain intent** (`--domain`, or the domain name/keyword in the task prose). A module hint, or a domain word that only occurs inside an explicit reference (`loyalty-program#FR-2`), no longer widens into every rule. Removing the accidental metadata match (change 1) exposed the second case: the regression-tier `explicit-fr`/`explicit-ac` cases then pulled RULE-LOY-002/003 through `loyalty`.
+
+| Metric (20 frozen cases, normal budget) | Before | After | Delta |
+| --- | --- | --- | --- |
+| required recall | 100% | 100% | 0 |
+| relevant recall | 80.8% | 91.5% | +10.7 pt |
+| precision | 71.7% | 82.8% | +11.1 pt |
+| false positives | 17 | 10 | −7 |
+| false negatives (all budget/anchor except 2 knowledge-gap misses) | 9 | 4 | −5 |
+| candidate tokens | 9204 | 6433 | −30.1% |
+| selected object tokens | 6775 | 6071 | −10.4% |
+| business-rule-match precision | 36.8% (7/19) | 72.7% (8/11) | +35.9 pt |
+| business-domain-match precision | 100% (3/3) | 60% (3/5) | −40 pt (see below) |
+| budget-exhausted normal cases | 4 | 3 | −1 |
+
+With the six cases added in Phase 1E (3 explicit references on the real Spectra knowledge, 3 generic phrases with `--module packages-cli`; labels written before the runs) the same code goes from 63.1% → 82.7% precision, 77.2% → 93.0% relevant recall, 31 → 13 false positives, 13 → 4 false negatives, 100% required recall in both.
+
+`business-domain-match` precision fell because two false positives (RULE-LOY-002/003 in `feature-lexical-tp`) moved from `business-rule-match(point)` to the domain fallback: the task says "loyalty points", a stated domain name and keyword, and no single rule is distinguishable. That is the preserved fallback behaviour, not a new leak.
+
+| # | Finding | Class |
+| --- | --- | --- |
+| 20 | Real Spectra implementer context, 4 dogfood tasks, noise removed: `markdownTokens` 1200, mandatory baseline 1175, headroom 25; relevant optional objects requested 246–350 tokens, included 0 in every task. Retrieval is no longer the reason useful knowledge is missing. | BUDGET POLICY CANDIDATE |
+| 21 | Single generic-word coincidences remain: `Require a command` → RULE-SPE-001/005, `Update the package` → RULE-SPE-002, lifecycle → RULE-SPE-003 via `untouched`. Rare terms (df 1) look maximally discriminative, so frequency cannot separate them; a two-term rule would trade recall. | ACCEPTABLE CURRENT LIMITATION |
+| 22 | Feature lexical matching is unchanged: `assisted, implementation` still selects FR-2 and `Require approval before the release is shipped` still misses FR-2/AC-2 (one shared term; also a coverage gap). | RETRIEVAL TUNING REMAINS (secondary) / KNOWLEDGE COVERAGE GAP |
+| 23 | Domain fallback still returns the whole domain for a stated domain with no rule-level match (preserved on purpose; `domain-fallback` and the E2E fixture require it). | ACCEPTABLE CURRENT LIMITATION |
+| 24 | `RULE → FR/AC` traceability and the remaining requirement gaps (findings 17, 18) are untouched. | TRACEABILITY GAP |
+| 25 | `mandatory-overflow` appears once more in the "all runs" count (3 → 4): the `very-tight` padding is sized from the case's candidate tokens, which shrank. A harness artefact, not a selection change. | ACCEPTABLE CURRENT LIMITATION |
+
+Recommendation: **A — retrieval quality is sufficient; budget policy is now the measured blocker.** Not started in this phase.
