@@ -4,6 +4,7 @@ import { ensureDirectory } from "../runtime.js";
 import { SUMMARY_SOURCES } from "./sources.js";
 import { getCacheDir } from "./roots.js";
 import { parseApprovalSummary, parseFeatureBundleSummary, parseGovernanceSummary } from "./governance-summaries.js";
+import { buildDecideBrief } from "./brief-view.js";
 import { parseReleaseSummary } from "./release-summaries.js";
 import {
   parseActiveContextSummary,
@@ -74,6 +75,7 @@ const SUMMARY_BUILDERS = {
   "traceability.summary.json": parseTraceabilitySummary,
   "discovery.summary.json": parseDiscoverySummary,
   "release.summary.json": parseReleaseSummary,
+  "projectbrief.decide.md": buildDecideBrief,
   "approval.summary.json": parseApprovalSummary,
   "governance.summary.json": parseGovernanceSummary,
   "feature-bundle.summary.json": parseFeatureBundleSummary,
@@ -120,12 +122,17 @@ function ensureContextSummaries(repoRoot) {
   for (const [fileName, builder] of Object.entries(SUMMARY_BUILDERS)) {
     const outputPath = path.join(cacheDir, fileName);
     const sourcePaths = (SUMMARY_SOURCES[fileName] ?? []).map((relativePath) => path.join(repoRoot, relativePath));
+    // A derived markdown file must not outlive its source: no source, no file.
+    if (fileName.endsWith(".md") && sourcePaths.every((sourcePath) => !fs.existsSync(sourcePath))) {
+      fs.rmSync(outputPath, { force: true });
+      continue;
+    }
     if (!needsRebuild(outputPath, sourcePaths)) {
       continue;
     }
 
     const payload = builder(repoRoot);
-    fs.writeFileSync(outputPath, JSON.stringify(payload, null, 2));
+    fs.writeFileSync(outputPath, typeof payload === "string" ? payload : JSON.stringify(payload, null, 2));
   }
 }
 

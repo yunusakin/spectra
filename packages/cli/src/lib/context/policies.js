@@ -94,8 +94,8 @@ const GOAL_POLICIES = {
     escalation: ["projectBrief", "invariants"]
   },
   decide: {
-    entries: ["minimalRules", "projectSummary", "activeSummary", "projectBrief", "featureBundleSummary", "governanceSummary"],
-    escalation: ["invariants", "discoverySummary"]
+    entries: ["minimalRules", "projectSummary", "activeSummary", "projectBriefClean", "featureBundleSummary", "governanceSummary"],
+    escalation: ["invariants", "discoverySummary", "projectBrief"]
   },
   implement: {
     entries: ["implementationSummary", "implementationBrief", "traceabilitySummary", "reviewSummary", "featureBundleSummary", "governanceSummary"],

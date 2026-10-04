@@ -89,7 +89,7 @@ function printInline(pack) {
     title(`--- ${entry.knowledgeId ?? entry.path} [${entry.mode}] ---`);
     if (entry.content) {
       title(entry.content);
-    } else if (entry.mode === "summary") {
+    } else if (entry.mode === "summary" || entry.derived) {
       title(fs.readFileSync(entry.absolutePath, "utf8").trim());
     } else {
       title(`REF ${entry.path}`);

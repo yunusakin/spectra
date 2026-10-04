@@ -72,7 +72,7 @@ function chooseDynamicEntries(goal, summaries) {
   if (goal === "decide") {
     const project = summaries.project ?? {};
     if (!project.purpose || !project.appType) {
-      entries.push("projectBrief");
+      entries.push("projectBriefClean");
     }
   }
 
@@ -103,8 +103,9 @@ function resolveEntry(repoRoot, entryId, changedFiles, source) {
 
   // Summary entries live in the layout's cache directory (see getCacheDir);
   // their ENTRY_DEFS.path stays a canonical .spectra/... display path.
-  // Full-mode entries resolve against the data root.
-  const absolutePath = definition.mode === "summary"
+  // Derived entries (markdown pool, generated into the same cache) do too; other full-mode entries
+  // resolve against the data root.
+  const absolutePath = definition.mode === "summary" || definition.derived
     ? path.join(getCacheDir(repoRoot), path.basename(definition.path))
     : path.join(repoRoot, definition.path);
   const exists = fs.existsSync(absolutePath);
@@ -114,6 +115,7 @@ function resolveEntry(repoRoot, entryId, changedFiles, source) {
     id: entryId,
     label: definition.label,
     mode: definition.mode,
+    ...(definition.derived ? { derived: true, derivedFrom: definition.sources } : {}),
     source,
     path: definition.path,
     absolutePath,
@@ -230,7 +232,8 @@ function buildContextPack({
       entries.some((entry) => entry.changedRefs.includes(candidate) || entry.path === candidate)
   );
 
-  let avoid = rolePolicy.avoid.filter((candidate) => !entries.some((entry) => entry.path === candidate));
+  // A derived entry stands in for the canonical file it is built from, so that file is not also "avoid".
+  let avoid = rolePolicy.avoid.filter((candidate) => !entries.some((entry) => entry.path === candidate || entry.derivedFrom?.includes(candidate)));
   let route;
   let knowledge;
   let selection;
