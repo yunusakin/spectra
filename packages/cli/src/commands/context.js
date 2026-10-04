@@ -56,8 +56,9 @@ function printSelection(pack) {
       title(`- ${entry.id} [${entry.exclusion}; ${entry.reasons.map(({ reason }) => reason).join(", ")}; ~${entry.estimatedTokens} tokens]`);
     }
   }
+  // stdout, not stderr: refs/inline consumers must see budget and fallback state.
   for (const warning of selection.warnings) {
-    warn(warning.message);
+    title(`WARN ${warning.message}`);
   }
 }
 
