@@ -1,0 +1,956 @@
+{
+  "repository": "spectra",
+  "roles": {
+    "planner/discover": {
+      "markdownBudget": 700,
+      "summaryBudget": 2600,
+      "mandatoryFull": 375,
+      "mandatorySummary": 1010,
+      "markdownHeadroom": 325,
+      "summaryHeadroom": 1590,
+      "status": "budget-exhausted",
+      "mandatoryEntries": [
+        {
+          "id": "activeSummary",
+          "pool": "summary",
+          "tokens": 53
+        },
+        {
+          "id": "discoverySummary",
+          "pool": "summary",
+          "tokens": 33
+        },
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "intakeSummary",
+          "pool": "summary",
+          "tokens": 172
+        },
+        {
+          "id": "projectSummary",
+          "pool": "summary",
+          "tokens": 222
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "minimalRules",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 945,
+      "optionalIncludedTokens": 282,
+      "optionalExcludedTokens": 663,
+      "packTotal": 1667,
+      "candidateIds": [
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ]
+    },
+    "planner/decide": {
+      "markdownBudget": 700,
+      "summaryBudget": 2600,
+      "mandatoryFull": 1056,
+      "mandatorySummary": 977,
+      "markdownHeadroom": -356,
+      "summaryHeadroom": 1623,
+      "status": "mandatory-overflow",
+      "mandatoryEntries": [
+        {
+          "id": "activeSummary",
+          "pool": "summary",
+          "tokens": 53
+        },
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "intakeSummary",
+          "pool": "summary",
+          "tokens": 172
+        },
+        {
+          "id": "projectSummary",
+          "pool": "summary",
+          "tokens": 222
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "projectBrief",
+          "pool": "markdown",
+          "tokens": 681
+        },
+        {
+          "id": "minimalRules",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 945,
+      "optionalIncludedTokens": 0,
+      "optionalExcludedTokens": 945,
+      "packTotal": 2033,
+      "candidateIds": [
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ]
+    },
+    "architect/decide": {
+      "markdownBudget": 1000,
+      "summaryBudget": 3200,
+      "mandatoryFull": 1172,
+      "mandatorySummary": 888,
+      "markdownHeadroom": -172,
+      "summaryHeadroom": 2312,
+      "status": "mandatory-overflow",
+      "mandatoryEntries": [
+        {
+          "id": "activeSummary",
+          "pool": "summary",
+          "tokens": 53
+        },
+        {
+          "id": "discoverySummary",
+          "pool": "summary",
+          "tokens": 33
+        },
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "projectSummary",
+          "pool": "summary",
+          "tokens": 222
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "traceabilitySummary",
+          "pool": "summary",
+          "tokens": 50
+        },
+        {
+          "id": "invariants",
+          "pool": "markdown",
+          "tokens": 116
+        },
+        {
+          "id": "projectBrief",
+          "pool": "markdown",
+          "tokens": 681
+        },
+        {
+          "id": "minimalRules",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 945,
+      "optionalIncludedTokens": 0,
+      "optionalExcludedTokens": 945,
+      "packTotal": 2060,
+      "candidateIds": [
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ]
+    },
+    "implementer/implement": {
+      "markdownBudget": 1200,
+      "summaryBudget": 3200,
+      "mandatoryFull": 494,
+      "mandatorySummary": 907,
+      "markdownHeadroom": 706,
+      "summaryHeadroom": 2293,
+      "status": "budget-exhausted",
+      "mandatoryEntries": [
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "implementationSummary",
+          "pool": "summary",
+          "tokens": 57
+        },
+        {
+          "id": "projectSummary",
+          "pool": "summary",
+          "tokens": 222
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "traceabilitySummary",
+          "pool": "summary",
+          "tokens": 50
+        },
+        {
+          "id": "implementationBrief",
+          "pool": "markdown",
+          "tokens": 119
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 945,
+      "optionalIncludedTokens": 691,
+      "optionalExcludedTokens": 254,
+      "packTotal": 2092,
+      "candidateIds": [
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ]
+    },
+    "reviewer/verify": {
+      "markdownBudget": 800,
+      "summaryBudget": 3000,
+      "mandatoryFull": 375,
+      "mandatorySummary": 764,
+      "markdownHeadroom": 425,
+      "summaryHeadroom": 2236,
+      "status": "budget-exhausted",
+      "mandatoryEntries": [
+        {
+          "id": "approvalSummary",
+          "pool": "summary",
+          "tokens": 78
+        },
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "progressSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "traceabilitySummary",
+          "pool": "summary",
+          "tokens": 50
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 945,
+      "optionalIncludedTokens": 400,
+      "optionalExcludedTokens": 545,
+      "packTotal": 1539,
+      "candidateIds": [
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ]
+    },
+    "verifier/verify": {
+      "markdownBudget": 700,
+      "summaryBudget": 2800,
+      "mandatoryFull": 375,
+      "mandatorySummary": 764,
+      "markdownHeadroom": 325,
+      "summaryHeadroom": 2036,
+      "status": "budget-exhausted",
+      "mandatoryEntries": [
+        {
+          "id": "approvalSummary",
+          "pool": "summary",
+          "tokens": 78
+        },
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "progressSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "traceabilitySummary",
+          "pool": "summary",
+          "tokens": 50
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 945,
+      "optionalIncludedTokens": 282,
+      "optionalExcludedTokens": 663,
+      "packTotal": 1421,
+      "candidateIds": [
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ]
+    },
+    "release-manager/ship": {
+      "markdownBudget": 700,
+      "summaryBudget": 2600,
+      "mandatoryFull": 375,
+      "mandatorySummary": 990,
+      "markdownHeadroom": 325,
+      "summaryHeadroom": 1610,
+      "status": "budget-exhausted",
+      "mandatoryEntries": [
+        {
+          "id": "approvalSummary",
+          "pool": "summary",
+          "tokens": 78
+        },
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "progressSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "releaseSummary",
+          "pool": "summary",
+          "tokens": 276
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 945,
+      "optionalIncludedTokens": 282,
+      "optionalExcludedTokens": 663,
+      "packTotal": 1647,
+      "candidateIds": [
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ]
+    }
+  },
+  "dogfood": {
+    "spectra-approval-gating": {
+      "markdownBudget": 1200,
+      "summaryBudget": 3200,
+      "mandatoryFull": 494,
+      "mandatorySummary": 907,
+      "markdownHeadroom": 706,
+      "summaryHeadroom": 2293,
+      "status": "budget-exhausted",
+      "mandatoryEntries": [
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "implementationSummary",
+          "pool": "summary",
+          "tokens": 57
+        },
+        {
+          "id": "projectSummary",
+          "pool": "summary",
+          "tokens": 222
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "traceabilitySummary",
+          "pool": "summary",
+          "tokens": 50
+        },
+        {
+          "id": "implementationBrief",
+          "pool": "markdown",
+          "tokens": 119
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 945,
+      "optionalIncludedTokens": 691,
+      "optionalExcludedTokens": 254,
+      "packTotal": 2092,
+      "candidateIds": [
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "relevant": {
+        "requestedTokens": 336,
+        "includedTokens": 336,
+        "excludedTokens": 0,
+        "includedIds": [
+          "RULE-SPE-006",
+          "node:module:packages/cli",
+          "node:test-target:packages/cli",
+          "spectra-core#AC-2",
+          "spectra-core#FR-2"
+        ],
+        "excludedIds": []
+      }
+    },
+    "spectra-lifecycle": {
+      "markdownBudget": 1200,
+      "summaryBudget": 3200,
+      "mandatoryFull": 494,
+      "mandatorySummary": 907,
+      "markdownHeadroom": 706,
+      "summaryHeadroom": 2293,
+      "status": "budget-exhausted",
+      "mandatoryEntries": [
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "implementationSummary",
+          "pool": "summary",
+          "tokens": 57
+        },
+        {
+          "id": "projectSummary",
+          "pool": "summary",
+          "tokens": 222
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "traceabilitySummary",
+          "pool": "summary",
+          "tokens": 50
+        },
+        {
+          "id": "implementationBrief",
+          "pool": "markdown",
+          "tokens": 119
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 1118,
+      "optionalIncludedTokens": 665,
+      "optionalExcludedTokens": 453,
+      "packTotal": 2066,
+      "candidateIds": [
+        "RULE-SPE-001",
+        "RULE-SPE-002",
+        "RULE-SPE-003",
+        "RULE-SPE-004",
+        "RULE-SPE-005",
+        "node:module:packages/cli",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-1",
+        "spectra-core#FR-1"
+      ],
+      "relevant": {
+        "requestedTokens": 350,
+        "includedTokens": 350,
+        "excludedTokens": 0,
+        "includedIds": [
+          "RULE-SPE-001",
+          "RULE-SPE-002",
+          "node:module:packages/cli",
+          "node:test-target:packages/cli"
+        ],
+        "excludedIds": []
+      }
+    },
+    "spectra-repo-index": {
+      "markdownBudget": 1200,
+      "summaryBudget": 3200,
+      "mandatoryFull": 494,
+      "mandatorySummary": 907,
+      "markdownHeadroom": 706,
+      "summaryHeadroom": 2293,
+      "status": "within-budget",
+      "mandatoryEntries": [
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "implementationSummary",
+          "pool": "summary",
+          "tokens": 57
+        },
+        {
+          "id": "projectSummary",
+          "pool": "summary",
+          "tokens": 222
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "traceabilitySummary",
+          "pool": "summary",
+          "tokens": 50
+        },
+        {
+          "id": "implementationBrief",
+          "pool": "markdown",
+          "tokens": 119
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 653,
+      "optionalIncludedTokens": 653,
+      "optionalExcludedTokens": 0,
+      "packTotal": 2054,
+      "candidateIds": [
+        "RULE-SPE-008",
+        "RULE-SPE-009",
+        "node:module:packages/cli",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md"
+      ],
+      "relevant": {
+        "requestedTokens": 246,
+        "includedTokens": 246,
+        "excludedTokens": 0,
+        "includedIds": [
+          "RULE-SPE-008",
+          "node:module:packages/cli",
+          "node:test-target:packages/cli"
+        ],
+        "excludedIds": []
+      }
+    },
+    "spectra-context-resolver": {
+      "markdownBudget": 1200,
+      "summaryBudget": 3200,
+      "mandatoryFull": 494,
+      "mandatorySummary": 907,
+      "markdownHeadroom": 706,
+      "summaryHeadroom": 2293,
+      "status": "within-budget",
+      "mandatoryEntries": [
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "implementationSummary",
+          "pool": "summary",
+          "tokens": 57
+        },
+        {
+          "id": "projectSummary",
+          "pool": "summary",
+          "tokens": 222
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "traceabilitySummary",
+          "pool": "summary",
+          "tokens": 50
+        },
+        {
+          "id": "implementationBrief",
+          "pool": "markdown",
+          "tokens": 119
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 701,
+      "optionalIncludedTokens": 701,
+      "optionalExcludedTokens": 0,
+      "packTotal": 2102,
+      "candidateIds": [
+        "RULE-SPE-009",
+        "RULE-SPE-010",
+        "node:module:packages/cli",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md"
+      ],
+      "relevant": {
+        "requestedTokens": 294,
+        "includedTokens": 294,
+        "excludedTokens": 0,
+        "includedIds": [
+          "RULE-SPE-010",
+          "node:module:packages/cli",
+          "node:test-target:packages/cli"
+        ],
+        "excludedIds": []
+      }
+    }
+  },
+  "shipDogfood": {
+    "ship-readiness": {
+      "markdownBudget": 700,
+      "summaryBudget": 2600,
+      "mandatoryFull": 375,
+      "mandatorySummary": 990,
+      "markdownHeadroom": 325,
+      "summaryHeadroom": 1610,
+      "status": "budget-exhausted",
+      "mandatoryEntries": [
+        {
+          "id": "approvalSummary",
+          "pool": "summary",
+          "tokens": 78
+        },
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "progressSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "releaseSummary",
+          "pool": "summary",
+          "tokens": 276
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 1069,
+      "optionalIncludedTokens": 313,
+      "optionalExcludedTokens": 756,
+      "packTotal": 1678,
+      "candidateIds": [
+        "RULE-SPE-001",
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ]
+    },
+    "ship-approval-gating": {
+      "markdownBudget": 700,
+      "summaryBudget": 2600,
+      "mandatoryFull": 375,
+      "mandatorySummary": 990,
+      "markdownHeadroom": 325,
+      "summaryHeadroom": 1610,
+      "status": "budget-exhausted",
+      "mandatoryEntries": [
+        {
+          "id": "approvalSummary",
+          "pool": "summary",
+          "tokens": 78
+        },
+        {
+          "id": "featureBundleSummary",
+          "pool": "summary",
+          "tokens": 79
+        },
+        {
+          "id": "governanceSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "progressSummary",
+          "pool": "summary",
+          "tokens": 58
+        },
+        {
+          "id": "releaseSummary",
+          "pool": "summary",
+          "tokens": 276
+        },
+        {
+          "id": "reviewSummary",
+          "pool": "summary",
+          "tokens": 48
+        },
+        {
+          "id": "sharedCore",
+          "pool": "summary",
+          "tokens": 393
+        },
+        {
+          "id": "sdd/system/runtime/minimal.md",
+          "pool": "markdown",
+          "tokens": 375
+        }
+      ],
+      "optionalCandidateTokens": 945,
+      "optionalIncludedTokens": 282,
+      "optionalExcludedTokens": 663,
+      "packTotal": 1647,
+      "candidateIds": [
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli",
+        "sdd/memory-bank/business/INDEX.md",
+        "sdd/memory-bank/tech/modules.md",
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ]
+    }
+  }
+}
