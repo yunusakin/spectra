@@ -96,8 +96,10 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
     // Whole-domain fallback needs a direct domain signal (explicit --domain, the domain named in the
     // task, or a configured keyword). A domain reached only through a module's business domains
     // contributes the rules that share a term with the task, never all of them.
-    // A task that already names exact objects does not need a guess at the rest of the domain.
-    const direct = !hasExplicitReference && (route.domainMatches ?? []).some((match) => match.name === domain && DIRECT_DOMAIN_SIGNALS.has(match.matchedBy));
+    // A task that already names exact objects does not need a guess at the rest of the domain,
+    // unless the user asked for the domain itself (--domain).
+    const signals = (route.domainMatches ?? []).filter((match) => match.name === domain).map((match) => match.matchedBy);
+    const direct = signals.includes("explicit-domain") || (!hasExplicitReference && signals.some((signal) => DIRECT_DOMAIN_SIGNALS.has(signal)));
     for (const id of matching.length > 0 ? matching : direct ? ruleIds : []) {
       if (matching.length > 0) add(id, "business-rule-match", overlap(taskTerms, byId.get(id)).join(","));
       else add(id, "business-domain-match", domain);

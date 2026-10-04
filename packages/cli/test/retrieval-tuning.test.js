@@ -122,6 +122,14 @@ test("a single shared term does not join rules that share more terms, but still 
   assert.deepEqual(picked(weak), ["RULE-LED-002:business-rule-match"]);
 });
 
+test("an explicit --domain keeps its whole-domain fallback even when the task names an object", () => {
+  const root = project();
+  const selected = ids(candidates(root, "Explain RULE-PAY-001", ["--domain", "payments"]));
+  assert.deepEqual(selected.filter((id) => id.startsWith("RULE-")).sort(), ["RULE-PAY-001", "RULE-PAY-002"]);
+  const other = ids(candidates(root, "Explain RULE-LED-001", ["--domain", "payments"]));
+  assert.deepEqual(other.filter((id) => id.startsWith("RULE-")).sort(), ["RULE-LED-001", "RULE-PAY-001", "RULE-PAY-002"]);
+});
+
 test("a map cached with the previous term contract is rebuilt, not trusted", () => {
   const root = project();
   const stale = buildKnowledgeMap(root);
