@@ -38,3 +38,15 @@ Retrieval logic was **not changed** while measuring. Re-run: `node test/evaluati
 ## Recommendation: C — improve canonical knowledge coverage first
 
 Retrieval met the safety gate and its errors are small and mechanical (findings 2–5, 7 are one small tuning pass). The larger limiter for Spectra on itself is that the canonical knowledge barely exists: five of seven real tasks have nothing to retrieve beyond modules. Verification/traceability needs requirements and rules to trace, so coverage comes first; the tuning candidates can ship in the same stretch as a separate, measured commit (re-run this harness before and after).
+
+## Phase 1D addendum — canonical coverage added (retrieval logic unchanged)
+
+`spectra-product` now holds RULE-SPE-001…010 (active) and RULE-SPE-011 (unresolved), each tied to repository evidence, and its keywords gained `migration,update,uninstall,approval,cache,knowledge-map,budget`. Findings 10 and parts of the gap list are closed; the rules exposed new retrieval behaviour:
+
+| # | Finding | Class |
+|---|---|---|
+| 15 | A module hint or one keyword selects the whole domain: unrelated rules arrive via `business-domain-match` or one shared generic term (`require`, `spectra`, `project`, `change`). | RETRIEVAL TUNING CANDIDATE |
+| 16 | In the real repo the implementer role's `markdownTokens` (1200) is spent by the mandatory baseline (projectBrief 681, sharedCore 393) leaving ~25 tokens, so every optional rule/requirement is excluded by budget. | BUDGET POLICY CANDIDATE |
+| 17 | Still open: no feature requirement for installation lifecycle, context resolver, or repo index/Knowledge Map; no release-approval requirement; no finer module than `packages-cli`; `packages/core` has no test script. | KNOWLEDGE COVERAGE GAP (needs product decisions) |
+| 18 | `RULE → FR/AC` has no canonical field, so traceability between the new rules and FR-2/AC-2 is not expressible. | RELATIONSHIP GAP (later traceability phase) |
+| 19 | `superseded-by-exact-object` still labels a domain's whole rules/unresolved file even when none of its rules resolved (pack.js `domain: ` entries). | OPEN 1B.2 ITEM |

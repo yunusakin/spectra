@@ -265,7 +265,7 @@ test("a changed file selects its own module and test-target, not unrelated modul
 
 // ---- Dogfood: real Spectra knowledge ---------------------------------------------------------
 
-test("dogfood: approval-gating task resolves FR-2, AC-2 and packages/cli evidence, nothing else", () => {
+test("dogfood: approval-gating task resolves FR-2, AC-2, the approval rules and module evidence, nothing else", () => {
   const root = createProject();
   fs.rmSync(path.join(sdd(root), "features"), { recursive: true });
   fs.cpSync(path.join(repoRoot, "sdd", "features"), path.join(sdd(root), "features"), { recursive: true });
@@ -278,10 +278,10 @@ test("dogfood: approval-gating task resolves FR-2, AC-2 and packages/cli evidenc
 
   const task = "Block AI-assisted implementation until implementation approval is granted.";
   const { pack, resolved } = resolve(root, task, ["--module", "packages-cli"]);
-  assert.deepEqual(idsOf(resolved).sort(), ["node:module:packages/cli", "node:test-target:packages/cli", "spectra-core#AC-2", "spectra-core#FR-2"]);
+  assert.deepEqual(idsOf(resolved).sort(), ["RULE-SPE-006", "RULE-SPE-007", "RULE-SPE-011", "node:module:packages/cli", "node:module:packages/core", "node:test-target:packages/cli", "spectra-core#AC-2", "spectra-core#FR-2"]);
   assert.deepEqual(reasonsOf(resolved, "spectra-core#FR-2").sort(), ["feature-match", "feature-relationship"]);
   assert.deepEqual(reasonsOf(resolved, "spectra-core#AC-2").sort(), ["feature-match", "feature-relationship"]);
-  for (const excluded of ["spectra-core#FR-1", "spectra-core#AC-1", "spectra-core#NFR-1", "node:module:packages/core", "node:module:packages/templates"]) {
+  for (const excluded of ["spectra-core#FR-1", "spectra-core#AC-1", "spectra-core#NFR-1", "node:module:packages/templates", "RULE-SPE-001", "RULE-SPE-010"]) {
     assert.equal(idsOf(resolved).includes(excluded), false, excluded);
   }
   assert.equal(pack.entries.some((entry) => entry.path === "sdd/system/runtime/minimal.md"), true, "baseline policy context stays");
