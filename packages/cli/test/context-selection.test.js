@@ -404,6 +404,19 @@ test("refs and inline summarize the budget; inline never renders excluded conten
   assert.doesNotMatch(inline.stdout, /"kind":"test-target"/);
 });
 
+test("refs and inline carry selection warnings on stdout, not only stderr", () => {
+  const root = project();
+  write(rulesFile(root, "payments"), fs.readFileSync(rulesFile(root, "loyalty"), "utf8"));
+  for (const format of ["refs", "inline"]) {
+    const result = run(root, ["context", "--route-task", "Fix expired points", "--format", format]);
+    assert.match(result.stdout, /WARN Knowledge Map unavailable, using whole-file routing: Duplicate business rule ID/, format);
+  }
+  const clean = project();
+  tuneRule(clean, 900, "Explain RULE-LOY-001", TIGHT);
+  const overflow = run(clean, ["context", "--route-task", "Explain RULE-LOY-001", "--format", "refs", ...TIGHT]);
+  assert.match(overflow.stdout, /WARN Mandatory context exceeds the budget/);
+});
+
 // ---- Dogfood -----------------------------------------------------------------------------------------------
 
 test("dogfood: approval-gating task is a within-budget selection with nothing required or excluded", () => {
