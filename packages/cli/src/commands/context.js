@@ -29,6 +29,7 @@ function printRefs(pack) {
       title(`- ${changedFile}`);
     }
   }
+  printSelection(pack);
   title("");
   title("Deferred By Policy:");
   for (const deferred of pack.avoid) {
@@ -40,6 +41,24 @@ function printRefs(pack) {
     title(`- ${escalationPath}`);
   }
   printRepoIndexSection(pack);
+}
+
+function printSelection(pack) {
+  const { selection } = pack;
+  if (!selection) {
+    return;
+  }
+  title("");
+  title(`Selection: ${selection.status} (full ${selection.full.used}/${selection.full.budget}, summary ${selection.summary.used}/${selection.summary.budget})`);
+  if (selection.excluded.length > 0) {
+    title("Excluded:");
+    for (const entry of selection.excluded) {
+      title(`- ${entry.id} [${entry.exclusion}; ${entry.reasons.map(({ reason }) => reason).join(", ")}; ~${entry.estimatedTokens} tokens]`);
+    }
+  }
+  for (const warning of selection.warnings) {
+    warn(warning.message);
+  }
 }
 
 function printRepoIndexSection(pack) {
@@ -76,6 +95,7 @@ function printInline(pack) {
     }
     title("");
   }
+  printSelection(pack);
   printRepoIndexSection(pack);
 }
 
@@ -108,9 +128,6 @@ function contextCommand(argv) {
     domains: String(options["--domain"] ?? "").split(",").filter(Boolean),
     modules: String(options["--module"] ?? "").split(",").filter(Boolean)
   });
-  if (pack.knowledge?.error) {
-    warn(`Knowledge Map unavailable, using whole-file routing: ${pack.knowledge.error}`);
-  }
 
   switch (options["--format"] ?? "refs") {
     case "refs":
@@ -124,6 +141,12 @@ function contextCommand(argv) {
       return 0;
     default:
       throw new Error("Unsupported format. Use refs, inline, or json.");
+  }
+
+  // Route mode reports budget state through `selection` (printed above).
+  if (pack.selection) {
+    next(`Use summary files first; escalate to ${pack.escalation.length} raw file(s) only if ambiguity remains.`);
+    return 0;
   }
 
   if (pack.totals.summary > pack.budgets.summaryTokens) {
