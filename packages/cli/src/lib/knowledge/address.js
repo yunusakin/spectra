@@ -39,6 +39,13 @@ function collectRuleSections(projectRoot, onlyId = null) {
   return found;
 }
 
+// Match terms come from the title and prose only: Status, Affected Modules, Evidence and
+// Confidence lines hold paths, commit ids and tool names that would select unrelated rules.
+const RULE_METADATA_LINE = /^(Status|Affected Modules|Evidence|Confidence):/;
+function ruleText(section) {
+  return [section.title, ...section.body.split("\n").filter((line) => !RULE_METADATA_LINE.test(line))].join("\n");
+}
+
 function ruleReference(projectRoot, { filePath, section }) {
   const [status = null] = ruleStatuses(section);
   const affectedModules = ruleAffectedModules(section);
@@ -67,7 +74,7 @@ function enumerateBusinessRules(projectRoot) {
   return collectRuleSections(projectRoot).map((entry) => {
     if (seen.has(entry.section.id)) throw new Error(`Duplicate business rule ID: ${entry.section.id}`);
     seen.add(entry.section.id);
-    return { reference: ruleReference(projectRoot, entry), signature: sha256(entry.section.raw.trimEnd()), terms: termsOf(entry.section.raw) };
+    return { reference: ruleReference(projectRoot, entry), signature: sha256(entry.section.raw.trimEnd()), terms: termsOf(ruleText(entry.section)) };
   });
 }
 

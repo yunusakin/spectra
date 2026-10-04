@@ -22,6 +22,8 @@ const REASON_PRIORITY = {
 const reasonPriority = ({ reason }, kind) => (reason === "repo-index-evidence" && kind === "module" ? 3 : REASON_PRIORITY[reason]);
 const FEATURE_KINDS = new Set(["functional-requirement", "non-functional-requirement", "acceptance-scenario"]);
 const MIN_FEATURE_TERM_OVERLAP = 2;
+const MIN_RULE_TERM_OVERLAP = 2;
+const DIRECT_DOMAIN_SIGNALS = new Set(["explicit-domain", "domain", "keyword"]);
 
 const pathOf = (value) => String(value).trim().replace(/^\.\//, "").replace(/\/+$/, "");
 const overlap = (taskTerms, reference) => (reference.terms ?? []).filter((term) => taskTerms.has(term));
@@ -76,15 +78,27 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
     return String(row ? rowValue(row, "paths") : "").split(",").filter(Boolean).flatMap((value) => recordsByPath.get(pathOf(value)) ?? []);
   };
 
-  for (const id of explicitIds(task, byId)) add(id, "explicit-reference", id);
+  const explicit = explicitIds(task, byId);
+  const hasExplicitReference = explicit.length > 0;
+  for (const id of explicit) add(id, "explicit-reference", id);
 
   for (const domain of route?.domains ?? []) {
     const row = domainRows.find((candidate) => normalize(rowValue(candidate, "domain")) === domain);
     const ruleIds = [rowValue(row ?? {}, "rules"), rowValue(row ?? {}, "unresolved")]
       .filter(Boolean)
       .flatMap((relativePath) => map.bySource[`sdd/memory-bank/${relativePath.replace(/^sdd\/memory-bank\//, "")}`] ?? []);
-    const matching = ruleIds.filter((id) => overlap(taskTerms, byId.get(id)).length > 0);
-    for (const id of matching.length > 0 ? matching : ruleIds) {
+    // A single shared term only counts when no rule in the domain shares two (like features,
+    // which need two); generic words then cannot ride along with a real match.
+    const matched = ruleIds.filter((id) => overlap(taskTerms, byId.get(id)).length > 0);
+    const matching = matched.some((id) => overlap(taskTerms, byId.get(id)).length >= MIN_RULE_TERM_OVERLAP)
+      ? matched.filter((id) => overlap(taskTerms, byId.get(id)).length >= MIN_RULE_TERM_OVERLAP)
+      : matched;
+    // Whole-domain fallback needs a direct domain signal (explicit --domain, the domain named in the
+    // task, or a configured keyword). A domain reached only through a module's business domains
+    // contributes the rules that share a term with the task, never all of them.
+    // A task that already names exact objects does not need a guess at the rest of the domain.
+    const direct = !hasExplicitReference && (route.domainMatches ?? []).some((match) => match.name === domain && DIRECT_DOMAIN_SIGNALS.has(match.matchedBy));
+    for (const id of matching.length > 0 ? matching : direct ? ruleIds : []) {
       if (matching.length > 0) add(id, "business-rule-match", overlap(taskTerms, byId.get(id)).join(","));
       else add(id, "business-domain-match", domain);
     }
