@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { getSddRoot } from "../project-layout.js";
-import { parseRuleSections, ruleAffectedModules, ruleMeaning, ruleStatuses } from "../business/rule-sections.js";
+import { parseRuleSections, ruleAffectedModules, ruleGoverns, ruleMeaning, ruleStatuses } from "../business/rule-sections.js";
 import { readBusinessIndexes, resolveBusinessPath } from "../business/repository.js";
 import { rowValue } from "../business/parser.js";
 import { getFeatureBundle, getFeatureDirs } from "../specs/feature-bundles.js";
@@ -42,6 +42,7 @@ function collectRuleSections(projectRoot, onlyId = null) {
 function ruleReference(projectRoot, { filePath, section }) {
   const [status = null] = ruleStatuses(section);
   const affectedModules = ruleAffectedModules(section);
+  const governs = [...new Set(ruleGoverns(section))];
   return createKnowledgeReference({
     id: section.id,
     kind: "business-rule",
@@ -49,7 +50,7 @@ function ruleReference(projectRoot, { filePath, section }) {
     address: `section:${section.id}`,
     provenance: PROVENANCE,
     status,
-    relationships: affectedModules.length > 0 ? { affectedModules } : {}
+    relationships: { ...(affectedModules.length > 0 ? { affectedModules } : {}), ...(governs.length > 0 ? { governs } : {}) }
   });
 }
 
@@ -184,4 +185,4 @@ function readKnowledgeObject(projectRoot, reference) {
   return object ? YAML.stringify(object, { indent: 2, lineWidth: 0 }).trim() : null;
 }
 
-export { listKnowledgeSourceFiles, readKnowledgeObject, enumerateBusinessRules, enumerateFeatureObjects, resolveBusinessRule, resolveFeatureObject, sha256 };
+export { collectRuleSections, listKnowledgeSourceFiles, readKnowledgeObject, enumerateBusinessRules, enumerateFeatureObjects, resolveBusinessRule, resolveFeatureObject, sha256 };

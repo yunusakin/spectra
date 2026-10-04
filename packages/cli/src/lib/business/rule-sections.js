@@ -38,8 +38,18 @@ function ruleAffectedModules(section) {
   return line ? line[1].split(",").map((name) => name.trim()).filter(Boolean) : [];
 }
 
+// `Governs: <feature-id>#<object-id>, ...`: the requirements/scenarios this rule governs (canonical
+// intent). A rule may carry at most one such line; validation reports more.
+function ruleGovernsLines(section) {
+  return [...section.body.matchAll(/^Governs:\s+(.+?)\s*$/gm)].map((match) => match[1]);
+}
+
+function ruleGoverns(section) {
+  return ruleGovernsLines(section).flatMap((line) => line.split(",").map((target) => target.trim()).filter(Boolean));
+}
+
 // The canonical metadata lines of a rule (see docs/business-context.md).
-const RULE_METADATA_LINE = /^(Status|Affected Modules|Evidence|Confidence):/;
+const RULE_METADATA_LINE = /^(Status|Affected Modules|Governs|Evidence|Confidence):/;
 
 // What the rule says: its title and statement lines, without the ID or the
 // canonical metadata lines. Any other `Word: text` line is still statement.
@@ -47,4 +57,4 @@ function ruleMeaning(section) {
   return [section.title ?? "", ...section.body.split(/\r?\n/).filter((line) => !RULE_METADATA_LINE.test(line.trim()))].join("\n");
 }
 
-export { findRuleSection, parseRuleSections, ruleAffectedModules, ruleMeaning, ruleStatuses };
+export { findRuleSection, parseRuleSections, ruleAffectedModules, ruleGoverns, ruleGovernsLines, ruleMeaning, ruleStatuses };

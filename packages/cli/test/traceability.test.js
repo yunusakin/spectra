@@ -40,7 +40,8 @@ import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import { validateBusinessContext } from "../src/lib/business/validator.js";
 import { loadKnowledgeMap } from "../src/lib/knowledge/map.js";
-import { buildTraceability, traceSubject, traceabilityMetrics } from "../src/lib/traceability/trace.js";
+import { buildTraceability, traceSubject } from "../src/lib/traceability/trace.js";
+import { traceabilityMetrics } from "../src/lib/traceability/metrics.js";
 import { concludeVerification, readVerificationEvidence, recordVerificationEvidence } from "../src/lib/traceability/evidence.js";
 
 const cliRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -259,7 +260,7 @@ test("metrics are small, deterministic and honest about gaps", () => {
   assert.deepEqual(metrics, {
     activeRules: 2,
     rulesWithRequirementLink: 1,
-    requirements: 3,
+    requirements: 6, // alpha's three plus the three of the spectra-core template feature `init` creates
     requirementsWithGoverningRule: 1,
     requirementsWithModule: 1,
     requirementsWithTestTarget: 1,
