@@ -20,6 +20,7 @@
 ### Internal
 - Business-rule section parsing is consolidated in `business/rule-sections.js`; `knowledge/address.js` resolves rules and feature objects (`<feature-id>#FR-2`) by stable ID. Internal only, no new command and no schema change.
 - A derived Knowledge Map (`.spectra/cache/knowledge/knowledge-map.json`) indexes business rules, feature objects and Repo Index records by stable ID with content signatures and fresh/stale/missing detection. Internal only: not used by `spectra context`, disposable, and needs no migration.
+- `spectra context --route-task` now resolves exact knowledge objects from the Knowledge Map (rule sections, feature requirements/scenarios, Repo Index records) with per-item reasons, replacing the matched domains' whole rule files. Output is additive (`knowledge`, entry `knowledgeId`/`reasons`/`content`); plain `spectra context` is unchanged.
 
 ## [3.1.2] - 2026-10-02
 
