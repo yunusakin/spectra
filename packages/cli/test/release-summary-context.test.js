@@ -110,6 +110,31 @@ test("an empty Unreleased section falls back to the latest release", () => {
   assert.ok(text.includes("ANCIENT-3"));
 });
 
+test("Keep-a-Changelog headings: [Unreleased] is current even when listed after an older release", () => {
+  const text = cachedRelease(ship(project("# Changelog\n\n## [1.0.0] - 2026-01-01\n\nOLD-SHIPPED\n\n## [Unreleased]\n\nNEW-PENDING\n")));
+  assert.ok(text.includes("NEW-PENDING"));
+  assert.equal(text.includes("OLD-SHIPPED"), false);
+});
+
+test("bracketed and dated version headings rank by version, not file order", () => {
+  const text = cachedRelease(ship(project("## [1.0.0] - 2026-01-01\n\nV1\n\n## [1.2.0] - 2026-03-01\n\nV12\n\n## [1.1.0] - 2026-02-01\n\nV11\n")));
+  assert.ok(text.includes("V12"));
+  assert.equal(text.includes("V11"), false);
+});
+
+test("a final release outranks its own pre-release", () => {
+  const text = cachedRelease(ship(project("## v1.0.0-rc.1\n\nRC-NOTES\n\n## v1.0.0\n\nFINAL-NOTES\n")));
+  assert.ok(text.includes("FINAL-NOTES"));
+  assert.equal(text.includes("RC-NOTES"), false);
+});
+
+test("a placeholder Unreleased section does not hide the latest release", () => {
+  for (const placeholder of ["- None", "<!-- nothing yet -->", "_No changes yet._"]) {
+    const text = cachedRelease(ship(project(`## Unreleased\n\n${placeholder}\n\n## v1.0.0\n\nREAL-NOTES\n`)));
+    assert.ok(text.includes("REAL-NOTES"), `placeholder ${placeholder}`);
+  }
+});
+
 test("the summary follows edits to RELEASE_SUMMARY.md", () => {
   const root = project(release(CURRENT, 3));
   assert.ok(cachedRelease(ship(root)).includes("irreversible"));
