@@ -43,12 +43,20 @@ function supportedIds(trace, testTarget) {
   return [...ids].sort();
 }
 
-function recordVerificationEvidence(projectRoot, { testTarget, result, command = null }) {
-  if (!RESULTS.has(result)) throw new Error(`Invalid verification result: ${result} (expected passed or failed)`);
+// Signatures of everything a result for `testTarget` would support, as of now. A producer takes this
+// BEFORE it runs the tests, so an edit made while they run leaves the evidence stale.
+function observeSupport(projectRoot, testTarget) {
   const trace = buildTraceability(projectRoot);
+  return Object.fromEntries(supportedIds(trace, testTarget).map((id) => [id, trace.signatures[id] ?? null]));
+}
+
+// `granularity`: "test-target" when the command is exactly the target's own, "aggregate" when it fans
+// out to other targets (it then only supports paths through that aggregate target itself).
+function recordVerificationEvidence(projectRoot, { testTarget, result, command = null, granularity = "test-target", observed = null }) {
+  if (!RESULTS.has(result)) throw new Error(`Invalid verification result: ${result} (expected passed or failed)`);
   if (!(loadKnowledgeMap(projectRoot).map.byKind["test-target"] ?? []).includes(testTarget)) throw new Error(`Unknown test target: ${testTarget}`);
-  const observed = Object.fromEntries(supportedIds(trace, testTarget).map((id) => [id, trace.signatures[id] ?? null]));
-  const records = [...readVerificationEvidence(projectRoot).records.filter((record) => record.testTarget !== testTarget), { testTarget, result, command, observed }]
+  const support = observed ?? observeSupport(projectRoot, testTarget);
+  const records = [...readVerificationEvidence(projectRoot).records.filter((record) => record.testTarget !== testTarget), { testTarget, result, command, granularity, observed: support }]
     .sort((a, b) => (a.testTarget < b.testTarget ? -1 : 1));
   const file = evidenceFile(projectRoot);
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -72,7 +80,7 @@ function staleForPath(record, trace, entry) {
 
 function concludeVerification(trace, evidence, id) {
   const subject = traceSubject(trace, id);
-  const base = { id, traceability: { complete: subject.complete, missing: subject.missing } };
+  const base = { id, traceability: { complete: subject.complete, missing: subject.missing }, modulesWithoutTestTarget: subject.modulesWithoutTestTarget };
   if (!subject.complete) return { ...base, verification: "unverified", reason: `incomplete trace path: missing ${subject.missing.join(", ")}`, paths: [] };
 
   const records = evidence?.records ?? [];
@@ -89,4 +97,4 @@ function concludeVerification(trace, evidence, id) {
   return { ...base, verification: "unverified", reason: "no evidence recorded for the path's test targets", paths };
 }
 
-export { concludeVerification, readVerificationEvidence, recordVerificationEvidence, staleBecause };
+export { concludeVerification, observeSupport, readVerificationEvidence, recordVerificationEvidence, staleBecause };

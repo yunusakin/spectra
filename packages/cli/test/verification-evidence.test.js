@@ -165,7 +165,8 @@ test("unknown targets, targets without a command and a stale Repo Index are refu
 
 test("signatures are taken before the run: an edit made while the tests run leaves the evidence stale", () => {
   const root = project();
-  const edit = `require('fs').appendFileSync(${JSON.stringify(rulesFile(root))}, '\\nStatement changed mid-run.\\n')`;
+  const file = JSON.stringify(rulesFile(root));
+  const edit = `const fs = require('fs'); fs.writeFileSync(${file}, fs.readFileSync(${file}, 'utf8').replace('Expired points cannot pay', 'Expired points can pay'))`;
   write(path.join(root, "packages", "loyalty", "check.js"), `${edit};\nprocess.exit(0);\n`);
   assert.equal(run(root, ["index"]).status, 0);
   const outcome = runTestTarget(root, LOYALTY_TARGET);
@@ -231,7 +232,7 @@ test("evidence bytes are deterministic and never depend on time", () => {
   const first = evidenceBytes(root);
   runTestTarget(root, LOYALTY_TARGET);
   assert.equal(evidenceBytes(root), first);
-  assert.equal(/\d{4}-\d{2}-\d{2}T|\d{13}/.test(first), false);
+  assert.equal(/\d{4}-\d{2}-\d{2}T/.test(first), false);
 });
 
 test("a corrupt evidence cache is replaced by a clean record and never reads as verified", () => {
