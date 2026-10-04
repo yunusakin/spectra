@@ -8,7 +8,7 @@ import { concludeVerification, readVerificationEvidence } from "../lib/traceabil
 import { runTestTarget } from "../lib/traceability/run.js";
 
 // Runs one test target, records the evidence and says what it now supports. Exit status follows the result.
-function verifyTestTarget(cwd, testTarget) {
+async function verifyTestTarget(cwd, testTarget) {
   const projectRoot = findSpectraRoot(cwd);
   if (!projectRoot) {
     fail(`Could not find a Spectra runtime from ${cwd}`);
@@ -16,7 +16,7 @@ function verifyTestTarget(cwd, testTarget) {
   }
   let outcome;
   try {
-    outcome = runTestTarget(projectRoot, testTarget);
+    outcome = await runTestTarget(projectRoot, testTarget);
   } catch (error) {
     fail(error.message);
     return 1;
@@ -44,7 +44,7 @@ function verifyTestTarget(cwd, testTarget) {
   return 0;
 }
 
-function verifyCommand(argv) {
+async function verifyCommand(argv) {
   const { options } = parseOptions(argv, {
     booleanFlags: ["--help"],
     stringFlags: ["--cwd", "--scope", "--item", "--test-target"]
@@ -57,6 +57,10 @@ function verifyCommand(argv) {
   }
 
   if (options["--test-target"]) {
+    if (options["--scope"] || options["--item"]) {
+      fail("--test-target cannot be combined with --scope or --item: it runs one test target and skips the other verify stages.");
+      return 1;
+    }
     return verifyTestTarget(options["--cwd"] ?? process.cwd(), options["--test-target"]);
   }
 

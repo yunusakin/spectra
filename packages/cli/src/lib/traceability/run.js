@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { checkIndexFreshness, readIndex } from "../index/cache.js";
 import { observeSupport, recordVerificationEvidence } from "./evidence.js";
 
@@ -13,10 +13,36 @@ import { observeSupport, recordVerificationEvidence } from "./evidence.js";
 // records nothing, so a previous valid record is never replaced by a guess.
 
 const DEFAULT_TIMEOUT_MS = 30 * 60 * 1000;
-const AGGREGATE_COMMAND = /(^|\s)(--workspaces|-ws)(\s|$)|--workspace[=\s]/;
+// Fan-out forms of common monorepo tools (a heuristic, not a guarantee): such a command runs other
+// targets, so its result is labelled aggregate. Anything else is taken as the target's own command.
+const AGGREGATE_COMMAND = /(^|\s)(--workspaces|-ws)(\s|$)|--workspace[=\s]|\bpnpm\s+(-r|--recursive)\b|\b(lerna|turbo)\s+run\b|\bnx\s+run-many\b|\byarn\s+workspaces\s+foreach\b/;
+const OUTPUT_TAIL = 4000;
+
+// Runs the command in its own process group so a timeout stops the whole tree (grandchildren
+// included), not just the shell.
+function execute(command, { cwd, env, timeoutMs }) {
+  return new Promise((resolve) => {
+    const child = spawn(command, { cwd, env, shell: true, detached: true, stdio: ["ignore", "pipe", "pipe"] });
+    let output = "";
+    let timedOut = false;
+    const collect = (chunk) => { output = (output + chunk).slice(-OUTPUT_TAIL * 4); };
+    child.stdout.setEncoding("utf8").on("data", collect);
+    child.stderr.setEncoding("utf8").on("data", collect);
+    const timer = setTimeout(() => {
+      timedOut = true;
+      try {
+        process.kill(-child.pid, "SIGKILL");
+      } catch {
+        child.kill("SIGKILL");
+      }
+    }, timeoutMs);
+    child.on("error", (error) => { clearTimeout(timer); resolve({ error, output }); });
+    child.on("close", (status, signal) => { clearTimeout(timer); resolve({ status, signal, timedOut, output }); });
+  });
+}
 
 // The Repo Index signature covers absolute paths, so freshness is judged on the real path.
-function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOUT_MS, env = process.env } = {}) {
+async function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOUT_MS, env = process.env } = {}) {
   const projectRoot = fs.realpathSync(givenRoot);
   let index = null;
   try {
@@ -32,9 +58,9 @@ function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOUT_MS, 
   if (freshness.status !== "fresh") throw new Error(`The Repo Index is ${freshness.status}; run \`spectra index\` before running a test target.`);
 
   const observed = observeSupport(projectRoot, testTarget);
-  const execution = spawnSync(command, { cwd: path.join(projectRoot, record.path), env, shell: true, encoding: "utf8", timeout: timeoutMs, maxBuffer: 64 * 1024 * 1024 });
-  const output = `${execution.stdout ?? ""}${execution.stderr ?? ""}`.slice(-4000);
-  const incomplete = execution.error?.code === "ETIMEDOUT" ? `timed out after ${timeoutMs} ms`
+  const execution = await execute(command, { cwd: path.join(projectRoot, record.path), env, timeoutMs });
+  const output = execution.output.slice(-OUTPUT_TAIL);
+  const incomplete = execution.timedOut ? `timed out after ${timeoutMs} ms`
     : execution.error ? `did not complete: ${execution.error.message}`
       : execution.signal ? `did not complete: terminated by ${execution.signal}`
         : execution.status === 126 || execution.status === 127 ? `did not complete: command not found or not executable (exit ${execution.status})`

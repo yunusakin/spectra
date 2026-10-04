@@ -89,9 +89,9 @@ const setExit = (root, code) => write(path.join(root, "packages", "loyalty", "ex
 const conclude = (root, id = "RULE-LOY-001") => concludeVerification(buildTraceability(root), readVerificationEvidence(root), id);
 const evidenceBytes = (root) => fs.readFileSync(readVerificationEvidence(root).file, "utf8");
 
-test("a completed passing run records passed evidence and the rule becomes verified", () => {
+test("a completed passing run records passed evidence and the rule becomes verified", async () => {
   const root = project();
-  const outcome = runTestTarget(root, LOYALTY_TARGET);
+  const outcome = await runTestTarget(root, LOYALTY_TARGET);
   assert.deepEqual([outcome.recorded, outcome.result, outcome.exitStatus], [true, "passed", 0]);
   const [record] = readVerificationEvidence(root).records;
   assert.deepEqual([record.testTarget, record.result, record.command, record.granularity], [LOYALTY_TARGET, "passed", "node check.js", "test-target"]);
@@ -100,81 +100,81 @@ test("a completed passing run records passed evidence and the rule becomes verif
   assert.equal(conclude(root, "alpha#FR-1").verification, "verified");
 });
 
-test("a completed failing run is `failed` evidence, not `unverified`", () => {
+test("a completed failing run is `failed` evidence, not `unverified`", async () => {
   const root = project();
   setExit(root, 3);
-  const outcome = runTestTarget(root, LOYALTY_TARGET);
+  const outcome = await runTestTarget(root, LOYALTY_TARGET);
   assert.deepEqual([outcome.recorded, outcome.result, outcome.exitStatus], [true, "failed", 3]);
   assert.equal(conclude(root).verification, "failed");
 });
 
-test("pass replaces fail and fail replaces pass for the same target", () => {
+test("pass replaces fail and fail replaces pass for the same target", async () => {
   const root = project();
   setExit(root, 1);
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   assert.equal(conclude(root).verification, "failed");
   setExit(root, 0);
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   assert.equal(readVerificationEvidence(root).records.length, 1);
   assert.equal(conclude(root).verification, "verified");
   setExit(root, 2);
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   assert.equal(readVerificationEvidence(root).records.length, 1);
   assert.equal(conclude(root).verification, "failed");
 });
 
-test("an execution that does not complete records nothing and keeps the previous valid record", () => {
+test("an execution that does not complete records nothing and keeps the previous valid record", async () => {
   const root = project();
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   const before = evidenceBytes(root);
   const broken = (command) => write(path.join(root, "packages", "loyalty", "package.json"), JSON.stringify({ name: "loyalty-api", scripts: { test: command } }));
 
   broken("definitely-not-a-command-xyz");
   assert.equal(run(root, ["index"]).status, 0);
-  const missing = runTestTarget(root, LOYALTY_TARGET);
+  const missing = await runTestTarget(root, LOYALTY_TARGET);
   assert.equal(missing.recorded, false);
   assert.match(missing.reason, /not found|unavailable|did not complete/i);
   assert.equal(evidenceBytes(root), before);
 
   broken("node -e \"setTimeout(() => {}, 60000)\"");
   assert.equal(run(root, ["index"]).status, 0);
-  const timedOut = runTestTarget(root, LOYALTY_TARGET, { timeoutMs: 300 });
+  const timedOut = await runTestTarget(root, LOYALTY_TARGET, { timeoutMs: 300 });
   assert.equal(timedOut.recorded, false);
   assert.match(timedOut.reason, /timed out|did not complete/i);
   assert.equal(evidenceBytes(root), before);
 });
 
-test("a never-executed target has no evidence: indexing, listing and tracing record nothing", () => {
+test("a never-executed target has no evidence: indexing, listing and tracing record nothing", async () => {
   const root = project();
   buildTraceability(root);
   assert.equal(readVerificationEvidence(root).status, "missing");
   assert.equal(conclude(root).verification, "unverified");
 });
 
-test("unknown targets, targets without a command and a stale Repo Index are refused before running", () => {
+test("unknown targets, targets without a command and a stale Repo Index are refused before running", async () => {
   const root = project();
-  assert.throws(() => runTestTarget(root, "node:test-target:nope"), /unknown test target/i);
+  await assert.rejects(() => runTestTarget(root, "node:test-target:nope"), /unknown test target/i);
   fs.cpSync(path.join(cliRoot, "test", "fixtures", "dotnet-solution"), path.join(root, "services"), { recursive: true });
   assert.equal(run(root, ["index"]).status, 0);
   const dotnet = JSON.parse(fs.readFileSync(path.join(root, ".spectra", "cache", "index", "repo-index.json"), "utf8")).records.find((record) => record.kind === "test-target" && record.id.startsWith("dotnet:"));
-  assert.throws(() => runTestTarget(root, dotnet.id), /no recorded command/i);
+  await assert.rejects(() => runTestTarget(root, dotnet.id), /no recorded command/i);
   write(path.join(root, "packages", "loyalty", "package.json"), JSON.stringify({ name: "loyalty-api", scripts: { test: "node check.js --changed" } }));
-  assert.throws(() => runTestTarget(root, LOYALTY_TARGET), /spectra index/);
+  await assert.rejects(() => runTestTarget(root, LOYALTY_TARGET), /spectra index/);
   assert.equal(readVerificationEvidence(root).status, "missing");
 });
 
-test("signatures are taken before the run: an edit made while the tests run leaves the evidence stale", () => {
+test("signatures are taken before the run: an edit made while the tests run leaves the evidence stale", async () => {
   const root = project();
   const file = JSON.stringify(rulesFile(root));
   const edit = `const fs = require('fs'); fs.writeFileSync(${file}, fs.readFileSync(${file}, 'utf8').replace('Expired points cannot pay', 'Expired points can pay'))`;
   write(path.join(root, "packages", "loyalty", "check.js"), `${edit};\nprocess.exit(0);\n`);
   assert.equal(run(root, ["index"]).status, 0);
-  const outcome = runTestTarget(root, LOYALTY_TARGET);
+  const outcome = await runTestTarget(root, LOYALTY_TARGET);
   assert.equal(outcome.result, "passed");
   assert.equal(conclude(root).verification, "stale");
 });
 
-test("an edit to the governed rule, requirement or test target stales real evidence; an unrelated edit does not", () => {
+test("an edit to the governed rule, requirement or test target stales real evidence; an unrelated edit does not", async () => {
   const edits = {
     rule: (root) => { fs.writeFileSync(rulesFile(root), fs.readFileSync(rulesFile(root), "utf8").replace("Expired points cannot pay", "Expired points can pay")); touch(rulesFile(root)); },
     requirement: (root) => { const file = path.join(sdd(root), "features", "alpha", "feature.spec.yaml"); fs.writeFileSync(file, fs.readFileSync(file, "utf8").replace("redeem loyalty credits", "redeem loyalty credits at the till")); touch(file); },
@@ -183,81 +183,81 @@ test("an edit to the governed rule, requirement or test target stales real evide
   };
   for (const [name, edit] of Object.entries(edits)) {
     const root = project();
-    runTestTarget(root, LOYALTY_TARGET);
+    await runTestTarget(root, LOYALTY_TARGET);
     edit(root);
     assert.equal(conclude(root).verification, name === "unrelated" ? "verified" : "stale", name);
   }
 });
 
-test("a passing target does not verify a rule whose path goes through another target", () => {
+test("a passing target does not verify a rule whose path goes through another target", async () => {
   const root = project();
   fs.writeFileSync(rulesFile(root), fs.readFileSync(rulesFile(root), "utf8").replace("Affected Modules: loyalty-api", "Affected Modules: billing"));
   touch(rulesFile(root));
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   assert.equal(conclude(root).verification, "unverified");
-  runTestTarget(root, BILLING_TARGET);
+  await runTestTarget(root, BILLING_TARGET);
   assert.equal(conclude(root).verification, "verified");
 });
 
-test("multiple paths: one fresh pass suffices, any fresh failure dominates, and modules without a test target stay visible", () => {
+test("multiple paths: one fresh pass suffices, any fresh failure dominates, and modules without a test target stay visible", async () => {
   const root = project({ governsBoth: true, billingTests: false });
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   const verified = conclude(root);
   assert.equal(verified.verification, "verified");
   assert.deepEqual(verified.modulesWithoutTestTarget, ["node:module:packages/billing"], "the untested module is reported, not hidden");
 
   const both = project({ governsBoth: true });
-  runTestTarget(both, LOYALTY_TARGET);
+  await runTestTarget(both, LOYALTY_TARGET);
   setExit(both, 1);
-  runTestTarget(both, BILLING_TARGET);
+  await runTestTarget(both, BILLING_TARGET);
   assert.equal(conclude(both).verification, "verified", "billing passed, loyalty passed earlier");
-  runTestTarget(both, LOYALTY_TARGET);
+  await runTestTarget(both, LOYALTY_TARGET);
   assert.equal(conclude(both).verification, "failed", "a fresh failure on any path dominates");
 });
 
-test("a root target that fans out to workspaces is recorded as aggregate evidence, not exact", () => {
+test("a root target that fans out to workspaces is recorded as aggregate evidence, not exact", async () => {
   const root = project();
   write(path.join(root, "package.json"), JSON.stringify({ name: "shop", private: true, workspaces: ["packages/*"], scripts: { test: "npm test --workspaces --if-present" } }));
   assert.equal(run(root, ["index"]).status, 0);
-  const outcome = runTestTarget(root, "node:test-target:.");
+  const outcome = await runTestTarget(root, "node:test-target:.");
   assert.equal(outcome.result, "passed");
   assert.equal(readVerificationEvidence(root).records.find((record) => record.testTarget === "node:test-target:.").granularity, "aggregate");
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   assert.equal(readVerificationEvidence(root).records.find((record) => record.testTarget === LOYALTY_TARGET).granularity, "test-target");
 });
 
-test("evidence bytes are deterministic and never depend on time", () => {
+test("evidence bytes are deterministic and never depend on time", async () => {
   const root = project();
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   const first = evidenceBytes(root);
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   assert.equal(evidenceBytes(root), first);
   assert.equal(/\d{4}-\d{2}-\d{2}T/.test(first), false);
 });
 
-test("a corrupt evidence cache is replaced by a clean record and never reads as verified", () => {
+test("a corrupt evidence cache is replaced by a clean record and never reads as verified", async () => {
   const root = project();
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   fs.writeFileSync(readVerificationEvidence(root).file, "{ broken");
   assert.equal(conclude(root).verification, "unverified");
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   assert.equal(readVerificationEvidence(root).status, "ok");
   assert.equal(conclude(root).verification, "verified");
 });
 
-test("metrics separate traceability from executable verification coverage", () => {
+test("metrics separate traceability from executable verification coverage", async () => {
   const root = project();
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   const metrics = traceabilityMetrics(buildTraceability(root), readVerificationEvidence(root));
   assert.deepEqual(metrics.evidence, { freshPassed: 1, freshFailed: 0, stale: 0 });
   assert.equal(metrics.rulesWithCompletePath, 1);
   assert.deepEqual(metrics.verification, { verified: 1, failed: 0, stale: 0, unverified: 1 });
   setExit(root, 1);
-  runTestTarget(root, LOYALTY_TARGET);
+  await runTestTarget(root, LOYALTY_TARGET);
   assert.deepEqual(traceabilityMetrics(buildTraceability(root), readVerificationEvidence(root)).evidence, { freshPassed: 0, freshFailed: 1, stale: 0 });
 });
 
-test("`spectra verify --test-target` runs, records and reports; its exit code follows the result", () => {
+test("`spectra verify --test-target` runs, records and reports; its exit code follows the result", async () => {
   const root = project();
   const passed = run(root, ["verify", "--test-target", LOYALTY_TARGET]);
   assert.equal(passed.status, 0, passed.stdout + passed.stderr);
@@ -273,23 +273,23 @@ test("`spectra verify --test-target` runs, records and reports; its exit code fo
   assert.match(`${unknown.stdout}${unknown.stderr}`, /unknown test target/i);
 });
 
-test("without the flag `spectra verify` does not execute tests or touch evidence", () => {
+test("without the flag `spectra verify` does not execute tests or touch evidence", async () => {
   const root = project();
   run(root, ["verify"]);
   assert.equal(readVerificationEvidence(root).status, "missing");
 });
 
-test("a project with no Governs and no evidence stays valid and unverified", () => {
+test("a project with no Governs and no evidence stays valid and unverified", async () => {
   const root = project();
   fs.writeFileSync(rulesFile(root), fs.readFileSync(rulesFile(root), "utf8").replace("Governs: alpha#FR-1\n", ""));
   touch(rulesFile(root));
-  assert.equal(runTestTarget(root, LOYALTY_TARGET).recorded, true);
+  assert.equal((await runTestTarget(root, LOYALTY_TARGET)).recorded, true);
   assert.equal(conclude(root).verification, "unverified");
 });
 
 // ---- review findings on the producer ------------------------------------------------------------
 
-test("--test-target cannot be combined with --scope or --item and runs nothing then", () => {
+test("--test-target cannot be combined with --scope or --item and runs nothing then", async () => {
   const root = project();
   for (const extra of [["--scope", "app"], ["--item", "ITEM-1"]]) {
     const result = run(root, ["verify", "--test-target", LOYALTY_TARGET, ...extra]);
@@ -299,33 +299,33 @@ test("--test-target cannot be combined with --scope or --item and runs nothing t
   assert.equal(readVerificationEvidence(root).status, "missing");
 });
 
-test("fan-out commands of common monorepo tools are recorded as aggregate, a plain command as exact", () => {
+test("fan-out commands of common monorepo tools are recorded as aggregate, a plain command as exact", async () => {
   const root = project();
-  const granularityFor = (command) => {
+  const granularityFor = async (command) => {
     write(path.join(root, "package.json"), JSON.stringify({ name: "shop", private: true, workspaces: ["packages/*"], scripts: { test: command } }));
     assert.equal(run(root, ["index"]).status, 0);
-    assert.equal(runTestTarget(root, "node:test-target:.").recorded, true, command);
+    assert.equal((await runTestTarget(root, "node:test-target:.")).recorded, true, command);
     return readVerificationEvidence(root).records.find((record) => record.testTarget === "node:test-target:.").granularity;
   };
   for (const command of ["echo pnpm -r test", "echo pnpm --recursive test", "echo lerna run test", "echo turbo run test", "echo nx run-many -t test", "echo yarn workspaces foreach run test", "echo npm run test --workspaces", "echo npm test -ws"]) {
-    assert.equal(granularityFor(command), "aggregate", command);
+    assert.equal(await granularityFor(command), "aggregate", command);
   }
-  assert.equal(granularityFor("node -e \"process.exit(0)\""), "test-target");
+  assert.equal(await granularityFor("node -e \"process.exit(0)\""), "test-target");
 });
 
-test("a timeout stops the whole process group, grandchildren included", () => {
+test("a timeout stops the whole process group, grandchildren included", async () => {
   const root = project();
   const marker = path.join(root, "grandchild-ran.txt");
   write(path.join(root, "packages", "loyalty", "child.js"), `setTimeout(() => require('fs').writeFileSync(${JSON.stringify(marker)}, 'x'), 1200);\n`);
   write(path.join(root, "packages", "loyalty", "check.js"), "require('child_process').spawn(process.execPath, [require('path').join(__dirname, 'child.js')], { stdio: 'ignore' });\nsetTimeout(() => {}, 60000);\n");
-  const outcome = runTestTarget(root, LOYALTY_TARGET, { timeoutMs: 400 });
+  const outcome = await runTestTarget(root, LOYALTY_TARGET, { timeoutMs: 400 });
   assert.equal(outcome.recorded, false);
   assert.match(outcome.reason, /timed out/i);
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 2000);
   assert.equal(fs.existsSync(marker), false, "the grandchild outlived the timeout");
 });
 
-test("recording takes a lock: a held lock blocks a second writer, a stale lock is taken over, the lock is always released", () => {
+test("recording takes a lock: a held lock blocks a second writer, a stale lock is taken over, the lock is always released", async () => {
   const root = project();
   const file = readVerificationEvidence(root).file;
   fs.mkdirSync(path.dirname(file), { recursive: true });

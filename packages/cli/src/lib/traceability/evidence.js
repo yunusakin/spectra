@@ -52,17 +52,47 @@ function observeSupport(projectRoot, testTarget) {
 
 // `granularity`: "test-target" when the command is exactly the target's own, "aggregate" when it fans
 // out to other targets (it then only supports paths through that aggregate target itself).
-function recordVerificationEvidence(projectRoot, { testTarget, result, command = null, granularity = "test-target", observed = null }) {
+// One writer at a time: recording is read-modify-write over a single file, so two runs finishing
+// together must not drop each other's record. A lock older than `staleMs` is a crashed run's.
+function withEvidenceLock(file, work, { timeoutMs = 10_000, staleMs = 60_000 } = {}) {
+  const lock = `${file}.lock`;
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    try {
+      fs.closeSync(fs.openSync(lock, "wx"));
+      break;
+    } catch (error) {
+      if (error.code !== "EEXIST") throw error;
+      const age = Date.now() - (fs.statSync(lock, { throwIfNoEntry: false })?.mtimeMs ?? Date.now());
+      if (age > staleMs) {
+        fs.rmSync(lock, { force: true });
+        continue;
+      }
+      if (Date.now() > deadline) throw new Error("The verification evidence cache is locked by another run; try again.");
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 50);
+    }
+  }
+  try {
+    return work();
+  } finally {
+    fs.rmSync(lock, { force: true });
+  }
+}
+
+function recordVerificationEvidence(projectRoot, { testTarget, result, command = null, granularity = "test-target", observed = null, lockTimeoutMs = 10_000 }) {
   if (!RESULTS.has(result)) throw new Error(`Invalid verification result: ${result} (expected passed or failed)`);
   if (!(loadKnowledgeMap(projectRoot).map.byKind["test-target"] ?? []).includes(testTarget)) throw new Error(`Unknown test target: ${testTarget}`);
   const support = observed ?? observeSupport(projectRoot, testTarget);
-  const records = [...readVerificationEvidence(projectRoot).records.filter((record) => record.testTarget !== testTarget), { testTarget, result, command, granularity, observed: support }]
-    .sort((a, b) => (a.testTarget < b.testTarget ? -1 : 1));
   const file = evidenceFile(projectRoot);
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  const temporary = `${file}.${process.pid}.tmp`;
-  fs.writeFileSync(temporary, `${JSON.stringify(sortKeysDeep({ contractVersion: EVIDENCE_CONTRACT_VERSION, records }), null, 2)}\n`, "utf8");
-  fs.renameSync(temporary, file);
+  const records = withEvidenceLock(file, () => {
+    const next = [...readVerificationEvidence(projectRoot).records.filter((record) => record.testTarget !== testTarget), { testTarget, result, command, granularity, observed: support }]
+      .sort((a, b) => (a.testTarget < b.testTarget ? -1 : 1));
+    const temporary = `${file}.${process.pid}.tmp`;
+    fs.writeFileSync(temporary, `${JSON.stringify(sortKeysDeep({ contractVersion: EVIDENCE_CONTRACT_VERSION, records: next }), null, 2)}\n`, "utf8");
+    fs.renameSync(temporary, file);
+    return next;
+  }, { timeoutMs: lockTimeoutMs });
   return { file, record: records.find((record) => record.testTarget === testTarget) };
 }
 
