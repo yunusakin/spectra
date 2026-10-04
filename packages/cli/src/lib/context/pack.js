@@ -6,7 +6,7 @@ import { getChangedFiles as collectChangedFiles } from "../git-diff.js";
 import { buildRoute } from "../business-context.js";
 import { ENTRY_DEFS } from "./sources.js";
 import { resolveKnowledgeEntries } from "./knowledge.js";
-import { selectContext } from "./selection.js";
+import { poolOf, selectContext } from "./selection.js";
 import { GOAL_POLICIES, ROLE_POLICIES, normalizeGoal, normalizeRole, resolveTask } from "./policies.js";
 import { getCacheDir, getContextRoot } from "./roots.js";
 import { ensureContextSummaries } from "./summaries.js";
@@ -248,6 +248,7 @@ function buildContextPack({
     }
     const existingPaths = new Set(entries.map((entry) => entry.path));
     const supersededFiles = new Set();
+    const routingIndexes = [];
     for (const entry of route.entries) {
       if (existingPaths.has(entry.path)) continue;
       const absolutePath = path.join(route.repoRoot, entry.path);
@@ -256,7 +257,7 @@ function buildContextPack({
         supersededFiles.add(entry.path);
         continue;
       }
-      entries.push({
+      const routed = {
         ...entry,
         absolutePath,
         exists: fs.existsSync(absolutePath),
@@ -264,12 +265,20 @@ function buildContextPack({
         changedRefs: [],
         estimatedTokens: estimateTokensFromFile(absolutePath),
         source: "route"
-      });
+      };
+      // The routing policy and fallback whole files are required; the module/domain
+      // index files only explain routing, so they are the lowest optional tier.
+      if (entry.reason === "module index" || entry.reason === "domain index") {
+        routingIndexes.push(routed);
+      } else {
+        entries.push(routed);
+      }
       existingPaths.add(entry.path);
     }
     const selected = selectContext({
       baseline: entries,
       resolved: resolved.entries,
+      optionalBaseline: routingIndexes,
       budgets: rolePolicy.budgets,
       superseded: [...supersededFiles].map((entryPath) => ({ path: entryPath, estimatedTokens: estimateTokensFromFile(path.join(route.repoRoot, entryPath)) })),
       fallbackError: resolved.error
@@ -278,7 +287,14 @@ function buildContextPack({
     selection = selected.selection;
     avoid = [...new Set([...avoid, ...route.deferred, ...supersededFiles])].filter((candidate) => !existingPaths.has(candidate));
     // Routing decisions only: `entries` / `selection` are the final selected context.
-    route = { ...route, entries: route.entries.map((entry) => ({ ...entry, selection: supersededFiles.has(entry.path) ? "superseded-by-exact-object" : "included" })) };
+    const budgetExcluded = new Set(selection.excluded.map((entry) => entry.id));
+    route = {
+      ...route,
+      entries: route.entries.map((entry) => ({
+        ...entry,
+        selection: supersededFiles.has(entry.path) ? "superseded-by-exact-object" : budgetExcluded.has(entry.path) ? "excluded-by-budget" : "included"
+      }))
+    };
     knowledge = { map: resolved.mapStatus, resolved: resolved.entries.length, ...(resolved.error ? { error: resolved.error } : {}) };
   }
 
@@ -286,7 +302,7 @@ function buildContextPack({
     (accumulator, entry) => {
       accumulator.estimatedTokens += entry.estimatedTokens;
       // Resolved objects are markdown-sized content: they count toward `full`.
-      accumulator[entry.mode === "object" ? "full" : entry.mode] += entry.estimatedTokens;
+      accumulator[poolOf(entry)] += entry.estimatedTokens;
       return accumulator;
     },
     { estimatedTokens: 0, summary: 0, full: 0 }

@@ -144,21 +144,18 @@ function contextCommand(argv) {
   }
 
   // Route mode reports budget state through `selection` (printed above).
-  if (pack.selection) {
-    next(`Use summary files first; escalate to ${pack.escalation.length} raw file(s) only if ambiguity remains.`);
-    return 0;
-  }
+  if (!pack.selection) {
+    if (pack.totals.summary > pack.budgets.summaryTokens) {
+      warn(`Summary budget exceeded: ${pack.totals.summary} > ${pack.budgets.summaryTokens}`);
+    } else {
+      ok(`Summary budget respected (${pack.totals.summary}/${pack.budgets.summaryTokens})`);
+    }
 
-  if (pack.totals.summary > pack.budgets.summaryTokens) {
-    warn(`Summary budget exceeded: ${pack.totals.summary} > ${pack.budgets.summaryTokens}`);
-  } else {
-    ok(`Summary budget respected (${pack.totals.summary}/${pack.budgets.summaryTokens})`);
-  }
-
-  if (pack.totals.full > pack.budgets.markdownTokens) {
-    warn(`Markdown budget exceeded: ${pack.totals.full} > ${pack.budgets.markdownTokens}`);
-  } else {
-    ok(`Markdown budget respected (${pack.totals.full}/${pack.budgets.markdownTokens})`);
+    if (pack.totals.full > pack.budgets.markdownTokens) {
+      warn(`Markdown budget exceeded: ${pack.totals.full} > ${pack.budgets.markdownTokens}`);
+    } else {
+      ok(`Markdown budget respected (${pack.totals.full}/${pack.budgets.markdownTokens})`);
+    }
   }
 
   next(`Use summary files first; escalate to ${pack.escalation.length} raw file(s) only if ambiguity remains.`);

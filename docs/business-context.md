@@ -33,6 +33,8 @@ spectra context --role implementer --goal implement --route-task "Change custome
 
 `spectra route` selects matching domains and modules, includes only their mapped files, and lists unrelated domain files as deferred. `spectra context` composes that route with the existing role and goal context pack, including token estimates for the routed files.
 
+With `--route-task`, matched business rules, feature requirements/scenarios and Repo Index records are resolved as exact objects (one rule section, one YAML object, one compact record) instead of whole files, and `selection` in the JSON output explains the budget decision. Baseline context, explicit references (for example `RULE-X-001` or `<feature>#AC-1`) and the requirement an explicitly named scenario covers are required and never dropped; optional objects and the module/domain index files are kept in deterministic priority order while they fit the role's `markdownTokens` budget and are otherwise listed under `selection.excluded`. `selection.status` is `within-budget`, `budget-exhausted` (optional context was dropped) or `mandatory-overflow` (required context alone exceeds the budget; nothing is truncated). Whole files replaced by exact objects are listed under `selection.superseded`, and `repoIndex.modules` is omitted in this mode. Plain `spectra context` is unchanged.
+
 The business index supports both the legacy format and the keyword-aware format:
 
 ```markdown

@@ -33,9 +33,10 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 
-const cliRoot = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+const cliRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const cliPath = path.join(cliRoot, "bin", "spectra.js");
 
 function run(cwd, args) {
@@ -116,15 +117,17 @@ function resolve(root, task, extra = []) {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const pack = JSON.parse(result.stdout);
   const resolved = pack.entries.filter((entry) => entry.source === "resolved");
+  const routingIndexes = pack.entries.filter((entry) => entry.source === "route" && /index$/.test(entry.reason) && entry.reason !== "routing policy");
   const tokens = (list) => list.reduce((sum, entry) => sum + entry.estimatedTokens, 0);
   return {
     pack,
     resolved,
     selection: pack.selection,
     ids: resolved.map((entry) => entry.knowledgeId),
-    excludedIds: pack.selection.excluded.map((entry) => entry.id),
-    // everything in the markdown pool that is not an included resolved object
-    baselineFull: pack.totals.full - tokens(resolved)
+    // optional exact objects excluded for budget (routing index files are reported separately)
+    excludedIds: pack.selection.excluded.filter((entry) => entry.kind !== "routing-index").map((entry) => entry.id),
+    // the mandatory markdown pool: neither included resolved objects nor optional routing indexes
+    baselineFull: pack.totals.full - tokens(resolved) - tokens(routingIndexes)
   };
 }
 
@@ -281,7 +284,7 @@ test("domain fallback keeps rules in id order, drops what does not fit and prese
   const fits = Math.floor(room / each);
   const rules = probe.ids.filter((id) => id.startsWith("RULE-"));
   assert.deepEqual(rules, ["RULE-LOY-001", "RULE-LOY-002", "RULE-LOY-003"].slice(0, fits));
-  const excluded = probe.selection.excluded;
+  const excluded = probe.selection.excluded.filter((entry) => entry.kind !== "routing-index");
   assert.deepEqual(excluded.map((entry) => entry.id), ["RULE-LOY-001", "RULE-LOY-002", "RULE-LOY-003"].slice(fits));
   assert.ok(excluded.every((entry) => entry.reasons[0].reason === "business-domain-match"));
   if (fits < 3) assert.equal(excluded.at(-1).status, "unresolved");
@@ -302,12 +305,30 @@ test("the changed file's owning module survives before its secondary test-target
   const room = probe.pack.budgets.markdownTokens - probe.baselineFull;
   const padding = (room - mod - Math.floor(testTarget / 2)) * 4;
   assert.ok(padding > 0);
-  const modules = path.join(sdd(root), "memory-bank", "tech", "modules.md");
-  fs.appendFileSync(modules, `\n${"x".repeat(padding)}\n`);
+  // minimal.md is the (required) routing policy; padding it shrinks the room deterministically.
+  fs.appendFileSync(path.join(sdd(root), "system", "runtime", "minimal.md"), `\n${"x".repeat(padding)}\n`);
   const { ids, excludedIds, selection } = resolve(root, "Check the change", args);
   assert.deepEqual(ids, ["node:module:packages/billing"]);
   assert.deepEqual(excludedIds, ["node:test-target:packages/billing"]);
   assert.equal(selection.status, "budget-exhausted");
+});
+
+// ---- Routing indexes are optional, the routing policy is not ----------------------------------------
+
+test("module/domain index files are the lowest optional tier; the routing policy stays required", () => {
+  const root = project();
+  const probe = resolve(root, "Explain RULE-LOY-001", TIGHT);
+  const room = probe.pack.budgets.markdownTokens - probe.baselineFull;
+  tuneRule(root, room - 20, "Explain RULE-LOY-001", TIGHT);
+  const { pack, selection } = resolve(root, "Explain RULE-LOY-001", TIGHT);
+  const dropped = selection.excluded.filter((entry) => entry.kind === "routing-index").map((entry) => entry.id).sort();
+  assert.deepEqual(dropped, ["sdd/memory-bank/business/INDEX.md", "sdd/memory-bank/tech/modules.md"]);
+  assert.equal(pack.entries.some((entry) => entry.path === "sdd/system/runtime/minimal.md"), true);
+  assert.ok(selection.included.find((entry) => entry.id === "sdd/system/runtime/minimal.md").required);
+  const status = Object.fromEntries(pack.route.entries.map((entry) => [entry.path, entry.selection]));
+  assert.equal(status["sdd/memory-bank/tech/modules.md"], "excluded-by-budget");
+  assert.equal(status["sdd/system/runtime/minimal.md"], "included");
+  assert.equal(selection.full.used, pack.totals.full);
 });
 
 // ---- Legacy repoIndex / route metadata ----------------------------------------------------------------
