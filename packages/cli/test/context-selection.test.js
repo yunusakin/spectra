@@ -471,7 +471,9 @@ test("dogfood: approval-gating task selects the approval rules as optional conte
   assert.equal(run(root, ["index"]).status, 0);
   const task = "Block AI-assisted implementation until implementation approval is granted.";
   const { selection, ids } = resolve(root, task, ["--module", "packages-cli"]);
-  assert.deepEqual(ids.sort(), ["RULE-SPE-006", "RULE-SPE-007", "RULE-SPE-011", "node:module:packages/cli", "node:module:packages/core", "node:test-target:packages/cli", "spectra-core#AC-2", "spectra-core#FR-2"]);
+  assert.deepEqual(ids.sort(), ["RULE-SPE-006", "RULE-SPE-007", "RULE-SPE-011", "node:module:packages/cli", "node:module:packages/core", "spectra-core#AC-2", "spectra-core#FR-2"]);
+  // Phase 1H: the optional test target no longer fits the ~15-token headroom; it is excluded by budget.
+  assert.ok(selection.excluded.some((entry) => entry.id === "node:test-target:packages/cli" && entry.exclusion === "budget"));
   assert.notEqual(selection.status, "mandatory-overflow");
   assert.equal(selection.included.filter((entry) => entry.required && entry.id.startsWith("spectra-core#")).length, 0);
 });

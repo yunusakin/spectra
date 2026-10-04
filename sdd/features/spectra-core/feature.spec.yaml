@@ -25,6 +25,9 @@ requirements:
     - id: FR-2
       statement: AI-assisted implementation is blocked until implementation approval is granted.
       priority: must
+    - id: FR-3
+      statement: Changing a spec invalidates the approval stages that depend on the kind of change, and re-approval restores the stage.
+      priority: must
   nonFunctional:
     - id: NFR-1
       statement: Verification must aggregate validation, policy, tests, evals, telemetry, and release readiness.
@@ -43,6 +46,12 @@ acceptance:
       given: Implementation approval has not been granted
       when: An agent attempts to start implementation
       then: Policy and approval checks block the work
+    - id: AC-3
+      covers:
+        - FR-3
+      given: A spec has been approved at a stage
+      when: The spec is changed in a way that affects that stage
+      then: The stage is invalidated until it is approved again
 dependencies:
   - sdd/memory-bank/core/projectbrief.md
   - sdd/governance/approval-state.yaml
