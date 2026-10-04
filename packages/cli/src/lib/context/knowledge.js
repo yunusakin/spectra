@@ -1,5 +1,5 @@
 import { readIndex } from "../index/cache.js";
-import { normalize, rowValue } from "../business/parser.js";
+import { normalize, rowValue, taskContainsNormalized, taskTokens } from "../business/parser.js";
 import { readBusinessIndexes } from "../business/repository.js";
 import { loadKnowledgeMap } from "../knowledge/map.js";
 import { readKnowledgeObject } from "../knowledge/address.js";
@@ -22,6 +22,16 @@ const REASON_PRIORITY = {
 const reasonPriority = ({ reason }, kind) => (reason === "repo-index-evidence" && kind === "module" ? 3 : REASON_PRIORITY[reason]);
 const FEATURE_KINDS = new Set(["functional-requirement", "non-functional-requirement", "acceptance-scenario"]);
 const MIN_FEATURE_TERM_OVERLAP = 2;
+// A term that many of a domain's rules share cannot tell them apart: it is "common"
+// when it is in at least MIN_COMMON_RULES rules and in more than 1/COMMON_TERM_SHARE
+// of the domain's rules. (Measured plateau: 1/3 .. 2/5 give identical results.)
+const MIN_COMMON_RULES = 2;
+const COMMON_TERM_SHARE = 3;
+// How a matched domain was inferred. Only these may widen into the domain's whole
+// rule set when no single rule matches: the caller asked for the domain, or its name
+// or keyword is in the task. A module hint (module -> business domain) says the
+// technical module is relevant, not that every business rule of its domain is.
+const DOMAIN_FALLBACK_SIGNALS = new Set(["explicit-domain", "domain", "keyword"]);
 
 const pathOf = (value) => String(value).trim().replace(/^\.\//, "").replace(/\/+$/, "");
 const overlap = (taskTerms, reference) => (reference.terms ?? []).filter((term) => taskTerms.has(term));
@@ -34,6 +44,12 @@ function explicitIds(task, byId) {
     }
   }
   return found;
+}
+
+function commonTerms(rules) {
+  const counts = new Map();
+  for (const rule of rules) for (const term of rule.terms ?? []) counts.set(term, (counts.get(term) ?? 0) + 1);
+  return new Set([...counts].filter(([, count]) => count >= MIN_COMMON_RULES && count * COMMON_TERM_SHARE > rules.length).map(([term]) => term));
 }
 
 function compactRecord(record) {
@@ -76,17 +92,31 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
     return String(row ? rowValue(row, "paths") : "").split(",").filter(Boolean).flatMap((value) => recordsByPath.get(pathOf(value)) ?? []);
   };
 
-  for (const id of explicitIds(task, byId)) add(id, "explicit-reference", id);
+  const referenced = explicitIds(task, byId);
+  for (const id of referenced) add(id, "explicit-reference", id);
+
+  // Words inside an explicit reference (`loyalty-program#FR-2`) name an object, not a
+  // business domain, so they are not domain intent.
+  const proseTokens = taskTokens(referenced.reduce((text, id) => text.replaceAll(id, " "), String(task ?? "")));
+  const domainSignal = (domain) => {
+    const match = (route?.domainMatches ?? []).find((candidate) => candidate.name === domain);
+    if (!match) return null;
+    const stated = match.matchedBy === "explicit-domain" || ((match.matchedBy === "domain" || match.matchedBy === "keyword") && taskContainsNormalized(proseTokens, match.matchedValue));
+    return stated ? match.matchedBy : null;
+  };
 
   for (const domain of route?.domains ?? []) {
     const row = domainRows.find((candidate) => normalize(rowValue(candidate, "domain")) === domain);
     const ruleIds = [rowValue(row ?? {}, "rules"), rowValue(row ?? {}, "unresolved")]
       .filter(Boolean)
       .flatMap((relativePath) => map.bySource[`sdd/memory-bank/${relativePath.replace(/^sdd\/memory-bank\//, "")}`] ?? []);
-    const matching = ruleIds.filter((id) => overlap(taskTerms, byId.get(id)).length > 0);
-    for (const id of matching.length > 0 ? matching : ruleIds) {
-      if (matching.length > 0) add(id, "business-rule-match", overlap(taskTerms, byId.get(id)).join(","));
-      else add(id, "business-domain-match", domain);
+    const common = commonTerms(ruleIds.map((id) => byId.get(id)));
+    const matchedTerms = (id) => overlap(taskTerms, byId.get(id)).filter((term) => !common.has(term));
+    const matching = ruleIds.filter((id) => matchedTerms(id).length > 0);
+    for (const id of matching) add(id, "business-rule-match", matchedTerms(id).join(","));
+    const signal = domainSignal(domain);
+    if (matching.length === 0 && DOMAIN_FALLBACK_SIGNALS.has(signal)) {
+      for (const id of ruleIds) add(id, "business-domain-match", `${domain}:${signal}`);
     }
   }
 
