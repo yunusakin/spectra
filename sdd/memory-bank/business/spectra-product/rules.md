@@ -38,7 +38,7 @@ Confidence: high
 
 ## RULE-SPE-005 — Incompatible projects are refused
 
-Project commands run only against a project whose schema and layout are current. Other states are refused with their compatibility status; only `status`, `doctor` and `migrate` may inspect a non-current project.
+Project commands run only against a project whose schema and layout are current. Other states are refused with their compatibility status; only `status`, `doctor` and `migrate` may inspect a non-current project. Exceptions: `init`, `adopt` and installer operations on a directory that is not yet a project, and Spectra's own source repository (root-sdd layout without conflicts).
 
 Status: active
 Affected Modules: packages-cli

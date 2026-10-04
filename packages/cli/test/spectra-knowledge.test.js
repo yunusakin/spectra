@@ -10,6 +10,7 @@
 //  - the canonical knowledge needs a schema/migration change (project check regresses)
 
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
@@ -30,7 +31,8 @@ const context = (...args) => {
 
 test("every spectra-product rule is addressable with a stable ID, status and a real module", () => {
   const map = buildKnowledgeMap(repoRoot);
-  const modules = new Set(["packages-cli", "packages-core", "packages-templates", "scripts"]);
+  const modules = new Set(fs.readFileSync(path.join(repoRoot, "sdd", "memory-bank", "tech", "modules.md"), "utf8").split("\n").filter((line) => /^\| [a-z]/.test(line) && !line.startsWith("| Module")).map((line) => line.split("|")[1].trim()));
+  assert.ok(modules.has("packages-cli"), "modules.md was parsed");
   for (const id of [...ACTIVE, ...UNRESOLVED]) {
     const reference = lookupKnowledgeReference(map, id);
     assert.ok(reference, `${id} is in the Knowledge Map`);
@@ -60,4 +62,7 @@ test("an explicit rule reference is mandatory and returned exactly", () => {
   const { selection } = context("--route-task", "Change implementation approval behavior RULE-SPE-006");
   const entry = selection.included.find((candidate) => candidate.id === "RULE-SPE-006");
   assert.ok(entry?.required, "explicit RULE-SPE-006 is included as required");
+  const exact = resolveBusinessRule(repoRoot, "RULE-SPE-006").text.trimEnd();
+  const inline = spawnSync(process.execPath, [path.join(cliRoot, "bin", "spectra.js"), "context", "--role", "implementer", "--goal", "implement", "--format", "inline", "--route-task", "Change implementation approval behavior RULE-SPE-006"], { cwd: repoRoot, encoding: "utf8" });
+  assert.ok(inline.stdout.includes(exact), "inline output carries the complete rule section");
 });
