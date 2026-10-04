@@ -4,46 +4,46 @@
     "runs": 29,
     "normalRuns": 19,
     "requiredRecall": 1,
-    "relevantRecall": 0.9048,
-    "precision": 0.8113,
-    "falsePositives": 10,
-    "falsePositivesLabeledIrrelevant": 10,
+    "relevantRecall": 0.8298,
+    "precision": 0.7333,
+    "falsePositives": 16,
+    "falsePositivesLabeledIrrelevant": 16,
     "falsePositivesUnlabeled": 0,
-    "precisionLabeledOnly": 0.8113,
-    "falseNegativesNormal": 4,
-    "candidateTokens": 4229,
-    "selectedObjectTokens": 4120,
-    "packTokens": 30725,
-    "wholeFileBaselineTokens": 29255,
-    "packTokenReduction": -0.0502,
-    "exactObjectTokens": 4120,
-    "wholeSourceTokens": 26680,
-    "exactTokenReduction": 0.8456,
+    "precisionLabeledOnly": 0.7333,
+    "falseNegativesNormal": 8,
+    "candidateTokens": 9120,
+    "selectedObjectTokens": 6750,
+    "packTokens": 32395,
+    "wholeFileBaselineTokens": 36295,
+    "packTokenReduction": 0.1075,
+    "exactObjectTokens": 6750,
+    "wholeSourceTokens": 34335,
+    "exactTokenReduction": 0.8034,
     "byKind": {
       "business": {
-        "selectedTokens": 2040,
-        "wholeTokens": 4121,
-        "reduction": 0.505
+        "selectedTokens": 4724,
+        "wholeTokens": 11776,
+        "reduction": 0.5988
       },
       "feature": {
-        "selectedTokens": 528,
+        "selectedTokens": 482,
         "wholeTokens": 2809,
-        "reduction": 0.812
+        "reduction": 0.8284
       },
       "repoIndex": {
-        "selectedTokens": 1552,
+        "selectedTokens": 1544,
         "wholeTokens": 19750,
-        "reduction": 0.9214
+        "reduction": 0.9218
       }
     },
     "statusCounts": {
-      "within-budget": 19,
-      "budget-exhausted": 7,
+      "within-budget": 15,
+      "budget-exhausted": 11,
       "mandatory-overflow": 3
     },
     "statusCountsNormal": {
-      "within-budget": 18,
-      "budget-exhausted": 0,
+      "within-budget": 14,
+      "budget-exhausted": 4,
       "mandatory-overflow": 1
     },
     "reasons": {
@@ -54,10 +54,10 @@
         "tokens": 80
       },
       "business-rule-match": {
-        "selected": 7,
-        "relevant": 3,
-        "falsePositives": 4,
-        "tokens": 188
+        "selected": 18,
+        "relevant": 7,
+        "falsePositives": 11,
+        "tokens": 1666
       },
       "changed-file": {
         "selected": 2,
@@ -72,10 +72,10 @@
         "tokens": 1631
       },
       "feature-match": {
-        "selected": 9,
+        "selected": 8,
         "relevant": 6,
-        "falsePositives": 3,
-        "tokens": 261
+        "falsePositives": 2,
+        "tokens": 215
       },
       "feature-relationship": {
         "selected": 11,
@@ -84,23 +84,23 @@
         "tokens": 338
       },
       "module-match": {
-        "selected": 5,
-        "relevant": 5,
+        "selected": 4,
+        "relevant": 4,
         "falsePositives": 0,
-        "tokens": 248
+        "tokens": 199
       },
       "repo-index-evidence": {
-        "selected": 17,
-        "relevant": 17,
+        "selected": 18,
+        "relevant": 18,
         "falsePositives": 0,
-        "tokens": 927
+        "tokens": 966
       }
     },
     "relationshipOnly": {
       "repo-index-evidence": {
-        "selected": 16,
-        "relevant": 16,
-        "tokens": 875
+        "selected": 14,
+        "relevant": 14,
+        "tokens": 767
       },
       "feature-relationship": {
         "selected": 7,
@@ -109,11 +109,10 @@
       }
     },
     "missByCause": {
-      "normal:budget-exclusion": 2,
+      "normal:budget-exclusion": 6,
       "normal:retrieval-miss": 2,
-      "tight:anchor-exclusion": 1,
       "tight:budget-exclusion": 8,
-      "very-tight:anchor-exclusion": 3,
+      "very-tight:anchor-exclusion": 2,
       "very-tight:budget-exclusion": 6
     }
   },
@@ -2282,13 +2281,21 @@
       "selected": [
         "spectra-core#AC-2",
         "spectra-core#FR-2",
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
         "node:module:packages/cli",
+        "node:module:packages/core",
         "node:test-target:packages/cli"
       ],
       "candidates": [
         "spectra-core#AC-2",
         "spectra-core#FR-2",
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
         "node:module:packages/cli",
+        "node:module:packages/core",
         "node:test-target:packages/cli"
       ],
       "excluded": [],
@@ -2313,13 +2320,65 @@
             "via": "approval,assisted,granted,implementation"
           }
         ],
+        "RULE-SPE-006": [
+          {
+            "reason": "business-rule-match",
+            "via": "approval,block,implementation"
+          }
+        ],
+        "RULE-SPE-007": [
+          {
+            "reason": "business-rule-match",
+            "via": "approval,implementation"
+          }
+        ],
+        "RULE-SPE-011": [
+          {
+            "reason": "business-rule-match",
+            "via": "approval,implementation"
+          }
+        ],
         "node:module:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-007"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-011"
+          },
           {
             "reason": "module-match",
             "via": "packages-cli"
           }
         ],
+        "node:module:packages/core": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-011"
+          }
+        ],
         "node:test-target:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-007"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-011"
+          },
           {
             "reason": "repo-index-evidence",
             "via": "node:module:packages/cli"
@@ -2330,7 +2389,11 @@
       "labels": {
         "spectra-core#AC-2": "relevant",
         "spectra-core#FR-2": "relevant",
+        "RULE-SPE-006": "relevant",
+        "RULE-SPE-007": "acceptable",
+        "RULE-SPE-011": "acceptable",
         "node:module:packages/cli": "relevant",
+        "node:module:packages/core": "acceptable",
         "node:test-target:packages/cli": "relevant"
       },
       "falsePositives": [],
@@ -2343,19 +2406,19 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 176,
-        "included": 176,
+        "candidate": 691,
+        "included": 691,
         "excluded": 0,
-        "total": 1520,
-        "routingIndexes": 240,
-        "superseded": 21,
-        "wholeFileBaseline": 1365
+        "total": 1795,
+        "routingIndexes": 0,
+        "superseded": 1621,
+        "wholeFileBaseline": 2725
       },
       "exactVsWhole": [
         {
           "source": "repo-index",
-          "objects": 2,
-          "selectedTokens": 103,
+          "objects": 3,
+          "selectedTokens": 153,
           "wholeTokens": 1910
         },
         {
@@ -2363,24 +2426,38 @@
           "objects": 2,
           "selectedTokens": 73,
           "wholeTokens": 394
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 2,
+          "selectedTokens": 327,
+          "wholeTokens": 1471
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/unresolved.md",
+          "objects": 1,
+          "selectedTokens": 138,
+          "wholeTokens": 150
         }
       ],
       "selection": {
-        "status": "within-budget",
+        "status": "budget-exhausted",
         "knowledge": "rebuilt-missing",
         "full": {
           "budget": 1200,
-          "used": 910,
-          "remaining": 290
+          "used": 1185,
+          "remaining": 15
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 290,
-        "utilization": 0.7583,
-        "warnings": []
+        "remaining": 15,
+        "utilization": 0.9875,
+        "warnings": [
+          "optional-excluded"
+        ]
       }
     },
     {
@@ -2388,22 +2465,33 @@
       "level": "tight",
       "selected": [
         "spectra-core#AC-2",
-        "spectra-core#FR-2"
+        "spectra-core#FR-2",
+        "RULE-SPE-006",
+        "node:module:packages/cli",
+        "node:module:packages/core"
       ],
       "candidates": [
         "spectra-core#AC-2",
         "spectra-core#FR-2",
+        "RULE-SPE-006",
         "node:module:packages/cli",
+        "node:module:packages/core",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
         "node:test-target:packages/cli"
       ],
       "excluded": [
         {
-          "id": "node:module:packages/cli",
+          "id": "RULE-SPE-007",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-011",
           "exclusion": "budget"
         },
         {
           "id": "node:test-target:packages/cli",
-          "exclusion": "anchor-excluded"
+          "exclusion": "budget"
         }
       ],
       "reasons": {
@@ -2426,6 +2514,195 @@
             "reason": "feature-match",
             "via": "approval,assisted,granted,implementation"
           }
+        ],
+        "RULE-SPE-006": [
+          {
+            "reason": "business-rule-match",
+            "via": "approval,block,implementation"
+          }
+        ],
+        "node:module:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-007"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-011"
+          },
+          {
+            "reason": "module-match",
+            "via": "packages-cli"
+          }
+        ],
+        "node:module:packages/core": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-011"
+          }
+        ]
+      },
+      "required": [],
+      "labels": {
+        "spectra-core#AC-2": "relevant",
+        "spectra-core#FR-2": "relevant",
+        "RULE-SPE-006": "relevant",
+        "node:module:packages/cli": "relevant",
+        "node:module:packages/core": "acceptable",
+        "RULE-SPE-007": "acceptable",
+        "RULE-SPE-011": "acceptable",
+        "node:test-target:packages/cli": "relevant"
+      },
+      "falsePositives": [],
+      "falseNegatives": [
+        {
+          "id": "node:test-target:packages/cli",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        }
+      ],
+      "metrics": {
+        "requiredRecall": null,
+        "relevantRecall": 0.8,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 691,
+        "included": 332,
+        "excluded": 359,
+        "total": 1798,
+        "routingIndexes": 0,
+        "superseded": 1621,
+        "wholeFileBaseline": 3087
+      },
+      "exactVsWhole": [
+        {
+          "source": "repo-index",
+          "objects": 2,
+          "selectedTokens": 99,
+          "wholeTokens": 1910
+        },
+        {
+          "source": "sdd/features/spectra-core/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 73,
+          "wholeTokens": 394
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 1,
+          "selectedTokens": 160,
+          "wholeTokens": 1471
+        }
+      ],
+      "selection": {
+        "status": "budget-exhausted",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 1188,
+          "remaining": 12
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": 12,
+        "utilization": 0.99,
+        "warnings": [
+          "optional-excluded"
+        ]
+      }
+    },
+    {
+      "case": "spectra-approval-gating",
+      "level": "very-tight",
+      "selected": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2",
+        "node:module:packages/cli"
+      ],
+      "candidates": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2",
+        "node:module:packages/cli",
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/core",
+        "node:test-target:packages/cli"
+      ],
+      "excluded": [
+        {
+          "id": "RULE-SPE-006",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-007",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-011",
+          "exclusion": "budget"
+        },
+        {
+          "id": "node:module:packages/core",
+          "exclusion": "anchor-excluded"
+        },
+        {
+          "id": "node:test-target:packages/cli",
+          "exclusion": "budget"
+        }
+      ],
+      "reasons": {
+        "spectra-core#AC-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-core#FR-2"
+          },
+          {
+            "reason": "feature-match",
+            "via": "approval,block,granted,implementation"
+          }
+        ],
+        "spectra-core#FR-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-core#AC-2"
+          },
+          {
+            "reason": "feature-match",
+            "via": "approval,assisted,granted,implementation"
+          }
+        ],
+        "node:module:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-007"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-011"
+          },
+          {
+            "reason": "module-match",
+            "via": "packages-cli"
+          }
         ]
       },
       "required": [],
@@ -2433,38 +2710,48 @@
         "spectra-core#AC-2": "relevant",
         "spectra-core#FR-2": "relevant",
         "node:module:packages/cli": "relevant",
+        "RULE-SPE-006": "relevant",
+        "RULE-SPE-007": "acceptable",
+        "RULE-SPE-011": "acceptable",
+        "node:module:packages/core": "acceptable",
         "node:test-target:packages/cli": "relevant"
       },
       "falsePositives": [],
       "falseNegatives": [
         {
-          "id": "node:module:packages/cli",
+          "id": "node:test-target:packages/cli",
           "label": "relevant",
           "cause": "budget-exclusion"
         },
         {
-          "id": "node:test-target:packages/cli",
+          "id": "RULE-SPE-006",
           "label": "relevant",
-          "cause": "anchor-exclusion"
+          "cause": "budget-exclusion"
         }
       ],
       "metrics": {
         "requiredRecall": null,
-        "relevantRecall": 0.5,
+        "relevantRecall": 0.6,
         "precision": 1,
         "candidateRecall": 1,
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 176,
-        "included": 73,
-        "excluded": 103,
-        "total": 1796,
+        "candidate": 691,
+        "included": 122,
+        "excluded": 569,
+        "total": 1795,
         "routingIndexes": 0,
-        "superseded": 21,
-        "wholeFileBaseline": 1744
+        "superseded": 1621,
+        "wholeFileBaseline": 3294
       },
       "exactVsWhole": [
+        {
+          "source": "repo-index",
+          "objects": 1,
+          "selectedTokens": 49,
+          "wholeTokens": 1910
+        },
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
@@ -2477,123 +2764,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1186,
-          "remaining": 14
+          "used": 1185,
+          "remaining": 15
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 14,
-        "utilization": 0.9883,
-        "warnings": [
-          "optional-excluded"
-        ]
-      }
-    },
-    {
-      "case": "spectra-approval-gating",
-      "level": "very-tight",
-      "selected": [
-        "spectra-core#FR-2"
-      ],
-      "candidates": [
-        "spectra-core#FR-2",
-        "spectra-core#AC-2",
-        "node:module:packages/cli",
-        "node:test-target:packages/cli"
-      ],
-      "excluded": [
-        {
-          "id": "spectra-core#AC-2",
-          "exclusion": "budget"
-        },
-        {
-          "id": "node:module:packages/cli",
-          "exclusion": "budget"
-        },
-        {
-          "id": "node:test-target:packages/cli",
-          "exclusion": "anchor-excluded"
-        }
-      ],
-      "reasons": {
-        "spectra-core#FR-2": [
-          {
-            "reason": "feature-relationship",
-            "via": "spectra-core#AC-2"
-          },
-          {
-            "reason": "feature-match",
-            "via": "approval,assisted,granted,implementation"
-          }
-        ]
-      },
-      "required": [],
-      "labels": {
-        "spectra-core#FR-2": "relevant",
-        "spectra-core#AC-2": "relevant",
-        "node:module:packages/cli": "relevant",
-        "node:test-target:packages/cli": "relevant"
-      },
-      "falsePositives": [],
-      "falseNegatives": [
-        {
-          "id": "spectra-core#AC-2",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        },
-        {
-          "id": "node:module:packages/cli",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        },
-        {
-          "id": "node:test-target:packages/cli",
-          "label": "relevant",
-          "cause": "anchor-exclusion"
-        }
-      ],
-      "metrics": {
-        "requiredRecall": null,
-        "relevantRecall": 0.25,
-        "precision": 1,
-        "candidateRecall": 1,
-        "candidatePrecision": 1
-      },
-      "tokens": {
-        "candidate": 176,
-        "included": 29,
-        "excluded": 147,
-        "total": 1805,
-        "routingIndexes": 0,
-        "superseded": 21,
-        "wholeFileBaseline": 1797
-      },
-      "exactVsWhole": [
-        {
-          "source": "sdd/features/spectra-core/feature.spec.yaml",
-          "objects": 1,
-          "selectedTokens": 29,
-          "wholeTokens": 394
-        }
-      ],
-      "selection": {
-        "status": "budget-exhausted",
-        "knowledge": "fresh",
-        "full": {
-          "budget": 1200,
-          "used": 1195,
-          "remaining": 5
-        },
-        "summary": {
-          "budget": 3200,
-          "used": 610,
-          "remaining": 2590
-        },
-        "remaining": 5,
-        "utilization": 0.9958,
+        "remaining": 15,
+        "utilization": 0.9875,
         "warnings": [
           "optional-excluded"
         ]
@@ -2686,13 +2866,99 @@
     {
       "case": "spectra-lexical-false-negative",
       "level": "normal",
-      "selected": [],
-      "candidates": [],
-      "excluded": [],
-      "reasons": {},
+      "selected": [
+        "RULE-SPE-001",
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core"
+      ],
+      "candidates": [
+        "RULE-SPE-001",
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-011",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli"
+      ],
+      "excluded": [
+        {
+          "id": "node:test-target:packages/cli",
+          "exclusion": "budget"
+        }
+      ],
+      "reasons": {
+        "RULE-SPE-001": [
+          {
+            "reason": "business-rule-match",
+            "via": "require"
+          }
+        ],
+        "RULE-SPE-006": [
+          {
+            "reason": "business-rule-match",
+            "via": "approval,release"
+          }
+        ],
+        "RULE-SPE-007": [
+          {
+            "reason": "business-rule-match",
+            "via": "approval"
+          }
+        ],
+        "RULE-SPE-011": [
+          {
+            "reason": "business-rule-match",
+            "via": "approval"
+          }
+        ],
+        "node:module:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-001"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-007"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-011"
+          }
+        ],
+        "node:module:packages/core": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-011"
+          }
+        ]
+      },
       "required": [],
-      "labels": {},
-      "falsePositives": [],
+      "labels": {
+        "RULE-SPE-001": "irrelevant",
+        "RULE-SPE-006": "acceptable",
+        "RULE-SPE-007": "acceptable",
+        "RULE-SPE-011": "acceptable",
+        "node:module:packages/cli": "acceptable",
+        "node:module:packages/core": "acceptable",
+        "node:test-target:packages/cli": "unlabeled"
+      },
+      "falsePositives": [
+        {
+          "id": "RULE-SPE-001",
+          "label": "irrelevant"
+        }
+      ],
       "falseNegatives": [
         {
           "id": "spectra-core#FR-2",
@@ -2708,36 +2974,57 @@
       "metrics": {
         "requiredRecall": null,
         "relevantRecall": 0,
-        "precision": null,
+        "precision": 0,
         "candidateRecall": 0,
-        "candidatePrecision": null
+        "candidatePrecision": 0
       },
       "tokens": {
-        "candidate": 0,
-        "included": 0,
-        "excluded": 0,
-        "total": 1344,
-        "routingIndexes": 240,
-        "superseded": 21,
-        "wholeFileBaseline": 1365
+        "candidate": 742,
+        "included": 688,
+        "excluded": 54,
+        "total": 1792,
+        "routingIndexes": 0,
+        "superseded": 1621,
+        "wholeFileBaseline": 2725
       },
-      "exactVsWhole": [],
+      "exactVsWhole": [
+        {
+          "source": "repo-index",
+          "objects": 2,
+          "selectedTokens": 99,
+          "wholeTokens": 1910
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 3,
+          "selectedTokens": 451,
+          "wholeTokens": 1471
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/unresolved.md",
+          "objects": 1,
+          "selectedTokens": 138,
+          "wholeTokens": 150
+        }
+      ],
       "selection": {
-        "status": "within-budget",
+        "status": "budget-exhausted",
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 734,
-          "remaining": 466
+          "used": 1182,
+          "remaining": 18
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 466,
-        "utilization": 0.6117,
-        "warnings": []
+        "remaining": 18,
+        "utilization": 0.985,
+        "warnings": [
+          "optional-excluded"
+        ]
       }
     },
     {
@@ -2745,17 +3032,72 @@
       "level": "normal",
       "selected": [
         "spectra-core#FR-1",
-        "node:module:packages/cli",
-        "node:test-target:packages/cli",
-        "spectra-core#AC-1"
+        "RULE-SPE-001",
+        "RULE-SPE-002",
+        "RULE-SPE-003",
+        "RULE-SPE-004",
+        "RULE-SPE-005"
       ],
       "candidates": [
         "spectra-core#FR-1",
+        "RULE-SPE-001",
+        "RULE-SPE-002",
+        "RULE-SPE-003",
+        "RULE-SPE-004",
+        "RULE-SPE-005",
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-008",
+        "RULE-SPE-009",
+        "RULE-SPE-010",
+        "RULE-SPE-011",
         "node:module:packages/cli",
+        "node:module:packages/core",
         "node:test-target:packages/cli",
         "spectra-core#AC-1"
       ],
-      "excluded": [],
+      "excluded": [
+        {
+          "id": "RULE-SPE-006",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-007",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-008",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-009",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-010",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-011",
+          "exclusion": "budget"
+        },
+        {
+          "id": "node:module:packages/cli",
+          "exclusion": "budget"
+        },
+        {
+          "id": "node:module:packages/core",
+          "exclusion": "anchor-excluded"
+        },
+        {
+          "id": "node:test-target:packages/cli",
+          "exclusion": "budget"
+        },
+        {
+          "id": "spectra-core#AC-1",
+          "exclusion": "budget"
+        }
+      ],
       "reasons": {
         "spectra-core#FR-1": [
           {
@@ -2763,29 +3105,53 @@
             "via": "spectra-core#AC-1"
           }
         ],
-        "node:module:packages/cli": [
+        "RULE-SPE-001": [
           {
-            "reason": "module-match",
-            "via": "packages-cli"
+            "reason": "business-rule-match",
+            "via": "command,explicit,layout,leave,migrate,project,runs,schema,spectra,untouched,update"
           }
         ],
-        "node:test-target:packages/cli": [
+        "RULE-SPE-002": [
           {
-            "reason": "repo-index-evidence",
-            "via": "node:module:packages/cli"
+            "reason": "business-rule-match",
+            "via": "command,migrate,project,spectra,update"
           }
         ],
-        "spectra-core#AC-1": [
+        "RULE-SPE-003": [
           {
-            "reason": "feature-match",
-            "via": "project,runs,spectra"
+            "reason": "business-rule-match",
+            "via": "command,project,spectra,untouched"
+          }
+        ],
+        "RULE-SPE-004": [
+          {
+            "reason": "business-rule-match",
+            "via": "migrate,project,schema,update"
+          }
+        ],
+        "RULE-SPE-005": [
+          {
+            "reason": "business-rule-match",
+            "via": "command,layout,migrate,project,schema"
           }
         ]
       },
       "required": [],
       "labels": {
         "spectra-core#FR-1": "irrelevant",
+        "RULE-SPE-001": "relevant",
+        "RULE-SPE-002": "relevant",
+        "RULE-SPE-003": "irrelevant",
+        "RULE-SPE-004": "acceptable",
+        "RULE-SPE-005": "acceptable",
+        "RULE-SPE-006": "irrelevant",
+        "RULE-SPE-007": "irrelevant",
+        "RULE-SPE-008": "irrelevant",
+        "RULE-SPE-009": "irrelevant",
+        "RULE-SPE-010": "irrelevant",
+        "RULE-SPE-011": "irrelevant",
         "node:module:packages/cli": "relevant",
+        "node:module:packages/core": "irrelevant",
         "node:test-target:packages/cli": "relevant",
         "spectra-core#AC-1": "irrelevant"
       },
@@ -2795,73 +3161,110 @@
           "label": "irrelevant"
         },
         {
-          "id": "spectra-core#AC-1",
+          "id": "RULE-SPE-003",
           "label": "irrelevant"
         }
       ],
-      "falseNegatives": [],
+      "falseNegatives": [
+        {
+          "id": "node:module:packages/cli",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        },
+        {
+          "id": "node:test-target:packages/cli",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        }
+      ],
       "metrics": {
         "requiredRecall": null,
-        "relevantRecall": 1,
+        "relevantRecall": 0.5,
         "precision": 0.5,
         "candidateRecall": 1,
-        "candidatePrecision": 0.5
+        "candidatePrecision": 0.2857
       },
       "tokens": {
-        "candidate": 179,
-        "included": 179,
-        "excluded": 0,
-        "total": 1523,
-        "routingIndexes": 240,
-        "superseded": 21,
-        "wholeFileBaseline": 1365
+        "candidate": 1824,
+        "included": 673,
+        "excluded": 1151,
+        "total": 1777,
+        "routingIndexes": 0,
+        "superseded": 1621,
+        "wholeFileBaseline": 2725
       },
       "exactVsWhole": [
         {
-          "source": "repo-index",
-          "objects": 2,
-          "selectedTokens": 103,
-          "wholeTokens": 1910
+          "source": "sdd/features/spectra-core/feature.spec.yaml",
+          "objects": 1,
+          "selectedTokens": 30,
+          "wholeTokens": 394
         },
         {
-          "source": "sdd/features/spectra-core/feature.spec.yaml",
-          "objects": 2,
-          "selectedTokens": 76,
-          "wholeTokens": 394
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 5,
+          "selectedTokens": 643,
+          "wholeTokens": 1471
         }
       ],
       "selection": {
-        "status": "within-budget",
+        "status": "budget-exhausted",
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 913,
-          "remaining": 287
+          "used": 1167,
+          "remaining": 33
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 287,
-        "utilization": 0.7608,
-        "warnings": []
+        "remaining": 33,
+        "utilization": 0.9725,
+        "warnings": [
+          "optional-excluded"
+        ]
       }
     },
     {
       "case": "spectra-context-resolver",
       "level": "normal",
       "selected": [
+        "RULE-SPE-009",
+        "RULE-SPE-010",
         "node:module:packages/cli",
         "node:test-target:packages/cli"
       ],
       "candidates": [
+        "RULE-SPE-009",
+        "RULE-SPE-010",
         "node:module:packages/cli",
         "node:test-target:packages/cli"
       ],
       "excluded": [],
       "reasons": {
+        "RULE-SPE-009": [
+          {
+            "reason": "business-rule-match",
+            "via": "business,token"
+          }
+        ],
+        "RULE-SPE-010": [
+          {
+            "reason": "business-rule-match",
+            "via": "budget,business,context"
+          }
+        ],
         "node:module:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-009"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-010"
+          },
           {
             "reason": "module-match",
             "via": "packages-cli"
@@ -2870,12 +3273,22 @@
         "node:test-target:packages/cli": [
           {
             "reason": "repo-index-evidence",
+            "via": "RULE-SPE-009"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-010"
+          },
+          {
+            "reason": "repo-index-evidence",
             "via": "node:module:packages/cli"
           }
         ]
       },
       "required": [],
       "labels": {
+        "RULE-SPE-009": "acceptable",
+        "RULE-SPE-010": "relevant",
         "node:module:packages/cli": "relevant",
         "node:test-target:packages/cli": "relevant"
       },
@@ -2889,13 +3302,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 103,
-        "included": 103,
+        "candidate": 447,
+        "included": 447,
         "excluded": 0,
-        "total": 1447,
+        "total": 1791,
         "routingIndexes": 240,
-        "superseded": 21,
-        "wholeFileBaseline": 1365
+        "superseded": 1621,
+        "wholeFileBaseline": 2965
       },
       "exactVsWhole": [
         {
@@ -2903,6 +3316,12 @@
           "objects": 2,
           "selectedTokens": 103,
           "wholeTokens": 1910
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 2,
+          "selectedTokens": 344,
+          "wholeTokens": 1471
         }
       ],
       "selection": {
@@ -2910,16 +3329,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 837,
-          "remaining": 363
+          "used": 1181,
+          "remaining": 19
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 363,
-        "utilization": 0.6975,
+        "remaining": 19,
+        "utilization": 0.9842,
         "warnings": []
       }
     },
@@ -2927,75 +3346,244 @@
       "case": "spectra-repo-index",
       "level": "normal",
       "selected": [
-        "node:module:packages/cli",
-        "node:test-target:packages/cli"
+        "RULE-SPE-001",
+        "RULE-SPE-002",
+        "RULE-SPE-003",
+        "RULE-SPE-004",
+        "RULE-SPE-005",
+        "node:module:packages/cli"
       ],
       "candidates": [
+        "RULE-SPE-001",
+        "RULE-SPE-002",
+        "RULE-SPE-003",
+        "RULE-SPE-004",
+        "RULE-SPE-005",
         "node:module:packages/cli",
+        "RULE-SPE-006",
+        "RULE-SPE-007",
+        "RULE-SPE-008",
+        "RULE-SPE-009",
+        "RULE-SPE-010",
+        "RULE-SPE-011",
+        "node:module:packages/core",
         "node:test-target:packages/cli"
       ],
-      "excluded": [],
+      "excluded": [
+        {
+          "id": "RULE-SPE-006",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-007",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-008",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-009",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-010",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-011",
+          "exclusion": "budget"
+        },
+        {
+          "id": "node:module:packages/core",
+          "exclusion": "anchor-excluded"
+        },
+        {
+          "id": "node:test-target:packages/cli",
+          "exclusion": "budget"
+        }
+      ],
       "reasons": {
+        "RULE-SPE-001": [
+          {
+            "reason": "business-rule-match",
+            "via": "change,package"
+          }
+        ],
+        "RULE-SPE-002": [
+          {
+            "reason": "business-rule-match",
+            "via": "package"
+          }
+        ],
+        "RULE-SPE-003": [
+          {
+            "reason": "business-rule-match",
+            "via": "change,package"
+          }
+        ],
+        "RULE-SPE-004": [
+          {
+            "reason": "business-rule-match",
+            "via": "package"
+          }
+        ],
+        "RULE-SPE-005": [
+          {
+            "reason": "business-rule-match",
+            "via": "package"
+          }
+        ],
         "node:module:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-001"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-002"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-003"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-004"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-005"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-007"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-008"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-009"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-010"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-011"
+          },
           {
             "reason": "module-match",
             "via": "packages-cli"
-          }
-        ],
-        "node:test-target:packages/cli": [
-          {
-            "reason": "repo-index-evidence",
-            "via": "node:module:packages/cli"
           }
         ]
       },
       "required": [],
       "labels": {
+        "RULE-SPE-001": "irrelevant",
+        "RULE-SPE-002": "irrelevant",
+        "RULE-SPE-003": "irrelevant",
+        "RULE-SPE-004": "irrelevant",
+        "RULE-SPE-005": "irrelevant",
         "node:module:packages/cli": "relevant",
+        "RULE-SPE-006": "irrelevant",
+        "RULE-SPE-007": "irrelevant",
+        "RULE-SPE-008": "relevant",
+        "RULE-SPE-009": "acceptable",
+        "RULE-SPE-010": "irrelevant",
+        "RULE-SPE-011": "irrelevant",
+        "node:module:packages/core": "irrelevant",
         "node:test-target:packages/cli": "relevant"
       },
-      "falsePositives": [],
-      "falseNegatives": [],
+      "falsePositives": [
+        {
+          "id": "RULE-SPE-001",
+          "label": "irrelevant"
+        },
+        {
+          "id": "RULE-SPE-002",
+          "label": "irrelevant"
+        },
+        {
+          "id": "RULE-SPE-003",
+          "label": "irrelevant"
+        },
+        {
+          "id": "RULE-SPE-004",
+          "label": "irrelevant"
+        },
+        {
+          "id": "RULE-SPE-005",
+          "label": "irrelevant"
+        }
+      ],
+      "falseNegatives": [
+        {
+          "id": "node:test-target:packages/cli",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        },
+        {
+          "id": "RULE-SPE-008",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        }
+      ],
       "metrics": {
         "requiredRecall": null,
-        "relevantRecall": 1,
-        "precision": 1,
+        "relevantRecall": 0.3333,
+        "precision": 0.1667,
         "candidateRecall": 1,
-        "candidatePrecision": 1
+        "candidatePrecision": 0.2308
       },
       "tokens": {
-        "candidate": 103,
-        "included": 103,
-        "excluded": 0,
-        "total": 1447,
-        "routingIndexes": 240,
-        "superseded": 21,
-        "wholeFileBaseline": 1365
+        "candidate": 1748,
+        "included": 692,
+        "excluded": 1056,
+        "total": 1796,
+        "routingIndexes": 0,
+        "superseded": 1621,
+        "wholeFileBaseline": 2725
       },
       "exactVsWhole": [
         {
           "source": "repo-index",
-          "objects": 2,
-          "selectedTokens": 103,
+          "objects": 1,
+          "selectedTokens": 49,
           "wholeTokens": 1910
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 5,
+          "selectedTokens": 643,
+          "wholeTokens": 1471
         }
       ],
       "selection": {
-        "status": "within-budget",
+        "status": "budget-exhausted",
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 837,
-          "remaining": 363
+          "used": 1186,
+          "remaining": 14
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 363,
-        "utilization": 0.6975,
-        "warnings": []
+        "remaining": 14,
+        "utilization": 0.9883,
+        "warnings": [
+          "optional-excluded"
+        ]
       }
     },
     {

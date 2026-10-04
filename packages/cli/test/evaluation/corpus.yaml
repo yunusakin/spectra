@@ -160,11 +160,9 @@ cases:
     modules: [packages-cli]
     budgets: [normal, tight, very-tight]
     expect:
-      relevant: ["spectra-core#FR-2", "spectra-core#AC-2", "node:module:packages/cli", "node:test-target:packages/cli"]
-      irrelevant: ["spectra-core#FR-1", "spectra-core#AC-1", "spectra-core#NFR-1", "node:module:packages/core", "node:module:packages/templates"]
-    gaps:
-      - type: missing business rule
-        note: the spectra-product business domain declares no rules, so the approval gate exists only as FR-2/AC-2
+      acceptable: ["RULE-SPE-007", "node:module:packages/core", "RULE-SPE-011"]
+      relevant: ["spectra-core#FR-2", "spectra-core#AC-2", "node:module:packages/cli", "node:test-target:packages/cli", "RULE-SPE-006"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#AC-1", "spectra-core#NFR-1", "node:module:packages/templates", "RULE-SPE-001", "RULE-SPE-002", "RULE-SPE-003", "RULE-SPE-004", "RULE-SPE-005", "RULE-SPE-008", "RULE-SPE-009", "RULE-SPE-010"]
   - id: spectra-lexical-false-positive
     world: spectra
     category: dogfood
@@ -173,7 +171,7 @@ cases:
     task: Implementation of the AI-assisted onboarding wizard
     expect:
       acceptable: ["spectra-core#FR-1", "spectra-core#AC-1"]
-      irrelevant: ["spectra-core#FR-2", "spectra-core#AC-2", "spectra-core#NFR-1"]
+      irrelevant: ["spectra-core#FR-2", "spectra-core#AC-2", "spectra-core#NFR-1", "RULE-SPE-001", "RULE-SPE-002", "RULE-SPE-003", "RULE-SPE-004", "RULE-SPE-005", "RULE-SPE-006", "RULE-SPE-007", "RULE-SPE-008", "RULE-SPE-009", "RULE-SPE-010", "RULE-SPE-011"]
   - id: spectra-lexical-false-negative
     world: spectra
     category: dogfood
@@ -181,8 +179,9 @@ cases:
     tier: exploratory
     task: Require approval before the release is shipped
     expect:
+      acceptable: ["RULE-SPE-006", "RULE-SPE-007", "RULE-SPE-011", "node:module:packages/cli", "node:module:packages/core"]
       relevant: ["spectra-core#FR-2", "spectra-core#AC-2"]
-      irrelevant: ["spectra-core#FR-1", "spectra-core#AC-1"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#AC-1", "RULE-SPE-001", "RULE-SPE-002", "RULE-SPE-003", "RULE-SPE-004", "RULE-SPE-005", "RULE-SPE-008", "RULE-SPE-009", "RULE-SPE-010"]
     gaps:
       - type: missing requirement
         note: no requirement covers release approval; FR-2 only covers implementation approval, so it is the nearest existing knowledge
@@ -193,11 +192,10 @@ cases:
     task: Make spectra update leave project layout and schema untouched until the explicit migrate command runs
     modules: [packages-cli]
     expect:
-      relevant: ["node:module:packages/cli", "node:test-target:packages/cli"]
-      irrelevant: ["spectra-core#FR-1", "spectra-core#FR-2", "spectra-core#AC-1", "spectra-core#AC-2", "spectra-core#NFR-1", "node:module:packages/core"]
+      acceptable: ["RULE-SPE-004", "RULE-SPE-005"]
+      relevant: ["node:module:packages/cli", "node:test-target:packages/cli", "RULE-SPE-001", "RULE-SPE-002"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#FR-2", "spectra-core#AC-1", "spectra-core#AC-2", "spectra-core#NFR-1", "node:module:packages/core", "RULE-SPE-003", "RULE-SPE-006", "RULE-SPE-007", "RULE-SPE-008", "RULE-SPE-009", "RULE-SPE-010", "RULE-SPE-011"]
     gaps:
-      - type: missing business rule
-        note: update-vs-migrate lifecycle behaviour is documented in docs and tests but not in canonical business rules
       - type: missing requirement
         note: no feature requirement covers installation lifecycle
   - id: spectra-context-resolver
@@ -207,13 +205,12 @@ cases:
     task: Select exact business rules for a task within the context token budget
     modules: [packages-cli]
     expect:
-      relevant: ["node:module:packages/cli", "node:test-target:packages/cli"]
-      irrelevant: ["spectra-core#FR-1", "spectra-core#FR-2", "spectra-core#AC-1", "spectra-core#AC-2", "node:module:packages/core"]
+      acceptable: ["RULE-SPE-009"]
+      relevant: ["node:module:packages/cli", "node:test-target:packages/cli", "RULE-SPE-010"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#FR-2", "spectra-core#AC-1", "spectra-core#AC-2", "node:module:packages/core", "RULE-SPE-001", "RULE-SPE-002", "RULE-SPE-003", "RULE-SPE-004", "RULE-SPE-005", "RULE-SPE-006", "RULE-SPE-007", "RULE-SPE-008", "RULE-SPE-011"]
     gaps:
       - type: missing requirement
         note: the context resolver has no feature requirement or acceptance scenario
-      - type: missing business rule
-        note: context selection policy is not captured as business rules
   - id: spectra-repo-index
     world: spectra
     category: dogfood
@@ -221,8 +218,9 @@ cases:
     task: Rebuild the repo index and Knowledge Map when package manifests change
     modules: [packages-cli]
     expect:
-      relevant: ["node:module:packages/cli", "node:test-target:packages/cli"]
-      irrelevant: ["spectra-core#FR-1", "spectra-core#FR-2", "spectra-core#AC-1", "spectra-core#AC-2", "node:module:packages/core"]
+      acceptable: ["RULE-SPE-009"]
+      relevant: ["node:module:packages/cli", "node:test-target:packages/cli", "RULE-SPE-008"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#FR-2", "spectra-core#AC-1", "spectra-core#AC-2", "node:module:packages/core", "RULE-SPE-001", "RULE-SPE-002", "RULE-SPE-003", "RULE-SPE-004", "RULE-SPE-005", "RULE-SPE-006", "RULE-SPE-007", "RULE-SPE-010", "RULE-SPE-011"]
     gaps:
       - type: missing requirement
         note: no requirement describes the repo index or Knowledge Map
@@ -235,8 +233,9 @@ cases:
     task: Review the current change
     changedFiles: [packages/core/package.json]
     expect:
+      acceptable: ["RULE-SPE-006"]
       relevant: ["node:module:packages/core"]
-      irrelevant: ["node:module:packages/cli", "node:test-target:packages/cli", "node:module:packages/templates"]
+      irrelevant: ["node:module:packages/cli", "node:test-target:packages/cli", "node:module:packages/templates", "RULE-SPE-001", "RULE-SPE-002", "RULE-SPE-003", "RULE-SPE-004", "RULE-SPE-005", "RULE-SPE-007", "RULE-SPE-008", "RULE-SPE-009", "RULE-SPE-010", "RULE-SPE-011"]
     gaps:
       - type: missing test relationship
         note: packages/core declares no test script, so no test-target exists for it
