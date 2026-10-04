@@ -107,7 +107,7 @@ const GOAL_POLICIES = {
   },
   ship: {
     entries: ["approvalSummary", "reviewSummary", "progressSummary", "releaseSummary", "featureBundleSummary", "governanceSummary"],
-    escalation: ["reviewGate", "progress"]
+    escalation: ["reviewGate", "progress", "releaseHistory"]
   }
 };
 

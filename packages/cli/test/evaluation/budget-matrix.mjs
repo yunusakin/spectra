@@ -71,12 +71,17 @@ function freshProject() {
 const fresh = process.argv.includes("--fresh");
 const cwd = fresh ? freshProject() : repoRoot;
 const corpus = loadCorpus();
-const out = { repository: fresh ? "fresh-init" : "spectra", roles: {}, dogfood: {} };
+const SHIP_DOGFOOD = {
+  "ship-readiness": "Check that the release is ready to ship: approvals, review findings and release notes.",
+  "ship-approval-gating": MATRIX_TASK
+};
+const out = { repository: fresh ? "fresh-init" : "spectra", roles: {}, dogfood: {}, shipDogfood: {} };
 for (const [role, goal] of MATRIX) out.roles[`${role}/${goal}`] = measure(cwd, role, goal, MATRIX_TASK);
 for (const id of fresh ? [] : DOGFOOD) {
   const entry = corpus.cases.find((candidate) => candidate.id === id);
   out.dogfood[id] = measure(cwd, "implementer", "implement", entry.task, entry.expect ?? {}, entry.modules ?? []);
 }
+for (const [id, task] of Object.entries(fresh ? {} : SHIP_DOGFOOD)) out.shipDogfood[id] = measure(cwd, "release-manager", "ship", task);
 const text = `${JSON.stringify(out, null, 2)}\n`;
 const target = process.argv.indexOf("--write");
 if (target > 0) fs.writeFileSync(process.argv[target + 1], text);

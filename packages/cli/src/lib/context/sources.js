@@ -16,6 +16,7 @@ const SUMMARY_SOURCES = {
     "sdd/memory-bank/discovery/structure.md",
     "sdd/memory-bank/discovery/testing.md"
   ],
+  "release.summary.json": ["RELEASE_SUMMARY.md"],
   "approval.summary.json": [
     "sdd/memory-bank/core/intake-state.md",
     "sdd/memory-bank/core/review-gate.md",
@@ -156,6 +157,12 @@ const ENTRY_DEFS = {
   },
   releaseSummary: {
     label: "Release Summary",
+    mode: "summary",
+    path: ".spectra/cache/context/release.summary.json",
+    sources: SUMMARY_SOURCES["release.summary.json"]
+  },
+  releaseHistory: {
+    label: "Release History",
     mode: "full",
     path: "RELEASE_SUMMARY.md",
     sources: ["RELEASE_SUMMARY.md"]

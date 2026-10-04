@@ -4,6 +4,7 @@ import { ensureDirectory } from "../runtime.js";
 import { SUMMARY_SOURCES } from "./sources.js";
 import { getCacheDir } from "./roots.js";
 import { parseApprovalSummary, parseFeatureBundleSummary, parseGovernanceSummary } from "./governance-summaries.js";
+import { parseReleaseSummary } from "./release-summaries.js";
 import {
   parseActiveContextSummary,
   parseDiscoverySummary,
@@ -72,6 +73,7 @@ const SUMMARY_BUILDERS = {
   "implementation.summary.json": parseImplementationSummary,
   "traceability.summary.json": parseTraceabilitySummary,
   "discovery.summary.json": parseDiscoverySummary,
+  "release.summary.json": parseReleaseSummary,
   "approval.summary.json": parseApprovalSummary,
   "governance.summary.json": parseGovernanceSummary,
   "feature-bundle.summary.json": parseFeatureBundleSummary,
