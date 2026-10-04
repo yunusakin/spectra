@@ -86,3 +86,20 @@ With the six cases added in Phase 1E (3 explicit references on the real Spectra 
 | 25 | `mandatory-overflow` appears once more in the "all runs" count (3 → 4): the `very-tight` padding is sized from the case's candidate tokens, which shrank. A harness artefact, not a selection change. | ACCEPTABLE CURRENT LIMITATION |
 
 Recommendation: **A — retrieval quality is sufficient; budget policy is now the measured blocker.** Not started in this phase.
+
+## Phase 1F addendum — budget policy calibration (retrieval and corpus frozen)
+
+Measured with `node test/evaluation/budget-matrix.mjs [--fresh] [--write <file>]` (`budget-matrix.*.before.json` / `.after.json`). Candidate IDs are identical before and after in every role and dogfood task.
+
+Diagnosis. For `implementer/implement` in this repository the markdown pool held `minimal.md` 375 + `projectBrief` 681 + `implementationBrief` 119 = 1175 of 1200 (25 free), so every relevant optional object (246–350 tokens per dogfood task) was excluded. `sharedCore` (393) is a summary-pool entry and was never part of that. The full brief entered through `chooseDynamicEntries` (implementation summary without `itemId`/`goal`), although it is on the implementer's own `avoid` list and `sharedCore` already carries name, purpose and app type. Fix: that fallback now adds the existing `projectSummary` (222 summary tokens) instead of the full brief. Result: mandatory markdown 494, headroom 706, summary 907 of 3200, and all relevant optional knowledge is included in all four dogfood tasks.
+
+| Role / goal | Overflow cause | Class |
+|---|---|---|
+| implementer / implement | dynamic full-brief fallback contradicting `avoid` | POLICY DEFECT — fixed |
+| planner / decide (−356) | goal policy deliberately includes the full brief; 375 + 681 > 700; fresh project 697 of 700 | PROJECT-SIZE SCALING PROBLEM, needs a separate product decision |
+| architect / decide (−172) | same brief plus `invariants` | PROJECT-SIZE SCALING PROBLEM |
+| release-manager / ship (−970) | whole `RELEASE_SUMMARY.md` (1295 tokens, all releases since v2.0.0); no summary representation exists | PROJECT-SIZE SCALING PROBLEM, needs a representation decision |
+
+Not done on purpose: budgets, retrieval, the decide/ship whole-file entries, and any reserved Project Intelligence floor.
+
+Scope note: the fallback lives in `chooseDynamicEntries`, so it applies to plain `spectra context` as well as `--route-task`; both had the same avoid-list contradiction, so it was not restricted to route mode. The `budget-matrix.*.json` artifacts are snapshots of this repository's corpus and cache at the time of the run; regenerate them with the command above rather than diffing against a different checkout.

@@ -59,8 +59,10 @@ function chooseDynamicEntries(goal, summaries) {
   if (goal === "implement") {
     const implementation = summaries.implementation ?? {};
     const project = summaries.project ?? {};
+    // No active implementation item: add project orientation as the summary. The full brief is on
+    // the implementer's avoid list and stays an escalation entry, so it is not injected here.
     if ((!implementation.itemId || !implementation.goal) && (project.purpose || project.appType || project.projectName)) {
-      entries.push("projectBrief");
+      entries.push("projectSummary");
     }
     if ((summaries.review?.findings?.blocking ?? false) === true) {
       entries.push("reviewGate");
