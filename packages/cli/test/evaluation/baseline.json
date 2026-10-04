@@ -11,19 +11,19 @@
     "falsePositivesUnlabeled": 0,
     "precisionLabeledOnly": 0.8267,
     "falseNegativesNormal": 4,
-    "candidateTokens": 7601,
-    "selectedObjectTokens": 7239,
-    "packTokens": 41336,
-    "wholeFileBaselineTokens": 49938,
-    "packTokenReduction": 0.1723,
-    "exactObjectTokens": 7239,
-    "wholeSourceTokens": 47182,
-    "exactTokenReduction": 0.8466,
+    "candidateTokens": 7634,
+    "selectedObjectTokens": 7272,
+    "packTokens": 41369,
+    "wholeFileBaselineTokens": 50026,
+    "packTokenReduction": 0.1731,
+    "exactObjectTokens": 7272,
+    "wholeSourceTokens": 47270,
+    "exactTokenReduction": 0.8462,
     "byKind": {
       "business": {
-        "selectedTokens": 4666,
-        "wholeTokens": 16325,
-        "reduction": 0.7142
+        "selectedTokens": 4699,
+        "wholeTokens": 16413,
+        "reduction": 0.7137
       },
       "feature": {
         "selectedTokens": 628,
@@ -57,7 +57,7 @@
         "selected": 14,
         "relevant": 8,
         "falsePositives": 6,
-        "tokens": 1492
+        "tokens": 1503
       },
       "changed-file": {
         "selected": 2,
@@ -69,7 +69,7 @@
         "selected": 7,
         "relevant": 7,
         "falsePositives": 0,
-        "tokens": 1864
+        "tokens": 1875
       },
       "feature-match": {
         "selected": 8,
@@ -2178,13 +2178,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 691,
-        "included": 691,
+        "candidate": 702,
+        "included": 702,
         "excluded": 0,
-        "total": 1795,
+        "total": 1806,
         "routingIndexes": 0,
-        "superseded": 1663,
-        "wholeFileBaseline": 2767
+        "superseded": 1674,
+        "wholeFileBaseline": 2778
       },
       "exactVsWhole": [
         {
@@ -2202,8 +2202,8 @@
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
-          "selectedTokens": 327,
-          "wholeTokens": 1513
+          "selectedTokens": 338,
+          "wholeTokens": 1524
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/unresolved.md",
@@ -2217,16 +2217,16 @@
         "knowledge": "rebuilt-missing",
         "full": {
           "budget": 1200,
-          "used": 1185,
-          "remaining": 15
+          "used": 1196,
+          "remaining": 4
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 15,
-        "utilization": 0.9875,
+        "remaining": 4,
+        "utilization": 0.9967,
         "warnings": [
           "optional-excluded"
         ]
@@ -2349,13 +2349,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 691,
-        "included": 332,
+        "candidate": 702,
+        "included": 343,
         "excluded": 359,
-        "total": 1798,
+        "total": 1803,
         "routingIndexes": 0,
-        "superseded": 1663,
-        "wholeFileBaseline": 3129
+        "superseded": 1674,
+        "wholeFileBaseline": 3134
       },
       "exactVsWhole": [
         {
@@ -2373,8 +2373,8 @@
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
-          "selectedTokens": 160,
-          "wholeTokens": 1513
+          "selectedTokens": 171,
+          "wholeTokens": 1524
         }
       ],
       "selection": {
@@ -2382,16 +2382,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1188,
-          "remaining": 12
+          "used": 1193,
+          "remaining": 7
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 12,
-        "utilization": 0.99,
+        "remaining": 7,
+        "utilization": 0.9942,
         "warnings": [
           "optional-excluded"
         ]
@@ -2509,13 +2509,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 691,
+        "candidate": 702,
         "included": 122,
-        "excluded": 569,
-        "total": 1795,
+        "excluded": 580,
+        "total": 1793,
         "routingIndexes": 0,
-        "superseded": 1663,
-        "wholeFileBaseline": 3336
+        "superseded": 1674,
+        "wholeFileBaseline": 3345
       },
       "exactVsWhole": [
         {
@@ -2536,16 +2536,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1185,
-          "remaining": 15
+          "used": 1183,
+          "remaining": 17
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 15,
-        "utilization": 0.9875,
+        "remaining": 17,
+        "utilization": 0.9858,
         "warnings": [
           "optional-excluded"
         ]
@@ -2751,13 +2751,13 @@
         "candidatePrecision": 0
       },
       "tokens": {
-        "candidate": 742,
-        "included": 688,
+        "candidate": 753,
+        "included": 699,
         "excluded": 54,
-        "total": 1792,
+        "total": 1803,
         "routingIndexes": 0,
-        "superseded": 1663,
-        "wholeFileBaseline": 2767
+        "superseded": 1674,
+        "wholeFileBaseline": 2778
       },
       "exactVsWhole": [
         {
@@ -2769,8 +2769,8 @@
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 3,
-          "selectedTokens": 451,
-          "wholeTokens": 1513
+          "selectedTokens": 462,
+          "wholeTokens": 1524
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/unresolved.md",
@@ -2784,16 +2784,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1182,
-          "remaining": 18
+          "used": 1193,
+          "remaining": 7
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 18,
-        "utilization": 0.985,
+        "remaining": 7,
+        "utilization": 0.9942,
         "warnings": [
           "optional-excluded"
         ]
@@ -2952,8 +2952,8 @@
         "excluded": 199,
         "total": 1769,
         "routingIndexes": 0,
-        "superseded": 1663,
-        "wholeFileBaseline": 2767
+        "superseded": 1674,
+        "wholeFileBaseline": 2778
       },
       "exactVsWhole": [
         {
@@ -2972,7 +2972,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 4,
           "selectedTokens": 532,
-          "wholeTokens": 1513
+          "wholeTokens": 1524
         }
       ],
       "selection": {
@@ -3075,8 +3075,8 @@
         "excluded": 0,
         "total": 1805,
         "routingIndexes": 254,
-        "superseded": 1663,
-        "wholeFileBaseline": 3021
+        "superseded": 1674,
+        "wholeFileBaseline": 3032
       },
       "exactVsWhole": [
         {
@@ -3089,7 +3089,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
           "selectedTokens": 344,
-          "wholeTokens": 1513
+          "wholeTokens": 1524
         }
       ],
       "selection": {
@@ -3190,8 +3190,8 @@
         "excluded": 0,
         "total": 1757,
         "routingIndexes": 254,
-        "superseded": 1663,
-        "wholeFileBaseline": 3021
+        "superseded": 1674,
+        "wholeFileBaseline": 3032
       },
       "exactVsWhole": [
         {
@@ -3204,7 +3204,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
           "selectedTokens": 296,
-          "wholeTokens": 1513
+          "wholeTokens": 1524
         }
       ],
       "selection": {
@@ -3352,10 +3352,10 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 313,
-        "included": 313,
+        "candidate": 324,
+        "included": 324,
         "excluded": 0,
-        "total": 1671,
+        "total": 1682,
         "routingIndexes": 254,
         "superseded": 0,
         "wholeFileBaseline": 1358
@@ -3370,8 +3370,8 @@
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
-          "selectedTokens": 160,
-          "wholeTokens": 1513
+          "selectedTokens": 171,
+          "wholeTokens": 1524
         }
       ],
       "selection": {
@@ -3379,16 +3379,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1061,
-          "remaining": 139
+          "used": 1072,
+          "remaining": 128
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 139,
-        "utilization": 0.8842,
+        "remaining": 128,
+        "utilization": 0.8933,
         "warnings": []
       }
     },
@@ -3461,20 +3461,20 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 313,
-        "included": 160,
+        "candidate": 324,
+        "included": 171,
         "excluded": 153,
-        "total": 1815,
+        "total": 1820,
         "routingIndexes": 0,
         "superseded": 0,
-        "wholeFileBaseline": 1655
+        "wholeFileBaseline": 1649
       },
       "exactVsWhole": [
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
-          "selectedTokens": 160,
-          "wholeTokens": 1513
+          "selectedTokens": 171,
+          "wholeTokens": 1524
         }
       ],
       "selection": {
@@ -3482,16 +3482,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1205,
-          "remaining": -5
+          "used": 1210,
+          "remaining": -10
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": -5,
-        "utilization": 1.0042,
+        "remaining": -10,
+        "utilization": 1.0083,
         "warnings": [
           "mandatory-overflow",
           "optional-excluded"
@@ -3567,20 +3567,20 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 313,
-        "included": 160,
+        "candidate": 324,
+        "included": 171,
         "excluded": 153,
-        "total": 1909,
+        "total": 1918,
         "routingIndexes": 0,
         "superseded": 0,
-        "wholeFileBaseline": 1749
+        "wholeFileBaseline": 1747
       },
       "exactVsWhole": [
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
-          "selectedTokens": 160,
-          "wholeTokens": 1513
+          "selectedTokens": 171,
+          "wholeTokens": 1524
         }
       ],
       "selection": {
@@ -3588,16 +3588,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1299,
-          "remaining": -99
+          "used": 1308,
+          "remaining": -108
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": -99,
-        "utilization": 1.0825,
+        "remaining": -108,
+        "utilization": 1.09,
         "warnings": [
           "mandatory-overflow",
           "optional-excluded"
@@ -3967,8 +3967,8 @@
         "excluded": 0,
         "total": 1461,
         "routingIndexes": 254,
-        "superseded": 1663,
-        "wholeFileBaseline": 3021
+        "superseded": 1674,
+        "wholeFileBaseline": 3032
       },
       "exactVsWhole": [
         {
@@ -4064,8 +4064,8 @@
         "excluded": 0,
         "total": 1584,
         "routingIndexes": 254,
-        "superseded": 1663,
-        "wholeFileBaseline": 3021
+        "superseded": 1674,
+        "wholeFileBaseline": 3032
       },
       "exactVsWhole": [
         {
@@ -4078,7 +4078,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 123,
-          "wholeTokens": 1513
+          "wholeTokens": 1524
         }
       ],
       "selection": {
@@ -4188,8 +4188,8 @@
         "excluded": 0,
         "total": 1738,
         "routingIndexes": 254,
-        "superseded": 1663,
-        "wholeFileBaseline": 3021
+        "superseded": 1674,
+        "wholeFileBaseline": 3032
       },
       "exactVsWhole": [
         {
@@ -4202,7 +4202,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
           "selectedTokens": 277,
-          "wholeTokens": 1513
+          "wholeTokens": 1524
         }
       ],
       "selection": {

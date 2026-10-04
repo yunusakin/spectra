@@ -18,9 +18,12 @@ Requests outside the eligibility window require manual approval.
 
 Status: active
 Affected Modules: account-service
+Governs: customer-policy#FR-1
 Evidence: Product policy, 2026-08-30
 Confidence: high
 ```
+
+`Governs` is optional and lists, by stable ID, the feature requirements or scenarios (`<feature-id>#<object-id>`) the rule governs. It is canonical intent; the reverse direction is derived and never written. `spectra validate` rejects a malformed, duplicated or non-existent target, and more than one `Governs` line per rule. A rule without it stays valid and simply has no requirement link.
 
 ## Routing
 
@@ -35,7 +38,15 @@ spectra context --role implementer --goal implement --route-task "Change custome
 
 With `--route-task`, matched business rules, feature requirements/scenarios and Repo Index records are resolved as exact objects (one rule section, one YAML object, one compact record) instead of whole files, and `selection` in the JSON output explains the budget decision. Baseline context, explicit references (for example `RULE-X-001` or `<feature>#AC-1`) and the requirement an explicitly named scenario covers are required and never dropped; optional objects and the module/domain index files are kept in deterministic priority order while they fit the role's `markdownTokens` budget and are otherwise listed under `selection.excluded`. `selection.status` is `within-budget`, `budget-exhausted` (optional context was dropped) or `mandatory-overflow` (required context alone exceeds the budget; nothing is truncated). Whole files replaced by exact objects are listed under `selection.superseded` (only files with addressable rules; a domain file without any stays in the pack whole), and `repoIndex.modules` is omitted in this mode. Plain `spectra context` is unchanged.
 
-Business rules are matched to the task by their title and statement only: `Status`, `Affected Modules`, `Evidence` and `Confidence` lines never count as lexical evidence. A word that many rules of the same domain share (in at least two rules and in more than a third of them) cannot tell those rules apart and is ignored for that domain. When a matched domain has no rule-level match, all of its rules become candidates (`business-domain-match`) only if the caller asked for the domain (`--domain`) or the task states the domain's name or one of its keywords. A module hint, or a domain word that only occurs inside an explicit reference such as `<feature>#FR-2`, does not widen into the domain's whole rule set. The reason's `via` names the domain and the signal (for example `loyalty:keyword`).
+Business rules are matched to the task by their title and statement only: `Status`, `Affected Modules`, `Governs`, `Evidence` and `Confidence` lines never count as lexical evidence. A word that many rules of the same domain share (in at least two rules and in more than a third of them) cannot tell those rules apart and is ignored for that domain. When a matched domain has no rule-level match, all of its rules become candidates (`business-domain-match`) only if the caller asked for the domain (`--domain`) or the task states the domain's name or one of its keywords. A module hint, or a domain word that only occurs inside an explicit reference such as `<feature>#FR-2`, does not widen into the domain's whole rule set. The reason's `via` names the domain and the signal (for example `loyalty:keyword`).
+
+## Traceability and verification
+
+Traceability is what is connected to what; verification is what evidence currently supports those connections. They are separate questions: a path existing proves nothing passed.
+
+Connections come from stable IDs, never from paths or text similarity: a rule's `Governs` line (rule to requirement or scenario), a scenario's `covers` (scenario to requirement), a rule's `Affected Modules` (resolved through `tech/modules.md` paths to Repo Index module records) and the Repo Index's own test-target records (module to test target). Reverse links are derived. Every edge carries a reason, and missing hops (requirement, module, test target) are reported rather than omitted.
+
+A verification conclusion needs a complete path and fresh evidence. Evidence is a recorded result for a Repo Index test target, kept in the local cache (`.spectra/cache/verification/`, never committed, safe to delete) together with the signatures of the rules, requirements, module and test target it supported. If any of those changes the evidence is `stale`. The conclusions are `verified`, `failed`, `stale` and `unverified`; approvals and review findings are not evidence. This layer is internal for now: there is no trace command and nothing produces evidence automatically, so every rule reports `unverified` until a result is recorded.
 
 The business index supports both the legacy format and the keyword-aware format:
 
