@@ -51,6 +51,7 @@ Application code must not change before implementation approval. The approval st
 
 Status: active
 Affected Modules: packages-cli, packages-core
+Governs: spectra-core#FR-2, spectra-core#AC-2
 Evidence: sdd/features/spectra-core/feature.spec.yaml FR-2/AC-2; packages/core/assets/runtime/scripts/check-policy.sh (approval gate); packages/cli/src/lib/specs/stages.js; packages/cli/test/approval.test.js ("approval cannot skip intermediate stages beyond draft")
 Confidence: high
 
