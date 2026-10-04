@@ -17,6 +17,7 @@ const SUMMARY_SOURCES = {
     "sdd/memory-bank/discovery/testing.md"
   ],
   "release.summary.json": ["RELEASE_SUMMARY.md"],
+  "projectbrief.decide.md": ["sdd/memory-bank/core/projectbrief.md"],
   "approval.summary.json": [
     "sdd/memory-bank/core/intake-state.md",
     "sdd/memory-bank/core/review-gate.md",
@@ -124,6 +125,14 @@ const ENTRY_DEFS = {
     mode: "full",
     path: "sdd/memory-bank/core/projectbrief.md",
     sources: ["sdd/memory-bank/core/projectbrief.md"]
+  },
+  // Derived from projectBrief (comments stripped, content verbatim); still a markdown-pool entry.
+  projectBriefClean: {
+    label: "Project Brief (authoring comments removed)",
+    mode: "full",
+    derived: true,
+    path: ".spectra/cache/context/projectbrief.decide.md",
+    sources: SUMMARY_SOURCES["projectbrief.decide.md"]
   },
   implementationBrief: {
     label: "Implementation Brief",

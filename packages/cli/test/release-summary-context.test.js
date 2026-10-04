@@ -182,11 +182,11 @@ test("the full release file stays reachable as an escalation entry", () => {
   assert.ok(pack.escalation.includes("RELEASE_SUMMARY.md"));
 });
 
-test("other roles are untouched: decide roles keep the full brief, implementer keeps its summary fallback", () => {
+test("other roles are untouched: decide roles keep the brief content, implementer keeps its summary fallback", () => {
   const root = project(release(CURRENT, 5));
   const pack = (role, goal) => JSON.parse(run(root, ["context", "--role", role, "--goal", goal, "--route-task", "Fix the order endpoint", "--format", "json"]).stdout);
   for (const role of ["planner", "architect"]) {
-    assert.ok(pack(role, "decide").entries.some((candidate) => candidate.id === "projectBrief"), `${role}/decide keeps projectBrief`);
+    assert.ok(pack(role, "decide").entries.some((candidate) => candidate.id === "projectBriefClean"), `${role}/decide keeps the (comment-free) project brief`);
   }
   const implement = pack("implementer", "implement");
   assert.equal(implement.entries.some((candidate) => candidate.id === "projectBrief"), false);

@@ -77,12 +77,12 @@ test("a filled implementation brief gives the same context as before: no project
   assert.equal(ids(result).includes("projectSummary"), false);
 });
 
-test("roles whose goal policy includes the brief still get it, and overflow stays honest and untruncated", () => {
+test("decide roles still get the full brief content (comment-free since Phase 1F.2), and overflow stays honest and untruncated", () => {
   const root = project();
   const result = pack(root, "planner", "decide");
-  const brief = result.entries.find((entry) => entry.id === "projectBrief");
-  assert.ok(brief, "decide keeps the full brief");
-  assert.equal(brief.estimatedTokens, Math.ceil(fs.statSync(core(root, "projectbrief.md")).size / 4), "whole file, not truncated");
+  const brief = result.entries.find((entry) => entry.id === "projectBriefClean");
+  assert.ok(brief, "decide keeps the project brief content");
+  assert.equal(brief.estimatedTokens, Math.ceil(fs.statSync(brief.absolutePath).size / 4), "whole derived file, not truncated");
   assert.equal(result.selection.status, "mandatory-overflow");
   assert.ok(result.selection.warnings.some((warning) => warning.code === "mandatory-overflow"));
 });
