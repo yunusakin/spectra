@@ -1,5 +1,5 @@
 import { readIndex } from "../index/cache.js";
-import { normalize, rowValue, taskContainsNormalized, taskTokens } from "../business/parser.js";
+import { normalize, rowValue, splitList, taskContainsNormalized, taskTokens } from "../business/parser.js";
 import { readBusinessIndexes } from "../business/repository.js";
 import { loadKnowledgeMap } from "../knowledge/map.js";
 import { readKnowledgeObject } from "../knowledge/address.js";
@@ -98,11 +98,12 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
   // Words inside an explicit reference (`loyalty-program#FR-2`) name an object, not a
   // business domain, so they are not domain intent.
   const proseTokens = taskTokens(referenced.reduce((text, id) => text.replaceAll(id, " "), String(task ?? "")));
-  const domainSignal = (domain) => {
-    const match = (route?.domainMatches ?? []).find((candidate) => candidate.name === domain);
-    if (!match) return null;
-    const stated = match.matchedBy === "explicit-domain" || ((match.matchedBy === "domain" || match.matchedBy === "keyword") && taskContainsNormalized(proseTokens, match.matchedValue));
-    return stated ? match.matchedBy : null;
+  // Looked up from the domain's own name and keywords in the prose (not from the router's
+  // single recorded match, which an incidental word inside a reference could occupy).
+  const domainSignal = (domain, row) => {
+    if ((route?.domainMatches ?? []).some((match) => match.name === domain && match.matchedBy === "explicit-domain")) return "explicit-domain";
+    if (taskContainsNormalized(proseTokens, domain)) return "domain";
+    return splitList(rowValue(row ?? {}, "keywords")).some((keyword) => taskContainsNormalized(proseTokens, keyword)) ? "keyword" : null;
   };
 
   for (const domain of route?.domains ?? []) {
@@ -114,7 +115,7 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
     const matchedTerms = (id) => overlap(taskTerms, byId.get(id)).filter((term) => !common.has(term));
     const matching = ruleIds.filter((id) => matchedTerms(id).length > 0);
     for (const id of matching) add(id, "business-rule-match", matchedTerms(id).join(","));
-    const signal = domainSignal(domain);
+    const signal = domainSignal(domain, row);
     if (matching.length === 0 && DOMAIN_FALLBACK_SIGNALS.has(signal)) {
       for (const id of ruleIds) add(id, "business-domain-match", `${domain}:${signal}`);
     }

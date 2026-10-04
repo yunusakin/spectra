@@ -50,14 +50,11 @@ function splitRawList(value) {
   return String(value ?? "").split(",").map((item) => item.trim());
 }
 
-// `Key: value` lines of a rule body (Status, Affected Modules, Evidence, ...).
-const isRuleMetadataLine = (line) => /^[A-Za-z][A-Za-z ]*:\s+/.test(line);
-
 function parseRuleStatement(body) {
   return body
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter((line) => line && !isRuleMetadataLine(line))[0] ?? "";
+    .filter((line) => line && !/^[A-Za-z][A-Za-z ]*:\s+/.test(line))[0] ?? "";
 }
 
 function taskTokens(value) {
@@ -78,7 +75,6 @@ function rowValue(row, name) {
 }
 
 export {
-  isRuleMetadataLine,
   normalize,
   parseRuleStatement,
   readMarkdownTableContent,

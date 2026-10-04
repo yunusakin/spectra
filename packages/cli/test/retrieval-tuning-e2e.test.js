@@ -201,6 +201,33 @@ test("an explicit --domain keeps its broad meaning", () => {
   assert.deepEqual([...outcome.ruleIds].sort(), PLATFORM_IDS);
 });
 
+test("a statement line shaped like `Word: text` keeps its terms; only the canonical metadata lines are dropped", () => {
+  const root = project();
+  const rules = path.join(sdd(root), "memory-bank", "business", "platform", "rules.md");
+  fs.appendFileSync(rules, "\n## RULE-PLT-009 — Nightly hygiene\n\nNote: sandbox environments reset every night.\n\nStatus: active\nAffected Modules: platform-cli\nEvidence: packages/cli/src/commands/sandbox.js\nConfidence: high\n");
+  const outcome = resolve(root, "Release the sandbox");
+  record("colon-statement-line", outcome);
+  assert.deepEqual([...outcome.ruleIds].sort(), ["RULE-PLT-008", "RULE-PLT-009"]);
+  assert.deepEqual(outcome.reasonsOf("RULE-PLT-009"), ["business-rule-match"]);
+});
+
+test("a domain word inside an explicit reference does not hide a domain keyword stated in the prose", () => {
+  const root = project();
+  // feature id `platform` is also the domain name; `governance` is a domain keyword no rule contains
+  write(path.join(sdd(root), "features", "platform", "feature.spec.yaml"), YAML.stringify({
+    metadata: { id: "platform" },
+    requirements: { functional: [{ id: "FR-1", statement: "Operators publish notices" }], nonFunctional: [] },
+    acceptance: { scenarios: [] }
+  }));
+  const idOnly = resolve(root, "Implement platform#FR-1");
+  record("domain-word-only-in-reference", idOnly);
+  assert.deepEqual(idOnly.ruleIds, []);
+  const withProse = resolve(root, "Implement platform#FR-1 and review governance posture");
+  record("domain-word-in-reference-and-keyword-in-prose", withProse);
+  assert.deepEqual([...withProse.ruleIds].sort(), PLATFORM_IDS);
+  for (const id of PLATFORM_IDS) assert.deepEqual(withProse.reasonsOf(id), ["business-domain-match"]);
+});
+
 test("an unrelated task still produces no project knowledge", () => {
   const root = project();
   const outcome = resolve(root, "Add dark mode toggle to the marketing website header");

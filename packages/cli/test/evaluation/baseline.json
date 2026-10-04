@@ -2101,7 +2101,7 @@
         "RULE-SPE-007": [
           {
             "reason": "business-rule-match",
-            "via": "approval"
+            "via": "approval,implementation"
           }
         ],
         "RULE-SPE-011": [
