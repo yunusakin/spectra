@@ -5,7 +5,8 @@ import { getIndexFilePath, readIndex, sortKeysDeep } from "../index/cache.js";
 import { enumerateBusinessRules, enumerateFeatureObjects, listKnowledgeSourceFiles, sha256 } from "./address.js";
 import { createKnowledgeReference } from "./reference.js";
 
-const KNOWLEDGE_MAP_CONTRACT_VERSION = 2;
+// 3: business-rule lookup terms come from the rule's title and statement only, not its metadata lines.
+const KNOWLEDGE_MAP_CONTRACT_VERSION = 3;
 
 function getKnowledgeMapPath(projectRoot) {
   return path.join(getCacheRoot(projectRoot), "knowledge", "knowledge-map.json");

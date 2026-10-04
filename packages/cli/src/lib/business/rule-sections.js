@@ -38,4 +38,13 @@ function ruleAffectedModules(section) {
   return line ? line[1].split(",").map((name) => name.trim()).filter(Boolean) : [];
 }
 
-export { findRuleSection, parseRuleSections, ruleAffectedModules, ruleStatuses };
+// The canonical metadata lines of a rule (see docs/business-context.md).
+const RULE_METADATA_LINE = /^(Status|Affected Modules|Evidence|Confidence):/;
+
+// What the rule says: its title and statement lines, without the ID or the
+// canonical metadata lines. Any other `Word: text` line is still statement.
+function ruleMeaning(section) {
+  return [section.title ?? "", ...section.body.split(/\r?\n/).filter((line) => !RULE_METADATA_LINE.test(line.trim()))].join("\n");
+}
+
+export { findRuleSection, parseRuleSections, ruleAffectedModules, ruleMeaning, ruleStatuses };

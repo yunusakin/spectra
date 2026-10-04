@@ -1,63 +1,63 @@
 {
   "summary": {
-    "cases": 20,
-    "runs": 29,
-    "normalRuns": 19,
+    "cases": 26,
+    "runs": 39,
+    "normalRuns": 25,
     "requiredRecall": 1,
-    "relevantRecall": 0.8085,
-    "precision": 0.7167,
-    "falsePositives": 17,
-    "falsePositivesLabeledIrrelevant": 17,
+    "relevantRecall": 0.9298,
+    "precision": 0.8267,
+    "falsePositives": 13,
+    "falsePositivesLabeledIrrelevant": 13,
     "falsePositivesUnlabeled": 0,
-    "precisionLabeledOnly": 0.7167,
-    "falseNegativesNormal": 9,
-    "candidateTokens": 9204,
-    "selectedObjectTokens": 6775,
-    "packTokens": 32470,
-    "wholeFileBaselineTokens": 36547,
-    "packTokenReduction": 0.1116,
-    "exactObjectTokens": 6775,
-    "wholeSourceTokens": 32635,
-    "exactTokenReduction": 0.7924,
+    "precisionLabeledOnly": 0.8267,
+    "falseNegativesNormal": 4,
+    "candidateTokens": 7601,
+    "selectedObjectTokens": 7239,
+    "packTokens": 41336,
+    "wholeFileBaselineTokens": 49938,
+    "packTokenReduction": 0.1723,
+    "exactObjectTokens": 7239,
+    "wholeSourceTokens": 47182,
+    "exactTokenReduction": 0.8466,
     "byKind": {
       "business": {
-        "selectedTokens": 4798,
-        "wholeTokens": 11986,
-        "reduction": 0.5997
+        "selectedTokens": 4666,
+        "wholeTokens": 16325,
+        "reduction": 0.7142
       },
       "feature": {
-        "selectedTokens": 482,
-        "wholeTokens": 2809,
-        "reduction": 0.8284
+        "selectedTokens": 628,
+        "wholeTokens": 3597,
+        "reduction": 0.8254
       },
       "repoIndex": {
-        "selectedTokens": 1495,
-        "wholeTokens": 17840,
-        "reduction": 0.9162
+        "selectedTokens": 1945,
+        "wholeTokens": 27260,
+        "reduction": 0.9287
       }
     },
     "statusCounts": {
-      "within-budget": 15,
-      "budget-exhausted": 11,
-      "mandatory-overflow": 3
+      "within-budget": 22,
+      "budget-exhausted": 9,
+      "mandatory-overflow": 8
     },
     "statusCountsNormal": {
-      "within-budget": 14,
-      "budget-exhausted": 4,
+      "within-budget": 21,
+      "budget-exhausted": 3,
       "mandatory-overflow": 1
     },
     "reasons": {
       "business-domain-match": {
-        "selected": 3,
+        "selected": 5,
         "relevant": 3,
-        "falsePositives": 0,
-        "tokens": 80
+        "falsePositives": 2,
+        "tokens": 129
       },
       "business-rule-match": {
-        "selected": 19,
-        "relevant": 7,
-        "falsePositives": 12,
-        "tokens": 1851
+        "selected": 14,
+        "relevant": 8,
+        "falsePositives": 6,
+        "tokens": 1492
       },
       "changed-file": {
         "selected": 2,
@@ -66,10 +66,10 @@
         "tokens": 102
       },
       "explicit-reference": {
-        "selected": 4,
-        "relevant": 4,
+        "selected": 7,
+        "relevant": 7,
         "falsePositives": 0,
-        "tokens": 1631
+        "tokens": 1864
       },
       "feature-match": {
         "selected": 8,
@@ -78,42 +78,42 @@
         "tokens": 215
       },
       "feature-relationship": {
-        "selected": 11,
-        "relevant": 8,
+        "selected": 13,
+        "relevant": 10,
         "falsePositives": 3,
-        "tokens": 338
+        "tokens": 411
       },
       "module-match": {
-        "selected": 3,
-        "relevant": 3,
+        "selected": 8,
+        "relevant": 8,
         "falsePositives": 0,
-        "tokens": 150
+        "tokens": 395
       },
       "repo-index-evidence": {
-        "selected": 17,
-        "relevant": 17,
+        "selected": 28,
+        "relevant": 28,
         "falsePositives": 0,
-        "tokens": 917
+        "tokens": 1484
       }
     },
     "relationshipOnly": {
       "repo-index-evidence": {
-        "selected": 14,
-        "relevant": 14,
-        "tokens": 767
+        "selected": 22,
+        "relevant": 22,
+        "tokens": 1190
       },
       "feature-relationship": {
-        "selected": 7,
-        "relevant": 4,
-        "tokens": 218
+        "selected": 9,
+        "relevant": 6,
+        "tokens": 291
       }
     },
     "missByCause": {
-      "normal:budget-exclusion": 7,
+      "normal:budget-exclusion": 2,
       "normal:retrieval-miss": 2,
-      "tight:budget-exclusion": 8,
+      "tight:budget-exclusion": 10,
       "very-tight:anchor-exclusion": 2,
-      "very-tight:budget-exclusion": 6
+      "very-tight:budget-exclusion": 9
     }
   },
   "runs": [
@@ -403,17 +403,11 @@
       "level": "normal",
       "selected": [
         "loyalty-program#FR-2",
-        "loyalty-program#AC-2",
-        "RULE-LOY-001",
-        "node:module:packages/loyalty",
-        "node:test-target:packages/loyalty"
+        "loyalty-program#AC-2"
       ],
       "candidates": [
         "loyalty-program#FR-2",
-        "loyalty-program#AC-2",
-        "RULE-LOY-001",
-        "node:module:packages/loyalty",
-        "node:test-target:packages/loyalty"
+        "loyalty-program#AC-2"
       ],
       "excluded": [],
       "reasons": {
@@ -428,11 +422,328 @@
             "reason": "feature-relationship",
             "via": "loyalty-program#FR-2"
           }
+        ]
+      },
+      "required": [
+        "loyalty-program#FR-2"
+      ],
+      "labels": {
+        "loyalty-program#FR-2": "required",
+        "loyalty-program#AC-2": "relevant"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": 1,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 53,
+        "included": 53,
+        "excluded": 0,
+        "total": 1501,
+        "routingIndexes": 137,
+        "superseded": 88,
+        "wholeFileBaseline": 1536
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/features/loyalty-program/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 53,
+          "wholeTokens": 149
+        }
+      ],
+      "selection": {
+        "status": "within-budget",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 684,
+          "remaining": 516
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 817,
+          "remaining": 2383
+        },
+        "remaining": 516,
+        "utilization": 0.57,
+        "warnings": []
+      }
+    },
+    {
+      "case": "explicit-ac",
+      "level": "normal",
+      "selected": [
+        "loyalty-program#AC-1",
+        "loyalty-program#FR-1"
+      ],
+      "candidates": [
+        "loyalty-program#AC-1",
+        "loyalty-program#FR-1"
+      ],
+      "excluded": [],
+      "reasons": {
+        "loyalty-program#AC-1": [
+          {
+            "reason": "explicit-reference",
+            "via": "loyalty-program#AC-1"
+          }
+        ],
+        "loyalty-program#FR-1": [
+          {
+            "reason": "feature-relationship",
+            "via": "loyalty-program#AC-1"
+          }
+        ]
+      },
+      "required": [
+        "loyalty-program#AC-1",
+        "loyalty-program#FR-1"
+      ],
+      "labels": {
+        "loyalty-program#AC-1": "required",
+        "loyalty-program#FR-1": "required"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": null,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 47,
+        "included": 47,
+        "excluded": 0,
+        "total": 1495,
+        "routingIndexes": 137,
+        "superseded": 88,
+        "wholeFileBaseline": 1536
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/features/loyalty-program/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 47,
+          "wholeTokens": 149
+        }
+      ],
+      "selection": {
+        "status": "within-budget",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 678,
+          "remaining": 522
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 817,
+          "remaining": 2383
+        },
+        "remaining": 522,
+        "utilization": 0.565,
+        "warnings": []
+      }
+    },
+    {
+      "case": "explicit-ac",
+      "level": "tight",
+      "selected": [
+        "loyalty-program#AC-1",
+        "loyalty-program#FR-1"
+      ],
+      "candidates": [
+        "loyalty-program#AC-1",
+        "loyalty-program#FR-1"
+      ],
+      "excluded": [],
+      "reasons": {
+        "loyalty-program#AC-1": [
+          {
+            "reason": "explicit-reference",
+            "via": "loyalty-program#AC-1"
+          }
+        ],
+        "loyalty-program#FR-1": [
+          {
+            "reason": "feature-relationship",
+            "via": "loyalty-program#AC-1"
+          }
+        ]
+      },
+      "required": [
+        "loyalty-program#AC-1",
+        "loyalty-program#FR-1"
+      ],
+      "labels": {
+        "loyalty-program#AC-1": "required",
+        "loyalty-program#FR-1": "required"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": null,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 47,
+        "included": 47,
+        "excluded": 0,
+        "total": 2042,
+        "routingIndexes": 0,
+        "superseded": 88,
+        "wholeFileBaseline": 2083
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/features/loyalty-program/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 47,
+          "wholeTokens": 149
+        }
+      ],
+      "selection": {
+        "status": "mandatory-overflow",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 1225,
+          "remaining": -25
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 817,
+          "remaining": 2383
+        },
+        "remaining": -25,
+        "utilization": 1.0208,
+        "warnings": [
+          "mandatory-overflow",
+          "optional-excluded"
+        ]
+      }
+    },
+    {
+      "case": "explicit-ac",
+      "level": "very-tight",
+      "selected": [
+        "loyalty-program#AC-1",
+        "loyalty-program#FR-1"
+      ],
+      "candidates": [
+        "loyalty-program#AC-1",
+        "loyalty-program#FR-1"
+      ],
+      "excluded": [],
+      "reasons": {
+        "loyalty-program#AC-1": [
+          {
+            "reason": "explicit-reference",
+            "via": "loyalty-program#AC-1"
+          }
+        ],
+        "loyalty-program#FR-1": [
+          {
+            "reason": "feature-relationship",
+            "via": "loyalty-program#AC-1"
+          }
+        ]
+      },
+      "required": [
+        "loyalty-program#AC-1",
+        "loyalty-program#FR-1"
+      ],
+      "labels": {
+        "loyalty-program#AC-1": "required",
+        "loyalty-program#FR-1": "required"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": null,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 47,
+        "included": 47,
+        "excluded": 0,
+        "total": 2056,
+        "routingIndexes": 0,
+        "superseded": 88,
+        "wholeFileBaseline": 2097
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/features/loyalty-program/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 47,
+          "wholeTokens": 149
+        }
+      ],
+      "selection": {
+        "status": "mandatory-overflow",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 1239,
+          "remaining": -39
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 817,
+          "remaining": 2383
+        },
+        "remaining": -39,
+        "utilization": 1.0325,
+        "warnings": [
+          "mandatory-overflow",
+          "optional-excluded"
+        ]
+      }
+    },
+    {
+      "case": "rule-lexical",
+      "level": "normal",
+      "selected": [
+        "loyalty-program#AC-2",
+        "RULE-LOY-001",
+        "node:module:packages/loyalty",
+        "node:test-target:packages/loyalty",
+        "loyalty-program#FR-2"
+      ],
+      "candidates": [
+        "loyalty-program#AC-2",
+        "RULE-LOY-001",
+        "node:module:packages/loyalty",
+        "node:test-target:packages/loyalty",
+        "loyalty-program#FR-2"
+      ],
+      "excluded": [],
+      "reasons": {
+        "loyalty-program#AC-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "loyalty-program#FR-2"
+          }
         ],
         "RULE-LOY-001": [
           {
             "reason": "business-rule-match",
-            "via": "loyalty"
+            "via": "order"
           }
         ],
         "node:module:packages/loyalty": [
@@ -446,22 +757,26 @@
             "reason": "repo-index-evidence",
             "via": "RULE-LOY-001"
           }
+        ],
+        "loyalty-program#FR-2": [
+          {
+            "reason": "feature-match",
+            "via": "expired,point"
+          }
         ]
       },
-      "required": [
-        "loyalty-program#FR-2"
-      ],
+      "required": [],
       "labels": {
-        "loyalty-program#FR-2": "required",
         "loyalty-program#AC-2": "relevant",
-        "RULE-LOY-001": "acceptable",
-        "node:module:packages/loyalty": "acceptable",
-        "node:test-target:packages/loyalty": "acceptable"
+        "RULE-LOY-001": "relevant",
+        "node:module:packages/loyalty": "relevant",
+        "node:test-target:packages/loyalty": "relevant",
+        "loyalty-program#FR-2": "relevant"
       },
       "falsePositives": [],
       "falseNegatives": [],
       "metrics": {
-        "requiredRecall": 1,
+        "requiredRecall": null,
         "relevantRecall": 1,
         "precision": 1,
         "candidateRecall": 1,
@@ -515,134 +830,17 @@
       }
     },
     {
-      "case": "explicit-ac",
-      "level": "normal",
-      "selected": [
-        "loyalty-program#AC-1",
-        "loyalty-program#FR-1",
-        "RULE-LOY-001",
-        "node:module:packages/loyalty",
-        "node:test-target:packages/loyalty"
-      ],
-      "candidates": [
-        "loyalty-program#AC-1",
-        "loyalty-program#FR-1",
-        "RULE-LOY-001",
-        "node:module:packages/loyalty",
-        "node:test-target:packages/loyalty"
-      ],
-      "excluded": [],
-      "reasons": {
-        "loyalty-program#AC-1": [
-          {
-            "reason": "explicit-reference",
-            "via": "loyalty-program#AC-1"
-          }
-        ],
-        "loyalty-program#FR-1": [
-          {
-            "reason": "feature-relationship",
-            "via": "loyalty-program#AC-1"
-          }
-        ],
-        "RULE-LOY-001": [
-          {
-            "reason": "business-rule-match",
-            "via": "loyalty"
-          }
-        ],
-        "node:module:packages/loyalty": [
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-LOY-001"
-          }
-        ],
-        "node:test-target:packages/loyalty": [
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-LOY-001"
-          }
-        ]
-      },
-      "required": [
-        "loyalty-program#AC-1",
-        "loyalty-program#FR-1"
-      ],
-      "labels": {
-        "loyalty-program#AC-1": "required",
-        "loyalty-program#FR-1": "required",
-        "RULE-LOY-001": "acceptable",
-        "node:module:packages/loyalty": "acceptable",
-        "node:test-target:packages/loyalty": "acceptable"
-      },
-      "falsePositives": [],
-      "falseNegatives": [],
-      "metrics": {
-        "requiredRecall": 1,
-        "relevantRecall": null,
-        "precision": 1,
-        "candidateRecall": 1,
-        "candidatePrecision": 1
-      },
-      "tokens": {
-        "candidate": 187,
-        "included": 187,
-        "excluded": 0,
-        "total": 1635,
-        "routingIndexes": 137,
-        "superseded": 88,
-        "wholeFileBaseline": 1536
-      },
-      "exactVsWhole": [
-        {
-          "source": "repo-index",
-          "objects": 2,
-          "selectedTokens": 109,
-          "wholeTokens": 1020
-        },
-        {
-          "source": "sdd/features/loyalty-program/feature.spec.yaml",
-          "objects": 2,
-          "selectedTokens": 47,
-          "wholeTokens": 149
-        },
-        {
-          "source": "sdd/memory-bank/business/loyalty/rules.md",
-          "objects": 1,
-          "selectedTokens": 31,
-          "wholeTokens": 60
-        }
-      ],
-      "selection": {
-        "status": "within-budget",
-        "knowledge": "fresh",
-        "full": {
-          "budget": 1200,
-          "used": 818,
-          "remaining": 382
-        },
-        "summary": {
-          "budget": 3200,
-          "used": 817,
-          "remaining": 2383
-        },
-        "remaining": 382,
-        "utilization": 0.6817,
-        "warnings": []
-      }
-    },
-    {
-      "case": "explicit-ac",
+      "case": "rule-lexical",
       "level": "tight",
       "selected": [
-        "loyalty-program#AC-1",
-        "loyalty-program#FR-1",
-        "RULE-LOY-001"
+        "loyalty-program#AC-2",
+        "RULE-LOY-001",
+        "loyalty-program#FR-2"
       ],
       "candidates": [
-        "loyalty-program#AC-1",
-        "loyalty-program#FR-1",
+        "loyalty-program#AC-2",
         "RULE-LOY-001",
+        "loyalty-program#FR-2",
         "node:module:packages/loyalty",
         "node:test-target:packages/loyalty"
       ],
@@ -656,211 +854,6 @@
           "exclusion": "budget"
         }
       ],
-      "reasons": {
-        "loyalty-program#AC-1": [
-          {
-            "reason": "explicit-reference",
-            "via": "loyalty-program#AC-1"
-          }
-        ],
-        "loyalty-program#FR-1": [
-          {
-            "reason": "feature-relationship",
-            "via": "loyalty-program#AC-1"
-          }
-        ],
-        "RULE-LOY-001": [
-          {
-            "reason": "business-rule-match",
-            "via": "loyalty"
-          }
-        ]
-      },
-      "required": [
-        "loyalty-program#AC-1",
-        "loyalty-program#FR-1"
-      ],
-      "labels": {
-        "loyalty-program#AC-1": "required",
-        "loyalty-program#FR-1": "required",
-        "RULE-LOY-001": "acceptable",
-        "node:module:packages/loyalty": "acceptable",
-        "node:test-target:packages/loyalty": "acceptable"
-      },
-      "falsePositives": [],
-      "falseNegatives": [],
-      "metrics": {
-        "requiredRecall": 1,
-        "relevantRecall": null,
-        "precision": 1,
-        "candidateRecall": 1,
-        "candidatePrecision": 1
-      },
-      "tokens": {
-        "candidate": 187,
-        "included": 78,
-        "excluded": 109,
-        "total": 2003,
-        "routingIndexes": 0,
-        "superseded": 88,
-        "wholeFileBaseline": 2013
-      },
-      "exactVsWhole": [
-        {
-          "source": "sdd/features/loyalty-program/feature.spec.yaml",
-          "objects": 2,
-          "selectedTokens": 47,
-          "wholeTokens": 149
-        },
-        {
-          "source": "sdd/memory-bank/business/loyalty/rules.md",
-          "objects": 1,
-          "selectedTokens": 31,
-          "wholeTokens": 60
-        }
-      ],
-      "selection": {
-        "status": "budget-exhausted",
-        "knowledge": "fresh",
-        "full": {
-          "budget": 1200,
-          "used": 1186,
-          "remaining": 14
-        },
-        "summary": {
-          "budget": 3200,
-          "used": 817,
-          "remaining": 2383
-        },
-        "remaining": 14,
-        "utilization": 0.9883,
-        "warnings": [
-          "optional-excluded"
-        ]
-      }
-    },
-    {
-      "case": "explicit-ac",
-      "level": "very-tight",
-      "selected": [
-        "loyalty-program#AC-1",
-        "loyalty-program#FR-1"
-      ],
-      "candidates": [
-        "loyalty-program#AC-1",
-        "loyalty-program#FR-1",
-        "RULE-LOY-001",
-        "node:module:packages/loyalty",
-        "node:test-target:packages/loyalty"
-      ],
-      "excluded": [
-        {
-          "id": "RULE-LOY-001",
-          "exclusion": "budget"
-        },
-        {
-          "id": "node:module:packages/loyalty",
-          "exclusion": "anchor-excluded"
-        },
-        {
-          "id": "node:test-target:packages/loyalty",
-          "exclusion": "anchor-excluded"
-        }
-      ],
-      "reasons": {
-        "loyalty-program#AC-1": [
-          {
-            "reason": "explicit-reference",
-            "via": "loyalty-program#AC-1"
-          }
-        ],
-        "loyalty-program#FR-1": [
-          {
-            "reason": "feature-relationship",
-            "via": "loyalty-program#AC-1"
-          }
-        ]
-      },
-      "required": [
-        "loyalty-program#AC-1",
-        "loyalty-program#FR-1"
-      ],
-      "labels": {
-        "loyalty-program#AC-1": "required",
-        "loyalty-program#FR-1": "required",
-        "RULE-LOY-001": "acceptable",
-        "node:module:packages/loyalty": "acceptable",
-        "node:test-target:packages/loyalty": "acceptable"
-      },
-      "falsePositives": [],
-      "falseNegatives": [],
-      "metrics": {
-        "requiredRecall": 1,
-        "relevantRecall": null,
-        "precision": 1,
-        "candidateRecall": 1,
-        "candidatePrecision": 1
-      },
-      "tokens": {
-        "candidate": 187,
-        "included": 47,
-        "excluded": 140,
-        "total": 2028,
-        "routingIndexes": 0,
-        "superseded": 88,
-        "wholeFileBaseline": 2069
-      },
-      "exactVsWhole": [
-        {
-          "source": "sdd/features/loyalty-program/feature.spec.yaml",
-          "objects": 2,
-          "selectedTokens": 47,
-          "wholeTokens": 149
-        }
-      ],
-      "selection": {
-        "status": "mandatory-overflow",
-        "knowledge": "fresh",
-        "full": {
-          "budget": 1200,
-          "used": 1211,
-          "remaining": -11
-        },
-        "summary": {
-          "budget": 3200,
-          "used": 817,
-          "remaining": 2383
-        },
-        "remaining": -11,
-        "utilization": 1.0092,
-        "warnings": [
-          "mandatory-overflow",
-          "optional-excluded"
-        ]
-      }
-    },
-    {
-      "case": "rule-lexical",
-      "level": "normal",
-      "selected": [
-        "loyalty-program#AC-2",
-        "RULE-LOY-001",
-        "RULE-LOY-002",
-        "RULE-LOY-003",
-        "node:module:packages/loyalty",
-        "node:test-target:packages/loyalty",
-        "loyalty-program#FR-2"
-      ],
-      "candidates": [
-        "loyalty-program#AC-2",
-        "RULE-LOY-001",
-        "RULE-LOY-002",
-        "RULE-LOY-003",
-        "node:module:packages/loyalty",
-        "node:test-target:packages/loyalty",
-        "loyalty-program#FR-2"
-      ],
-      "excluded": [],
       "reasons": {
         "loyalty-program#AC-2": [
           {
@@ -871,31 +864,7 @@
         "RULE-LOY-001": [
           {
             "reason": "business-rule-match",
-            "via": "expired,order,point"
-          }
-        ],
-        "RULE-LOY-002": [
-          {
-            "reason": "business-rule-match",
-            "via": "point"
-          }
-        ],
-        "RULE-LOY-003": [
-          {
-            "reason": "business-rule-match",
-            "via": "expired,point"
-          }
-        ],
-        "node:module:packages/loyalty": [
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-LOY-001"
-          }
-        ],
-        "node:test-target:packages/loyalty": [
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-LOY-001"
+            "via": "order"
           }
         ],
         "loyalty-program#FR-2": [
@@ -909,42 +878,40 @@
       "labels": {
         "loyalty-program#AC-2": "relevant",
         "RULE-LOY-001": "relevant",
-        "RULE-LOY-002": "irrelevant",
-        "RULE-LOY-003": "acceptable",
+        "loyalty-program#FR-2": "relevant",
         "node:module:packages/loyalty": "relevant",
-        "node:test-target:packages/loyalty": "relevant",
-        "loyalty-program#FR-2": "relevant"
+        "node:test-target:packages/loyalty": "relevant"
       },
-      "falsePositives": [
+      "falsePositives": [],
+      "falseNegatives": [
         {
-          "id": "RULE-LOY-002",
-          "label": "irrelevant"
+          "id": "node:module:packages/loyalty",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        },
+        {
+          "id": "node:test-target:packages/loyalty",
+          "label": "relevant",
+          "cause": "budget-exclusion"
         }
       ],
-      "falseNegatives": [],
       "metrics": {
         "requiredRecall": null,
-        "relevantRecall": 1,
-        "precision": 0.8333,
+        "relevantRecall": 0.6,
+        "precision": 1,
         "candidateRecall": 1,
-        "candidatePrecision": 0.8333
+        "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 242,
-        "included": 242,
-        "excluded": 0,
-        "total": 1690,
-        "routingIndexes": 137,
+        "candidate": 193,
+        "included": 84,
+        "excluded": 109,
+        "total": 2006,
+        "routingIndexes": 0,
         "superseded": 88,
-        "wholeFileBaseline": 1536
+        "wholeFileBaseline": 2010
       },
       "exactVsWhole": [
-        {
-          "source": "repo-index",
-          "objects": 2,
-          "selectedTokens": 109,
-          "wholeTokens": 1020
-        },
         {
           "source": "sdd/features/loyalty-program/feature.spec.yaml",
           "objects": 2,
@@ -953,160 +920,9 @@
         },
         {
           "source": "sdd/memory-bank/business/loyalty/rules.md",
-          "objects": 2,
-          "selectedTokens": 56,
-          "wholeTokens": 60
-        },
-        {
-          "source": "sdd/memory-bank/business/loyalty/unresolved.md",
-          "objects": 1,
-          "selectedTokens": 24,
-          "wholeTokens": 28
-        }
-      ],
-      "selection": {
-        "status": "within-budget",
-        "knowledge": "fresh",
-        "full": {
-          "budget": 1200,
-          "used": 873,
-          "remaining": 327
-        },
-        "summary": {
-          "budget": 3200,
-          "used": 817,
-          "remaining": 2383
-        },
-        "remaining": 327,
-        "utilization": 0.7275,
-        "warnings": []
-      }
-    },
-    {
-      "case": "rule-lexical",
-      "level": "tight",
-      "selected": [
-        "loyalty-program#AC-2",
-        "RULE-LOY-001",
-        "RULE-LOY-002",
-        "RULE-LOY-003"
-      ],
-      "candidates": [
-        "loyalty-program#AC-2",
-        "RULE-LOY-001",
-        "RULE-LOY-002",
-        "RULE-LOY-003",
-        "node:module:packages/loyalty",
-        "node:test-target:packages/loyalty",
-        "loyalty-program#FR-2"
-      ],
-      "excluded": [
-        {
-          "id": "node:module:packages/loyalty",
-          "exclusion": "budget"
-        },
-        {
-          "id": "node:test-target:packages/loyalty",
-          "exclusion": "budget"
-        },
-        {
-          "id": "loyalty-program#FR-2",
-          "exclusion": "budget"
-        }
-      ],
-      "reasons": {
-        "loyalty-program#AC-2": [
-          {
-            "reason": "feature-relationship",
-            "via": "loyalty-program#FR-2"
-          }
-        ],
-        "RULE-LOY-001": [
-          {
-            "reason": "business-rule-match",
-            "via": "expired,order,point"
-          }
-        ],
-        "RULE-LOY-002": [
-          {
-            "reason": "business-rule-match",
-            "via": "point"
-          }
-        ],
-        "RULE-LOY-003": [
-          {
-            "reason": "business-rule-match",
-            "via": "expired,point"
-          }
-        ]
-      },
-      "required": [],
-      "labels": {
-        "loyalty-program#AC-2": "relevant",
-        "RULE-LOY-001": "relevant",
-        "RULE-LOY-002": "irrelevant",
-        "RULE-LOY-003": "acceptable",
-        "node:module:packages/loyalty": "relevant",
-        "node:test-target:packages/loyalty": "relevant",
-        "loyalty-program#FR-2": "relevant"
-      },
-      "falsePositives": [
-        {
-          "id": "RULE-LOY-002",
-          "label": "irrelevant"
-        }
-      ],
-      "falseNegatives": [
-        {
-          "id": "loyalty-program#FR-2",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        },
-        {
-          "id": "node:module:packages/loyalty",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        },
-        {
-          "id": "node:test-target:packages/loyalty",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        }
-      ],
-      "metrics": {
-        "requiredRecall": null,
-        "relevantRecall": 0.4,
-        "precision": 0.6667,
-        "candidateRecall": 1,
-        "candidatePrecision": 0.8333
-      },
-      "tokens": {
-        "candidate": 242,
-        "included": 111,
-        "excluded": 131,
-        "total": 2008,
-        "routingIndexes": 0,
-        "superseded": 88,
-        "wholeFileBaseline": 1985
-      },
-      "exactVsWhole": [
-        {
-          "source": "sdd/features/loyalty-program/feature.spec.yaml",
           "objects": 1,
           "selectedTokens": 31,
-          "wholeTokens": 149
-        },
-        {
-          "source": "sdd/memory-bank/business/loyalty/rules.md",
-          "objects": 2,
-          "selectedTokens": 56,
           "wholeTokens": 60
-        },
-        {
-          "source": "sdd/memory-bank/business/loyalty/unresolved.md",
-          "objects": 1,
-          "selectedTokens": 24,
-          "wholeTokens": 28
         }
       ],
       "selection": {
@@ -1114,16 +930,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1191,
-          "remaining": 9
+          "used": 1189,
+          "remaining": 11
         },
         "summary": {
           "budget": 3200,
           "used": 817,
           "remaining": 2383
         },
-        "remaining": 9,
-        "utilization": 0.9925,
+        "remaining": 11,
+        "utilization": 0.9908,
         "warnings": [
           "optional-excluded"
         ]
@@ -1138,8 +954,6 @@
       "candidates": [
         "loyalty-program#AC-2",
         "RULE-LOY-001",
-        "RULE-LOY-002",
-        "RULE-LOY-003",
         "node:module:packages/loyalty",
         "node:test-target:packages/loyalty",
         "loyalty-program#FR-2"
@@ -1147,14 +961,6 @@
       "excluded": [
         {
           "id": "RULE-LOY-001",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-LOY-002",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-LOY-003",
           "exclusion": "budget"
         },
         {
@@ -1182,8 +988,6 @@
       "labels": {
         "loyalty-program#AC-2": "relevant",
         "RULE-LOY-001": "relevant",
-        "RULE-LOY-002": "irrelevant",
-        "RULE-LOY-003": "acceptable",
         "node:module:packages/loyalty": "relevant",
         "node:test-target:packages/loyalty": "relevant",
         "loyalty-program#FR-2": "relevant"
@@ -1216,16 +1020,16 @@
         "relevantRecall": 0.2,
         "precision": 1,
         "candidateRecall": 1,
-        "candidatePrecision": 0.8333
+        "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 242,
+        "candidate": 193,
         "included": 31,
-        "excluded": 211,
-        "total": 2001,
+        "excluded": 162,
+        "total": 2011,
         "routingIndexes": 0,
         "superseded": 88,
-        "wholeFileBaseline": 2058
+        "wholeFileBaseline": 2068
       },
       "exactVsWhole": [
         {
@@ -1240,16 +1044,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1184,
-          "remaining": 16
+          "used": 1194,
+          "remaining": 6
         },
         "summary": {
           "budget": 3200,
           "used": 817,
           "remaining": 2383
         },
-        "remaining": 16,
-        "utilization": 0.9867,
+        "remaining": 6,
+        "utilization": 0.995,
         "warnings": [
           "optional-excluded"
         ]
@@ -1277,19 +1081,19 @@
         "RULE-LOY-001": [
           {
             "reason": "business-domain-match",
-            "via": "loyalty"
+            "via": "loyalty:keyword"
           }
         ],
         "RULE-LOY-002": [
           {
             "reason": "business-domain-match",
-            "via": "loyalty"
+            "via": "loyalty:keyword"
           }
         ],
         "RULE-LOY-003": [
           {
             "reason": "business-domain-match",
-            "via": "loyalty"
+            "via": "loyalty:keyword"
           }
         ],
         "node:module:packages/loyalty": [
@@ -1398,19 +1202,19 @@
         "RULE-LOY-001": [
           {
             "reason": "business-domain-match",
-            "via": "loyalty"
+            "via": "loyalty:keyword"
           }
         ],
         "RULE-LOY-002": [
           {
             "reason": "business-domain-match",
-            "via": "loyalty"
+            "via": "loyalty:keyword"
           }
         ],
         "RULE-LOY-003": [
           {
             "reason": "business-domain-match",
-            "via": "loyalty"
+            "via": "loyalty:keyword"
           }
         ]
       },
@@ -1773,20 +1577,20 @@
         ],
         "RULE-LOY-001": [
           {
-            "reason": "business-rule-match",
-            "via": "loyalty,point"
+            "reason": "business-domain-match",
+            "via": "loyalty:domain"
           }
         ],
         "RULE-LOY-002": [
           {
-            "reason": "business-rule-match",
-            "via": "point"
+            "reason": "business-domain-match",
+            "via": "loyalty:domain"
           }
         ],
         "RULE-LOY-003": [
           {
-            "reason": "business-rule-match",
-            "via": "point"
+            "reason": "business-domain-match",
+            "via": "loyalty:domain"
           }
         ],
         "node:module:packages/loyalty": [
@@ -1979,23 +1783,15 @@
       "level": "normal",
       "selected": [
         "node:module:packages/billing",
-        "node:test-target:packages/billing",
-        "RULE-PAY-001",
-        "RULE-PAY-002"
+        "node:test-target:packages/billing"
       ],
       "candidates": [
         "node:module:packages/billing",
-        "node:test-target:packages/billing",
-        "RULE-PAY-001",
-        "RULE-PAY-002"
+        "node:test-target:packages/billing"
       ],
       "excluded": [],
       "reasons": {
         "node:module:packages/billing": [
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-PAY-001"
-          },
           {
             "reason": "module-match",
             "via": "billing"
@@ -2004,32 +1800,14 @@
         "node:test-target:packages/billing": [
           {
             "reason": "repo-index-evidence",
-            "via": "RULE-PAY-001"
-          },
-          {
-            "reason": "repo-index-evidence",
             "via": "node:module:packages/billing"
-          }
-        ],
-        "RULE-PAY-001": [
-          {
-            "reason": "business-domain-match",
-            "via": "payments"
-          }
-        ],
-        "RULE-PAY-002": [
-          {
-            "reason": "business-domain-match",
-            "via": "payments"
           }
         ]
       },
       "required": [],
       "labels": {
         "node:module:packages/billing": "relevant",
-        "node:test-target:packages/billing": "relevant",
-        "RULE-PAY-001": "acceptable",
-        "RULE-PAY-002": "acceptable"
+        "node:test-target:packages/billing": "relevant"
       },
       "falsePositives": [],
       "falseNegatives": [],
@@ -2041,10 +1819,10 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 158,
-        "included": 158,
+        "candidate": 109,
+        "included": 109,
         "excluded": 0,
-        "total": 1610,
+        "total": 1561,
         "routingIndexes": 137,
         "superseded": 52,
         "wholeFileBaseline": 1504
@@ -2055,12 +1833,6 @@
           "objects": 2,
           "selectedTokens": 109,
           "wholeTokens": 1020
-        },
-        {
-          "source": "sdd/memory-bank/business/payments/rules.md",
-          "objects": 2,
-          "selectedTokens": 49,
-          "wholeTokens": 52
         }
       ],
       "selection": {
@@ -2068,16 +1840,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 793,
-          "remaining": 407
+          "used": 744,
+          "remaining": 456
         },
         "summary": {
           "budget": 3200,
           "used": 817,
           "remaining": 2383
         },
-        "remaining": 407,
-        "utilization": 0.6608,
+        "remaining": 456,
+        "utilization": 0.62,
         "warnings": []
       }
     },
@@ -2271,7 +2043,7 @@
       },
       "fallback": {
         "wholeFileTokens": 88,
-        "exactTokens": 80,
+        "exactTokens": 31,
         "compareTo": "rule-lexical"
       }
     },
@@ -3036,7 +2808,8 @@
         "RULE-SPE-002",
         "RULE-SPE-003",
         "RULE-SPE-004",
-        "RULE-SPE-008"
+        "node:module:packages/cli",
+        "node:test-target:packages/cli"
       ],
       "candidates": [
         "spectra-core#FR-1",
@@ -3044,53 +2817,14 @@
         "RULE-SPE-002",
         "RULE-SPE-003",
         "RULE-SPE-004",
-        "RULE-SPE-008",
-        "RULE-SPE-005",
-        "RULE-SPE-006",
-        "RULE-SPE-007",
-        "RULE-SPE-009",
-        "RULE-SPE-010",
-        "RULE-SPE-011",
         "node:module:packages/cli",
-        "node:module:packages/core",
         "node:test-target:packages/cli",
+        "RULE-SPE-005",
         "spectra-core#AC-1"
       ],
       "excluded": [
         {
           "id": "RULE-SPE-005",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-006",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-007",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-009",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-010",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-011",
-          "exclusion": "budget"
-        },
-        {
-          "id": "node:module:packages/cli",
-          "exclusion": "budget"
-        },
-        {
-          "id": "node:module:packages/core",
-          "exclusion": "anchor-excluded"
-        },
-        {
-          "id": "node:test-target:packages/cli",
           "exclusion": "budget"
         },
         {
@@ -3108,31 +2842,77 @@
         "RULE-SPE-001": [
           {
             "reason": "business-rule-match",
-            "via": "command,explicit,layout,leave,migrate,project,runs,schema,spectra,untouched,update"
+            "via": "command,explicit,layout,migrate,schema"
           }
         ],
         "RULE-SPE-002": [
           {
             "reason": "business-rule-match",
-            "via": "command,migrate,project,spectra,update"
+            "via": "migrate,update"
           }
         ],
         "RULE-SPE-003": [
           {
             "reason": "business-rule-match",
-            "via": "command,project,spectra,untouched"
+            "via": "untouched"
           }
         ],
         "RULE-SPE-004": [
           {
             "reason": "business-rule-match",
-            "via": "migrate,project,schema,update"
+            "via": "schema"
           }
         ],
-        "RULE-SPE-008": [
+        "node:module:packages/cli": [
           {
-            "reason": "business-rule-match",
-            "via": "spectra"
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-001"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-002"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-003"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-004"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-005"
+          },
+          {
+            "reason": "module-match",
+            "via": "packages-cli"
+          }
+        ],
+        "node:test-target:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-001"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-002"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-003"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-004"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-005"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "node:module:packages/cli"
           }
         ]
       },
@@ -3143,16 +2923,9 @@
         "RULE-SPE-002": "relevant",
         "RULE-SPE-003": "irrelevant",
         "RULE-SPE-004": "acceptable",
-        "RULE-SPE-008": "irrelevant",
-        "RULE-SPE-005": "acceptable",
-        "RULE-SPE-006": "irrelevant",
-        "RULE-SPE-007": "irrelevant",
-        "RULE-SPE-009": "irrelevant",
-        "RULE-SPE-010": "irrelevant",
-        "RULE-SPE-011": "irrelevant",
         "node:module:packages/cli": "relevant",
-        "node:module:packages/core": "irrelevant",
         "node:test-target:packages/cli": "relevant",
+        "RULE-SPE-005": "acceptable",
         "spectra-core#AC-1": "irrelevant"
       },
       "falsePositives": [
@@ -3163,41 +2936,32 @@
         {
           "id": "RULE-SPE-003",
           "label": "irrelevant"
-        },
-        {
-          "id": "RULE-SPE-008",
-          "label": "irrelevant"
         }
       ],
-      "falseNegatives": [
-        {
-          "id": "node:module:packages/cli",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        },
-        {
-          "id": "node:test-target:packages/cli",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        }
-      ],
+      "falseNegatives": [],
       "metrics": {
         "requiredRecall": null,
-        "relevantRecall": 0.5,
-        "precision": 0.4,
+        "relevantRecall": 1,
+        "precision": 0.6667,
         "candidateRecall": 1,
-        "candidatePrecision": 0.2857
+        "candidatePrecision": 0.5714
       },
       "tokens": {
-        "candidate": 1866,
-        "included": 705,
-        "excluded": 1161,
-        "total": 1809,
+        "candidate": 864,
+        "included": 665,
+        "excluded": 199,
+        "total": 1769,
         "routingIndexes": 0,
         "superseded": 1663,
         "wholeFileBaseline": 2767
       },
       "exactVsWhole": [
+        {
+          "source": "repo-index",
+          "objects": 2,
+          "selectedTokens": 103,
+          "wholeTokens": 1910
+        },
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 1,
@@ -3206,8 +2970,8 @@
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
-          "objects": 5,
-          "selectedTokens": 675,
+          "objects": 4,
+          "selectedTokens": 532,
           "wholeTokens": 1513
         }
       ],
@@ -3216,16 +2980,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1199,
-          "remaining": 1
+          "used": 1159,
+          "remaining": 41
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 1,
-        "utilization": 0.9992,
+        "remaining": 41,
+        "utilization": 0.9658,
         "warnings": [
           "optional-excluded"
         ]
@@ -3251,13 +3015,13 @@
         "RULE-SPE-009": [
           {
             "reason": "business-rule-match",
-            "via": "business,token"
+            "via": "business"
           }
         ],
         "RULE-SPE-010": [
           {
             "reason": "business-rule-match",
-            "via": "budget,business,context"
+            "via": "budget,context"
           }
         ],
         "node:module:packages/cli": [
@@ -3350,196 +3114,115 @@
       "case": "spectra-repo-index",
       "level": "normal",
       "selected": [
-        "RULE-SPE-001",
-        "RULE-SPE-002",
-        "RULE-SPE-003",
-        "RULE-SPE-004",
-        "RULE-SPE-005"
-      ],
-      "candidates": [
-        "RULE-SPE-001",
-        "RULE-SPE-002",
-        "RULE-SPE-003",
-        "RULE-SPE-004",
-        "RULE-SPE-005",
-        "RULE-SPE-006",
-        "RULE-SPE-007",
         "RULE-SPE-008",
         "RULE-SPE-009",
-        "RULE-SPE-010",
-        "RULE-SPE-011",
         "node:module:packages/cli",
-        "node:module:packages/core",
         "node:test-target:packages/cli"
       ],
-      "excluded": [
-        {
-          "id": "RULE-SPE-006",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-007",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-008",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-009",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-010",
-          "exclusion": "budget"
-        },
-        {
-          "id": "RULE-SPE-011",
-          "exclusion": "budget"
-        },
-        {
-          "id": "node:module:packages/cli",
-          "exclusion": "budget"
-        },
-        {
-          "id": "node:module:packages/core",
-          "exclusion": "anchor-excluded"
-        },
-        {
-          "id": "node:test-target:packages/cli",
-          "exclusion": "budget"
-        }
+      "candidates": [
+        "RULE-SPE-008",
+        "RULE-SPE-009",
+        "node:module:packages/cli",
+        "node:test-target:packages/cli"
       ],
+      "excluded": [],
       "reasons": {
-        "RULE-SPE-001": [
+        "RULE-SPE-008": [
           {
             "reason": "business-rule-match",
-            "via": "change,package"
+            "via": "index,knowledge,repo"
           }
         ],
-        "RULE-SPE-002": [
+        "RULE-SPE-009": [
           {
             "reason": "business-rule-match",
-            "via": "package"
+            "via": "knowledge"
           }
         ],
-        "RULE-SPE-003": [
+        "node:module:packages/cli": [
           {
-            "reason": "business-rule-match",
-            "via": "change,package"
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-008"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-009"
+          },
+          {
+            "reason": "module-match",
+            "via": "packages-cli"
           }
         ],
-        "RULE-SPE-004": [
+        "node:test-target:packages/cli": [
           {
-            "reason": "business-rule-match",
-            "via": "package"
-          }
-        ],
-        "RULE-SPE-005": [
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-008"
+          },
           {
-            "reason": "business-rule-match",
-            "via": "package"
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-009"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "node:module:packages/cli"
           }
         ]
       },
       "required": [],
       "labels": {
-        "RULE-SPE-001": "irrelevant",
-        "RULE-SPE-002": "irrelevant",
-        "RULE-SPE-003": "irrelevant",
-        "RULE-SPE-004": "irrelevant",
-        "RULE-SPE-005": "irrelevant",
-        "RULE-SPE-006": "irrelevant",
-        "RULE-SPE-007": "irrelevant",
         "RULE-SPE-008": "relevant",
         "RULE-SPE-009": "acceptable",
-        "RULE-SPE-010": "irrelevant",
-        "RULE-SPE-011": "irrelevant",
         "node:module:packages/cli": "relevant",
-        "node:module:packages/core": "irrelevant",
         "node:test-target:packages/cli": "relevant"
       },
-      "falsePositives": [
-        {
-          "id": "RULE-SPE-001",
-          "label": "irrelevant"
-        },
-        {
-          "id": "RULE-SPE-002",
-          "label": "irrelevant"
-        },
-        {
-          "id": "RULE-SPE-003",
-          "label": "irrelevant"
-        },
-        {
-          "id": "RULE-SPE-004",
-          "label": "irrelevant"
-        },
-        {
-          "id": "RULE-SPE-005",
-          "label": "irrelevant"
-        }
-      ],
-      "falseNegatives": [
-        {
-          "id": "node:module:packages/cli",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        },
-        {
-          "id": "node:test-target:packages/cli",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        },
-        {
-          "id": "RULE-SPE-008",
-          "label": "relevant",
-          "cause": "budget-exclusion"
-        }
-      ],
+      "falsePositives": [],
+      "falseNegatives": [],
       "metrics": {
         "requiredRecall": null,
-        "relevantRecall": 0,
-        "precision": 0,
+        "relevantRecall": 1,
+        "precision": 1,
         "candidateRecall": 1,
-        "candidatePrecision": 0.2308
+        "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 1790,
-        "included": 685,
-        "excluded": 1105,
-        "total": 1789,
-        "routingIndexes": 0,
+        "candidate": 399,
+        "included": 399,
+        "excluded": 0,
+        "total": 1757,
+        "routingIndexes": 254,
         "superseded": 1663,
-        "wholeFileBaseline": 2767
+        "wholeFileBaseline": 3021
       },
       "exactVsWhole": [
         {
+          "source": "repo-index",
+          "objects": 2,
+          "selectedTokens": 103,
+          "wholeTokens": 1910
+        },
+        {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
-          "objects": 5,
-          "selectedTokens": 685,
+          "objects": 2,
+          "selectedTokens": 296,
           "wholeTokens": 1513
         }
       ],
       "selection": {
-        "status": "budget-exhausted",
+        "status": "within-budget",
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1179,
-          "remaining": 21
+          "used": 1147,
+          "remaining": 53
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 21,
-        "utilization": 0.9825,
-        "warnings": [
-          "optional-excluded"
-        ]
+        "remaining": 53,
+        "utilization": 0.9558,
+        "warnings": []
       }
     },
     {
@@ -3605,6 +3288,938 @@
         },
         "remaining": 402,
         "utilization": 0.665,
+        "warnings": []
+      }
+    },
+    {
+      "case": "spectra-explicit-rule",
+      "level": "normal",
+      "selected": [
+        "RULE-SPE-006",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli"
+      ],
+      "candidates": [
+        "RULE-SPE-006",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli"
+      ],
+      "excluded": [],
+      "reasons": {
+        "RULE-SPE-006": [
+          {
+            "reason": "explicit-reference",
+            "via": "RULE-SPE-006"
+          }
+        ],
+        "node:module:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          }
+        ],
+        "node:module:packages/core": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          }
+        ],
+        "node:test-target:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-006"
+          }
+        ]
+      },
+      "required": [
+        "RULE-SPE-006"
+      ],
+      "labels": {
+        "RULE-SPE-006": "required",
+        "node:module:packages/cli": "relevant",
+        "node:module:packages/core": "relevant",
+        "node:test-target:packages/cli": "relevant"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": 1,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 313,
+        "included": 313,
+        "excluded": 0,
+        "total": 1671,
+        "routingIndexes": 254,
+        "superseded": 0,
+        "wholeFileBaseline": 1358
+      },
+      "exactVsWhole": [
+        {
+          "source": "repo-index",
+          "objects": 3,
+          "selectedTokens": 153,
+          "wholeTokens": 1910
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 1,
+          "selectedTokens": 160,
+          "wholeTokens": 1513
+        }
+      ],
+      "selection": {
+        "status": "within-budget",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 1061,
+          "remaining": 139
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": 139,
+        "utilization": 0.8842,
+        "warnings": []
+      }
+    },
+    {
+      "case": "spectra-explicit-rule",
+      "level": "tight",
+      "selected": [
+        "RULE-SPE-006"
+      ],
+      "candidates": [
+        "RULE-SPE-006",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli"
+      ],
+      "excluded": [
+        {
+          "id": "node:module:packages/cli",
+          "exclusion": "budget"
+        },
+        {
+          "id": "node:module:packages/core",
+          "exclusion": "budget"
+        },
+        {
+          "id": "node:test-target:packages/cli",
+          "exclusion": "budget"
+        }
+      ],
+      "reasons": {
+        "RULE-SPE-006": [
+          {
+            "reason": "explicit-reference",
+            "via": "RULE-SPE-006"
+          }
+        ]
+      },
+      "required": [
+        "RULE-SPE-006"
+      ],
+      "labels": {
+        "RULE-SPE-006": "required",
+        "node:module:packages/cli": "relevant",
+        "node:module:packages/core": "relevant",
+        "node:test-target:packages/cli": "relevant"
+      },
+      "falsePositives": [],
+      "falseNegatives": [
+        {
+          "id": "node:module:packages/cli",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        },
+        {
+          "id": "node:test-target:packages/cli",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        },
+        {
+          "id": "node:module:packages/core",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        }
+      ],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": 0,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 313,
+        "included": 160,
+        "excluded": 153,
+        "total": 1815,
+        "routingIndexes": 0,
+        "superseded": 0,
+        "wholeFileBaseline": 1655
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 1,
+          "selectedTokens": 160,
+          "wholeTokens": 1513
+        }
+      ],
+      "selection": {
+        "status": "mandatory-overflow",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 1205,
+          "remaining": -5
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": -5,
+        "utilization": 1.0042,
+        "warnings": [
+          "mandatory-overflow",
+          "optional-excluded"
+        ]
+      }
+    },
+    {
+      "case": "spectra-explicit-rule",
+      "level": "very-tight",
+      "selected": [
+        "RULE-SPE-006"
+      ],
+      "candidates": [
+        "RULE-SPE-006",
+        "node:module:packages/cli",
+        "node:module:packages/core",
+        "node:test-target:packages/cli"
+      ],
+      "excluded": [
+        {
+          "id": "node:module:packages/cli",
+          "exclusion": "budget"
+        },
+        {
+          "id": "node:module:packages/core",
+          "exclusion": "budget"
+        },
+        {
+          "id": "node:test-target:packages/cli",
+          "exclusion": "budget"
+        }
+      ],
+      "reasons": {
+        "RULE-SPE-006": [
+          {
+            "reason": "explicit-reference",
+            "via": "RULE-SPE-006"
+          }
+        ]
+      },
+      "required": [
+        "RULE-SPE-006"
+      ],
+      "labels": {
+        "RULE-SPE-006": "required",
+        "node:module:packages/cli": "relevant",
+        "node:module:packages/core": "relevant",
+        "node:test-target:packages/cli": "relevant"
+      },
+      "falsePositives": [],
+      "falseNegatives": [
+        {
+          "id": "node:module:packages/cli",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        },
+        {
+          "id": "node:test-target:packages/cli",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        },
+        {
+          "id": "node:module:packages/core",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        }
+      ],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": 0,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 313,
+        "included": 160,
+        "excluded": 153,
+        "total": 1909,
+        "routingIndexes": 0,
+        "superseded": 0,
+        "wholeFileBaseline": 1749
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 1,
+          "selectedTokens": 160,
+          "wholeTokens": 1513
+        }
+      ],
+      "selection": {
+        "status": "mandatory-overflow",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 1299,
+          "remaining": -99
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": -99,
+        "utilization": 1.0825,
+        "warnings": [
+          "mandatory-overflow",
+          "optional-excluded"
+        ]
+      }
+    },
+    {
+      "case": "spectra-explicit-fr",
+      "level": "normal",
+      "selected": [
+        "spectra-core#FR-2",
+        "spectra-core#AC-2"
+      ],
+      "candidates": [
+        "spectra-core#FR-2",
+        "spectra-core#AC-2"
+      ],
+      "excluded": [],
+      "reasons": {
+        "spectra-core#FR-2": [
+          {
+            "reason": "explicit-reference",
+            "via": "spectra-core#FR-2"
+          }
+        ],
+        "spectra-core#AC-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-core#FR-2"
+          }
+        ]
+      },
+      "required": [
+        "spectra-core#FR-2"
+      ],
+      "labels": {
+        "spectra-core#FR-2": "required",
+        "spectra-core#AC-2": "relevant"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": 1,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 73,
+        "included": 73,
+        "excluded": 0,
+        "total": 1431,
+        "routingIndexes": 254,
+        "superseded": 0,
+        "wholeFileBaseline": 1358
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/features/spectra-core/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 73,
+          "wholeTokens": 394
+        }
+      ],
+      "selection": {
+        "status": "within-budget",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 821,
+          "remaining": 379
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": 379,
+        "utilization": 0.6842,
+        "warnings": []
+      }
+    },
+    {
+      "case": "spectra-explicit-ac",
+      "level": "normal",
+      "selected": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "candidates": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "excluded": [],
+      "reasons": {
+        "spectra-core#AC-2": [
+          {
+            "reason": "explicit-reference",
+            "via": "spectra-core#AC-2"
+          }
+        ],
+        "spectra-core#FR-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-core#AC-2"
+          }
+        ]
+      },
+      "required": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "labels": {
+        "spectra-core#AC-2": "required",
+        "spectra-core#FR-2": "required"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": null,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 73,
+        "included": 73,
+        "excluded": 0,
+        "total": 1431,
+        "routingIndexes": 254,
+        "superseded": 0,
+        "wholeFileBaseline": 1358
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/features/spectra-core/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 73,
+          "wholeTokens": 394
+        }
+      ],
+      "selection": {
+        "status": "within-budget",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 821,
+          "remaining": 379
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": 379,
+        "utilization": 0.6842,
+        "warnings": []
+      }
+    },
+    {
+      "case": "spectra-explicit-ac",
+      "level": "tight",
+      "selected": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "candidates": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "excluded": [],
+      "reasons": {
+        "spectra-core#AC-2": [
+          {
+            "reason": "explicit-reference",
+            "via": "spectra-core#AC-2"
+          }
+        ],
+        "spectra-core#FR-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-core#AC-2"
+          }
+        ]
+      },
+      "required": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "labels": {
+        "spectra-core#AC-2": "required",
+        "spectra-core#FR-2": "required"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": null,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 73,
+        "included": 73,
+        "excluded": 0,
+        "total": 1848,
+        "routingIndexes": 0,
+        "superseded": 0,
+        "wholeFileBaseline": 1775
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/features/spectra-core/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 73,
+          "wholeTokens": 394
+        }
+      ],
+      "selection": {
+        "status": "mandatory-overflow",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 1238,
+          "remaining": -38
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": -38,
+        "utilization": 1.0317,
+        "warnings": [
+          "mandatory-overflow",
+          "optional-excluded"
+        ]
+      }
+    },
+    {
+      "case": "spectra-explicit-ac",
+      "level": "very-tight",
+      "selected": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "candidates": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "excluded": [],
+      "reasons": {
+        "spectra-core#AC-2": [
+          {
+            "reason": "explicit-reference",
+            "via": "spectra-core#AC-2"
+          }
+        ],
+        "spectra-core#FR-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-core#AC-2"
+          }
+        ]
+      },
+      "required": [
+        "spectra-core#AC-2",
+        "spectra-core#FR-2"
+      ],
+      "labels": {
+        "spectra-core#AC-2": "required",
+        "spectra-core#FR-2": "required"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": 1,
+        "relevantRecall": null,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 73,
+        "included": 73,
+        "excluded": 0,
+        "total": 1870,
+        "routingIndexes": 0,
+        "superseded": 0,
+        "wholeFileBaseline": 1797
+      },
+      "exactVsWhole": [
+        {
+          "source": "sdd/features/spectra-core/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 73,
+          "wholeTokens": 394
+        }
+      ],
+      "selection": {
+        "status": "mandatory-overflow",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 1260,
+          "remaining": -60
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": -60,
+        "utilization": 1.05,
+        "warnings": [
+          "mandatory-overflow",
+          "optional-excluded"
+        ]
+      }
+    },
+    {
+      "case": "spectra-generic-change",
+      "level": "normal",
+      "selected": [
+        "node:module:packages/cli",
+        "node:test-target:packages/cli"
+      ],
+      "candidates": [
+        "node:module:packages/cli",
+        "node:test-target:packages/cli"
+      ],
+      "excluded": [],
+      "reasons": {
+        "node:module:packages/cli": [
+          {
+            "reason": "module-match",
+            "via": "packages-cli"
+          }
+        ],
+        "node:test-target:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "node:module:packages/cli"
+          }
+        ]
+      },
+      "required": [],
+      "labels": {
+        "node:module:packages/cli": "relevant",
+        "node:test-target:packages/cli": "relevant"
+      },
+      "falsePositives": [],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": null,
+        "relevantRecall": 1,
+        "precision": 1,
+        "candidateRecall": 1,
+        "candidatePrecision": 1
+      },
+      "tokens": {
+        "candidate": 103,
+        "included": 103,
+        "excluded": 0,
+        "total": 1461,
+        "routingIndexes": 254,
+        "superseded": 1663,
+        "wholeFileBaseline": 3021
+      },
+      "exactVsWhole": [
+        {
+          "source": "repo-index",
+          "objects": 2,
+          "selectedTokens": 103,
+          "wholeTokens": 1910
+        }
+      ],
+      "selection": {
+        "status": "within-budget",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 851,
+          "remaining": 349
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": 349,
+        "utilization": 0.7092,
+        "warnings": []
+      }
+    },
+    {
+      "case": "spectra-generic-package",
+      "level": "normal",
+      "selected": [
+        "RULE-SPE-002",
+        "node:module:packages/cli",
+        "node:test-target:packages/cli"
+      ],
+      "candidates": [
+        "RULE-SPE-002",
+        "node:module:packages/cli",
+        "node:test-target:packages/cli"
+      ],
+      "excluded": [],
+      "reasons": {
+        "RULE-SPE-002": [
+          {
+            "reason": "business-rule-match",
+            "via": "update"
+          }
+        ],
+        "node:module:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-002"
+          },
+          {
+            "reason": "module-match",
+            "via": "packages-cli"
+          }
+        ],
+        "node:test-target:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-002"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "node:module:packages/cli"
+          }
+        ]
+      },
+      "required": [],
+      "labels": {
+        "RULE-SPE-002": "irrelevant",
+        "node:module:packages/cli": "relevant",
+        "node:test-target:packages/cli": "relevant"
+      },
+      "falsePositives": [
+        {
+          "id": "RULE-SPE-002",
+          "label": "irrelevant"
+        }
+      ],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": null,
+        "relevantRecall": 1,
+        "precision": 0.6667,
+        "candidateRecall": 1,
+        "candidatePrecision": 0.6667
+      },
+      "tokens": {
+        "candidate": 226,
+        "included": 226,
+        "excluded": 0,
+        "total": 1584,
+        "routingIndexes": 254,
+        "superseded": 1663,
+        "wholeFileBaseline": 3021
+      },
+      "exactVsWhole": [
+        {
+          "source": "repo-index",
+          "objects": 2,
+          "selectedTokens": 103,
+          "wholeTokens": 1910
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 1,
+          "selectedTokens": 123,
+          "wholeTokens": 1513
+        }
+      ],
+      "selection": {
+        "status": "within-budget",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 974,
+          "remaining": 226
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": 226,
+        "utilization": 0.8117,
+        "warnings": []
+      }
+    },
+    {
+      "case": "spectra-generic-command",
+      "level": "normal",
+      "selected": [
+        "RULE-SPE-001",
+        "RULE-SPE-005",
+        "node:module:packages/cli",
+        "node:test-target:packages/cli"
+      ],
+      "candidates": [
+        "RULE-SPE-001",
+        "RULE-SPE-005",
+        "node:module:packages/cli",
+        "node:test-target:packages/cli"
+      ],
+      "excluded": [],
+      "reasons": {
+        "RULE-SPE-001": [
+          {
+            "reason": "business-rule-match",
+            "via": "command,require"
+          }
+        ],
+        "RULE-SPE-005": [
+          {
+            "reason": "business-rule-match",
+            "via": "command"
+          }
+        ],
+        "node:module:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-001"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-005"
+          },
+          {
+            "reason": "module-match",
+            "via": "packages-cli"
+          }
+        ],
+        "node:test-target:packages/cli": [
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-001"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "RULE-SPE-005"
+          },
+          {
+            "reason": "repo-index-evidence",
+            "via": "node:module:packages/cli"
+          }
+        ]
+      },
+      "required": [],
+      "labels": {
+        "RULE-SPE-001": "irrelevant",
+        "RULE-SPE-005": "irrelevant",
+        "node:module:packages/cli": "relevant",
+        "node:test-target:packages/cli": "relevant"
+      },
+      "falsePositives": [
+        {
+          "id": "RULE-SPE-001",
+          "label": "irrelevant"
+        },
+        {
+          "id": "RULE-SPE-005",
+          "label": "irrelevant"
+        }
+      ],
+      "falseNegatives": [],
+      "metrics": {
+        "requiredRecall": null,
+        "relevantRecall": 1,
+        "precision": 0.5,
+        "candidateRecall": 1,
+        "candidatePrecision": 0.5
+      },
+      "tokens": {
+        "candidate": 380,
+        "included": 380,
+        "excluded": 0,
+        "total": 1738,
+        "routingIndexes": 254,
+        "superseded": 1663,
+        "wholeFileBaseline": 3021
+      },
+      "exactVsWhole": [
+        {
+          "source": "repo-index",
+          "objects": 2,
+          "selectedTokens": 103,
+          "wholeTokens": 1910
+        },
+        {
+          "source": "sdd/memory-bank/business/spectra-product/rules.md",
+          "objects": 2,
+          "selectedTokens": 277,
+          "wholeTokens": 1513
+        }
+      ],
+      "selection": {
+        "status": "within-budget",
+        "knowledge": "fresh",
+        "full": {
+          "budget": 1200,
+          "used": 1128,
+          "remaining": 72
+        },
+        "summary": {
+          "budget": 3200,
+          "used": 610,
+          "remaining": 2590
+        },
+        "remaining": 72,
+        "utilization": 0.94,
         "warnings": []
       }
     }

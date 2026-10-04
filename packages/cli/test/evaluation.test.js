@@ -38,7 +38,7 @@ const byId = (id, level = "normal") => results.runs.find((run) => run.case === i
 test("corpus: labelled by hand, disjoint, typed gaps, covers the required scenarios", () => {
   const ids = corpus.cases.map((entry) => entry.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.ok(corpus.cases.length >= 12 && corpus.cases.length <= 20, `${corpus.cases.length} cases`);
+  assert.ok(corpus.cases.length >= 12 && corpus.cases.length <= 30, `${corpus.cases.length} cases`); // 20 in Phase 1C, 26 with the Phase 1E additions
   for (const entry of corpus.cases) {
     const { required = [], relevant = [], acceptable = [], irrelevant = [] } = entry.expect;
     const all = [...required, ...relevant, ...acceptable, ...irrelevant];
@@ -47,7 +47,7 @@ test("corpus: labelled by hand, disjoint, typed gaps, covers the required scenar
     for (const gap of entry.gaps ?? []) assert.match(gap.type, /^missing (business rule|requirement|module relationship|test relationship|domain mapping)$/);
   }
   const categories = new Set(corpus.cases.map((entry) => entry.category));
-  for (const needed of ["explicit-reference", "business-rule-lexical", "business-domain-fallback", "feature-lexical", "changed-file", "explicit-module", "rule-module-evidence", "unrelated", "mandatory-overflow", "fallback", "dogfood"]) {
+  for (const needed of ["explicit-reference", "business-rule-lexical", "business-domain-fallback", "feature-lexical", "changed-file", "explicit-module", "rule-module-evidence", "unrelated", "mandatory-overflow", "fallback", "dogfood", "generic-phrase"]) {
     assert.ok(categories.has(needed), needed);
   }
   assert.ok(corpus.cases.filter((entry) => entry.world === "spectra").length >= 3);

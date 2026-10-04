@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { getSddRoot } from "../project-layout.js";
-import { parseRuleSections, ruleAffectedModules, ruleStatuses } from "../business/rule-sections.js";
+import { parseRuleSections, ruleAffectedModules, ruleMeaning, ruleStatuses } from "../business/rule-sections.js";
 import { readBusinessIndexes, resolveBusinessPath } from "../business/repository.js";
 import { rowValue } from "../business/parser.js";
 import { getFeatureBundle, getFeatureDirs } from "../specs/feature-bundles.js";
@@ -67,7 +67,7 @@ function enumerateBusinessRules(projectRoot) {
   return collectRuleSections(projectRoot).map((entry) => {
     if (seen.has(entry.section.id)) throw new Error(`Duplicate business rule ID: ${entry.section.id}`);
     seen.add(entry.section.id);
-    return { reference: ruleReference(projectRoot, entry), signature: sha256(entry.section.raw.trimEnd()), terms: termsOf(entry.section.raw) };
+    return { reference: ruleReference(projectRoot, entry), signature: sha256(entry.section.raw.trimEnd()), terms: termsOf(ruleMeaning(entry.section)) };
   });
 }
 
