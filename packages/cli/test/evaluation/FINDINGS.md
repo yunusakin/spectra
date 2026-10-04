@@ -136,3 +136,38 @@ The goal policy lists both `projectSummary` and `projectBrief`; the `intake-core
 | Full-file entries include HTML-comment template examples (255 of 681 brief tokens) | BUDGET POLICY REMAINS |
 | In the standard layout the release entry resolves `<root>/.spectra/RELEASE_SUMMARY.md`; a project-root file is never read | KNOWLEDGE COVERAGE GAP (pre-existing, unchanged) |
 | No RULE → FR schema; no feature requirements for install lifecycle, resolver, repo index, release approval | TRACEABILITY GAP / DEFER BEYOND PHASE 1 |
+
+## Phase 1F.2 addendum — decide context semantics (retrieval and corpus frozen)
+
+Measured with `budget-matrix.mjs` (`budget-matrix.*.1f2-before.json` / `.1f2-after.json`). The evaluation report is byte-identical before and after (required recall 100.0%, relevant recall 93.0%, precision 82.7%, FP 13, FN 4, candidate tokens 7601). Candidate IDs, the four implementer dogfood tasks and the two ship dogfood tasks are identical.
+
+Change. The `decide` goal now lists `projectBriefClean` instead of `projectBrief`: the canonical brief with `<!-- ... -->` authoring comments removed and everything else verbatim (fenced code and inline HTML stay; an unclosed comment is left in place). It is a derived cache file (`projectbrief.decide.md`, rebuilt when the brief changes), charged to the markdown pool like the raw file was. The raw brief is now a `decide` escalation entry. The change is on the goal, so any role using `decide` gets it; planner and architect are the only roles that do in practice.
+
+| Spectra repo | markdown mandatory | markdown headroom | status | pack total |
+|---|---:|---:|---|---:|
+| planner / decide before → after | 1056 → 801 | −356 → −101 | mandatory-overflow → mandatory-overflow | 2033 → 1778 |
+| architect / decide before → after | 1172 → 917 | −172 → 83 | mandatory-overflow → budget-exhausted | 2060 → 1878 |
+
+Raw brief 681 tokens; comment content 255; derived brief 426 (the 1F.1 estimate held exactly). Fresh init: planner/decide 697 → 423 (headroom 3 → 277, now within-budget), architect/decide 813 → 539. Summary pool unchanged everywhere.
+
+Semantic coverage on the real brief:
+
+| Category | Raw brief | projectSummary | Derived brief |
+|---|---|---|---|
+| Product context prose | yes | no (bullets only) | yes |
+| Functional requirements | 4 | first 3 | 4 |
+| Non-functional requirements | 3 | none | 3 |
+| Security constraints | 2 | 1 (shared first-3 limit) | 2 |
+| Organizational constraints | 1 | none | 1 |
+| Template examples | 255 tokens | no | removed |
+
+### Planner decision — no budget change (P2 conditions not all met)
+
+planner/decide is still 101 tokens over its 700-token markdown budget (375 minimal rules + 426 brief). The remaining content is semantic and mandatory by policy, the gap is small, and fresh init is healthy. But the brief is user-authored and grows with the project, so a fixed increase would only choose the project size at which the overflow reappears; condition 7 ("no project-size scaling defect hidden") cannot be shown. Overflow stays reported as `mandatory-overflow`, uncut. The 700 budget was effectively sized for an unfilled template (697 before this change), which is the product question.
+
+| Finding | Class |
+|---|---|
+| planner/decide −101 | PRODUCT SEMANTICS DECISION (budget vs contract) |
+| architect/decide headroom 83 | ACCEPTABLE CURRENT LIMITATION (grows with the brief) |
+| Standard layout reads only `<root>/.spectra/RELEASE_SUMMARY.md` | KNOWLEDGE COVERAGE GAP (unchanged) |
+| No RULE → FR schema; no requirements for lifecycle, resolver, repo index, release approval | TRACEABILITY GAP / DEFER BEYOND PHASE 1 |
