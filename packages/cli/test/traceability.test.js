@@ -164,10 +164,10 @@ test("validation: missing target, bad syntax, non-feature target, duplicates and
     ["Governs: alpha#FR-1\nGoverns: alpha#FR-2", /RULE-LOY-001.*more than one Governs/i]
   ];
   for (const [line, pattern] of cases) {
-    const errors = validateBusinessContext(path.join(project({ governs: line }), ".spectra"));
+    const errors = validateBusinessContext(project({ governs: line }));
     assert.ok(errors.some((error) => pattern.test(error)), `${line} -> ${JSON.stringify(errors)}`);
   }
-  assert.deepEqual(validateBusinessContext(path.join(project(), ".spectra")), []);
+  assert.deepEqual(validateBusinessContext(project()), []);
 });
 
 test("`spectra validate` reports a broken Governs target and stops", () => {
@@ -297,7 +297,7 @@ test("a corrupt evidence file or knowledge map never breaks tracing; recording r
 test("a project without Governs or feature specs stays valid and reports an incomplete trace", () => {
   const root = project({ governs: null });
   fs.rmSync(path.join(sdd(root), "features"), { recursive: true });
-  assert.deepEqual(validateBusinessContext(path.join(root, ".spectra")), []);
+  assert.deepEqual(validateBusinessContext(root), []);
   const metrics = traceabilityMetrics(buildTraceability(root), readVerificationEvidence(root));
   assert.equal(metrics.rulesWithRequirementLink, 0);
   assert.equal(metrics.requirements, 0);
