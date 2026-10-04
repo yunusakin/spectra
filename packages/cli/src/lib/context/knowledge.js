@@ -5,18 +5,21 @@ import { loadKnowledgeMap } from "../knowledge/map.js";
 import { readKnowledgeObject } from "../knowledge/address.js";
 import { termsOf } from "../knowledge/terms.js";
 
-// Strongest reason wins the ordering; all reasons are kept for explainability.
-// 1 explicit > 3 direct relationship > 4 routing > 5 changed file > 6 lexical.
-const REASON_RANK = {
-  "explicit-reference": 1,
-  "feature-relationship": 3,
-  "repo-index-evidence": 3,
-  "business-rule-match": 4,
-  "business-domain-match": 4,
-  "module-match": 4,
-  "changed-file": 5,
+// Discrete selection tiers; the strongest reason sets a candidate's priority and
+// all reasons are kept for explainability. Priority 0 means required: it is never
+// dropped for budget (see selection.js). A Repo Index module reached from a rule
+// or a changed file is an anchor (3); its test-target is secondary evidence (4).
+const REASON_PRIORITY = {
+  "explicit-reference": 0,
+  "feature-relationship": 1,
+  "business-rule-match": 2,
+  "module-match": 3,
+  "changed-file": 3,
+  "repo-index-evidence": 4,
+  "business-domain-match": 5,
   "feature-match": 6
 };
+const reasonPriority = ({ reason }, kind) => (reason === "repo-index-evidence" && kind === "module" ? 3 : REASON_PRIORITY[reason]);
 const FEATURE_KINDS = new Set(["functional-requirement", "non-functional-requirement", "acceptance-scenario"]);
 const MIN_FEATURE_TERM_OVERLAP = 2;
 
@@ -127,8 +130,15 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
     }
   }
 
-  const rank = (reasons) => Math.min(...reasons.map(({ reason }) => REASON_RANK[reason]));
-  const ordered = [...candidates].sort(([idA, a], [idB, b]) => rank(a) - rank(b) || (idA < idB ? -1 : idA > idB ? 1 : 0));
+  // Required: explicit references, plus the requirement an explicitly named scenario
+  // covers (the scenario cannot be interpreted without it). The reverse direction
+  // (requirement -> covering scenario) is evidence only, so it stays optional.
+  const required = new Set([...candidates].filter(([, reasons]) => reasons.some(({ reason }) => reason === "explicit-reference")).map(([id]) => id));
+  for (const [id, reasons] of candidates) {
+    if (reasons.some(({ reason, via }) => reason === "feature-relationship" && required.has(via) && byId.get(via).kind === "acceptance-scenario" && byId.get(id).kind !== "acceptance-scenario")) required.add(id);
+  }
+  const priorityOf = (id) => (required.has(id) ? 0 : Math.min(...candidates.get(id).map((reason) => reasonPriority(reason, byId.get(id).kind))));
+  const ordered = [...candidates];
 
   const entries = [];
   for (const [id, reasons] of ordered) {
@@ -146,7 +156,9 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
       address: reference.address,
       provenance: reference.provenance,
       status: reference.status,
-      reasons: reasons.sort((a, b) => REASON_RANK[a.reason] - REASON_RANK[b.reason] || (a.via < b.via ? -1 : 1)),
+      required: required.has(id),
+      priority: priorityOf(id),
+      reasons: reasons.sort((a, b) => reasonPriority(a, reference.kind) - reasonPriority(b, reference.kind) || (a.via < b.via ? -1 : 1)),
       content,
       exists: true,
       changed: false,

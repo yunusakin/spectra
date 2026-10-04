@@ -6,6 +6,7 @@ import { getChangedFiles as collectChangedFiles } from "../git-diff.js";
 import { buildRoute } from "../business-context.js";
 import { ENTRY_DEFS } from "./sources.js";
 import { resolveKnowledgeEntries } from "./knowledge.js";
+import { poolOf, selectContext } from "./selection.js";
 import { GOAL_POLICIES, ROLE_POLICIES, normalizeGoal, normalizeRole, resolveTask } from "./policies.js";
 import { getCacheDir, getContextRoot } from "./roots.js";
 import { ensureContextSummaries } from "./summaries.js";
@@ -127,8 +128,10 @@ const MAX_REPO_INDEX_MODULES = 25;
 // participates in token budgets or entry selection, so a project that has not
 // run `spectra index` yet keeps producing exactly the same context pack as
 // before. It only surfaces what the index already knows, never inferring
-// business meaning of its own.
-function buildRepoIndexSummary(projectRoot) {
+// business meaning of its own. In `--route-task` mode the module list is omitted:
+// exact Repo Index records are resolved, budgeted entries there, so this stays
+// metadata only (available/stats/hint).
+function buildRepoIndexSummary(projectRoot, { includeModules = true } = {}) {
   const index = readRepoIndex(projectRoot);
   if (!index) {
     return { available: false };
@@ -151,7 +154,7 @@ function buildRepoIndexSummary(projectRoot) {
     generatedAt: index.generatedAt,
     ecosystems: index.ecosystems,
     stats: index.stats,
-    modules,
+    ...(includeModules ? { modules } : {}),
     hint: "Run `spectra index --explain` for full module/build/test/dependency evidence; `spectra index --check` to verify it is still current."
   };
 }
@@ -228,6 +231,7 @@ function buildContextPack({
   let avoid = rolePolicy.avoid.filter((candidate) => !entries.some((entry) => entry.path === candidate));
   let route;
   let knowledge;
+  let selection;
 
   // `--route-task`: business/module routing plus exact Knowledge Map candidates.
   // The route's whole-file rule entries for matched domains are replaced by the
@@ -243,15 +247,17 @@ function buildContextPack({
       resolved = { entries: [], mapStatus: "unavailable", error: error.message };
     }
     const existingPaths = new Set(entries.map((entry) => entry.path));
-    const replacedRuleFiles = [];
+    const supersededFiles = new Set();
+    const routingIndexes = [];
     for (const entry of route.entries) {
       if (existingPaths.has(entry.path)) continue;
+      const absolutePath = path.join(route.repoRoot, entry.path);
       if (entry.reason.startsWith("domain: ") && !resolved.error) {
-        replacedRuleFiles.push(entry.path);
+        // Exact rule objects replace the whole rules/unresolved file.
+        supersededFiles.add(entry.path);
         continue;
       }
-      const absolutePath = path.join(route.repoRoot, entry.path);
-      entries.push({
+      const routed = {
         ...entry,
         absolutePath,
         exists: fs.existsSync(absolutePath),
@@ -259,11 +265,36 @@ function buildContextPack({
         changedRefs: [],
         estimatedTokens: estimateTokensFromFile(absolutePath),
         source: "route"
-      });
+      };
+      // The routing policy and fallback whole files are required; the module/domain
+      // index files only explain routing, so they are the lowest optional tier.
+      if (entry.reason === "module index" || entry.reason === "domain index") {
+        routingIndexes.push(routed);
+      } else {
+        entries.push(routed);
+      }
       existingPaths.add(entry.path);
     }
-    entries.push(...resolved.entries);
-    avoid = [...new Set([...avoid, ...route.deferred, ...replacedRuleFiles])].filter((candidate) => !existingPaths.has(candidate));
+    const selected = selectContext({
+      baseline: entries,
+      resolved: resolved.entries,
+      optionalBaseline: routingIndexes,
+      budgets: rolePolicy.budgets,
+      superseded: [...supersededFiles].map((entryPath) => ({ path: entryPath, estimatedTokens: estimateTokensFromFile(path.join(route.repoRoot, entryPath)) })),
+      fallbackError: resolved.error
+    });
+    entries.push(...selected.entries);
+    selection = selected.selection;
+    avoid = [...new Set([...avoid, ...route.deferred, ...supersededFiles])].filter((candidate) => !existingPaths.has(candidate));
+    // Routing decisions only: `entries` / `selection` are the final selected context.
+    const budgetExcluded = new Set(selection.excluded.map((entry) => entry.id));
+    route = {
+      ...route,
+      entries: route.entries.map((entry) => ({
+        ...entry,
+        selection: supersededFiles.has(entry.path) ? "superseded-by-exact-object" : budgetExcluded.has(entry.path) ? "excluded-by-budget" : "included"
+      }))
+    };
     knowledge = { map: resolved.mapStatus, resolved: resolved.entries.length, ...(resolved.error ? { error: resolved.error } : {}) };
   }
 
@@ -271,7 +302,7 @@ function buildContextPack({
     (accumulator, entry) => {
       accumulator.estimatedTokens += entry.estimatedTokens;
       // Resolved objects are markdown-sized content: they count toward `full`.
-      accumulator[entry.mode === "object" ? "full" : entry.mode] += entry.estimatedTokens;
+      accumulator[poolOf(entry)] += entry.estimatedTokens;
       return accumulator;
     },
     { estimatedTokens: 0, summary: 0, full: 0 }
@@ -288,8 +319,8 @@ function buildContextPack({
     escalation: goalPolicy.escalation.map((entryId) => ENTRY_DEFS[entryId].path),
     entries,
     totals,
-    repoIndex: buildRepoIndexSummary(projectRoot),
-    ...(route ? { route, knowledge } : {})
+    repoIndex: buildRepoIndexSummary(projectRoot, { includeModules: !route }),
+    ...(route ? { route, knowledge, selection } : {})
   };
 }
 

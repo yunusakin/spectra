@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Changed
+- `spectra context --route-task` selects resolved knowledge within the existing role budget: baseline and explicit references are never dropped (overflow is reported as `mandatory-overflow`), optional objects are included by deterministic tier or listed under `selection.excluded`. JSON gains `selection` (status, budgets, included, excluded, superseded, warnings); `repoIndex.modules` is omitted in route mode, and `route.entries[].selection` marks whole files replaced by exact objects. Plain `spectra context` is unchanged.
 - `spectra update` updates application software only; project layout and installation-schema changes use the explicit, per-project `spectra migrate` command.
 - Documentation distinguishes the synchronized application release, numeric project `schemaVersion`, and the `spectra/v2` contract namespace.
 - Native application updates retain verified version directories and preserve original executable bytes for update recovery; no public rollback command is provided.
