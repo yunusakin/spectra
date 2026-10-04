@@ -1,0 +1,242 @@
+# Phase 1C evaluation corpus. Labels are authored by hand from the task and the
+# world's canonical knowledge — never generated from the resolver.
+#
+#   required    final context would be incorrect or unsafe without it
+#   relevant    useful; should normally be retrieved
+#   acceptable  genuinely optional; inclusion or exclusion are both fine
+#   irrelevant  must not be retrieved
+#   none: true  nothing resolved is expected; any selected object is a false positive
+#
+# tier: regression  -> must hold exactly (recall 1, no false positives) in the test suite
+# tier: exploratory -> only measured and reported
+# gaps record missing canonical knowledge, which is NOT a retrieval failure.
+#
+# Labelling note: the first run counted four objects as "unlabeled" false positives
+# because they were omitted from the lists above (RULE-LOY-001/module/test-target for
+# the explicit FR/AC cases, RULE-LOY-003 for expired-points tasks). They were then
+# labelled "acceptable" (related but not required). That is a judgement call; the
+# underlying signal leaks are reported as findings independent of the labels.
+worlds:
+  shop: synthetic workspace with loyalty + billing packages, 2 domains, 5 rules, 2 feature specs
+  shop-big-rule: shop with a very large RULE-LOY-001 (forces mandatory overflow)
+  shop-duplicate: shop with a duplicate rule ID (forces exact-resolution failure)
+  shop-large: shop with 40 unrelated rule sections and 30 unrelated requirements (large whole-file sources)
+  spectra: the real Spectra canonical knowledge (features, business domain, module index, package manifests)
+
+cases:
+  # ---- explicit semantic references -------------------------------------------------------------
+  - id: explicit-rule
+    world: shop
+    category: explicit-reference
+    tier: regression
+    task: Explain RULE-LOY-001
+    budgets: [normal, tight, very-tight]
+    expect:
+      required: [RULE-LOY-001]
+      relevant: ["node:module:packages/loyalty", "node:test-target:packages/loyalty"]
+      irrelevant: [RULE-LOY-002, RULE-LOY-003, RULE-PAY-001, RULE-PAY-002]
+  - id: explicit-fr
+    world: shop
+    category: explicit-reference
+    tier: regression
+    task: Implement loyalty-program#FR-2
+    expect:
+      required: ["loyalty-program#FR-2"]
+      relevant: ["loyalty-program#AC-2"]
+      acceptable: [RULE-LOY-001, "node:module:packages/loyalty", "node:test-target:packages/loyalty"]
+      irrelevant: ["loyalty-program#FR-1", "loyalty-program#AC-1", "shipping#FR-1", "shipping#AC-1"]
+  - id: explicit-ac
+    world: shop
+    category: explicit-reference
+    tier: regression
+    task: Implement loyalty-program#AC-1
+    budgets: [normal, tight, very-tight]
+    expect:
+      required: ["loyalty-program#AC-1", "loyalty-program#FR-1"]
+      acceptable: [RULE-LOY-001, "node:module:packages/loyalty", "node:test-target:packages/loyalty"]
+      irrelevant: ["loyalty-program#FR-2", "loyalty-program#AC-2", "shipping#FR-1"]
+  # ---- business rules ----------------------------------------------------------------------------
+  - id: rule-lexical
+    world: shop
+    category: business-rule-lexical
+    tier: exploratory
+    task: Expired points must not be redeemable when paying for orders
+    budgets: [normal, tight, very-tight]
+    expect:
+      relevant: [RULE-LOY-001, "loyalty-program#FR-2", "loyalty-program#AC-2", "node:module:packages/loyalty", "node:test-target:packages/loyalty"]
+      acceptable: ["loyalty-program#FR-1", "loyalty-program#AC-1", RULE-LOY-003]
+      irrelevant: [RULE-LOY-002, RULE-PAY-001, RULE-PAY-002, "shipping#FR-1"]
+  - id: domain-fallback
+    world: shop
+    category: business-domain-fallback
+    tier: exploratory
+    task: Review rewards behavior
+    budgets: [normal, tight]
+    expect:
+      relevant: [RULE-LOY-001, RULE-LOY-002, RULE-LOY-003, "node:module:packages/loyalty", "node:test-target:packages/loyalty"]
+      irrelevant: [RULE-PAY-001, RULE-PAY-002, "shipping#FR-1"]
+  - id: rule-affected-module
+    world: shop
+    category: rule-module-evidence
+    tier: regression
+    task: Refunds must follow settlement cycles
+    expect:
+      relevant: [RULE-PAY-001, "node:module:packages/billing", "node:test-target:packages/billing"]
+      irrelevant: [RULE-LOY-001, RULE-LOY-002, RULE-PAY-002, "node:module:packages/loyalty"]
+  - id: large-sources
+    world: shop-large
+    category: token-efficiency
+    tier: exploratory
+    task: Expired points must not be redeemable when paying for orders
+    expect:
+      relevant: [RULE-LOY-001, "loyalty-program#FR-2", "loyalty-program#AC-2", "node:module:packages/loyalty", "node:test-target:packages/loyalty"]
+      acceptable: ["loyalty-program#FR-1", "loyalty-program#AC-1", RULE-LOY-003]
+      irrelevant: [RULE-LOY-002, RULE-PAY-001, RULE-PAY-002, "shipping#FR-1"]
+  # ---- feature lexical matching --------------------------------------------------------------------
+  - id: feature-lexical-tp
+    world: shop
+    category: feature-lexical
+    focus: lexical
+    tier: exploratory
+    task: Customers redeem loyalty points for discounts at checkout
+    expect:
+      relevant: ["loyalty-program#FR-1", "loyalty-program#AC-1"]
+      acceptable: [RULE-LOY-001, "node:module:packages/loyalty", "node:test-target:packages/loyalty"]
+      irrelevant: [RULE-LOY-002, RULE-LOY-003, "loyalty-program#FR-2", "loyalty-program#AC-2", "shipping#FR-1", RULE-PAY-001]
+  # ---- routing signals ------------------------------------------------------------------------------
+  - id: changed-file
+    world: shop
+    category: changed-file
+    tier: regression
+    task: Review the current change
+    changedFiles: [packages/billing/src/index.js]
+    expect:
+      relevant: ["node:module:packages/billing", "node:test-target:packages/billing"]
+      irrelevant: ["node:module:packages/loyalty", "node:test-target:packages/loyalty", RULE-LOY-001, RULE-PAY-001]
+  - id: explicit-module
+    world: shop
+    category: explicit-module
+    tier: exploratory
+    task: Tune the nightly job
+    modules: [billing]
+    expect:
+      relevant: ["node:module:packages/billing", "node:test-target:packages/billing"]
+      acceptable: [RULE-PAY-001, RULE-PAY-002]
+      irrelevant: [RULE-LOY-001, "node:module:packages/loyalty", "loyalty-program#FR-1"]
+  # ---- no signal / failure / overflow ----------------------------------------------------------------
+  - id: unrelated
+    world: shop
+    category: unrelated
+    tier: regression
+    task: Add dark mode toggle to the marketing website header
+    expect:
+      none: true
+  - id: mandatory-overflow
+    world: shop-big-rule
+    category: mandatory-overflow
+    tier: regression
+    role: verifier
+    goal: verify
+    task: Explain RULE-LOY-001
+    expect:
+      required: [RULE-LOY-001]
+      relevant: ["node:module:packages/loyalty", "node:test-target:packages/loyalty"]
+      irrelevant: [RULE-LOY-002, RULE-PAY-001]
+  - id: fallback-whole-file
+    world: shop-duplicate
+    category: fallback
+    tier: exploratory
+    fallback: true
+    compareTo: rule-lexical
+    task: Expired points must not be redeemable when paying for orders
+    expect:
+      none: true
+  # ---- real Spectra dogfood ----------------------------------------------------------------------------
+  - id: spectra-approval-gating
+    world: spectra
+    category: dogfood
+    tier: regression
+    task: Block AI-assisted implementation until implementation approval is granted.
+    modules: [packages-cli]
+    budgets: [normal, tight, very-tight]
+    expect:
+      relevant: ["spectra-core#FR-2", "spectra-core#AC-2", "node:module:packages/cli", "node:test-target:packages/cli"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#AC-1", "spectra-core#NFR-1", "node:module:packages/core", "node:module:packages/templates"]
+    gaps:
+      - type: missing business rule
+        note: the spectra-product business domain declares no rules, so the approval gate exists only as FR-2/AC-2
+  - id: spectra-lexical-false-positive
+    world: spectra
+    category: dogfood
+    focus: lexical
+    tier: exploratory
+    task: Implementation of the AI-assisted onboarding wizard
+    expect:
+      acceptable: ["spectra-core#FR-1", "spectra-core#AC-1"]
+      irrelevant: ["spectra-core#FR-2", "spectra-core#AC-2", "spectra-core#NFR-1"]
+  - id: spectra-lexical-false-negative
+    world: spectra
+    category: dogfood
+    focus: lexical
+    tier: exploratory
+    task: Require approval before the release is shipped
+    expect:
+      relevant: ["spectra-core#FR-2", "spectra-core#AC-2"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#AC-1"]
+    gaps:
+      - type: missing requirement
+        note: no requirement covers release approval; FR-2 only covers implementation approval, so it is the nearest existing knowledge
+  - id: spectra-lifecycle
+    world: spectra
+    category: dogfood
+    tier: exploratory
+    task: Make spectra update leave project layout and schema untouched until the explicit migrate command runs
+    modules: [packages-cli]
+    expect:
+      relevant: ["node:module:packages/cli", "node:test-target:packages/cli"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#FR-2", "spectra-core#AC-1", "spectra-core#AC-2", "spectra-core#NFR-1", "node:module:packages/core"]
+    gaps:
+      - type: missing business rule
+        note: update-vs-migrate lifecycle behaviour is documented in docs and tests but not in canonical business rules
+      - type: missing requirement
+        note: no feature requirement covers installation lifecycle
+  - id: spectra-context-resolver
+    world: spectra
+    category: dogfood
+    tier: exploratory
+    task: Select exact business rules for a task within the context token budget
+    modules: [packages-cli]
+    expect:
+      relevant: ["node:module:packages/cli", "node:test-target:packages/cli"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#FR-2", "spectra-core#AC-1", "spectra-core#AC-2", "node:module:packages/core"]
+    gaps:
+      - type: missing requirement
+        note: the context resolver has no feature requirement or acceptance scenario
+      - type: missing business rule
+        note: context selection policy is not captured as business rules
+  - id: spectra-repo-index
+    world: spectra
+    category: dogfood
+    tier: exploratory
+    task: Rebuild the repo index and Knowledge Map when package manifests change
+    modules: [packages-cli]
+    expect:
+      relevant: ["node:module:packages/cli", "node:test-target:packages/cli"]
+      irrelevant: ["spectra-core#FR-1", "spectra-core#FR-2", "spectra-core#AC-1", "spectra-core#AC-2", "node:module:packages/core"]
+    gaps:
+      - type: missing requirement
+        note: no requirement describes the repo index or Knowledge Map
+      - type: missing module relationship
+        note: modules.md maps packages-cli to the CLI only; index/knowledge code has no finer module
+  - id: spectra-changed-file
+    world: spectra
+    category: dogfood
+    tier: exploratory
+    task: Review the current change
+    changedFiles: [packages/core/package.json]
+    expect:
+      relevant: ["node:module:packages/core"]
+      irrelevant: ["node:module:packages/cli", "node:test-target:packages/cli", "node:module:packages/templates"]
+    gaps:
+      - type: missing test relationship
+        note: packages/core declares no test script, so no test-target exists for it
