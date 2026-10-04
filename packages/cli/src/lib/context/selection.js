@@ -13,14 +13,37 @@
 const poolOf = (entry) => (entry.mode === "summary" ? "summary" : "full");
 const ROUTING_INDEX_PRIORITY = 7;
 const idOf = (entry) => entry.knowledgeId ?? entry.id ?? entry.path;
-const byPriorityThenId = (a, b) => a.priority - b.priority || (a.knowledgeId < b.knowledgeId ? -1 : a.knowledgeId > b.knowledgeId ? 1 : 0);
 const evidenceOnly = (entry) => (entry.reasons ?? []).every(({ reason }) => reason === "repo-index-evidence");
+
+// Evidence never outranks the anchor it hangs off: a module reached only from a
+// domain-fallback rule (tier 5) sorts at tier 5, after that rule, so a single
+// ordered pass always sees the anchor first.
+function sortWithAnchors(resolved) {
+  const byId = new Map(resolved.map((entry) => [entry.knowledgeId, entry]));
+  const memo = new Map();
+  const effective = (entry) => {
+    if (!memo.has(entry.knowledgeId)) {
+      memo.set(entry.knowledgeId, entry.priority); // cycle guard: evidence chains are acyclic
+      if (!entry.required && evidenceOnly(entry)) {
+        const anchors = entry.reasons.map(({ via }) => byId.get(via)).filter(Boolean).map(effective);
+        if (anchors.length > 0) memo.set(entry.knowledgeId, Math.max(entry.priority, Math.min(...anchors)));
+      }
+    }
+    return memo.get(entry.knowledgeId);
+  };
+  const rank = (entry) => [effective(entry), evidenceOnly(entry) ? 1 : 0];
+  return [...resolved].sort((a, b) => {
+    const [ea, ta] = rank(a);
+    const [eb, tb] = rank(b);
+    return ea - eb || ta - tb || (a.knowledgeId < b.knowledgeId ? -1 : a.knowledgeId > b.knowledgeId ? 1 : 0);
+  });
+}
 
 function selectContext({ baseline, resolved, optionalBaseline = [], budgets, superseded, fallbackError }) {
   const used = { summary: 0, full: 0 };
   for (const entry of baseline) used[poolOf(entry)] += entry.estimatedTokens;
 
-  const ordered = [...resolved].sort(byPriorityThenId);
+  const ordered = sortWithAnchors(resolved);
   const included = [];
   const excluded = [];
   for (const entry of ordered.filter((candidate) => candidate.required)) {

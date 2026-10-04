@@ -306,6 +306,14 @@ test("domain fallback keeps rules in id order, drops what does not fit and prese
   assert.equal(probe.selection.status, "budget-exhausted");
 });
 
+test("domain-fallback rules keep their affected module and test evidence when budget allows", () => {
+  const root = project();
+  const { ids, selection } = resolve(root, "Review rewards");
+  assert.deepEqual(ids.filter((id) => !id.startsWith("RULE-")).sort(), [MODULE, TEST_TARGET].sort());
+  assert.equal(selection.status, "within-budget");
+  assert.deepEqual(selection.excluded, []);
+});
+
 // ---- Changed files ----------------------------------------------------------------------------------
 
 test("the changed file's owning module survives before its secondary test-target", () => {
