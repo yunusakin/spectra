@@ -101,3 +101,5 @@ Diagnosis. For `implementer/implement` in this repository the markdown pool held
 | release-manager / ship (−970) | whole `RELEASE_SUMMARY.md` (1295 tokens, all releases since v2.0.0); no summary representation exists | PROJECT-SIZE SCALING PROBLEM, needs a representation decision |
 
 Not done on purpose: budgets, retrieval, the decide/ship whole-file entries, and any reserved Project Intelligence floor.
+
+Scope note: the fallback lives in `chooseDynamicEntries`, so it applies to plain `spectra context` as well as `--route-task`; both had the same avoid-list contradiction, so it was not restricted to route mode. The `budget-matrix.*.json` artifacts are snapshots of this repository's corpus and cache at the time of the run; regenerate them with the command above rather than diffing against a different checkout.
