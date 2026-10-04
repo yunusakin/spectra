@@ -152,6 +152,28 @@ test("fenced code and inline HTML are real content and stay", () => {
   assert.ok(text.includes("INLINE-HTML-KEEP"));
 });
 
+const briefWith = (body) => `# Project Brief\n\n## Purpose\nKEEP-PURPOSE\n\n## Constraints\n${body}\n`;
+
+test("comment-looking text inside inline code spans is content and stays", () => {
+  const text = derived(pack(project(briefWith("Use `<!-- TODO -->` markers in docs, and ``a <!-- b --> c`` too.\n<!-- real comment REAL-COMMENT -->\nAfter."))));
+  assert.ok(text.includes("`<!-- TODO -->`") && text.includes("``a <!-- b --> c``"));
+  assert.equal(text.includes("REAL-COMMENT"), false);
+  assert.ok(text.includes("After."));
+});
+
+test("nested and mixed fences are tracked by character and length", () => {
+  const body = "````md\n```\n<!-- NESTED-KEEP -->\n```\n<!-- STILL-INSIDE-KEEP -->\n````\n<!-- OUTSIDE-GONE -->\n\n```\n~~~\n<!-- MIXED-KEEP -->\n```\n\n~~~\n<!-- TILDE-KEEP -->\n~~~\ntext <!-- INLINE-GONE --> end";
+  const text = derived(pack(project(briefWith(body))));
+  for (const kept of ["NESTED-KEEP", "STILL-INSIDE-KEEP", "MIXED-KEEP", "TILDE-KEEP", "text  end"]) assert.ok(text.includes(kept), `lost: ${kept}`);
+  for (const gone of ["OUTSIDE-GONE", "INLINE-GONE"]) assert.equal(text.includes(gone), false, `not stripped: ${gone}`);
+});
+
+test("an indented code line that only looks like a fence does not hide later comments", () => {
+  const text = derived(pack(project(briefWith("    ```\n<!-- AFTER-INDENTED-GONE -->\nKEEP-TAIL"))));
+  assert.equal(text.includes("AFTER-INDENTED-GONE"), false);
+  assert.ok(text.includes("KEEP-TAIL"));
+});
+
 test("an unclosed comment never swallows the rest of the brief", () => {
   const text = derived(pack(project("# Project Brief\n\n## Purpose\nKEEP-BEFORE\n\n<!-- never closed\n\n## Constraints\nKEEP-AFTER\n")));
   assert.ok(text.includes("KEEP-BEFORE") && text.includes("KEEP-AFTER"));
