@@ -34,7 +34,7 @@ import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import { buildTraceability } from "../src/lib/traceability/trace.js";
 import { traceabilityMetrics } from "../src/lib/traceability/metrics.js";
-import { concludeVerification, readVerificationEvidence } from "../src/lib/traceability/evidence.js";
+import { concludeVerification, readVerificationEvidence, recordVerificationEvidence } from "../src/lib/traceability/evidence.js";
 import { runTestTarget } from "../src/lib/traceability/run.js";
 
 const cliRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -285,4 +285,57 @@ test("a project with no Governs and no evidence stays valid and unverified", () 
   touch(rulesFile(root));
   assert.equal(runTestTarget(root, LOYALTY_TARGET).recorded, true);
   assert.equal(conclude(root).verification, "unverified");
+});
+
+// ---- review findings on the producer ------------------------------------------------------------
+
+test("--test-target cannot be combined with --scope or --item and runs nothing then", () => {
+  const root = project();
+  for (const extra of [["--scope", "app"], ["--item", "ITEM-1"]]) {
+    const result = run(root, ["verify", "--test-target", LOYALTY_TARGET, ...extra]);
+    assert.equal(result.status, 1, extra.join(" "));
+    assert.match(`${result.stdout}${result.stderr}`, /cannot be combined/i);
+  }
+  assert.equal(readVerificationEvidence(root).status, "missing");
+});
+
+test("fan-out commands of common monorepo tools are recorded as aggregate, a plain command as exact", () => {
+  const root = project();
+  const granularityFor = (command) => {
+    write(path.join(root, "package.json"), JSON.stringify({ name: "shop", private: true, workspaces: ["packages/*"], scripts: { test: command } }));
+    assert.equal(run(root, ["index"]).status, 0);
+    assert.equal(runTestTarget(root, "node:test-target:.").recorded, true, command);
+    return readVerificationEvidence(root).records.find((record) => record.testTarget === "node:test-target:.").granularity;
+  };
+  for (const command of ["echo pnpm -r test", "echo pnpm --recursive test", "echo lerna run test", "echo turbo run test", "echo nx run-many -t test", "echo yarn workspaces foreach run test", "echo npm run test --workspaces", "echo npm test -ws"]) {
+    assert.equal(granularityFor(command), "aggregate", command);
+  }
+  assert.equal(granularityFor("node -e \"process.exit(0)\""), "test-target");
+});
+
+test("a timeout stops the whole process group, grandchildren included", () => {
+  const root = project();
+  const marker = path.join(root, "grandchild-ran.txt");
+  write(path.join(root, "packages", "loyalty", "child.js"), `setTimeout(() => require('fs').writeFileSync(${JSON.stringify(marker)}, 'x'), 1200);\n`);
+  write(path.join(root, "packages", "loyalty", "check.js"), "require('child_process').spawn(process.execPath, [require('path').join(__dirname, 'child.js')], { stdio: 'ignore' });\nsetTimeout(() => {}, 60000);\n");
+  const outcome = runTestTarget(root, LOYALTY_TARGET, { timeoutMs: 400 });
+  assert.equal(outcome.recorded, false);
+  assert.match(outcome.reason, /timed out/i);
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 2000);
+  assert.equal(fs.existsSync(marker), false, "the grandchild outlived the timeout");
+});
+
+test("recording takes a lock: a held lock blocks a second writer, a stale lock is taken over, the lock is always released", () => {
+  const root = project();
+  const file = readVerificationEvidence(root).file;
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const lock = `${file}.lock`;
+  fs.writeFileSync(lock, "another run");
+  assert.throws(() => recordVerificationEvidence(root, { testTarget: LOYALTY_TARGET, result: "passed", lockTimeoutMs: 200 }), /locked/i);
+  assert.equal(readVerificationEvidence(root).status, "missing", "nothing was written while the lock was held");
+  const old = new Date(Date.now() - 10 * 60 * 1000);
+  fs.utimesSync(lock, old, old);
+  recordVerificationEvidence(root, { testTarget: LOYALTY_TARGET, result: "passed", lockTimeoutMs: 200 });
+  assert.equal(readVerificationEvidence(root).records.length, 1);
+  assert.equal(fs.existsSync(lock), false, "lock released after the write");
 });
