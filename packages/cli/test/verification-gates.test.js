@@ -18,7 +18,7 @@ import YAML from "yaml";
 import { buildTraceability } from "../src/lib/traceability/trace.js";
 import { traceabilityMetrics } from "../src/lib/traceability/metrics.js";
 import { concludeVerification, readVerificationEvidence } from "../src/lib/traceability/evidence.js";
-import { evaluateGate } from "../src/lib/traceability/gates.js";
+import { evaluateGate, rulesForChangedFiles } from "../src/lib/traceability/gates.js";
 import { runTestTarget } from "../src/lib/traceability/run.js";
 import { validateBusinessContext } from "../src/lib/business/validator.js";
 
@@ -418,4 +418,38 @@ test("a broken verifiedBy on a covering AC (or on a subject no rule governs) sti
   const release = gate(ungoverned, "release");
   assert.ok(release.blockers.some((entry) => entry.code === "broken-canonical-structure" && entry.subject === "alpha#FR-9" && entry.rule === null), JSON.stringify(release.blockers));
   assert.equal(gate(ungoverned, "review", ["RULE-LOY-001"]).blockers.some((entry) => entry.subject === "alpha#FR-9"), false, "a narrowed review only sees edges its rules reach");
+});
+
+test("root-module files concern the rules that affect the root module, and only files no other module owns", () => {
+  const trace = {
+    subjects: { "RULE-A": { kind: "business-rule", status: "active" }, "RULE-B": { kind: "business-rule", status: "active" } },
+    edges: [{ type: "affectsModule", from: "RULE-A", to: "node:module:." }, { type: "affectsModule", from: "RULE-B", to: "node:module:packages/b" }],
+    locators: { modules: { "node:module:.": ".", "node:module:packages/b": "packages/b" }, sources: {} }
+  };
+  assert.deepEqual(rulesForChangedFiles(trace, ["package.json"]), ["RULE-A"]);
+  assert.deepEqual(rulesForChangedFiles(trace, ["packages/b/index.js"]), ["RULE-B"], "a file owned by another module is not a root-module change");
+  assert.deepEqual(rulesForChangedFiles(trace, ["packages/b/index.js", "README.md"]), ["RULE-A", "RULE-B"]);
+});
+
+test("a narrowed gate whose changed files concern no rule says so explicitly instead of passing silently", () => {
+  const root = project();
+  const result = JSON.parse(run(root, ["verify", "--gate", "review", "--changed", "--json"]).stdout);
+  assert.equal(result.status, "allowed");
+  assert.deepEqual(result.scope.rules, []);
+  assert.ok(result.warnings.some((entry) => entry.code === "no-rules-in-scope"), JSON.stringify(result.warnings));
+  assert.match(run(root, ["verify", "--gate", "review", "--changed"]).stdout, /no-rules-in-scope/);
+  assert.notEqual(run(root, ["verify", "--gate", "review", "--head", "HEAD"]).status, 0, "--head without --base is rejected");
+});
+
+test("a blocked release gate lowers the release confidence score", async () => {
+  const root = project({ fr1: [LOY], ac1: [LOY] });
+  const features = path.join(sdd(root), "features");
+  for (const file of fs.readdirSync(path.join(features, "spectra-core"), { recursive: true, withFileTypes: true }).filter((entry) => entry.isFile() && entry.name !== "feature.spec.yaml")) {
+    const relative = path.relative(path.join(features, "spectra-core"), path.join(file.parentPath, file.name));
+    write(path.join(features, "alpha", relative), fs.readFileSync(path.join(file.parentPath, file.name), "utf8").replaceAll("spectra-core", "alpha"));
+  }
+  const score = (out) => Number(out.match(/Release confidence score: (\d+)\/100/)[1]);
+  const blocked = score(run(root, ["verify"]).stdout);
+  await verifyTarget(root, LOY);
+  assert.ok(score(run(root, ["verify"]).stdout) > blocked, "verification evidence must show in the score, not only in the verdict");
 });

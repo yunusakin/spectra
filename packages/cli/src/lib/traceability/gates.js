@@ -21,8 +21,11 @@ const byKey = (a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
 // file, rules defined in a changed file, and rules governing a subject defined in a changed file.
 function rulesForChangedFiles(trace, files) {
   const rules = Object.keys(trace.subjects).filter((id) => trace.subjects[id].kind === "business-rule" && trace.subjects[id].status === "active");
-  const inModule = (file, modulePath) => modulePath !== "." && (file === modulePath || file.startsWith(`${modulePath}/`));
-  const modules = Object.entries(trace.locators.modules).filter(([, modulePath]) => files.some((file) => inModule(file, modulePath))).map(([id]) => id);
+  const inModule = (file, modulePath) => file === modulePath || file.startsWith(`${modulePath}/`);
+  const nested = Object.values(trace.locators.modules).filter((modulePath) => modulePath !== ".");
+  // The root module owns only the files no other module contains.
+  const owns = (file, modulePath) => (modulePath === "." ? !nested.some((other) => inModule(file, other)) : inModule(file, modulePath));
+  const modules = Object.entries(trace.locators.modules).filter(([, modulePath]) => files.some((file) => owns(file, modulePath))).map(([id]) => id);
   const sources = new Set(files);
   const changedSubjects = Object.keys(trace.locators.sources).filter((id) => sources.has(trace.locators.sources[id]));
   return rules.filter((rule) => {
@@ -72,6 +75,7 @@ function evaluateGate(trace, evidence, stage, { rules = null } = {}) {
       }
     }
   }
+  if (rules && inScope.length === 0) warnings.push({ key: "~", code: "no-rules-in-scope", rule: null, reason: "the changed files concern no active rule, so nothing was evaluated" });
   const dedupe = (items) => [...new Map(items.sort(byKey).map((item) => [item.key, item])).values()].map(({ key, ...rest }) => rest);
   // Implementation never blocks: what would block elsewhere is shown as warnings of the same code.
   const shown = stage === "implementation" ? { blockers: [], warnings: [...warnings, ...blockers.filter((item) => item.code !== "broken-canonical-structure")] } : { blockers, warnings };

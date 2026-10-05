@@ -138,6 +138,10 @@ async function verifyCommand(argv) {
       fail("--gate is read-only and cannot be combined with --scope, --item, --test-target or --explain.");
       return 1;
     }
+    if (options["--head"] && !options["--base"]) {
+      fail("--head needs --base: it names the end of the compared range.");
+      return 1;
+    }
     if (gate === "release" && (options["--changed"] || options["--base"])) {
       fail("The release gate is project-wide by design; --changed and --base apply to the review gate.");
       return 1;

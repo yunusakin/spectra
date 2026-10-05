@@ -146,9 +146,9 @@ function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}
     policy: 20,
     "verify-work": 20,
     evals: 20,
-    telemetry: 10,
+    telemetry: 5,
     "release-readiness": 15,
-    verification: 0,
+    verification: 5,
     "repo-index": 5
   };
 
