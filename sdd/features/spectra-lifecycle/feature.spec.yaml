@@ -23,27 +23,29 @@ requirements:
       statement: A project's schema and layout change only through the explicit migrate command; non-interactive execution requires --yes and --check never writes.
       priority: must
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:lifecycle
+        - node:test-target:packages/cli:test:migration
     - id: FR-2
       statement: Updating the machine application never migrates, bootstraps or refreshes any project.
       priority: must
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:lifecycle
     - id: FR-3
       statement: Uninstall removes only verified machine-owned installations and never changes project files.
       priority: must
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:installer
+        - node:test-target:packages/cli:test:lifecycle
     - id: FR-4
       statement: A project's schema version advances only after migration validation passes, and migration snapshots valuable content and refuses to recover over content that changed since.
       priority: must
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:migration
     - id: FR-5
       statement: Project commands run only against a project whose schema and layout are current; other states are refused with their compatibility status.
       priority: must
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:lifecycle
   nonFunctional: []
 acceptance:
   scenarios:
@@ -54,7 +56,8 @@ acceptance:
       when: Migration is requested without --yes in a non-interactive session
       then: The project is left untouched
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:lifecycle
+        - node:test-target:packages/cli:test:migration
     - id: AC-2
       covers:
         - FR-2
@@ -62,7 +65,7 @@ acceptance:
       when: The machine application is updated
       then: No project file changes
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:lifecycle
     - id: AC-3
       covers:
         - FR-3
@@ -70,7 +73,8 @@ acceptance:
       when: Uninstall runs
       then: The installation and every project file stay untouched
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:installer
+        - node:test-target:packages/cli:test:lifecycle
     - id: AC-4
       covers:
         - FR-4
@@ -78,7 +82,7 @@ acceptance:
       when: The migration finishes
       then: The schema version is not advanced and the content stays recoverable
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:migration
     - id: AC-5
       covers:
         - FR-5
@@ -86,6 +90,6 @@ acceptance:
       when: A project command other than status, doctor or migrate runs
       then: The command is refused with the compatibility status
       verifiedBy:
-        - node:test-target:packages/cli
+        - node:test-target:packages/cli:test:lifecycle
 dependencies:
   - sdd/memory-bank/core/projectbrief.md

@@ -12,7 +12,14 @@
     "build:native": "node ./scripts/check-versions.mjs && node ./scripts/build-native.mjs",
     "prepack": "node ./scripts/check-versions.mjs && node ./scripts/sync-assets.mjs",
     "pretest": "node ./scripts/sync-assets.mjs",
-    "test": "node ./scripts/run-tests.mjs"
+    "test": "node ./scripts/run-tests.mjs",
+    "test:approval": "node --test test/approval.test.js",
+    "test:context": "node --test test/context-selection.test.js",
+    "test:install-layout": "node --test test/install-layout.test.js",
+    "test:installer": "node --test test/native-installation-e2e.test.js",
+    "test:knowledge": "node --test test/knowledge-map.test.js test/knowledge-addressing.test.js test/context-knowledge.test.js",
+    "test:lifecycle": "node --test test/lifecycle-e2e.test.js",
+    "test:migration": "node --test test/migration.test.js test/migration-e2e.test.js test/update.test.js"
   },
   "files": [
     "bin",
