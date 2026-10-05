@@ -31,6 +31,7 @@ Local and installed invocations operate on the same project state. Most project 
 | [`route`](#route) | Select relevant technical modules and business domains | Does not write project files |
 | [`knowledge`](#knowledge) | Record durable business rules and manage their lifecycle | Updates `.spectra/sdd/memory-bank/business/INDEX.md` and domain `rules.md` / `unresolved.md` |
 | [`index`](#index) | Refresh evidence after bootstrap or manifest changes | Default mode writes `.spectra/cache/index/repo-index.json` |
+| [`inspect`](#inspect) | Ask what a rule, requirement, module or test target relates to and why it is verified or not; or what changed files impact | Does not write project files; may rebuild the disposable Knowledge Map cache |
 | [`check`](#check) | Validate the Spectra layer after changes | Does not write persistent project files; validation smoke checks use temporary directories |
 | [`verify`](#verify) | Assess release readiness before handoff | Refreshes `.spectra/sdd/governance/approval-state.yaml` and intake approval status; runs release evals and overwrites each selected feature’s `evals/reports/latest.json` and `latest.md` |
 | [`status`](#status) | Resume work and see recent changes | Recomputes `.spectra/sdd/governance/approval-state.yaml` and syncs approval status in `.spectra/sdd/memory-bank/core/intake-state.md` |
@@ -313,6 +314,27 @@ spectra index --explain
   absent/stale → current deterministic manifest evidence
   --check → no file changes
 ```
+## inspect
+
+**When to use:** Before changing an area ("what governs this, what must pass?"), when asking why a subject is `verified`, `failed`, `stale` or `unverified`, or to learn which rules, subjects and verification scopes a set of changed files concerns.
+
+**Prerequisites:** Installed project; a Repo Index (`spectra index`) for modules and test targets. `--changed` and `--base` need a Git repository.
+
+**Reads:** Business rules, feature specs, the Repo Index, the derived Knowledge Map and the local verification evidence.
+
+**Writes/changes:** Does not write project files. It never runs tests, records evidence or touches approvals; the derived Knowledge Map cache may be rebuilt exactly as `context` already does.
+
+**Result:** Human text or `--json` with stable ordering, stable IDs, project-relative paths and no timestamps.
+
+**Modes and repeat runs:** `spectra inspect <id>` takes one exact stable ID (a business rule, `<feature>#FR-1`/`NFR`/`AC`/`INV`, `node:module:<path>` or `node:test-target:<path>`); an unknown or other-kind ID exits 1, nothing is fuzzy-matched. It returns identity, relationships (each marked `canonical` or `derived`), modules, the verification conclusion (identical to `verify --explain`) and the review/release gate for the rules concerned. `spectra inspect --changed | --base <ref> [--head <ref>] | --file <path>[,<path>...]` returns `files`, `modules`, `canonicalSubjects`, `rules`, `verificationScopes`, `verificationState`, `reviewImpact`, `releaseImpact` and `warnings`; every item carries a reason (`affected-module:<id>`, `source-file-changed`, `governs-changed-subject:<id>`, `governed-by:<rule>`, `verified-by:<subject>`, `tested-by-module:<id>`). The rule set is the one `verify --gate review` uses for the same files, so the two agree. An empty change set reports `no-changed-files`; a change that concerns no rule reports `no-rule-impact`; an unresolvable ref or a non-Git directory fails instead of returning an empty impact. Impact is module- and canonical-source-level: it is not a code or dependency graph, and a change to a canonical file concerns everything defined in that file.
+
+**Example:**
+
+```bash
+spectra inspect RULE-SPE-006
+spectra inspect --base main --json
+```
+
 ## check
 
 **When to use:** Validate the Spectra layer after changes.

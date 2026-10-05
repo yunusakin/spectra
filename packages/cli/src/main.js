@@ -16,6 +16,7 @@ import { statusCommand } from "./commands/status.js";
 import { validateCommand } from "./commands/validate.js";
 import { checkCommand } from "./commands/check.js";
 import { indexCommand } from "./commands/index.js";
+import { inspectCommand } from "./commands/inspect.js";
 import { onboardCommand } from "./commands/onboard.js";
 import { verifyCommand } from "./commands/verify.js";
 import { printHelp as printCommandHelp } from "./commands/help.js";
@@ -85,7 +86,7 @@ function dispatch(argv) {
   const { command, subcommand, rest } = normalized;
   const args = [subcommand, ...rest].filter(Boolean);
 
-  const projectCommands = new Set(["check", "index", "onboard", "__update-project", "init", "adopt", "validate", "approve", "context", "task", "route", "knowledge", "verify", "quick", "status", "doctor", "eval", "skills", "adapters", "diff", "migrate"]);
+  const projectCommands = new Set(["check", "index", "onboard", "__update-project", "init", "adopt", "validate", "approve", "context", "task", "route", "knowledge", "inspect", "verify", "quick", "status", "doctor", "eval", "skills", "adapters", "diff", "migrate"]);
   const helpFlag = args.filter(arg => arg === "--help" || arg.startsWith("--help=")).at(-1);
   if (projectCommands.has(command) && !["--help", "--help=true"].includes(helpFlag)) {
     if (command === "init" || command === "adopt") {
@@ -125,6 +126,8 @@ function dispatch(argv) {
       return checkCommand(args);
     case "index":
       return indexCommand(args);
+    case "inspect":
+      return inspectCommand(args);
     case "onboard":
       return onboardCommand(args);
     case "migrate":

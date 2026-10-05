@@ -92,7 +92,7 @@ test("legacy forms reach the canonical usage text", () => {
 
 test("every canonical command answers --help at a single command token", () => {
   const canonical = [
-    "init", "adopt", "onboard", "context", "task", "route", "knowledge",
+    "init", "adopt", "onboard", "context", "task", "route", "knowledge", "inspect",
     "check", "verify", "status", "update", "doctor",
     "approve", "eval", "diff", "quick", "skills", "adapters", "validate"
   ];
