@@ -1,0 +1,15 @@
+apiVersion: spectra/v2
+kind: FailureModes
+feature_id: spectra-lifecycle
+failure_modes:
+  - id: FM-001
+    title: Update migrates a project silently
+    severity: critical
+    category: unsafe_behavior_cases
+    detection:
+      - project_changed_by_update
+    expected_behavior:
+      - refuse
+      - point_to_migrate
+    covered_by:
+      - RF-001

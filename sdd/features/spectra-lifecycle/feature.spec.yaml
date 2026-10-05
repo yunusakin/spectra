@@ -1,0 +1,91 @@
+apiVersion: spectra/v2
+kind: FeatureSpec
+metadata:
+  id: spectra-lifecycle
+  name: Spectra Lifecycle
+  version: 0.1.0
+  owner: product
+  status: draft
+summary:
+  problem: A Spectra installation and the projects it serves change over time, and those changes must never silently alter project content.
+  outcome: Installation, update, migration, uninstall and compatibility behave predictably and are verifiable.
+scope:
+  in:
+    - explicit project migration
+    - machine update and uninstall
+    - project compatibility checks
+  out:
+    - new lifecycle commands
+    - remote or shared installation management
+requirements:
+  functional:
+    - id: FR-1
+      statement: A project's schema and layout change only through the explicit migrate command; non-interactive execution requires --yes and --check never writes.
+      priority: must
+      verifiedBy:
+        - node:test-target:packages/cli
+    - id: FR-2
+      statement: Updating the machine application never migrates, bootstraps or refreshes any project.
+      priority: must
+      verifiedBy:
+        - node:test-target:packages/cli
+    - id: FR-3
+      statement: Uninstall removes only verified machine-owned installations and never changes project files.
+      priority: must
+      verifiedBy:
+        - node:test-target:packages/cli
+    - id: FR-4
+      statement: A project's schema version advances only after migration validation passes, and migration snapshots valuable content and refuses to recover over content that changed since.
+      priority: must
+      verifiedBy:
+        - node:test-target:packages/cli
+    - id: FR-5
+      statement: Project commands run only against a project whose schema and layout are current; other states are refused with their compatibility status.
+      priority: must
+      verifiedBy:
+        - node:test-target:packages/cli
+  nonFunctional: []
+acceptance:
+  scenarios:
+    - id: AC-1
+      covers:
+        - FR-1
+      given: A project on a legacy layout
+      when: Migration is requested without --yes in a non-interactive session
+      then: The project is left untouched
+      verifiedBy:
+        - node:test-target:packages/cli
+    - id: AC-2
+      covers:
+        - FR-2
+      given: A project that is not on the current schema
+      when: The machine application is updated
+      then: No project file changes
+      verifiedBy:
+        - node:test-target:packages/cli
+    - id: AC-3
+      covers:
+        - FR-3
+      given: An installation without a machine ownership record
+      when: Uninstall runs
+      then: The installation and every project file stay untouched
+      verifiedBy:
+        - node:test-target:packages/cli
+    - id: AC-4
+      covers:
+        - FR-4
+      given: A migration whose validation fails
+      when: The migration finishes
+      then: The schema version is not advanced and the content stays recoverable
+      verifiedBy:
+        - node:test-target:packages/cli
+    - id: AC-5
+      covers:
+        - FR-5
+      given: A project with an outdated schema
+      when: A project command other than status, doctor or migrate runs
+      then: The command is refused with the compatibility status
+      verifiedBy:
+        - node:test-target:packages/cli
+dependencies:
+  - sdd/memory-bank/core/projectbrief.md

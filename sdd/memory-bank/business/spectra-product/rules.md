@@ -6,6 +6,7 @@ Project schema and layout change only through the explicit `spectra migrate` com
 
 Status: active
 Affected Modules: packages-cli
+Governs: spectra-lifecycle#FR-1, spectra-lifecycle#AC-1
 Evidence: packages/cli/src/commands/migrate.js; packages/cli/test/update.test.js ("migrate --yes runs non-interactively", "non-TTY migrate with declined input leaves a legacy layout untouched"); docs/lifecycle-verification.md
 Confidence: high
 
@@ -15,6 +16,7 @@ Confidence: high
 
 Status: active
 Affected Modules: packages-cli
+Governs: spectra-lifecycle#FR-2, spectra-lifecycle#AC-2
 Evidence: packages/cli/src/commands/update.js (help text and retired `__update-project`); docs/lifecycle-verification.md "Final lifecycle milestone"
 Confidence: high
 
@@ -24,6 +26,7 @@ Confidence: high
 
 Status: active
 Affected Modules: packages-cli
+Governs: spectra-lifecycle#FR-3, spectra-lifecycle#AC-3
 Evidence: packages/cli/src/commands/uninstall.js (help text and legacy-installation refusal); packages/cli/test/native-installation-e2e.test.js
 Confidence: high
 
@@ -33,6 +36,7 @@ A project's schema version is committed only after the migration's validation pa
 
 Status: active
 Affected Modules: packages-cli
+Governs: spectra-lifecycle#FR-4, spectra-lifecycle#AC-4
 Evidence: commit 362dde5 "defer schema advancement until validation passes"; packages/cli/src/lib/project-migration.js (snapshot, schema-commit phase, "Valuable content changed"); packages/cli/test/migration-e2e.test.js; packages/cli/test/update.test.js ("migrate distinguishes a migration failure from a validation failure")
 Confidence: high
 
@@ -42,6 +46,7 @@ Project commands run only against a project whose schema and layout are current.
 
 Status: active
 Affected Modules: packages-cli
+Governs: spectra-lifecycle#FR-5, spectra-lifecycle#AC-5
 Evidence: packages/cli/src/lib/project-compatibility.js (assertProjectOperationAllowed); packages/cli/src/main.js
 Confidence: high
 
@@ -71,6 +76,7 @@ Everything under `.spectra/cache`, including the Repo Index and the Knowledge Ma
 
 Status: active
 Affected Modules: packages-cli
+Governs: spectra-core#INV-1
 Evidence: docs/structure.md (`.spectra/cache/`); packages/cli/src/lib/knowledge/map.js (fingerprint rebuild, corrupt cache treated as missing); packages/cli/test/knowledge-map.test.js
 Confidence: high
 
@@ -80,6 +86,7 @@ Business rules, requirements and scenarios are addressed by their stable ID, nev
 
 Status: active
 Affected Modules: packages-cli
+Governs: spectra-core#INV-2
 Evidence: packages/cli/src/lib/business/rule-sections.js (identity is the full ID token); packages/cli/test/knowledge-map.test.js ("moving a rule updates the locator and map signature but keeps id and object signature", "duplicate rule IDs fail map generation deterministically")
 Confidence: high
 
@@ -89,5 +96,6 @@ Baseline context, explicitly referenced objects and the requirement an explicitl
 
 Status: active
 Affected Modules: packages-cli
+Governs: spectra-core#INV-3
 Evidence: packages/cli/src/lib/context/selection.js (required entries, mandatory-overflow); docs/business-context.md; packages/cli/test/context-selection.test.js ("an explicit reference larger than the budget is still returned with mandatory-overflow", "an explicit AC keeps the FR it covers even when that overflows the budget")
 Confidence: high

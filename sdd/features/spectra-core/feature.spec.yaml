@@ -25,13 +25,30 @@ requirements:
     - id: FR-2
       statement: AI-assisted implementation is blocked until implementation approval is granted.
       priority: must
+      verifiedBy:
+        - node:test-target:packages/cli
     - id: FR-3
       statement: Changing a spec invalidates the approval stages that depend on the kind of change, and re-approval restores the stage.
       priority: must
+      verifiedBy:
+        - node:test-target:packages/cli
   nonFunctional:
     - id: NFR-1
       statement: Verification must aggregate validation, policy, tests, evals, telemetry, and release readiness.
       priority: must
+invariants:
+  - id: INV-1
+    statement: Everything under .spectra/cache is derived from canonical files and rebuildable from them; a stale or corrupt cache is rebuilt or bypassed, never trusted.
+    verifiedBy:
+      - node:test-target:packages/cli
+  - id: INV-2
+    statement: Knowledge objects are addressed by their stable ID, never by file position or text prefix, and duplicate IDs are errors.
+    verifiedBy:
+      - node:test-target:packages/cli
+  - id: INV-3
+    statement: Mandatory context is never dropped; budget selection drops only optional context in a deterministic order and reports mandatory overflow instead of truncating.
+    verifiedBy:
+      - node:test-target:packages/cli
 acceptance:
   scenarios:
     - id: AC-1
@@ -46,12 +63,16 @@ acceptance:
       given: Implementation approval has not been granted
       when: An agent attempts to start implementation
       then: Policy and approval checks block the work
+      verifiedBy:
+        - node:test-target:packages/cli
     - id: AC-3
       covers:
         - FR-3
       given: A spec has been approved at a stage
       when: The spec is changed in a way that affects that stage
       then: The stage is invalidated until it is approved again
+      verifiedBy:
+        - node:test-target:packages/cli
 dependencies:
   - sdd/memory-bank/core/projectbrief.md
   - sdd/governance/approval-state.yaml

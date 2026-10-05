@@ -1,0 +1,30 @@
+apiVersion: spectra/v2
+kind: GoldenScenarios
+feature_id: spectra-lifecycle
+scenarios:
+  - id: HP-001
+    title: Explicit migration of a legacy project
+    category: happy_path
+    severity: critical
+    input:
+      messages:
+        - role: user
+          content: Check what migration would change.
+        - role: user
+          content: Run the migration with --yes.
+    expected:
+      outcome: completed
+      telemetry_events:
+        - spectra_migrate_completed
+        - spectra_project_refused
+  - id: RF-001
+    title: Incompatible project refused
+    category: refusal_cases
+    severity: critical
+    input:
+      messages:
+        - role: user
+          content: Run a project command on an outdated project.
+    expected:
+      outcome: refused
+      refusal_reason: project schema is not current
