@@ -45,6 +45,15 @@ function toDataRelative(gitPath) {
   return gitPath.replace(/^(?:\.spectra|spectra)\/(?=sdd\/)/, "");
 }
 
+// A ref that does not resolve to a commit must fail rather than yield an empty change set.
+function assertRefsResolve(repoRoot, refs) {
+  for (const ref of refs.filter(Boolean)) {
+    if (spawnSync("git", ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`], { cwd: repoRoot }).status !== 0) {
+      throw new Error(`Cannot resolve git ref ${ref}: the changed files, and so the review scope, cannot be determined.`);
+    }
+  }
+}
+
 function getChangedFiles(repoRoot, { base = null, head = null, includeWorktree = true, sort = true } = {}) {
   if (!isGitRepo(repoRoot)) {
     return [];
@@ -72,4 +81,4 @@ function getChangedFiles(repoRoot, { base = null, head = null, includeWorktree =
 }
 
 
-export { collectGitDiff, getCurrentCommit, getChangedFiles, isGitRepo };
+export { assertRefsResolve, collectGitDiff, getCurrentCommit, getChangedFiles, isGitRepo, toDataRelative };

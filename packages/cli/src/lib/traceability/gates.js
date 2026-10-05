@@ -17,26 +17,37 @@ import { traceSubject } from "./trace.js";
 const STAGES = ["implementation", "review", "release"];
 const byKey = (a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
 
-// Rules concerned by changed files (data-relative paths): rules that affect a module containing the
-// file, rules defined in a changed file, and rules governing a subject defined in a changed file.
-function rulesForChangedFiles(trace, files) {
+// What changed files concern (data-relative paths), with the reason for each rule: rules that affect a
+// module containing the file, rules defined in a changed file, and rules governing a subject (or a scenario
+// covering one) defined in a changed file. The one implementation shared by the review gate and
+// `spectra inspect`, so the two cannot disagree about which rules a change concerns.
+function changedFileImpact(trace, files) {
   const rules = Object.keys(trace.subjects).filter((id) => trace.subjects[id].kind === "business-rule" && trace.subjects[id].status === "active");
   const inModule = (file, modulePath) => file === modulePath || file.startsWith(`${modulePath}/`);
   const nested = Object.values(trace.locators.modules).filter((modulePath) => modulePath !== ".");
   // The root module owns only the files no other module contains.
   const owns = (file, modulePath) => (modulePath === "." ? !nested.some((other) => inModule(file, other)) : inModule(file, modulePath));
-  const modules = Object.entries(trace.locators.modules).filter(([, modulePath]) => files.some((file) => owns(file, modulePath))).map(([id]) => id);
+  const modules = Object.entries(trace.locators.modules).filter(([, modulePath]) => files.some((file) => owns(file, modulePath))).map(([id]) => id).sort();
   const sources = new Set(files);
-  const changedSubjects = Object.keys(trace.locators.sources).filter((id) => sources.has(trace.locators.sources[id]));
-  return rules.filter((rule) => {
-    if (changedSubjects.includes(rule)) return true;
+  const changedSubjects = Object.keys(trace.locators.sources).filter((id) => sources.has(trace.locators.sources[id])).sort();
+  const reasonsOf = (rule) => {
     const edges = trace.edges.filter((edge) => edge.from === rule);
-    if (edges.some((edge) => edge.type === "affectsModule" && modules.includes(edge.to))) return true;
     const governed = edges.filter((edge) => edge.type === "governs").map((edge) => edge.to);
     const closure = [...governed, ...trace.edges.filter((edge) => edge.type === "covers" && governed.includes(edge.to)).map((edge) => edge.from)];
-    return closure.some((id) => changedSubjects.includes(id));
-  }).sort();
+    return [
+      ...(changedSubjects.includes(rule) ? ["source-file-changed"] : []),
+      ...edges.filter((edge) => edge.type === "affectsModule" && modules.includes(edge.to)).map((edge) => `affected-module:${edge.to}`),
+      ...[...new Set(closure)].filter((id) => changedSubjects.includes(id)).map((id) => `governs-changed-subject:${id}`)
+    ].sort();
+  };
+  return {
+    modules: modules.map((id) => ({ id, files: files.filter((file) => owns(file, trace.locators.modules[id])).sort() })),
+    changedSubjects,
+    rules: rules.map((id) => ({ id, reasons: reasonsOf(id) })).filter((rule) => rule.reasons.length > 0).sort((a, b) => (a.id < b.id ? -1 : 1))
+  };
 }
+
+const rulesForChangedFiles = (trace, files) => changedFileImpact(trace, files).rules.map((rule) => rule.id);
 
 function evaluateGate(trace, evidence, stage, { rules = null } = {}) {
   if (!STAGES.includes(stage)) throw new Error(`Unknown gate stage: ${stage} (expected ${STAGES.join(", ")})`);
@@ -88,4 +99,4 @@ function evaluateGate(trace, evidence, stage, { rules = null } = {}) {
   };
 }
 
-export { STAGES, evaluateGate, rulesForChangedFiles };
+export { STAGES, changedFileImpact, evaluateGate, rulesForChangedFiles };

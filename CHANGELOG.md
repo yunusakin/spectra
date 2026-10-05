@@ -17,6 +17,7 @@
 - Native application updates retain verified version directories and preserve original executable bytes for update recovery; no public rollback command is provided.
 
 ### Added
+- `spectra inspect <id> [--json]` and `spectra inspect --changed | --base <ref> [--head <ref>] | --file <path> [--json]`: a read-only Project Intelligence query over existing traceability, verification and gate semantics. It explains one rule, requirement, scenario, invariant, module or test target (relationships marked canonical or derived, verification conclusion identical to `verify --explain`, review/release gate) and reports the impact of changed files (modules, subjects, rules, verification scopes, gate implications, each with a deterministic reason). The changed-file-to-rule logic moved out of the review gate into one shared function, so impact and `verify --gate review` agree. No new storage, no schema change or migration.
 - `spectra uninstall` removes verified managed native application files while leaving projects, adapters and Git exclusions unchanged. npm, npx and project-local fallback guidance follows installation provenance.
 
 ### Documentation

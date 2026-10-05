@@ -7,8 +7,7 @@ import { buildTraceability, traceSubject } from "../lib/traceability/trace.js";
 import { concludeVerification, readVerificationEvidence } from "../lib/traceability/evidence.js";
 import { runTestTarget } from "../lib/traceability/run.js";
 import { STAGES, evaluateGate, rulesForChangedFiles } from "../lib/traceability/gates.js";
-import { getChangedFiles, isGitRepo } from "../lib/git-diff.js";
-import { spawnSync } from "node:child_process";
+import { assertRefsResolve, getChangedFiles, isGitRepo } from "../lib/git-diff.js";
 
 // Runs one test target, records the evidence and says what it now supports. Exit status follows the result.
 async function verifyTestTarget(cwd, testTarget) {
@@ -87,9 +86,7 @@ function gateStage(cwd, stage, { changed, base, head, json }) {
     const trace = buildTraceability(projectRoot);
     const narrowed = changed || base;
     const determinable = !narrowed || isGitRepo(projectRoot);
-    for (const ref of [base, head].filter(Boolean)) {
-      if (determinable && spawnSync("git", ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`], { cwd: projectRoot }).status !== 0) throw new Error(`Cannot resolve git ref ${ref}: the changed files, and so the review scope, cannot be determined.`);
-    }
+    if (determinable) assertRefsResolve(projectRoot, [base, head]);
     // Scope that cannot be determined (not a git repository) never narrows the gate: it falls back to the whole project.
     result = evaluateGate(trace, readVerificationEvidence(projectRoot), stage, { rules: narrowed && determinable ? rulesForChangedFiles(trace, getChangedFiles(projectRoot, { base, head })) : null });
     if (narrowed && !determinable) result.warnings.unshift({ code: "scope-undeterminable", rule: null, reason: "this is not a git repository, so changed files cannot be determined; the gate covers the whole project" });

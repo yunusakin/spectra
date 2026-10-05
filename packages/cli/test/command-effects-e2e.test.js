@@ -7,7 +7,7 @@ import test from "node:test";
 import { createGitProject, localSpectra, spectra } from "./helpers/project.js";
 
 const repo = fileURLToPath(new URL("../../../", import.meta.url));
-const commands = "init adopt onboard context task route knowledge index check verify status update doctor approve eval diff quick skills adapters version help".split(" ");
+const commands = "init adopt onboard context task route knowledge index inspect check verify status update doctor approve eval diff quick skills adapters version help".split(" ");
 
 // Failure modes: omitted public command/mode, stale installed guide, diagrams
 // absent, hidden cache or governance writes, falsely read-only operations,

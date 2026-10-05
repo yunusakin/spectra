@@ -16,7 +16,8 @@ const WORKFLOWS = [
     ["task", "Prepare an implementation task"],
     ["route", "Route a task to the smallest relevant context"],
     ["knowledge", "Record and promote durable business rules"],
-    ["index", "Build the deterministic repo index used for scoped context"]
+    ["index", "Build the deterministic repo index used for scoped context"],
+    ["inspect", "Explain one subject or the impact of changed files (read-only)"]
   ]],
   ["Quality", [
     ["check", "Validate project health"],
