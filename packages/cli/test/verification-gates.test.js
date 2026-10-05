@@ -409,3 +409,13 @@ test("metrics count required subjects by conclusion and the rules each stage gat
   assert.deepEqual(metrics.verificationRequired, { subjects: 2, verified: 1, failed: 1, stale: 0, unverified: 0 });
   assert.deepEqual(metrics.rulesBlocked, { review: 1, release: 1 });
 });
+
+test("a broken verifiedBy on a covering AC (or on a subject no rule governs) still blocks a project-wide gate", () => {
+  const acOnly = project({ fr1: [LOY], ac1: ["node:test-target:packages/nope"] });
+  for (const stage of ["review", "release"]) assert.ok(gate(acOnly, stage).blockers.some((entry) => entry.code === "broken-canonical-structure" && entry.subject === "alpha#AC-1" && entry.rule === "RULE-LOY-001"), stage);
+  const ungoverned = project({ fr1: [LOY], ac1: [LOY] });
+  editSpec(ungoverned, (spec) => { spec.requirements.functional.push({ id: "FR-9", statement: "Orphan.", priority: "must", verifiedBy: ["node:test-target:packages/nope"] }); });
+  const release = gate(ungoverned, "release");
+  assert.ok(release.blockers.some((entry) => entry.code === "broken-canonical-structure" && entry.subject === "alpha#FR-9" && entry.rule === null), JSON.stringify(release.blockers));
+  assert.equal(gate(ungoverned, "review", ["RULE-LOY-001"]).blockers.some((entry) => entry.subject === "alpha#FR-9"), false, "a narrowed review only sees edges its rules reach");
+});

@@ -1,4 +1,5 @@
 import { concludeVerification } from "./evidence.js";
+import { traceSubject } from "./trace.js";
 
 // Stage gates over verification state. Two inputs only: the trace (canonical structure) and the local
 // evidence. Nothing runs tests, nothing grants approval, and structural validation stays in the
@@ -58,9 +59,16 @@ function evaluateGate(trace, evidence, stage, { rules = null } = {}) {
       else if (/has no test target/.test(gap)) warnings.push({ key: `${rule}\t2\t${module}`, code: "module-without-test-target", rule, module, reason: gap });
       else if (module) warnings.push({ key: `${rule}\t3\t${module}`, code: "module-scope-not-named", rule, module, reason: gap });
     }
-    if (stage !== "implementation") {
-      for (const broken of trace.unresolved.filter((entry) => entry.from === rule || conclusion.scopes.concat(conclusion.subjects).some((scope) => (scope.subject ?? scope.id) === entry.from))) {
-        blockers.push({ key: `${rule}\t~\t${broken.from}\t${broken.target}`, code: "broken-canonical-structure", rule, subject: broken.from, scope: broken.target, evidence: "none", reason: `${broken.type} target ${broken.target} is invalid: ${broken.reason}`, action: "fix the canonical link (spectra validate reports it)" });
+  }
+  // Broken canonical edges (already reported by the validators) block review and release. A broken edge
+  // belongs to every active rule whose obligations include its source; one that no rule reaches still
+  // blocks a project-wide gate, attributed to no rule.
+  if (stage !== "implementation") {
+    for (const broken of trace.unresolved) {
+      const owners = active.filter((rule) => rule === broken.from || traceSubject(trace, rule).governsClosure.includes(broken.from));
+      const relevant = rules ? owners.filter((rule) => inScope.includes(rule)) : owners.length > 0 ? owners : [null];
+      for (const rule of relevant) {
+        blockers.push({ key: `${rule ?? ""}\t~\t${broken.from}\t${broken.target}`, code: "broken-canonical-structure", rule, subject: broken.from, scope: broken.target, evidence: "none", reason: `${broken.type} target ${broken.target} is invalid: ${broken.reason}`, action: "fix the canonical link (spectra validate reports it)" });
       }
     }
   }

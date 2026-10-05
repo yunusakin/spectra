@@ -103,7 +103,7 @@ function gateStage(cwd, stage, { changed, base, head, json }) {
     const [first] = group;
     title(`  BLOCKER ${first.code}${first.scope ? ` via ${first.scope}` : ""} (${first.evidence}): ${group.length} subject/rule pair(s)`);
     title(`    ${first.reason}`);
-    title(`    affects: ${[...new Set(group.map((item) => item.rule))].join(", ")}`);
+    title(`    affects: ${[...new Set(group.map((item) => item.rule).filter(Boolean))].join(", ") || "no rule (canonical structure)"}`);
     title(`    subjects: ${[...new Set(group.map((item) => item.subject).filter(Boolean))].join(", ")}`);
     title(`    action: ${first.action}`);
   }
