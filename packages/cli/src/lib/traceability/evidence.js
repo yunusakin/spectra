@@ -41,7 +41,7 @@ function supportedIds(trace, testTarget) {
   for (const subject of subjects) ids.add(subject);
   for (const rule of Object.keys(trace.subjects).filter((id) => trace.subjects[id].kind === "business-rule")) {
     const detail = traceSubject(trace, rule);
-    if (!detail.governs.some((id) => subjects.includes(id))) continue;
+    if (!detail.governsClosure.some((id) => subjects.includes(id))) continue;
     ids.add(rule);
     for (const module of detail.modules.filter((candidate) => candidate.testTargets.includes(testTarget))) ids.add(module.id);
   }
@@ -162,14 +162,36 @@ const REASONS = {
   verified: "every required verification scope has fresh passing evidence"
 };
 
-function concludeSubject(trace, records, id) {
+const ORDER = ["failed", "stale", "unverified", "verified"];
+const strongest = (states) => ORDER.find((state) => states.includes(state)) ?? "unverified";
+
+// One subject judged by its own explicit scopes only.
+function ownConclusion(trace, records, id) {
   const detail = traceSubject(trace, id);
-  const targets = detail.scopes;
-  const scopes = targets.map((target) => scopeState(trace, records, id, target));
-  const gaps = targets.length === 0 ? ["missing verification scope: no verifiedBy target names an executable scope"] : [];
+  const scopes = detail.scopes.map((target) => scopeState(trace, records, id, target));
+  const gaps = scopes.length === 0 ? ["missing verification scope: no verifiedBy target names an executable scope"] : [];
   const verification = rollUp(scopes, gaps);
   const reason = verification === "unverified" ? (gaps[0] ?? "no evidence recorded for a required verification scope") : REASONS[verification];
-  return { id, kind: trace.subjects[id].kind, traceability: { complete: detail.complete, missing: detail.missing }, modulesWithoutTestTarget: detail.modulesWithoutTestTarget, verification, reason, gaps, scopes, explanation: scopes.map(describeScope).concat(gaps) };
+  return { id, kind: trace.subjects[id].kind, detail, verification, reason, gaps, scopes };
+}
+
+// A requirement is verified only when its own scopes are AND every scenario that canonically covers it
+// is (`AC covers FR`); neither inherits the other's scope. Precedence failed > stale > unverified > verified.
+function concludeSubject(trace, records, id) {
+  const own = ownConclusion(trace, records, id);
+  const components = own.detail.coveredBy.map((ac) => ownConclusion(trace, records, ac));
+  const verification = strongest([own.verification, ...components.map((entry) => entry.verification)]);
+  const driver = verification === own.verification ? null : components.find((entry) => entry.verification === verification);
+  const reason = driver ? `${driver.id}: ${driver.reason}` : own.reason;
+  const scopes = [...own.scopes, ...components.flatMap((entry) => entry.scopes)];
+  const gaps = [...own.gaps, ...components.flatMap((entry) => entry.gaps.map((gap) => `${entry.id}: ${gap}`))];
+  const detail = own.detail;
+  return {
+    id, kind: own.kind, traceability: { complete: detail.complete, missing: detail.missing }, modulesWithoutTestTarget: detail.modulesWithoutTestTarget,
+    verification, reason, gaps, scopes,
+    components: components.map((entry) => ({ id: entry.id, verification: entry.verification, reason: entry.reason })),
+    explanation: [...scopes.map(describeScope), ...gaps]
+  };
 }
 
 function concludeRule(trace, records, id) {
@@ -183,11 +205,13 @@ function concludeRule(trace, records, id) {
     if (module.testTargets.length === 0) gaps.push(`module ${module.id} has no test target`);
     else if (!module.testTargets.some((target) => named.has(target))) gaps.push(`module ${module.id} has test target(s) but no governed subject names one as its verification scope`);
   }
-  for (const entry of governed) gaps.push(...entry.gaps.map((gap) => `${entry.id}: ${gap}`));
-  const scopes = governed.flatMap((entry) => entry.scopes.map((scope) => scopeState(trace, records, scope.subject, scope.target, [id, ...subject.modules.filter((module) => module.testTargets.includes(scope.target)).map((module) => module.id)])));
+  for (const entry of governed) gaps.push(...entry.gaps.map((gap) => (/^[^ ]+#[^ ]+: /.test(gap) ? gap : `${entry.id}: ${gap}`)));
+  const seen = new Set();
+  const scopes = governed.flatMap((entry) => entry.scopes).filter((scope) => !seen.has(`${scope.subject}\t${scope.target}`) && seen.add(`${scope.subject}\t${scope.target}`))
+    .map((scope) => scopeState(trace, records, scope.subject, scope.target, [id, ...subject.modules.filter((module) => module.testTargets.includes(scope.target)).map((module) => module.id)]));
   const verification = rollUp(scopes, gaps);
   const reason = verification === "unverified" ? (gaps[0] ?? "no evidence recorded for a required verification scope") : REASONS[verification];
-  const subjects = governed.map(({ id: subjectId, verification: state, reason: why }) => ({ id: subjectId, verification: state, reason: why }));
+  const subjects = governed.map(({ id: subjectId, verification: state, reason: why, components }) => ({ id: subjectId, verification: state, reason: why, ...(components?.length ? { components } : {}) }));
   return { ...base, verification, reason, gaps, subjects, scopes, explanation: [...subjects.map((entry) => `${entry.id}: ${entry.verification} (${entry.reason})`), ...scopes.map(describeScope), ...gaps.filter((gap) => /^module|^missing canonical/.test(gap))] };
 }
 

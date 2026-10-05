@@ -1,5 +1,6 @@
 import { concludeVerification, staleBecause } from "./evidence.js";
 import { traceSubject } from "./trace.js";
+import { evaluateGate } from "./gates.js";
 
 // Factual coverage counts, kept apart on purpose: canonical (rules with a governed subject),
 // scope (subjects naming an explicit verifiedBy target), execution evidence (fresh/stale/failed
@@ -25,6 +26,9 @@ function traceabilityMetrics(trace, evidence) {
     if (views.some((scope) => !scope.fresh)) return "stale";
     return views.some((scope) => scope.result === "failed") ? "freshFailed" : "freshPassed";
   });
+  const required = governed.filter((id) => traceSubject(trace, id).scopes.length > 0);
+  const requiredConclusions = subjectConclusions.filter((entry) => required.includes(entry.id));
+  const blockedRules = (stage) => new Set(evaluateGate(trace, evidence, stage).blockers.map((entry) => entry.rule)).size;
   return {
     activeRules: rules.length,
     rulesWithRequirementLink: ruleTraces.filter((entry) => entry.requirements.length > 0).length,
@@ -39,6 +43,9 @@ function traceabilityMetrics(trace, evidence) {
     brokenEdges: trace.unresolved.length,
     verification: count(rules.map((id) => ({ verification: concludeVerification(trace, evidence, id).verification })), "verification"),
     subjectVerification: count(subjectConclusions, "verification"),
+    // Subjects that declare a required scope (`verifiedBy`), by conclusion, and rules each stage gate blocks.
+    verificationRequired: { subjects: required.length, ...count(requiredConclusions, "verification") },
+    rulesBlocked: { review: blockedRules("review"), release: blockedRules("release") },
     scopes: {
       total: scopeTargets.length,
       freshPassed: states.filter((state) => state === "freshPassed").length,
