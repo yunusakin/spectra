@@ -434,8 +434,15 @@ adapter_outputs=(
 )
 
 if [[ "${repo_mode}" == "canonical" ]]; then
+  # Handwritten guidance (AGENTS.md, CLAUDE.md, ...) is allowed; only a committed Spectra-generated
+  # adapter is rejected. Generated output is recognised by its first non-empty line, which the generator
+  # always writes and handwritten files do not share.
   for p in "${adapter_outputs[@]}"; do
-    [[ ! -e "${p}" ]] || add_error "Canonical repo must not commit generated adapter output: ${p}"
+    [[ -e "${p}" ]] || continue
+    [[ -f "${generated_a}/${p}" ]] || continue
+    if [[ "$(grep -m1 -v '^[[:space:]]*$' "${p}" 2>/dev/null)" == "$(grep -m1 -v '^[[:space:]]*$' "${generated_a}/${p}" 2>/dev/null)" ]]; then
+      add_error "Canonical repo must not commit generated adapter output: ${p}"
+    fi
   done
 elif [[ "${repo_mode}" == "consumer" ]]; then
   for p in "${adapter_outputs[@]}"; do

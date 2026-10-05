@@ -168,6 +168,25 @@ function scanNode(ctx) {
       );
     }
 
+    // Named sub-targets: `scripts.test:<name>` is an independently executable slice of the package's tests.
+    // The id carries the script name (`<path>:test:<name>`); `path` stays the directory it runs from, so
+    // the module still owns it and the Phase 1H producer runs its command unchanged.
+    for (const script of Object.keys(pkg.scripts ?? {}).filter((name) => /^test:[A-Za-z0-9._-]+$/.test(name) && typeof pkg.scripts[name] === "string").sort()) {
+      records.push(
+        createRecord({
+          kind: "test-target",
+          name: `${moduleName}:${script}`,
+          path: relDir,
+          idPath: `${relDir}:${script}`,
+          ecosystem: ECOSYSTEM,
+          confidence: "high",
+          status: "confirmed",
+          evidence: [evidenceEntry(relPkg, `scripts.${script}`)],
+          attributes: { command: pkg.scripts[script] }
+        })
+      );
+    }
+
     if (pkg.scripts?.build) {
       records.push(
         createRecord({

@@ -54,6 +54,13 @@ function execute(command, { cwd, env, timeoutMs }) {
 }
 
 // The Repo Index signature covers absolute paths, so freshness is judged on the real path.
+// NODE_TEST_CONTEXT marks a process as a child of an outer `node --test`; inherited by a command that is
+// itself `node --test`, it makes the inner run report success whatever happens, so it is never passed on.
+function cleanEnv(env) {
+  const { NODE_TEST_CONTEXT, ...rest } = env;
+  return rest;
+}
+
 async function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOUT_MS, env = process.env } = {}) {
   const projectRoot = fs.realpathSync(givenRoot);
   let index = null;
@@ -70,7 +77,7 @@ async function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOU
   if (freshness.status !== "fresh") throw new Error(`The Repo Index is ${freshness.status}; run \`spectra index\` before running a test target.`);
 
   const observed = observeSupport(projectRoot, testTarget);
-  const execution = await execute(command, { cwd: path.join(projectRoot, record.path), env, timeoutMs });
+  const execution = await execute(command, { cwd: path.join(projectRoot, record.path), env: cleanEnv(env), timeoutMs });
   const output = execution.output.slice(-OUTPUT_TAIL);
   const incomplete = execution.timedOut ? `timed out after ${timeoutMs} ms`
     : execution.error ? `did not complete: ${execution.error.message}`
