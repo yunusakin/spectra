@@ -344,7 +344,7 @@ spectra check
 
 **Result:** Per-stage results and release-confidence score; failure when readiness is blocked.
 
-**Modes and repeat runs:** `--scope all|spec|app`, `--item`. App/item work requires implementation approval; final release readiness also checks implementation approval and checklists. Command-mode evals may run application commands and modify their chosen paths. Does not automatically run your generic npm/Maven test command. Reports can change even on a failed verify.
+**Modes and repeat runs:** `--scope all|spec|app`, `--item`. App/item work requires implementation approval; final release readiness also checks implementation approval and checklists. Command-mode evals may run application commands and modify their chosen paths. Does not automatically run your generic npm/Maven test command. Reports can change even on a failed verify. `--test-target <id>` is a separate mode: it runs only that Repo Index test target's recorded command (for Node, `scripts.test`) once, records the completed result in `.spectra/cache/verification/evidence.json` (local cache, never committed) and prints which rules and requirements it now supports; it skips the other stages and exits 0 only when the tests pass.
 
 **Example:**
 

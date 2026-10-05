@@ -128,6 +128,7 @@ function traceSubject(trace, id) {
     requirements,
     governedBy: kind === "business-rule" ? [] : involved,
     modules: modules.map((module) => ({ id: module, via: involved.filter((rule) => from("affectsModule", rule).includes(module)) })),
+    modulesWithoutTestTarget: modules.filter((module) => testsOf(module).length === 0),
     testTargets: unique(modules.flatMap(testsOf)).map((target) => ({ id: target, module: modules.find((module) => testsOf(module).includes(target)) })),
     paths: [...new Map(paths.map((path) => [JSON.stringify(path), path])).values()].sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1)),
     missing,

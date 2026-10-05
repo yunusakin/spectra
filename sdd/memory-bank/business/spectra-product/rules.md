@@ -61,6 +61,7 @@ Changing a spec invalidates the approval stages that depend on the kind of chang
 
 Status: active
 Affected Modules: packages-cli
+Governs: spectra-core#FR-3, spectra-core#AC-3
 Evidence: packages/cli/src/lib/specs/approval-state.js (STAGE_INVALIDATION); packages/cli/test/approval.test.js ("editing projectbrief.md invalidates product approval and re-approval restores it", "editing a feature spec (yaml) invalidates approvals in a canonical project")
 Confidence: high
 

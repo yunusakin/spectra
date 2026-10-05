@@ -10,6 +10,7 @@ function traceabilityMetrics(trace, evidence) {
   const requirements = ids.filter((id) => REQUIREMENT_KINDS.has(trace.subjects[id].kind));
   const ruleTraces = rules.map((id) => traceSubject(trace, id));
   const requirementTraces = requirements.map((id) => traceSubject(trace, id));
+  const records = evidence?.records ?? [];
   const verification = { verified: 0, failed: 0, stale: 0, unverified: 0 };
   for (const id of rules) verification[concludeVerification(trace, evidence, id).verification] += 1;
   return {
@@ -22,6 +23,11 @@ function traceabilityMetrics(trace, evidence) {
     rulesWithCompletePath: ruleTraces.filter((entry) => entry.complete).length,
     brokenEdges: trace.unresolved.length,
     verification,
+    evidence: {
+      freshPassed: records.filter((record) => staleBecause(record, trace).length === 0 && record.result === "passed").length,
+      freshFailed: records.filter((record) => staleBecause(record, trace).length === 0 && record.result === "failed").length,
+      stale: records.filter((record) => staleBecause(record, trace).length > 0).length
+    },
     staleEvidence: (evidence?.records ?? []).filter((record) => staleBecause(record, trace).length > 0).length
   };
 }

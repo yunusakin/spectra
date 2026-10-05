@@ -4,36 +4,36 @@
     "runs": 39,
     "normalRuns": 25,
     "requiredRecall": 1,
-    "relevantRecall": 0.9298,
-    "precision": 0.8267,
+    "relevantRecall": 0.9123,
+    "precision": 0.8243,
     "falsePositives": 13,
     "falsePositivesLabeledIrrelevant": 13,
     "falsePositivesUnlabeled": 0,
-    "precisionLabeledOnly": 0.8267,
-    "falseNegativesNormal": 4,
-    "candidateTokens": 7634,
-    "selectedObjectTokens": 7272,
-    "packTokens": 41369,
-    "wholeFileBaselineTokens": 50026,
-    "packTokenReduction": 0.1731,
-    "exactObjectTokens": 7272,
-    "wholeSourceTokens": 47270,
-    "exactTokenReduction": 0.8462,
+    "precisionLabeledOnly": 0.8243,
+    "falseNegativesNormal": 5,
+    "candidateTokens": 7656,
+    "selectedObjectTokens": 7190,
+    "packTokens": 41287,
+    "wholeFileBaselineTokens": 50122,
+    "packTokenReduction": 0.1763,
+    "exactObjectTokens": 7190,
+    "wholeSourceTokens": 47856,
+    "exactTokenReduction": 0.8498,
     "byKind": {
       "business": {
-        "selectedTokens": 4699,
-        "wholeTokens": 16413,
-        "reduction": 0.7137
+        "selectedTokens": 4721,
+        "wholeTokens": 16509,
+        "reduction": 0.714
       },
       "feature": {
         "selectedTokens": 628,
-        "wholeTokens": 3597,
-        "reduction": 0.8254
+        "wholeTokens": 4087,
+        "reduction": 0.8463
       },
       "repoIndex": {
-        "selectedTokens": 1945,
+        "selectedTokens": 1841,
         "wholeTokens": 27260,
-        "reduction": 0.9287
+        "reduction": 0.9325
       }
     },
     "statusCounts": {
@@ -90,17 +90,17 @@
         "tokens": 395
       },
       "repo-index-evidence": {
-        "selected": 28,
-        "relevant": 28,
+        "selected": 27,
+        "relevant": 27,
         "falsePositives": 0,
-        "tokens": 1484
+        "tokens": 1430
       }
     },
     "relationshipOnly": {
       "repo-index-evidence": {
-        "selected": 22,
-        "relevant": 22,
-        "tokens": 1190
+        "selected": 21,
+        "relevant": 21,
+        "tokens": 1136
       },
       "feature-relationship": {
         "selected": 9,
@@ -109,7 +109,7 @@
       }
     },
     "missByCause": {
-      "normal:budget-exclusion": 2,
+      "normal:budget-exclusion": 3,
       "normal:retrieval-miss": 2,
       "tight:budget-exclusion": 10,
       "very-tight:anchor-exclusion": 2,
@@ -2057,8 +2057,7 @@
         "RULE-SPE-007",
         "RULE-SPE-011",
         "node:module:packages/cli",
-        "node:module:packages/core",
-        "node:test-target:packages/cli"
+        "node:module:packages/core"
       ],
       "candidates": [
         "spectra-core#AC-2",
@@ -2070,7 +2069,12 @@
         "node:module:packages/core",
         "node:test-target:packages/cli"
       ],
-      "excluded": [],
+      "excluded": [
+        {
+          "id": "node:test-target:packages/cli",
+          "exclusion": "budget"
+        }
+      ],
       "reasons": {
         "spectra-core#AC-2": [
           {
@@ -2137,24 +2141,6 @@
             "reason": "repo-index-evidence",
             "via": "RULE-SPE-011"
           }
-        ],
-        "node:test-target:packages/cli": [
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-SPE-006"
-          },
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-SPE-007"
-          },
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-SPE-011"
-          },
-          {
-            "reason": "repo-index-evidence",
-            "via": "node:module:packages/cli"
-          }
         ]
       },
       "required": [],
@@ -2169,41 +2155,47 @@
         "node:test-target:packages/cli": "relevant"
       },
       "falsePositives": [],
-      "falseNegatives": [],
+      "falseNegatives": [
+        {
+          "id": "node:test-target:packages/cli",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        }
+      ],
       "metrics": {
         "requiredRecall": null,
-        "relevantRecall": 1,
+        "relevantRecall": 0.8,
         "precision": 1,
         "candidateRecall": 1,
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 702,
-        "included": 702,
-        "excluded": 0,
-        "total": 1806,
+        "candidate": 713,
+        "included": 659,
+        "excluded": 54,
+        "total": 1763,
         "routingIndexes": 0,
-        "superseded": 1674,
-        "wholeFileBaseline": 2778
+        "superseded": 1686,
+        "wholeFileBaseline": 2790
       },
       "exactVsWhole": [
         {
           "source": "repo-index",
-          "objects": 3,
-          "selectedTokens": 153,
+          "objects": 2,
+          "selectedTokens": 99,
           "wholeTokens": 1910
         },
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
           "selectedTokens": 73,
-          "wholeTokens": 394
+          "wholeTokens": 492
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
-          "selectedTokens": 338,
-          "wholeTokens": 1524
+          "selectedTokens": 349,
+          "wholeTokens": 1536
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/unresolved.md",
@@ -2217,16 +2209,16 @@
         "knowledge": "rebuilt-missing",
         "full": {
           "budget": 1200,
-          "used": 1196,
-          "remaining": 4
+          "used": 1153,
+          "remaining": 47
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 4,
-        "utilization": 0.9967,
+        "remaining": 47,
+        "utilization": 0.9608,
         "warnings": [
           "optional-excluded"
         ]
@@ -2349,13 +2341,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 702,
+        "candidate": 713,
         "included": 343,
-        "excluded": 359,
-        "total": 1803,
+        "excluded": 370,
+        "total": 1798,
         "routingIndexes": 0,
-        "superseded": 1674,
-        "wholeFileBaseline": 3134
+        "superseded": 1686,
+        "wholeFileBaseline": 3141
       },
       "exactVsWhole": [
         {
@@ -2368,13 +2360,13 @@
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
           "selectedTokens": 73,
-          "wholeTokens": 394
+          "wholeTokens": 492
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 171,
-          "wholeTokens": 1524
+          "wholeTokens": 1536
         }
       ],
       "selection": {
@@ -2382,16 +2374,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1193,
-          "remaining": 7
+          "used": 1188,
+          "remaining": 12
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 7,
-        "utilization": 0.9942,
+        "remaining": 12,
+        "utilization": 0.99,
         "warnings": [
           "optional-excluded"
         ]
@@ -2509,13 +2501,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 702,
+        "candidate": 713,
         "included": 122,
-        "excluded": 580,
-        "total": 1793,
+        "excluded": 591,
+        "total": 1791,
         "routingIndexes": 0,
-        "superseded": 1674,
-        "wholeFileBaseline": 3345
+        "superseded": 1686,
+        "wholeFileBaseline": 3355
       },
       "exactVsWhole": [
         {
@@ -2528,7 +2520,7 @@
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
           "selectedTokens": 73,
-          "wholeTokens": 394
+          "wholeTokens": 492
         }
       ],
       "selection": {
@@ -2536,16 +2528,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1183,
-          "remaining": 17
+          "used": 1181,
+          "remaining": 19
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 17,
-        "utilization": 0.9858,
+        "remaining": 19,
+        "utilization": 0.9842,
         "warnings": [
           "optional-excluded"
         ]
@@ -2614,7 +2606,7 @@
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
           "selectedTokens": 73,
-          "wholeTokens": 394
+          "wholeTokens": 492
         }
       ],
       "selection": {
@@ -2643,8 +2635,7 @@
         "RULE-SPE-006",
         "RULE-SPE-007",
         "RULE-SPE-011",
-        "node:module:packages/cli",
-        "node:module:packages/core"
+        "node:module:packages/cli"
       ],
       "candidates": [
         "RULE-SPE-001",
@@ -2656,6 +2647,10 @@
         "node:test-target:packages/cli"
       ],
       "excluded": [
+        {
+          "id": "node:module:packages/core",
+          "exclusion": "budget"
+        },
         {
           "id": "node:test-target:packages/cli",
           "exclusion": "budget"
@@ -2703,16 +2698,6 @@
             "reason": "repo-index-evidence",
             "via": "RULE-SPE-011"
           }
-        ],
-        "node:module:packages/core": [
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-SPE-006"
-          },
-          {
-            "reason": "repo-index-evidence",
-            "via": "RULE-SPE-011"
-          }
         ]
       },
       "required": [],
@@ -2751,26 +2736,26 @@
         "candidatePrecision": 0
       },
       "tokens": {
-        "candidate": 753,
-        "included": 699,
-        "excluded": 54,
-        "total": 1803,
+        "candidate": 764,
+        "included": 660,
+        "excluded": 104,
+        "total": 1764,
         "routingIndexes": 0,
-        "superseded": 1674,
-        "wholeFileBaseline": 2778
+        "superseded": 1686,
+        "wholeFileBaseline": 2790
       },
       "exactVsWhole": [
         {
           "source": "repo-index",
-          "objects": 2,
-          "selectedTokens": 99,
+          "objects": 1,
+          "selectedTokens": 49,
           "wholeTokens": 1910
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 3,
-          "selectedTokens": 462,
-          "wholeTokens": 1524
+          "selectedTokens": 473,
+          "wholeTokens": 1536
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/unresolved.md",
@@ -2784,16 +2769,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1193,
-          "remaining": 7
+          "used": 1154,
+          "remaining": 46
         },
         "summary": {
           "budget": 3200,
           "used": 610,
           "remaining": 2590
         },
-        "remaining": 7,
-        "utilization": 0.9942,
+        "remaining": 46,
+        "utilization": 0.9617,
         "warnings": [
           "optional-excluded"
         ]
@@ -2952,8 +2937,8 @@
         "excluded": 199,
         "total": 1769,
         "routingIndexes": 0,
-        "superseded": 1674,
-        "wholeFileBaseline": 2778
+        "superseded": 1686,
+        "wholeFileBaseline": 2790
       },
       "exactVsWhole": [
         {
@@ -2966,13 +2951,13 @@
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 1,
           "selectedTokens": 30,
-          "wholeTokens": 394
+          "wholeTokens": 492
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 4,
           "selectedTokens": 532,
-          "wholeTokens": 1524
+          "wholeTokens": 1536
         }
       ],
       "selection": {
@@ -3075,8 +3060,8 @@
         "excluded": 0,
         "total": 1805,
         "routingIndexes": 254,
-        "superseded": 1674,
-        "wholeFileBaseline": 3032
+        "superseded": 1686,
+        "wholeFileBaseline": 3044
       },
       "exactVsWhole": [
         {
@@ -3089,7 +3074,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
           "selectedTokens": 344,
-          "wholeTokens": 1524
+          "wholeTokens": 1536
         }
       ],
       "selection": {
@@ -3190,8 +3175,8 @@
         "excluded": 0,
         "total": 1757,
         "routingIndexes": 254,
-        "superseded": 1674,
-        "wholeFileBaseline": 3032
+        "superseded": 1686,
+        "wholeFileBaseline": 3044
       },
       "exactVsWhole": [
         {
@@ -3204,7 +3189,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
           "selectedTokens": 296,
-          "wholeTokens": 1524
+          "wholeTokens": 1536
         }
       ],
       "selection": {
@@ -3371,7 +3356,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 171,
-          "wholeTokens": 1524
+          "wholeTokens": 1536
         }
       ],
       "selection": {
@@ -3474,7 +3459,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 171,
-          "wholeTokens": 1524
+          "wholeTokens": 1536
         }
       ],
       "selection": {
@@ -3580,7 +3565,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 171,
-          "wholeTokens": 1524
+          "wholeTokens": 1536
         }
       ],
       "selection": {
@@ -3660,7 +3645,7 @@
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
           "selectedTokens": 73,
-          "wholeTokens": 394
+          "wholeTokens": 492
         }
       ],
       "selection": {
@@ -3738,7 +3723,7 @@
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
           "selectedTokens": 73,
-          "wholeTokens": 394
+          "wholeTokens": 492
         }
       ],
       "selection": {
@@ -3816,7 +3801,7 @@
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
           "selectedTokens": 73,
-          "wholeTokens": 394
+          "wholeTokens": 492
         }
       ],
       "selection": {
@@ -3897,7 +3882,7 @@
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
           "selectedTokens": 73,
-          "wholeTokens": 394
+          "wholeTokens": 492
         }
       ],
       "selection": {
@@ -3967,8 +3952,8 @@
         "excluded": 0,
         "total": 1461,
         "routingIndexes": 254,
-        "superseded": 1674,
-        "wholeFileBaseline": 3032
+        "superseded": 1686,
+        "wholeFileBaseline": 3044
       },
       "exactVsWhole": [
         {
@@ -4064,8 +4049,8 @@
         "excluded": 0,
         "total": 1584,
         "routingIndexes": 254,
-        "superseded": 1674,
-        "wholeFileBaseline": 3032
+        "superseded": 1686,
+        "wholeFileBaseline": 3044
       },
       "exactVsWhole": [
         {
@@ -4078,7 +4063,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 123,
-          "wholeTokens": 1524
+          "wholeTokens": 1536
         }
       ],
       "selection": {
@@ -4188,8 +4173,8 @@
         "excluded": 0,
         "total": 1738,
         "routingIndexes": 254,
-        "superseded": 1674,
-        "wholeFileBaseline": 3032
+        "superseded": 1686,
+        "wholeFileBaseline": 3044
       },
       "exactVsWhole": [
         {
@@ -4202,7 +4187,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
           "selectedTokens": 277,
-          "wholeTokens": 1524
+          "wholeTokens": 1536
         }
       ],
       "selection": {

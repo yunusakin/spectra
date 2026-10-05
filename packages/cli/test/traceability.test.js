@@ -315,7 +315,8 @@ test("metrics are small, deterministic and honest about gaps", () => {
     rulesWithCompletePath: 1,
     brokenEdges: 0,
     verification: { verified: 1, failed: 0, stale: 0, unverified: 1 },
-    staleEvidence: 0
+    staleEvidence: 0,
+    evidence: { freshPassed: 1, freshFailed: 0, stale: 0 }
   });
 });
 
