@@ -38,6 +38,7 @@ function createRecord({
   kind,
   name,
   path: recordPath,
+  idPath = null,
   ecosystem,
   confidence,
   status,
@@ -46,7 +47,7 @@ function createRecord({
   relationships = {}
 }) {
   const record = {
-    id: makeRecordId(ecosystem, kind, recordPath ?? name),
+    id: makeRecordId(ecosystem, kind, idPath ?? recordPath ?? name),
     kind,
     name,
     path: recordPath ?? null,

@@ -231,13 +231,13 @@ test("resolves FR, NFR and AC from the real Spectra feature spec by qualified ID
   const ac = resolveFeatureObject(repoRoot, "spectra-core#AC-2");
   assert.equal(ac.reference.kind, "acceptance-scenario");
   assert.equal(ac.reference.address, "yaml:acceptance.scenarios[id=AC-2]");
-  assert.deepEqual(ac.reference.relationships, { covers: ["FR-2"], verifiedBy: ["node:test-target:packages/cli"] });
+  assert.deepEqual(ac.reference.relationships, { covers: ["FR-2"], verifiedBy: ["node:test-target:packages/cli:test:approval", "node:test-target:packages/cli:test:install-layout"] });
   assert.deepEqual(ac.object, spec.acceptance.scenarios.find((item) => item.id === "AC-2"));
 
   const invariant = resolveFeatureObject(repoRoot, "spectra-core#INV-1");
   assert.equal(invariant.reference.kind, "architectural-invariant");
   assert.equal(invariant.reference.address, "yaml:invariants[id=INV-1]");
-  assert.deepEqual(invariant.reference.relationships, { verifiedBy: ["node:test-target:packages/cli"] });
+  assert.deepEqual(invariant.reference.relationships, { verifiedBy: ["node:test-target:packages/cli:test:knowledge"] });
 
   const lifecycle = resolveFeatureObject(repoRoot, "spectra-lifecycle#FR-1");
   assert.equal(lifecycle.reference.source, "sdd/features/spectra-lifecycle/feature.spec.yaml");

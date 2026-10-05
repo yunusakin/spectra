@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getCacheRoot } from "../project-layout.js";
-import { sortKeysDeep } from "../index/cache.js";
+import { readIndex, sortKeysDeep } from "../index/cache.js";
 import { loadKnowledgeMap } from "../knowledge/map.js";
 import { buildTraceability, traceSubject } from "./trace.js";
+import { sourceFingerprint } from "./fingerprint.js";
 
 // Verification = what evidence currently supports a connection. Evidence is a recorded result for a
 // Repo Index test target plus the signatures (Knowledge Map / Repo Index) of everything that result
@@ -103,13 +104,19 @@ function withEvidenceLock(file, work, { timeoutMs = 10_000, staleMs = 60_000 } =
   }
 }
 
-function recordVerificationEvidence(projectRoot, { testTarget, result, command = null, granularity = "test-target", observed = null, lockTimeoutMs = 10_000 }) {
+// Fingerprint of the sources the target runs from, as of now (taken BEFORE a run, like the signatures).
+function observeSources(projectRoot, testTarget) {
+  const record = readIndex(projectRoot).records.find((candidate) => candidate.id === testTarget);
+  return record ? sourceFingerprint(projectRoot, record.path) : null;
+}
+
+function recordVerificationEvidence(projectRoot, { testTarget, result, command = null, granularity = "test-target", observed = null, sourceFingerprint: sources, sourceFingerprintBefore: sourcesBefore, lockTimeoutMs = 10_000 }) {
   if (!RESULTS.has(result)) throw new Error(`Invalid verification result: ${result} (expected passed or failed)`);
   if (!(loadKnowledgeMap(projectRoot).map.byKind["test-target"] ?? []).includes(testTarget)) throw new Error(`Unknown test target: ${testTarget}`);
   const support = observed ?? observeSupport(projectRoot, testTarget);
   const file = evidenceFile(projectRoot);
   const records = withEvidenceLock(file, () => {
-    const next = [...readVerificationEvidence(projectRoot).records.filter((record) => record.testTarget !== testTarget), { testTarget, result, command, granularity, observed: support }]
+    const next = [...readVerificationEvidence(projectRoot).records.filter((record) => record.testTarget !== testTarget), { testTarget, result, command, granularity, observed: support, sourceFingerprint: sources === undefined ? observeSources(projectRoot, testTarget) : sources, sourceFingerprintBefore: sourcesBefore === undefined ? (sources === undefined ? observeSources(projectRoot, testTarget) : sources) : sourcesBefore }]
       .sort((a, b) => (a.testTarget < b.testTarget ? -1 : 1));
     const temporary = `${file}.${process.pid}.tmp`;
     fs.writeFileSync(temporary, `${JSON.stringify(sortKeysDeep({ contractVersion: EVIDENCE_CONTRACT_VERSION, records: next }), null, 2)}\n`, "utf8");
@@ -121,7 +128,17 @@ function recordVerificationEvidence(projectRoot, { testTarget, result, command =
 
 // Evidence is fresh only while every signature it observed is unchanged.
 function staleBecause(record, trace) {
-  return Object.entries(record.observed ?? {}).filter(([id, signature]) => (trace.signatures[id] ?? null) !== signature).map(([id]) => id).sort();
+  const changed = Object.entries(record.observed ?? {}).filter(([id, signature]) => (trace.signatures[id] ?? null) !== signature).map(([id]) => id);
+  return [...changed, ...sourceChanged(record, trace)].sort();
+}
+
+// The sources the target runs from differ from the ones the result was recorded against.
+function sourceChanged(record, trace) {
+  const now = trace.sourceFingerprints?.[record.testTarget];
+  // Fresh when the sources match the tree after the run (the run's own output files are part of it) or the
+  // tree before it (the output was cleaned up again). An edit made while the tests ran cannot be told
+  // apart from the run's own output.
+  return now === undefined || (record.sourceFingerprint ?? null) === now || (record.sourceFingerprintBefore ?? null) === now ? [] : [`source files of ${record.testTarget}`];
 }
 
 // A result supports only what it observed, and only what it observed about the ids that matter to
@@ -130,7 +147,7 @@ function staleBecause(record, trace) {
 // result) counts as changed.
 function staleFor(record, trace, ids) {
   const observed = record.observed ?? {};
-  return [...new Set(ids)].filter((id) => !(id in observed) || (trace.signatures[id] ?? null) !== observed[id]).sort();
+  return [...new Set([...[...new Set(ids)].filter((id) => !(id in observed) || (trace.signatures[id] ?? null) !== observed[id]), ...sourceChanged(record, trace)])].sort();
 }
 
 // What one explicit scope (a test target named by `subject`) currently says about it.
@@ -222,4 +239,4 @@ function concludeVerification(trace, evidence, id) {
   return kind === "business-rule" ? concludeRule(trace, records, id) : concludeSubject(trace, records, id);
 }
 
-export { concludeVerification, observeSupport, readVerificationEvidence, recordVerificationEvidence, staleBecause, withEvidenceLock };
+export { concludeVerification, observeSources, observeSupport, readVerificationEvidence, recordVerificationEvidence, staleBecause, withEvidenceLock };

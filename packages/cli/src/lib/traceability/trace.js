@@ -2,6 +2,7 @@ import { readIndex } from "../index/cache.js";
 import { normalize, rowValue } from "../business/parser.js";
 import { readBusinessIndexes } from "../business/repository.js";
 import { loadKnowledgeMap } from "../knowledge/map.js";
+import { sourceFingerprint } from "./fingerprint.js";
 
 // Traceability = what is connected to what, derived on demand from the Knowledge Map (rules,
 // feature objects, Repo Index records, with stable IDs and signatures) and the module index. Nothing
@@ -81,7 +82,13 @@ function buildTraceability(projectRoot) {
   const sorted = [...edges.values()].sort((a, b) => (a.from + a.type + a.to < b.from + b.type + b.to ? -1 : 1));
   const used = unique([...sorted.flatMap((edge) => [edge.from, edge.to]), ...(map.byKind["test-target"] ?? [])]);
   const subjects = map.references.filter((reference) => reference.kind === "business-rule" || GOVERNABLE_KINDS.has(reference.kind));
+  // Source fingerprints of the test targets some subject names in `verifiedBy`, one per distinct directory.
+  const targetPaths = Object.fromEntries(records.filter((record) => record.kind === "test-target").map((record) => [record.id, record.path]));
+  const named = unique(sorted.filter((edge) => edge.type === "verifiedBy").map((edge) => edge.to));
+  const byDirectory = new Map();
+  const fingerprintOf = (directory) => (byDirectory.has(directory) ? byDirectory.get(directory) : byDirectory.set(directory, sourceFingerprint(projectRoot, directory)).get(directory));
   return {
+    sourceFingerprints: Object.fromEntries(named.filter((target) => target in targetPaths).map((target) => [target, fingerprintOf(targetPaths[target])])),
     subjects: Object.fromEntries(subjects.map((reference) => [reference.id, { kind: reference.kind, status: reference.status }])),
     // Locators only (never identity): where each module and each canonical subject/rule lives, so a
     // stage gate can map changed files to the rules they concern.
