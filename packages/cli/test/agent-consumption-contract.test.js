@@ -30,8 +30,15 @@ const git = (root, ...args) => assert.equal(spawnSync("git", ["-c", "user.name=t
 function project(label = "a", agents = null) {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), `spectra-consume-${label}-`)));
   git(root, "init", "-q");
-  const init = run(root, ["init", ".", ...(agents ? ["--agents", agents] : [])]);
+  const init = run(root, ["init", "."]);
   assert.equal(init.status, 0, init.stderr || init.stdout);
+  if (agents) {
+    // The runtime generator itself, like `spectra adapters` minus its check that each agent CLI is on PATH
+    // (CI machines have none of them).
+    const script = path.join(cliRoot, "..", "core", "assets", "runtime", "scripts", "generate-adapters.sh");
+    const generated = spawnSync("bash", [script, "--agents", agents, "--target", root], { cwd: path.join(root, ".spectra"), encoding: "utf8", env: { ...process.env, SPECTRA_REPO_ROOT: path.join(root, ".spectra"), SPECTRA_PROJECT_DOCS_NAME: "fixture" } });
+    assert.equal(generated.status, 0, generated.stderr || generated.stdout);
+  }
   write(path.join(root, "package.json"), JSON.stringify({ name: "shop", private: true, workspaces: ["packages/*"] }));
   write(path.join(root, "packages", "loyalty", "package.json"), JSON.stringify({ name: "loyalty", scripts: { test: "node check.js" } }));
   write(path.join(root, "packages", "loyalty", "check.js"), "process.exit(0);\n");
