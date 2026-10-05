@@ -435,12 +435,12 @@ adapter_outputs=(
 
 if [[ "${repo_mode}" == "canonical" ]]; then
   # Handwritten guidance (AGENTS.md, CLAUDE.md, ...) is allowed; only a committed Spectra-generated
-  # adapter is rejected. Generated output is recognised by its first non-empty line, which the generator
-  # always writes and handwritten files do not share.
+  # adapter is rejected. Generated output is recognised by its first three non-empty lines, which the
+  # generator always writes (a shared heading alone does not make a file generated).
   for p in "${adapter_outputs[@]}"; do
     [[ -e "${p}" ]] || continue
     [[ -f "${generated_a}/${p}" ]] || continue
-    if [[ "$(grep -m1 -v '^[[:space:]]*$' "${p}" 2>/dev/null)" == "$(grep -m1 -v '^[[:space:]]*$' "${generated_a}/${p}" 2>/dev/null)" ]]; then
+    if [[ "$(grep -v '^[[:space:]]*$' "${p}" 2>/dev/null | head -n 3)" == "$(grep -v '^[[:space:]]*$' "${generated_a}/${p}" 2>/dev/null | head -n 3)" ]]; then
       add_error "Canonical repo must not commit generated adapter output: ${p}"
     fi
   done

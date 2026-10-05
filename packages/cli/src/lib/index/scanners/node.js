@@ -4,6 +4,8 @@ import { createRecord, evidenceEntry } from "../model.js";
 import { toPosixRelative, readTextFile } from "../fs-walk.js";
 
 const ECOSYSTEM = "node";
+// `--watch`, `--watchAll`, `-w` or a name containing "watch": long-running, never a one-shot result.
+const WATCH_MODE = /(^|[\s:._-])(--watch\w*|-w|watch\w*)($|[\s:._=-])/i;
 
 const FRONTEND_DEP_HINTS = {
   next: "Next.js",
@@ -168,10 +170,10 @@ function scanNode(ctx) {
       );
     }
 
-    // Named sub-targets: `scripts.test:<name>` is an independently executable slice of the package's tests.
+    // Named sub-targets (watch-mode scripts never finish, so they are not one-shot test runs): `scripts.test:<name>` is an independently executable slice of the package's tests.
     // The id carries the script name (`<path>:test:<name>`); `path` stays the directory it runs from, so
     // the module still owns it and the Phase 1H producer runs its command unchanged.
-    for (const script of Object.keys(pkg.scripts ?? {}).filter((name) => /^test:[A-Za-z0-9._-]+$/.test(name) && typeof pkg.scripts[name] === "string").sort()) {
+    for (const script of Object.keys(pkg.scripts ?? {}).filter((name) => /^test:[A-Za-z0-9._-]+$/.test(name) && typeof pkg.scripts[name] === "string" && !WATCH_MODE.test(`${name} ${pkg.scripts[name]}`)).sort()) {
       records.push(
         createRecord({
           kind: "test-target",

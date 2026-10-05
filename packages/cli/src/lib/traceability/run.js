@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { checkIndexFreshness, readIndex } from "../index/cache.js";
-import { observeSupport, recordVerificationEvidence } from "./evidence.js";
+import { observeSources, observeSupport, recordVerificationEvidence } from "./evidence.js";
 
 // The only producer of verification evidence. Nothing else in Spectra executes tests: the Repo Index
 // records each test target's command (`attributes.command`, Node `scripts.test`) and this runs exactly
@@ -77,6 +77,7 @@ async function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOU
   if (freshness.status !== "fresh") throw new Error(`The Repo Index is ${freshness.status}; run \`spectra index\` before running a test target.`);
 
   const observed = observeSupport(projectRoot, testTarget);
+  const sourcesBefore = observeSources(projectRoot, testTarget);
   const execution = await execute(command, { cwd: path.join(projectRoot, record.path), env: cleanEnv(env), timeoutMs });
   const output = execution.output.slice(-OUTPUT_TAIL);
   const incomplete = execution.timedOut ? `timed out after ${timeoutMs} ms`
@@ -86,9 +87,10 @@ async function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOU
           : null;
   if (incomplete) return { recorded: false, reason: incomplete, exitStatus: execution.status, command, output };
 
+  const sourcesAfter = observeSources(projectRoot, testTarget);
   const result = execution.status === 0 ? "passed" : "failed";
   const granularity = AGGREGATE_COMMAND.test(command) ? "aggregate" : "test-target";
-  recordVerificationEvidence(projectRoot, { testTarget, result, command, granularity, observed });
+  recordVerificationEvidence(projectRoot, { testTarget, result, command, granularity, observed, sourceFingerprint: sourcesAfter, sourceFingerprintBefore: sourcesBefore });
   return { recorded: true, result, exitStatus: execution.status, command, granularity, output };
 }
 

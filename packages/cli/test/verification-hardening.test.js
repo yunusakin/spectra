@@ -21,6 +21,7 @@ import { evaluateGate } from "../src/lib/traceability/gates.js";
 import { runTestTarget } from "../src/lib/traceability/run.js";
 import { validateBusinessContext } from "../src/lib/business/validator.js";
 import { readIndex } from "../src/lib/index/cache.js";
+import { recordVerificationEvidence } from "../src/lib/traceability/evidence.js";
 
 const cliRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const bin = path.join(cliRoot, "bin", "spectra.js");
@@ -176,4 +177,57 @@ test("the producer does not leak an outer node test runner context into the comm
     if (outer === undefined) delete process.env.NODE_TEST_CONTEXT;
     else process.env.NODE_TEST_CONTEXT = outer;
   }
+});
+
+// ---- Review findings ---------------------------------------------------------------------------------------
+
+test("editing a file in the target's directory makes its evidence stale; an unrelated directory does not", async () => {
+  const root = project();
+  await runTestTarget(root, ALPHA);
+  assert.equal(conclude(root, "alpha#FR-A").verification, "verified");
+  write(path.join(root, "unrelated", "notes.txt"), "outside the package\n");
+  assert.equal(conclude(root, "alpha#FR-A").verification, "verified", "a file outside the target's directory is not its source");
+  write(path.join(root, "packages", "app", "alpha.test.js"), "const test = require('node:test');\ntest('alpha', () => {});\n// edited\n");
+  const stale = conclude(root, "alpha#FR-A");
+  assert.equal(stale.verification, "stale");
+  assert.ok(stale.scopes.some((scope) => scope.staleBecause.some((entry) => /source/.test(entry))), JSON.stringify(stale.scopes));
+  assert.equal(gate(root, "implementation").status, "allowed");
+  assert.equal(gate(root, "review", ["RULE-SHP-001"]).status, "blocked");
+  await runTestTarget(root, ALPHA);
+  assert.equal(conclude(root, "alpha#FR-A").verification, "verified");
+  assert.equal(gate(root, "review", ["RULE-SHP-001"]).status, "allowed");
+});
+
+test("the run's own output files do not stale its result, and a record without a source fingerprint is stale", async () => {
+  const root = project();
+  await runTestTarget(root, ALPHA);
+  assert.equal(fs.existsSync(path.join(root, "packages", "app", "ran-alpha.txt")), true, "the fixture's test writes an output file into its own directory");
+  assert.equal(conclude(root, "alpha#FR-A").verification, "verified");
+  fs.rmSync(path.join(root, "packages", "app", "ran-alpha.txt"));
+  assert.equal(conclude(root, "alpha#FR-A").verification, "verified", "cleaning the output back to the pre-run tree is fresh too");
+  await runTestTarget(root, BETA);
+  assert.equal(conclude(root, "alpha#FR-A").verification, "verified", "a sibling target writing its output next to the same sources does not stale this one");
+  const old = project();
+  recordVerificationEvidence(old, { testTarget: ALPHA, result: "passed", command: "x", sourceFingerprint: null, sourceFingerprintBefore: null });
+  assert.equal(conclude(old, "alpha#FR-A").verification, "stale", "an old record cannot be shown to match the current sources");
+});
+
+test("without git the source fingerprint is absent on both sides and evidence stays usable", async () => {
+  const root = project();
+  fs.rmSync(path.join(root, ".git"), { recursive: true, force: true });
+  await runTestTarget(root, ALPHA);
+  assert.equal(conclude(root, "alpha#FR-A").verification, "verified");
+});
+
+test("scripts that cannot be verified as one-shot test runs (watch mode) are not recorded as test targets", () => {
+  const root = project({ pkgScripts: scripts({ "test:watch": "node --test --watch", "test:jest-watch": "jest --watchAll", "test:unit": "node --test alpha.test.js" }) });
+  const ids = records(root).map((record) => record.id);
+  assert.equal(ids.some((id) => /test:watch|test:jest-watch/.test(id)), false, JSON.stringify(ids));
+  assert.ok(ids.includes("node:test-target:packages/app:test:unit"));
+});
+
+test("a handwritten adapter that only shares the generated heading is accepted in a canonical repository", () => {
+  const root = canonicalRepo();
+  write(path.join(root, "AGENTS.md"), "# Spectra Adapter (Codex)\n\nOur own notes for this repository, not generated.\n");
+  assert.deepEqual(adapterErrors(root), []);
 });
