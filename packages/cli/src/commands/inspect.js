@@ -5,6 +5,7 @@ import { findSpectraRoot } from "../lib/runtime.js";
 import { title } from "../lib/output.js";
 import { assertRefsResolve, getChangedFiles, isGitRepo, toDataRelative } from "../lib/git-diff.js";
 import { analyzeImpact, inspectSubject } from "../lib/project-intelligence.js";
+import { ContractError, guardJson, parseArguments, versioned } from "../lib/contract.js";
 
 const USAGE = "Usage: spectra inspect <id> [--json] | spectra inspect --changed | --base <ref> [--head <ref>] | --file <path>[,<path>...] [--json] [--cwd <path>]";
 
@@ -52,10 +53,14 @@ function printImpact(result) {
 }
 
 function inspectCommand(argv) {
-  const { options, positional } = parseOptions(argv, {
+  return guardJson(argv, () => runInspect(argv));
+}
+
+function runInspect(argv) {
+  const { options, positional } = parseArguments(() => parseOptions(argv, {
     booleanFlags: ["--help", "--json", "--changed"],
     stringFlags: ["--cwd", "--file", "--base", "--head"]
-  });
+  }));
   if (options["--help"]) {
     title(USAGE);
     title("  Read-only. Explains one stable ID (rule, requirement, scenario, invariant, module or test target) or the impact of changed files; never runs tests or writes project files.");
@@ -63,18 +68,18 @@ function inspectCommand(argv) {
   }
   const cwd = options["--cwd"] ?? process.cwd();
   const selectors = [options["--changed"], options["--base"], options["--file"]].filter(Boolean).length;
-  if (positional.length > 1 || (positional.length === 1 && selectors > 0) || selectors > 1 || (positional.length === 0 && selectors === 0)) throw new Error(USAGE);
-  if (options["--head"] && !options["--base"]) throw new Error("--head needs --base: it names the end of the compared range.");
+  if (positional.length > 1 || (positional.length === 1 && selectors > 0) || selectors > 1 || (positional.length === 0 && selectors === 0)) throw new ContractError("invalid-arguments", USAGE);
+  if (options["--head"] && !options["--base"]) throw new ContractError("invalid-arguments", "--head needs --base: it names the end of the compared range.");
   const projectRoot = findSpectraRoot(cwd);
-  if (!projectRoot) throw new Error(`Could not find a Spectra runtime from ${cwd}`);
-  const emit = (result) => title(JSON.stringify(result, null, 2));
+  if (!projectRoot) throw new ContractError("project-not-found", `Could not find a Spectra runtime from ${cwd}`);
+  const emit = (result) => title(JSON.stringify(versioned(result), null, 2));
 
   if (positional.length === 1) {
     const result = inspectSubject(projectRoot, positional[0]);
     if (!result.found) {
-      throw new Error(result.kind
-        ? `${positional[0]} is a Repo Index ${result.kind}, not an inspectable subject (expected a business rule, requirement, scenario, invariant, module or test-target ID)`
-        : `Unknown subject: ${positional[0]} (expected a business rule, requirement, scenario, invariant, Repo Index module or test-target ID)`);
+      throw result.kind
+        ? new ContractError("subject-not-inspectable", `${positional[0]} is a Repo Index ${result.kind}, not an inspectable subject (expected a business rule, requirement, scenario, invariant, module or test-target ID)`)
+        : new ContractError("subject-not-found", `Unknown subject: ${positional[0]} (expected a business rule, requirement, scenario, invariant, Repo Index module or test-target ID)`);
     }
     if (options["--json"]) emit(result);
     else printSubject(result);
@@ -91,13 +96,13 @@ function inspectCommand(argv) {
     files = options["--file"].split(",").filter(Boolean).map((file) => {
       const absolute = path.resolve(cwd, file);
       const relative = path.relative(rootReal, path.join(real(path.dirname(absolute)), path.basename(absolute)));
-      if (relative.startsWith("..") || path.isAbsolute(relative)) throw new Error(`File is outside the project: ${file}`);
+      if (relative.startsWith("..") || path.isAbsolute(relative)) throw new ContractError("file-outside-project", `File is outside the project: ${file}`);
       return toDataRelative(relative.split(path.sep).join("/"));
     });
     files = [...new Set(files)].sort();
     scope = { kind: "files" };
   } else {
-    if (!isGitRepo(projectRoot)) throw new Error("This is not a git repository, so changed files cannot be determined; name them with --file.");
+    if (!isGitRepo(projectRoot)) throw new ContractError("not-a-git-repository", "This is not a git repository, so changed files cannot be determined; name them with --file.");
     assertRefsResolve(projectRoot, [options["--base"], options["--head"]]);
     files = getChangedFiles(projectRoot, { base: options["--base"], head: options["--head"] });
     scope = options["--base"] ? { kind: "range", base: options["--base"], head: options["--head"] ?? "HEAD" } : { kind: "changed" };

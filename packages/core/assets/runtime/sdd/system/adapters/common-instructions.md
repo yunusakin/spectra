@@ -21,6 +21,18 @@ Use Spectra's canonical system files as the source of truth.
 - Treat root agent files such as `AGENTS.md` as generated projections of `.spectra/` state.
 - Use `./.spectra/bin/spectra verify` before marking work ready.
 
+## Project Intelligence
+
+Ask Spectra for governed project knowledge instead of broad manual exploration when Spectra already holds the answer. It does not replace reading or inspecting the code you are changing. These intelligence operations do not mutate canonical project knowledge, governance, approvals, or verification evidence. `context` and `route` may refresh disposable derived caches.
+
+- Focused task context: `./.spectra/bin/spectra context --role <role> --goal <goal>` compiles the smallest useful context for a task.
+- One known subject (a business rule, requirement, scenario, invariant, module or test-target ID): `./.spectra/bin/spectra inspect <id> --json`.
+- What the current changes affect: `./.spectra/bin/spectra inspect --changed --json`.
+- Why one subject is or is not verified: `./.spectra/bin/spectra verify --explain <id> --json`.
+- Whether the current work may pass review: `./.spectra/bin/spectra verify --gate review --changed --json`.
+- Release-wide readiness: `./.spectra/bin/spectra verify --gate release --json`.
+- `--json` output carries a `contractVersion`. A failed query prints `{"ok": false, "error": {"code": ..., "message": ...}}` and exits with status 1.
+
 ## Plugin and Skill Output Location
 
 - When an alternate output location is supported, create plugin/skill-generated project plans, designs, analyses, reports, and auxiliary files under `.spectra/docs/<project-name>/<plugin-or-skill-name>/`. Preserve useful subdirectories such as `specs/` and `plans/`.

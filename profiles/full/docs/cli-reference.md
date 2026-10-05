@@ -392,9 +392,9 @@ spectra verify
 
 **Writes/changes:** Recomputes `.spectra/sdd/governance/approval-state.yaml` and syncs approval status in `.spectra/sdd/memory-bank/core/intake-state.md`.
 
-**Result:** Recent changes and suggested next action.
+**Result:** Recent changes and suggested next action; with `--json` the same state as one document (`recentUpdates`, `approval.currentState`, `approval.highestValid`, `approval.invalidations`, `nextAction`, `compatibility.status`; see [Agent-facing JSON contract](agent-json-contract.md)).
 
-**Modes and repeat runs:** `--cwd`. Each run recomputes approval validity and syncs its status; it does not update progress or activeContext for you.
+**Modes and repeat runs:** `--cwd`, `--json`. Each run recomputes approval validity and syncs its status; it does not update progress or activeContext for you.
 
 **Example:**
 

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { buildContextPack } from "../lib/context.js";
 import { next, ok, title, warn } from "../lib/output.js";
 import { parseOptions } from "../lib/options.js";
+import { ContractError, guardJson, parseArguments, portableRoot, versioned } from "../lib/contract.js";
 
 function printRefs(pack) {
   title("Spectra Context Pack");
@@ -100,11 +101,26 @@ function printInline(pack) {
   printRepoIndexSection(pack);
 }
 
+// The pack as an agent receives it: roots relative to the project, and the machine-specific `absolutePath` of each
+// entry left out (its project-relative `path` is kept).
+function agentView(pack, cwd) {
+  return {
+    ...pack,
+    repoRoot: portableRoot(cwd, pack.repoRoot),
+    ...(pack.route ? { route: { ...pack.route, repoRoot: portableRoot(cwd, pack.route.repoRoot) } } : {}),
+    entries: pack.entries.map(({ absolutePath, ...entry }) => entry)
+  };
+}
+
 function contextCommand(argv) {
-  const { options } = parseOptions(argv, {
+  return guardJson(argv, () => runContext(argv));
+}
+
+function runContext(argv) {
+  const { options } = parseArguments(() => parseOptions(argv, {
     booleanFlags: ["--help", "--changed"],
     stringFlags: ["--base", "--cwd", "--domain", "--format", "--goal", "--head", "--module", "--role", "--route-task", "--task"]
-  });
+  }));
 
   if (options["--help"]) {
     title("Usage: spectra context [--role <role>] [--goal <goal>] [--task <legacy_pack>] [--route-task <task>] [--domain <domain>] [--module <module>] [--cwd <path>] [--format <refs|inline|json>] [--changed|--base <ref> --head <ref>]");
@@ -114,7 +130,7 @@ function contextCommand(argv) {
   const hasRoleGoal = Boolean(options["--role"] && options["--goal"]);
   const hasRouteTask = Boolean(options["--route-task"]);
   if (!options["--task"] && !hasRoleGoal && !hasRouteTask) {
-    throw new Error("Provide either --task <legacy_pack> or both --role and --goal.");
+    throw new ContractError("invalid-arguments", "Provide either --task <legacy_pack> or both --role and --goal.");
   }
 
   const pack = buildContextPack({
@@ -138,10 +154,10 @@ function contextCommand(argv) {
       printInline(pack);
       break;
     case "json":
-      title(JSON.stringify(pack, null, 2));
+      title(JSON.stringify(versioned(agentView(pack, options["--cwd"] ?? process.cwd())), null, 2));
       return 0;
     default:
-      throw new Error("Unsupported format. Use refs, inline, or json.");
+      throw new ContractError("invalid-arguments", "Unsupported format. Use refs, inline, or json.");
   }
 
   // Route mode reports budget state through `selection` (printed above).

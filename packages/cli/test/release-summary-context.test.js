@@ -22,6 +22,7 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { GOAL_POLICIES, ROLE_POLICIES } from "../src/lib/context/policies.js";
+import { withAbsolute } from "./helpers/context-pack.js";
 
 const cliRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const run = (cwd, args) => spawnSync(process.execPath, [path.join(cliRoot, "bin", "spectra.js"), ...args], { cwd, encoding: "utf8", env: { ...process.env, SPECTRA_ASSETS_DIR: path.join(cliRoot, "assets") } });
@@ -59,7 +60,7 @@ const release = (current, count, options) => `# Release Summary\n\n${current}\n$
 function ship(root, task = "Prepare the release for shipping") {
   const result = run(root, ["context", "--role", "release-manager", "--goal", "ship", "--route-task", task, "--format", "json"]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  return JSON.parse(result.stdout);
+  return withAbsolute(root, JSON.parse(result.stdout));
 }
 const entry = (pack, id) => pack.entries.find((candidate) => candidate.id === id);
 const cachedRelease = (pack) => fs.readFileSync(entry(pack, "releaseSummary").absolutePath, "utf8");

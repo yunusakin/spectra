@@ -202,7 +202,7 @@ function parseDiscoverySummary(repoRoot) {
   }
 
   return {
-    source: discoveryDir,
+    source: path.relative(repoRoot, discoveryDir).split(path.sep).join("/"),
     documents: documents.slice(0, 6),
     documentCount: documents.length
   };

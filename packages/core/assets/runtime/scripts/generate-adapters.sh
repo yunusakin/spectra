@@ -103,7 +103,7 @@ ${common_body}
 - Target: ${tool_name}
 - Bootstrap context: \`./.spectra/bin/spectra context --role planner --goal discover\`
 - Intake context: \`./.spectra/bin/spectra context --role planner --goal decide\`
-- Repo structure (modules, build/test commands, dependencies): \`./.spectra/bin/spectra index --explain\` — do not read the whole tree yourself.
+- Repo structure (modules, build/test commands, dependencies): \`./.spectra/bin/spectra index --explain\` (refreshes the derived Repo Index cache) — do not read the whole tree yourself.
 - Verification gate: \`./.spectra/bin/spectra verify\`
 
 ## Ignore Guidance
