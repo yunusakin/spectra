@@ -202,6 +202,18 @@ test("a --json query outside any Spectra project fails structured, without namin
   }
 });
 
+test("--cwd given inline (--cwd=<dir>) is scrubbed from a --json failure like the two-token form", () => {
+  const empty = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "spectra-consume-inline-")));
+  // Run from a sibling directory so --cwd is the only way the target directory can be known.
+  const elsewhere = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "spectra-consume-elsewhere-")));
+  for (const args of [["inspect", "RULE-LOY-001", "--json", `--cwd=${empty}`], ["inspect", "RULE-LOY-001", "--json", "--cwd", empty], ["status", "--json", `--cwd=${empty}`]]) {
+    const result = run(elsewhere, args);
+    assert.equal(result.status, 1, args.join(" "));
+    assert.equal(json(result).error.code, "project-not-found", args.join(" "));
+    assert.equal(result.stdout.includes(empty), false, `${args.join(" ")} leaks the directory`);
+  }
+});
+
 test("without --json the same failures keep the human FAIL text on stderr and an empty stdout", () => {
   const root = project("human-errors");
   for (const args of [["inspect", "RULE-NOPE-999"], ["verify", "--explain", "RULE-NOPE-999"]]) {

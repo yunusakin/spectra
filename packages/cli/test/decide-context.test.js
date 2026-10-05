@@ -26,6 +26,7 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { GOAL_POLICIES, ROLE_POLICIES } from "../src/lib/context/policies.js";
+import { withAbsolute } from "./helpers/context-pack.js";
 
 const cliRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const run = (cwd, args) => spawnSync(process.execPath, [path.join(cliRoot, "bin", "spectra.js"), ...args], { cwd, encoding: "utf8", env: { ...process.env, SPECTRA_ASSETS_DIR: path.join(cliRoot, "assets") } });
@@ -111,8 +112,6 @@ function setBrief(root, text) {
   fs.utimesSync(briefPath(root), future, future);
 }
 
-// The CLI JSON is location-neutral (project-relative `path`); tests resolve files against the project root.
-const withAbsolute = (root, parsed) => { for (const entry of parsed.entries) entry.absolutePath = path.join(root, entry.path); return parsed; };
 function pack(root, role = "architect", goal = "decide", task = "Choose the storage design") {
   const result = run(root, ["context", "--role", role, "--goal", goal, "--route-task", task, "--format", "json"]);
   assert.equal(result.status, 0, result.stderr || result.stdout);

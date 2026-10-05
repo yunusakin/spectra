@@ -39,8 +39,9 @@ function wantsJson(argv) {
 
 // Paths a message may mention; they are rendered as "." so a failure reads the same wherever the project lives.
 function knownRoots(argv) {
-  const cwdFlag = argv.findIndex((token) => token === "--cwd");
-  const cwds = [process.cwd(), cwdFlag === -1 ? null : argv[cwdFlag + 1]].filter(Boolean).map((cwd) => path.resolve(cwd));
+  // Both spellings parseOptions accepts: `--cwd <dir>` and `--cwd=<dir>`.
+  const cwdValues = argv.flatMap((token, index) => (token === "--cwd" ? [argv[index + 1]] : token.startsWith("--cwd=") ? [token.slice("--cwd=".length)] : []));
+  const cwds = [process.cwd(), ...cwdValues].filter(Boolean).map((cwd) => path.resolve(cwd));
   const roots = cwds.flatMap((cwd) => {
     let real = cwd;
     try { real = fs.realpathSync(cwd); } catch { /* not on disk: keep the lexical path */ }
