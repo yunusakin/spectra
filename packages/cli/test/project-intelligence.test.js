@@ -421,3 +421,19 @@ test("a stale or missing Repo Index is reported, not hidden", () => {
   const missing = inspect(root, "--file", "packages/loyalty/src/index.js").json;
   assert.ok(missing.warnings.some((warning) => warning.code === "repo-index-missing"));
 });
+
+test("--file resolves relative paths against the working directory and absolute paths through symlinks; outside paths are refused", () => {
+  const root = project();
+  const nested = path.join(root, "packages", "loyalty");
+  const fromNested = run(nested, ["inspect", "--file", "src/index.js", "--json"]);
+  assert.equal(fromNested.status, 0, fromNested.stderr);
+  assert.deepEqual(JSON.parse(fromNested.stdout).files, [{ path: "packages/loyalty/src/index.js", module: MOD_LOY }]);
+  const link = `${root}-link`;
+  fs.symlinkSync(root, link);
+  const viaLink = run(root, ["inspect", "--file", path.join(link, "packages", "billing", "src", "index.js"), "--json"]);
+  assert.equal(viaLink.status, 0, viaLink.stderr);
+  assert.equal(JSON.parse(viaLink.stdout).files[0].path, "packages/billing/src/index.js");
+  const outside = run(nested, ["inspect", "--file", "../../../outside.js"]);
+  assert.equal(outside.status, 1);
+  assert.match(outside.stderr + outside.stdout, /outside the project/);
+});

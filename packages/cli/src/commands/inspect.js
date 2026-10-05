@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { parseOptions } from "../lib/options.js";
 import { findSpectraRoot } from "../lib/runtime.js";
@@ -83,9 +84,14 @@ function inspectCommand(argv) {
   let files;
   let scope;
   if (options["--file"]) {
+    // Resolved against the working directory (like any CLI path) and compared by real path, so a symlinked
+    // root or a call from a subdirectory names the file it points at.
+    const real = (target) => { try { return fs.realpathSync(target); } catch { return path.resolve(target); } };
+    const rootReal = real(projectRoot);
     files = options["--file"].split(",").filter(Boolean).map((file) => {
-      const relative = path.isAbsolute(file) ? path.relative(projectRoot, file) : path.normalize(file);
-      if (relative.startsWith("..")) throw new Error(`File is outside the project: ${file}`);
+      const absolute = path.resolve(cwd, file);
+      const relative = path.relative(rootReal, path.join(real(path.dirname(absolute)), path.basename(absolute)));
+      if (relative.startsWith("..") || path.isAbsolute(relative)) throw new Error(`File is outside the project: ${file}`);
       return toDataRelative(relative.split(path.sep).join("/"));
     });
     files = [...new Set(files)].sort();
