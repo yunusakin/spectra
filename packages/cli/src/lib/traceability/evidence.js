@@ -56,17 +56,28 @@ function observeSupport(projectRoot, testTarget) {
 // together must not drop each other's record. A lock older than `staleMs` is a crashed run's.
 function withEvidenceLock(file, work, { timeoutMs = 10_000, staleMs = 60_000 } = {}) {
   const lock = `${file}.lock`;
+  const token = `${process.pid}-${Math.random()}`;
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     try {
-      fs.closeSync(fs.openSync(lock, "wx"));
+      fs.writeFileSync(lock, token, { flag: "wx" });
       break;
     } catch (error) {
       if (error.code !== "EEXIST") throw error;
       const age = Date.now() - (fs.statSync(lock, { throwIfNoEntry: false })?.mtimeMs ?? Date.now());
       if (age > staleMs) {
-        fs.rmSync(lock, { force: true });
+        // rename is atomic: of several runs that judged the lock stale only one moves it away.
+        const tomb = `${lock}.stale-${token}`;
+        try {
+          fs.renameSync(lock, tomb);
+          const movedAge = Date.now() - fs.statSync(tomb).mtimeMs;
+          // we grabbed a live lock someone created after our check: put it back
+          if (movedAge <= staleMs) fs.renameSync(tomb, lock);
+          else fs.rmSync(tomb, { force: true });
+        } catch {
+          // another run already moved it
+        }
         continue;
       }
       if (Date.now() > deadline) throw new Error("The verification evidence cache is locked by another run; try again.");
@@ -76,7 +87,14 @@ function withEvidenceLock(file, work, { timeoutMs = 10_000, staleMs = 60_000 } =
   try {
     return work();
   } finally {
-    fs.rmSync(lock, { force: true });
+    // only release a lock that is still ours
+    let owner = null;
+    try {
+      owner = fs.readFileSync(lock, "utf8");
+    } catch {
+      // already gone
+    }
+    if (owner === token) fs.rmSync(lock, { force: true });
   }
 }
 
@@ -127,4 +145,4 @@ function concludeVerification(trace, evidence, id) {
   return { ...base, verification: "unverified", reason: "no evidence recorded for the path's test targets", paths };
 }
 
-export { concludeVerification, observeSupport, readVerificationEvidence, recordVerificationEvidence, staleBecause };
+export { concludeVerification, observeSupport, readVerificationEvidence, recordVerificationEvidence, staleBecause, withEvidenceLock };

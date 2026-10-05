@@ -34,7 +34,7 @@ import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import { buildTraceability } from "../src/lib/traceability/trace.js";
 import { traceabilityMetrics } from "../src/lib/traceability/metrics.js";
-import { concludeVerification, readVerificationEvidence, recordVerificationEvidence } from "../src/lib/traceability/evidence.js";
+import { concludeVerification, readVerificationEvidence, recordVerificationEvidence, withEvidenceLock } from "../src/lib/traceability/evidence.js";
 import { runTestTarget } from "../src/lib/traceability/run.js";
 
 const cliRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -338,4 +338,25 @@ test("recording takes a lock: a held lock blocks a second writer, a stale lock i
   recordVerificationEvidence(root, { testTarget: LOYALTY_TARGET, result: "passed", lockTimeoutMs: 200 });
   assert.equal(readVerificationEvidence(root).records.length, 1);
   assert.equal(fs.existsSync(lock), false, "lock released after the write");
+});
+
+test("a run whose lock was taken over never deletes the new owner's lock when it finishes", async () => {
+  const root = project();
+  const file = readVerificationEvidence(root).file;
+  const lock = `${file}.lock`;
+  withEvidenceLock(file, () => {
+    fs.rmSync(lock, { force: true });
+    fs.writeFileSync(lock, "another owner");
+  });
+  assert.equal(fs.readFileSync(lock, "utf8"), "another owner", "released a lock it no longer owned");
+});
+
+test("a test command that leaves a background process holding its output still completes and records", async () => {
+  const root = project();
+  write(path.join(root, "packages", "loyalty", "check.js"), "require('child_process').spawn(process.execPath, ['-e', 'setTimeout(() => {}, 4000)'], { stdio: 'inherit' }).unref();\n");
+  const started = Date.now();
+  const outcome = await runTestTarget(root, LOYALTY_TARGET, { timeoutMs: 20000 });
+  assert.equal(outcome.recorded, true, outcome.reason);
+  assert.equal(outcome.result, "passed");
+  assert.ok(Date.now() - started < 3500, "waited for the leaked process instead of the command's own exit");
 });

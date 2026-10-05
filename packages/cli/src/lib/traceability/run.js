@@ -17,6 +17,7 @@ const DEFAULT_TIMEOUT_MS = 30 * 60 * 1000;
 // targets, so its result is labelled aggregate. Anything else is taken as the target's own command.
 const AGGREGATE_COMMAND = /(^|\s)(--workspaces|-ws)(\s|$)|--workspace[=\s]|\bpnpm\s+(-r|--recursive)\b|\b(lerna|turbo)\s+run\b|\bnx\s+run-many\b|\byarn\s+workspaces\s+foreach\b/;
 const OUTPUT_TAIL = 4000;
+const DRAIN_MS = 500;
 
 // Runs the command in its own process group so a timeout stops the whole tree (grandchildren
 // included), not just the shell.
@@ -36,8 +37,19 @@ function execute(command, { cwd, env, timeoutMs }) {
         child.kill("SIGKILL");
       }
     }, timeoutMs);
-    child.on("error", (error) => { clearTimeout(timer); resolve({ error, output }); });
-    child.on("close", (status, signal) => { clearTimeout(timer); resolve({ status, signal, timedOut, output }); });
+    let settled = false;
+    const settle = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      child.stdout.destroy();
+      child.stderr.destroy();
+      resolve({ ...result, output });
+    };
+    child.on("error", (error) => settle({ error }));
+    // The command's own exit decides; a leaked background process holding the pipes only gets a short drain.
+    child.on("exit", (status, signal) => setTimeout(() => settle({ status, signal, timedOut }), DRAIN_MS));
+    child.on("close", (status, signal) => settle({ status, signal, timedOut }));
   });
 }
 
