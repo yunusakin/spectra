@@ -8,12 +8,14 @@ import { loadKnowledgeMap } from "../knowledge/map.js";
 // here is stored: canonical intent stays in the rule/feature files, and every edge carries a reason.
 //
 //   RULE --governs--> feature object (canonical)     AC --covers--> FR/NFR (canonical)
+//   subject --verifiedBy--> Repo Index test target (canonical: the explicit verification scope)
 //   RULE --affectsModule--> Repo Index module (canonical module name, resolved by tech/modules.md paths)
 //   module --testedBy--> Repo Index test target (derived from the Repo Index)
 //
 // Verification is a separate question (see evidence.js): a path existing proves nothing passed.
 
-const REQUIREMENT_KINDS = new Set(["functional-requirement", "non-functional-requirement"]);
+// Canonical subjects a rule can govern directly and that carry their own verification scope.
+const REQUIREMENT_KINDS = new Set(["functional-requirement", "non-functional-requirement", "architectural-invariant"]);
 const GOVERNABLE_KINDS = new Set([...REQUIREMENT_KINDS, "acceptance-scenario"]);
 const pathOf = (value) => String(value).trim().replace(/^\.\//, "").replace(/\/+$/, "");
 const unique = (values) => [...new Set(values)].sort();
@@ -44,6 +46,10 @@ function buildTraceability(projectRoot) {
   const add = (edge) => edges.set(`${edge.type}\t${edge.from}\t${edge.to}`, edge);
 
   for (const reference of map.references) {
+    for (const target of reference.relationships?.verifiedBy ?? []) {
+      if (references.get(target)?.kind === "test-target") add({ type: "verifiedBy", from: reference.id, to: target, provenance: "canonical", reason: `verifiedBy line of ${reference.id}` });
+      else unresolved.push({ type: "verifiedBy", from: reference.id, target, reason: "target is not a Repo Index test target" });
+    }
     if (reference.kind === "business-rule") {
       for (const target of reference.relationships?.governs ?? []) {
         const object = references.get(target);
@@ -126,8 +132,10 @@ function traceSubject(trace, id) {
     id,
     kind,
     requirements,
+    governs: kind === "business-rule" ? from("governs", id) : [],
+    scopes: from("verifiedBy", id),
     governedBy: kind === "business-rule" ? [] : involved,
-    modules: modules.map((module) => ({ id: module, via: involved.filter((rule) => from("affectsModule", rule).includes(module)) })),
+    modules: modules.map((module) => ({ id: module, via: involved.filter((rule) => from("affectsModule", rule).includes(module)), testTargets: testsOf(module) })),
     modulesWithoutTestTarget: modules.filter((module) => testsOf(module).length === 0),
     testTargets: unique(modules.flatMap(testsOf)).map((target) => ({ id: target, module: modules.find((module) => testsOf(module).includes(target)) })),
     paths: [...new Map(paths.map((path) => [JSON.stringify(path), path])).values()].sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1)),

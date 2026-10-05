@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { normalize, parseRuleStatement, rowValue, splitList, splitRawList } from "./parser.js";
 import { parseRuleSections, ruleStatuses } from "./rule-sections.js";
-import { validateGovernsLinks } from "../traceability/validate.js";
+import { validateGovernsLinks, validateVerificationScopes } from "../traceability/validate.js";
 import { getBusinessPaths, getContextRoot, readMarkdownTable, resolveBusinessPath } from "./repository.js";
 
 function validateKeywords({ row, domain, keywordOwners, errors }) {
@@ -129,6 +129,7 @@ function validateBusinessContext(repoRoot) {
     }
   }
   errors.push(...validateGovernsLinks(repoRoot));
+  errors.push(...validateVerificationScopes(repoRoot));
   return errors;
 }
 

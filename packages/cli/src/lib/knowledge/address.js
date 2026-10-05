@@ -75,7 +75,8 @@ function enumerateBusinessRules(projectRoot) {
 const FEATURE_OBJECT_FAMILIES = [
   { kind: "functional-requirement", path: ["requirements", "functional"] },
   { kind: "non-functional-requirement", path: ["requirements", "nonFunctional"] },
-  { kind: "acceptance-scenario", path: ["acceptance", "scenarios"] }
+  { kind: "acceptance-scenario", path: ["acceptance", "scenarios"] },
+  { kind: "architectural-invariant", path: ["invariants"] }
 ];
 
 function sha256(value) {
@@ -103,13 +104,16 @@ function* featureObjects(spec) {
 
 function featureObjectReference(projectRoot, specPath, featureId, { family, object }) {
   const covers = Array.isArray(object.covers) ? object.covers : [];
+  // `verifiedBy`: Repo Index test-target IDs that are this object's explicit verification scope (the
+  // only direction in which the relationship is authored).
+  const verifiedBy = Array.isArray(object.verifiedBy) ? object.verifiedBy.map(String) : [];
   return createKnowledgeReference({
     id: `${featureId}#${object.id}`,
     kind: family.kind,
     source: dataRelative(projectRoot, specPath),
     address: `yaml:${family.path.join(".")}[id=${object.id}]`,
     provenance: PROVENANCE,
-    relationships: covers.length > 0 ? { covers } : {}
+    relationships: { ...(covers.length > 0 ? { covers } : {}), ...(verifiedBy.length > 0 ? { verifiedBy } : {}) }
   });
 }
 
@@ -138,7 +142,7 @@ function resolveFeatureObject(projectRoot, qualifiedId) {
 // Lookup terms come from every value except the identity/relationship keys.
 function textOf(value) {
   if (Array.isArray(value)) return value.map(textOf).join(" ");
-  if (value && typeof value === "object") return Object.entries(value).filter(([key]) => key !== "id" && key !== "covers").map(([, item]) => textOf(item)).join(" ");
+  if (value && typeof value === "object") return Object.entries(value).filter(([key]) => key !== "id" && key !== "covers" && key !== "verifiedBy").map(([, item]) => textOf(item)).join(" ");
   return String(value ?? "");
 }
 
@@ -155,7 +159,7 @@ function enumerateFeatureObjects(projectRoot) {
       const reference = featureObjectReference(projectRoot, specPath, featureId, entry);
       if (objectIds.has(reference.id)) throw new Error(`Duplicate feature object ID: ${reference.id}`);
       objectIds.add(reference.id);
-      entries.push({ reference, signature: sha256(JSON.stringify(sortKeysDeep(entry.object))), terms: termsOf(textOf(entry.object)) });
+      entries.push({ reference, signature: sha256(JSON.stringify(sortKeysDeep(entry.object))), terms: termsOf(textOf(entry.object)), declaredVerifiedBy: entry.object.verifiedBy });
     }
   }
   return entries;

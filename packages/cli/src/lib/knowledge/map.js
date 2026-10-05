@@ -7,7 +7,8 @@ import { createKnowledgeReference } from "./reference.js";
 
 // 3: business-rule lookup terms come from the rule's title and statement only, not its metadata lines.
 // 4: business-rule references carry the canonical `governs` relationship (rule -> feature object IDs).
-const KNOWLEDGE_MAP_CONTRACT_VERSION = 4;
+// 5: `architectural-invariant` feature objects and the canonical `verifiedBy` relationship (subject -> test target).
+const KNOWLEDGE_MAP_CONTRACT_VERSION = 5;
 
 function getKnowledgeMapPath(projectRoot) {
   return path.join(getCacheRoot(projectRoot), "knowledge", "knowledge-map.json");

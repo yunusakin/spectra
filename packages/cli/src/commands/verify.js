@@ -44,16 +44,52 @@ async function verifyTestTarget(cwd, testTarget) {
   return 0;
 }
 
+// Read-only: why one subject (rule, requirement, scenario or invariant) has its verification
+// conclusion, naming every missing layer. Never runs tests and never writes.
+function explainSubject(cwd, id, json) {
+  const projectRoot = findSpectraRoot(cwd);
+  if (!projectRoot) {
+    fail(`Could not find a Spectra runtime from ${cwd}`);
+    return 1;
+  }
+  let conclusion;
+  try {
+    const trace = buildTraceability(projectRoot);
+    if (!trace.subjects[id]) throw new Error(`Unknown subject: ${id} (expected a business rule, requirement, scenario or invariant ID)`);
+    conclusion = concludeVerification(trace, readVerificationEvidence(projectRoot), id);
+  } catch (error) {
+    fail(error.message);
+    return 1;
+  }
+  if (json) {
+    process.stdout.write(`${JSON.stringify(conclusion, null, 2)}\n`);
+    return 0;
+  }
+  title(`${id}: ${conclusion.verification}`);
+  title(`  Reason: ${conclusion.reason}`);
+  for (const line of conclusion.explanation) title(`  - ${line}`);
+  return 0;
+}
+
 async function verifyCommand(argv) {
   const { options } = parseOptions(argv, {
-    booleanFlags: ["--help"],
-    stringFlags: ["--cwd", "--scope", "--item", "--test-target"]
+    booleanFlags: ["--help", "--json"],
+    stringFlags: ["--cwd", "--scope", "--item", "--test-target", "--explain"]
   });
 
   if (options["--help"]) {
-    title("Usage: spectra verify [--cwd <path>] [--scope <all|spec|app>] [--item <id>] [--test-target <id>]");
+    title("Usage: spectra verify [--cwd <path>] [--scope <all|spec|app>] [--item <id>] [--test-target <id>] [--explain <id> [--json]]");
+    title("  --explain shows, read-only, why a rule, requirement, scenario or invariant is verified, failed, stale or unverified, naming each missing layer.");
     title("  --test-target runs that Repo Index test target's own command once, records the completed result as local verification evidence and reports the subjects it supports; it skips the other stages.");
     return 0;
+  }
+
+  if (options["--explain"]) {
+    if (options["--scope"] || options["--item"] || options["--test-target"]) {
+      fail("--explain is read-only and cannot be combined with --scope, --item or --test-target.");
+      return 1;
+    }
+    return explainSubject(options["--cwd"] ?? process.cwd(), options["--explain"], options["--json"]);
   }
 
   if (options["--test-target"]) {
