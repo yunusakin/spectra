@@ -143,8 +143,10 @@ function canonicalRepo({ adapters = false } = {}) {
   assert.equal(spawnSync("git", ["init", "-q"], { cwd: root }).status, 0);
   assert.equal(run(root, ["init", "."]).status, 0);
   if (adapters) {
-    // generation is refused inside a source repository, so generate first and turn the repository canonical after
-    const generated = run(root, ["adapters", "--agents", "claude,codex,copilot,cursor", "--force"]);
+    // Generate with the runtime generator itself (the `adapters` command also requires the agent CLIs on PATH),
+    // before the repository turns canonical, exactly as the validator's own smoke generation does.
+    const script = path.join(cliRoot, "..", "core", "assets", "runtime", "scripts", "generate-adapters.sh");
+    const generated = spawnSync("bash", [script, "--agents", "claude,codex,copilot,cursor", "--target", root], { cwd: root, encoding: "utf8", env: { ...process.env, SPECTRA_PROJECT_DOCS_NAME: "fixture" } });
     assert.equal(generated.status, 0, generated.stdout + generated.stderr);
   }
   fs.renameSync(path.join(root, ".spectra", "sdd"), path.join(root, "sdd"));
