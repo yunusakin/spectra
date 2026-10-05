@@ -7,9 +7,11 @@ import { buildTraceability, traceSubject } from "./trace.js";
 
 // Verification = what evidence currently supports a connection. Evidence is a recorded result for a
 // Repo Index test target plus the signatures (Knowledge Map / Repo Index) of everything that result
-// supported; it is a local, disposable cache and never canonical. A conclusion needs a complete
-// trace path AND fresh evidence on it; approvals, review findings and "the module has tests" are
-// not evidence. One record per test target (the latest result replaces the previous one).
+// supported; it is a local, disposable cache and never canonical. A subject's evidence is the fresh
+// result of the test targets it names in its own canonical `verifiedBy` (its explicit verification
+// scope); "the module has tests", approvals and review findings are not evidence, and a result is
+// never attributed to a subject that did not name the target. One record per test target (the latest
+// result replaces the previous one).
 
 const EVIDENCE_CONTRACT_VERSION = 1;
 const RESULTS = new Set(["passed", "failed"]);
@@ -31,14 +33,17 @@ function readVerificationEvidence(projectRoot) {
   }
 }
 
-// All IDs a result for `testTarget` supports: every rule, requirement and module on any complete path
-// through it, and the test target itself.
+// All IDs a result for `testTarget` supports: the target, every subject that names it in `verifiedBy`,
+// the rules governing those subjects and the modules those rules affect that the target tests.
 function supportedIds(trace, testTarget) {
   const ids = new Set([testTarget]);
+  const subjects = trace.edges.filter((edge) => edge.type === "verifiedBy" && edge.to === testTarget).map((edge) => edge.from);
+  for (const subject of subjects) ids.add(subject);
   for (const rule of Object.keys(trace.subjects).filter((id) => trace.subjects[id].kind === "business-rule")) {
-    for (const entry of traceSubject(trace, rule).paths.filter((candidate) => candidate.testTarget === testTarget)) {
-      for (const id of [entry.rule, entry.requirement, entry.module]) ids.add(id);
-    }
+    const detail = traceSubject(trace, rule);
+    if (!detail.governs.some((id) => subjects.includes(id))) continue;
+    ids.add(rule);
+    for (const module of detail.modules.filter((candidate) => candidate.testTargets.includes(testTarget))) ids.add(module.id);
   }
   return [...ids].sort();
 }
@@ -119,30 +124,78 @@ function staleBecause(record, trace) {
   return Object.entries(record.observed ?? {}).filter(([id, signature]) => (trace.signatures[id] ?? null) !== signature).map(([id]) => id).sort();
 }
 
-// A result only supports a path it observed: ids on the path that the record never saw (a rule or
-// requirement added after the result was recorded) make it stale for that path.
-function staleForPath(record, trace, entry) {
-  const unobserved = [entry.rule, entry.requirement, entry.module, entry.testTarget].filter((id) => !(id in (record.observed ?? {})));
-  return [...new Set([...staleBecause(record, trace), ...unobserved])].sort();
+// A result supports only what it observed, and only what it observed about the ids that matter to
+// the conclusion asked for: the subject, the target, and for a rule the rule and its affected modules
+// tested by that target. An id the record never saw (a subject or rule added or re-pointed after the
+// result) counts as changed.
+function staleFor(record, trace, ids) {
+  const observed = record.observed ?? {};
+  return [...new Set(ids)].filter((id) => !(id in observed) || (trace.signatures[id] ?? null) !== observed[id]).sort();
+}
+
+// What one explicit scope (a test target named by `subject`) currently says about it.
+function scopeState(trace, records, subject, target, extraIds = []) {
+  const record = records.find((candidate) => candidate.testTarget === target);
+  if (!record) return { subject, target, result: null, fresh: false, granularity: null, staleBecause: [] };
+  const stale = staleFor(record, trace, [subject, target, ...extraIds]);
+  return { subject, target, result: record.result, fresh: stale.length === 0, granularity: record.granularity ?? "test-target", staleBecause: stale };
+}
+
+// failed (fresh failed required scope) > stale (outdated evidence) > unverified (gap or no evidence) > verified.
+function rollUp(scopes, gaps) {
+  if (scopes.some((scope) => scope.fresh && scope.result === "failed")) return "failed";
+  if (scopes.some((scope) => scope.result && !scope.fresh)) return "stale";
+  if (gaps.length > 0 || scopes.length === 0 || scopes.some((scope) => !scope.result)) return "unverified";
+  return "verified";
+}
+
+function describeScope(scope) {
+  const label = `${scope.subject} via ${scope.target}${scope.granularity === "aggregate" ? " (aggregate)" : ""}`;
+  if (!scope.result) return `${label}: no evidence recorded`;
+  if (!scope.fresh) return `${label}: ${scope.result} result is stale (${scope.staleBecause.join(", ")} changed)`;
+  return `${label}: fresh ${scope.result}`;
+}
+
+const REASONS = {
+  failed: "a required verification scope failed",
+  stale: "evidence exists but supporting knowledge or repository evidence changed",
+  verified: "every required verification scope has fresh passing evidence"
+};
+
+function concludeSubject(trace, records, id) {
+  const detail = traceSubject(trace, id);
+  const targets = detail.scopes;
+  const scopes = targets.map((target) => scopeState(trace, records, id, target));
+  const gaps = targets.length === 0 ? ["missing verification scope: no verifiedBy target names an executable scope"] : [];
+  const verification = rollUp(scopes, gaps);
+  const reason = verification === "unverified" ? (gaps[0] ?? "no evidence recorded for a required verification scope") : REASONS[verification];
+  return { id, kind: trace.subjects[id].kind, traceability: { complete: detail.complete, missing: detail.missing }, modulesWithoutTestTarget: detail.modulesWithoutTestTarget, verification, reason, gaps, scopes, explanation: scopes.map(describeScope).concat(gaps) };
+}
+
+function concludeRule(trace, records, id) {
+  const subject = traceSubject(trace, id);
+  const base = { id, kind: "business-rule", traceability: { complete: subject.complete, missing: subject.missing }, modulesWithoutTestTarget: subject.modulesWithoutTestTarget };
+  const governed = subject.governs.map((target) => concludeSubject(trace, records, target));
+  const gaps = [];
+  if (governed.length === 0) gaps.push("missing canonical subject: the rule governs no requirement, scenario or invariant");
+  const named = new Set(governed.flatMap((entry) => entry.scopes.map((scope) => scope.target)));
+  for (const module of subject.modules) {
+    if (module.testTargets.length === 0) gaps.push(`module ${module.id} has no test target`);
+    else if (!module.testTargets.some((target) => named.has(target))) gaps.push(`module ${module.id} has test target(s) but no governed subject names one as its verification scope`);
+  }
+  for (const entry of governed) gaps.push(...entry.gaps.map((gap) => `${entry.id}: ${gap}`));
+  const scopes = governed.flatMap((entry) => entry.scopes.map((scope) => scopeState(trace, records, scope.subject, scope.target, [id, ...subject.modules.filter((module) => module.testTargets.includes(scope.target)).map((module) => module.id)])));
+  const verification = rollUp(scopes, gaps);
+  const reason = verification === "unverified" ? (gaps[0] ?? "no evidence recorded for a required verification scope") : REASONS[verification];
+  const subjects = governed.map(({ id: subjectId, verification: state, reason: why }) => ({ id: subjectId, verification: state, reason: why }));
+  return { ...base, verification, reason, gaps, subjects, scopes, explanation: [...subjects.map((entry) => `${entry.id}: ${entry.verification} (${entry.reason})`), ...scopes.map(describeScope), ...gaps.filter((gap) => /^module|^missing canonical/.test(gap))] };
 }
 
 function concludeVerification(trace, evidence, id) {
-  const subject = traceSubject(trace, id);
-  const base = { id, traceability: { complete: subject.complete, missing: subject.missing }, modulesWithoutTestTarget: subject.modulesWithoutTestTarget };
-  if (!subject.complete) return { ...base, verification: "unverified", reason: `incomplete trace path: missing ${subject.missing.join(", ")}`, paths: [] };
-
   const records = evidence?.records ?? [];
-  const paths = subject.paths.map((entry) => {
-    const record = records.find((candidate) => candidate.testTarget === entry.testTarget);
-    if (!record) return { ...entry, evidence: null };
-    const stale = staleForPath(record, trace, entry);
-    return { ...entry, evidence: { result: record.result, fresh: stale.length === 0, staleBecause: stale } };
-  });
-  const fresh = paths.filter((entry) => entry.evidence?.fresh);
-  if (fresh.some((entry) => entry.evidence.result === "failed")) return { ...base, verification: "failed", reason: "a fresh failed result exists on a path", paths };
-  if (fresh.some((entry) => entry.evidence.result === "passed")) return { ...base, verification: "verified", reason: "fresh passing evidence on a complete path", paths };
-  if (paths.some((entry) => entry.evidence)) return { ...base, verification: "stale", reason: "evidence exists but supporting knowledge or repository evidence changed", paths };
-  return { ...base, verification: "unverified", reason: "no evidence recorded for the path's test targets", paths };
+  const kind = trace.subjects[id]?.kind;
+  if (!kind) return { id, kind: null, verification: "unverified", reason: "unknown subject", gaps: ["unknown subject"], scopes: [], explanation: [] };
+  return kind === "business-rule" ? concludeRule(trace, records, id) : concludeSubject(trace, records, id);
 }
 
 export { concludeVerification, observeSupport, readVerificationEvidence, recordVerificationEvidence, staleBecause, withEvidenceLock };

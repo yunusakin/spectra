@@ -52,12 +52,12 @@ const touch = (file) => { const future = new Date(Date.now() + 5000); fs.utimesS
 
 const SPEC = {
   metadata: { id: "alpha" },
-  requirements: { functional: [{ id: "FR-1", statement: "Customers redeem loyalty credits" }, { id: "FR-2", statement: "Warehouse ships parcels" }], nonFunctional: [] },
+  requirements: { functional: [{ id: "FR-1", statement: "Customers redeem loyalty credits", verifiedBy: ["node:test-target:packages/loyalty"] }, { id: "FR-2", statement: "Warehouse ships parcels" }], nonFunctional: [] },
   acceptance: { scenarios: [{ id: "AC-1", covers: ["FR-1"], given: "a customer", when: "they redeem", then: "credits drop" }] }
 };
 
 // loyalty and billing both have a test script; `exit.txt` decides the exit status of loyalty's.
-function project({ billingTests = true, governsBoth = false } = {}) {
+function project({ billingTests = true, governsBoth = false, scope = [LOYALTY_TARGET] } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "spectra-evidence-"));
   assert.equal(spawnSync("git", ["init", "-q"], { cwd: root }).status, 0);
   assert.equal(run(root, ["init", "."]).status, 0);
@@ -80,7 +80,7 @@ function project({ billingTests = true, governsBoth = false } = {}) {
     "## RULE-LOY-002 — Rounding", "", "Totals round half up.", "", "Status: active", ""
   ].join("\n"));
   write(path.join(sdd(root), "memory-bank", "business", "loyalty", "unresolved.md"), "# U\n");
-  write(path.join(sdd(root), "features", "alpha", "feature.spec.yaml"), YAML.stringify(SPEC));
+  write(path.join(sdd(root), "features", "alpha", "feature.spec.yaml"), YAML.stringify({ ...SPEC, requirements: { ...SPEC.requirements, functional: [{ ...SPEC.requirements.functional[0], verifiedBy: scope }, SPEC.requirements.functional[1]] } }));
   assert.equal(run(root, ["index"]).status, 0);
   return root;
 }
@@ -189,8 +189,8 @@ test("an edit to the governed rule, requirement or test target stales real evide
   }
 });
 
-test("a passing target does not verify a rule whose path goes through another target", async () => {
-  const root = project();
+test("a passing target does not verify a rule whose scope is another target", async () => {
+  const root = project({ scope: [BILLING_TARGET] });
   fs.writeFileSync(rulesFile(root), fs.readFileSync(rulesFile(root), "utf8").replace("Affected Modules: loyalty-api", "Affected Modules: billing"));
   touch(rulesFile(root));
   await runTestTarget(root, LOYALTY_TARGET);
@@ -199,20 +199,21 @@ test("a passing target does not verify a rule whose path goes through another ta
   assert.equal(conclude(root).verification, "verified");
 });
 
-test("multiple paths: one fresh pass suffices, any fresh failure dominates, and modules without a test target stay visible", async () => {
-  const root = project({ governsBoth: true, billingTests: false });
+test("multiple modules: every required path must pass, a fresh failure dominates, and untested modules stay visible", async () => {
+  const root = project({ governsBoth: true, billingTests: false, scope: [LOYALTY_TARGET] });
   await runTestTarget(root, LOYALTY_TARGET);
-  const verified = conclude(root);
-  assert.equal(verified.verification, "verified");
-  assert.deepEqual(verified.modulesWithoutTestTarget, ["node:module:packages/billing"], "the untested module is reported, not hidden");
+  const incomplete = conclude(root);
+  assert.equal(incomplete.verification, "unverified", "one passing path is not enough while another required module has no test");
+  assert.deepEqual(incomplete.modulesWithoutTestTarget, ["node:module:packages/billing"], "the untested module is reported, not hidden");
 
-  const both = project({ governsBoth: true });
+  const both = project({ governsBoth: true, scope: [LOYALTY_TARGET, BILLING_TARGET] });
   await runTestTarget(both, LOYALTY_TARGET);
-  setExit(both, 1);
+  assert.equal(conclude(both).verification, "unverified", "billing has no evidence yet");
   await runTestTarget(both, BILLING_TARGET);
-  assert.equal(conclude(both).verification, "verified", "billing passed, loyalty passed earlier");
+  assert.equal(conclude(both).verification, "verified");
+  setExit(both, 1);
   await runTestTarget(both, LOYALTY_TARGET);
-  assert.equal(conclude(both).verification, "failed", "a fresh failure on any path dominates");
+  assert.equal(conclude(both).verification, "failed", "a fresh failure on any required path dominates");
 });
 
 test("a root target that fans out to workspaces is recorded as aggregate evidence, not exact", async () => {

@@ -4,31 +4,31 @@
     "runs": 39,
     "normalRuns": 25,
     "requiredRecall": 1,
-    "relevantRecall": 0.9123,
-    "precision": 0.8243,
-    "falsePositives": 13,
-    "falsePositivesLabeledIrrelevant": 13,
-    "falsePositivesUnlabeled": 0,
-    "precisionLabeledOnly": 0.8243,
-    "falseNegativesNormal": 5,
-    "candidateTokens": 7656,
-    "selectedObjectTokens": 7190,
-    "packTokens": 41287,
-    "wholeFileBaselineTokens": 50122,
-    "packTokenReduction": 0.1763,
-    "exactObjectTokens": 7190,
-    "wholeSourceTokens": 47856,
-    "exactTokenReduction": 0.8498,
+    "relevantRecall": 0.8947,
+    "precision": 0.6667,
+    "falsePositives": 30,
+    "falsePositivesLabeledIrrelevant": 12,
+    "falsePositivesUnlabeled": 18,
+    "precisionLabeledOnly": 0.8333,
+    "falseNegativesNormal": 6,
+    "candidateTokens": 8932,
+    "selectedObjectTokens": 7885,
+    "packTokens": 43474,
+    "wholeFileBaselineTokens": 52342,
+    "packTokenReduction": 0.1694,
+    "exactObjectTokens": 7885,
+    "wholeSourceTokens": 52996,
+    "exactTokenReduction": 0.8512,
     "byKind": {
       "business": {
-        "selectedTokens": 4721,
-        "wholeTokens": 16509,
-        "reduction": 0.714
+        "selectedTokens": 4411,
+        "wholeTokens": 17237,
+        "reduction": 0.7441
       },
       "feature": {
-        "selectedTokens": 628,
-        "wholeTokens": 4087,
-        "reduction": 0.8463
+        "selectedTokens": 1633,
+        "wholeTokens": 8499,
+        "reduction": 0.8079
       },
       "repoIndex": {
         "selectedTokens": 1841,
@@ -37,13 +37,13 @@
       }
     },
     "statusCounts": {
-      "within-budget": 22,
-      "budget-exhausted": 9,
+      "within-budget": 20,
+      "budget-exhausted": 11,
       "mandatory-overflow": 8
     },
     "statusCountsNormal": {
-      "within-budget": 21,
-      "budget-exhausted": 3,
+      "within-budget": 19,
+      "budget-exhausted": 5,
       "mandatory-overflow": 1
     },
     "reasons": {
@@ -54,10 +54,10 @@
         "tokens": 129
       },
       "business-rule-match": {
-        "selected": 14,
-        "relevant": 8,
-        "falsePositives": 6,
-        "tokens": 1503
+        "selected": 12,
+        "relevant": 7,
+        "falsePositives": 5,
+        "tokens": 1351
       },
       "changed-file": {
         "selected": 2,
@@ -69,19 +69,19 @@
         "selected": 7,
         "relevant": 7,
         "falsePositives": 0,
-        "tokens": 1875
+        "tokens": 1897
       },
       "feature-match": {
-        "selected": 8,
+        "selected": 19,
         "relevant": 6,
-        "falsePositives": 2,
-        "tokens": 215
+        "falsePositives": 13,
+        "tokens": 821
       },
       "feature-relationship": {
-        "selected": 13,
+        "selected": 26,
         "relevant": 10,
-        "falsePositives": 3,
-        "tokens": 411
+        "falsePositives": 16,
+        "tokens": 1127
       },
       "module-match": {
         "selected": 8,
@@ -103,13 +103,13 @@
         "tokens": 1136
       },
       "feature-relationship": {
-        "selected": 9,
+        "selected": 16,
         "relevant": 6,
-        "tokens": 291
+        "tokens": 668
       }
     },
     "missByCause": {
-      "normal:budget-exclusion": 3,
+      "normal:budget-exclusion": 4,
       "normal:retrieval-miss": 2,
       "tight:budget-exclusion": 10,
       "very-tight:anchor-exclusion": 2,
@@ -2170,13 +2170,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 713,
-        "included": 659,
+        "candidate": 735,
+        "included": 681,
         "excluded": 54,
-        "total": 1763,
+        "total": 1915,
         "routingIndexes": 0,
-        "superseded": 1686,
-        "wholeFileBaseline": 2790
+        "superseded": 1777,
+        "wholeFileBaseline": 3011
       },
       "exactVsWhole": [
         {
@@ -2188,14 +2188,14 @@
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
-          "selectedTokens": 73,
-          "wholeTokens": 492
+          "selectedTokens": 95,
+          "wholeTokens": 724
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
           "selectedTokens": 349,
-          "wholeTokens": 1536
+          "wholeTokens": 1627
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/unresolved.md",
@@ -2209,16 +2209,16 @@
         "knowledge": "rebuilt-missing",
         "full": {
           "budget": 1200,
-          "used": 1153,
-          "remaining": 47
+          "used": 1175,
+          "remaining": 25
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 47,
-        "utilization": 0.9608,
+        "remaining": 25,
+        "utilization": 0.9792,
         "warnings": [
           "optional-excluded"
         ]
@@ -2341,13 +2341,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 713,
-        "included": 343,
+        "candidate": 735,
+        "included": 365,
         "excluded": 370,
-        "total": 1798,
+        "total": 1939,
         "routingIndexes": 0,
-        "superseded": 1686,
-        "wholeFileBaseline": 3141
+        "superseded": 1777,
+        "wholeFileBaseline": 3351
       },
       "exactVsWhole": [
         {
@@ -2359,14 +2359,14 @@
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
-          "selectedTokens": 73,
-          "wholeTokens": 492
+          "selectedTokens": 95,
+          "wholeTokens": 724
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 171,
-          "wholeTokens": 1536
+          "wholeTokens": 1627
         }
       ],
       "selection": {
@@ -2374,16 +2374,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1188,
-          "remaining": 12
+          "used": 1199,
+          "remaining": 1
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 12,
-        "utilization": 0.99,
+        "remaining": 1,
+        "utilization": 0.9992,
         "warnings": [
           "optional-excluded"
         ]
@@ -2501,13 +2501,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 713,
-        "included": 122,
+        "candidate": 735,
+        "included": 144,
         "excluded": 591,
-        "total": 1791,
+        "total": 1938,
         "routingIndexes": 0,
-        "superseded": 1686,
-        "wholeFileBaseline": 3355
+        "superseded": 1777,
+        "wholeFileBaseline": 3571
       },
       "exactVsWhole": [
         {
@@ -2519,8 +2519,8 @@
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
-          "selectedTokens": 73,
-          "wholeTokens": 492
+          "selectedTokens": 95,
+          "wholeTokens": 724
         }
       ],
       "selection": {
@@ -2528,16 +2528,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1181,
-          "remaining": 19
+          "used": 1198,
+          "remaining": 2
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 19,
-        "utilization": 0.9842,
+        "remaining": 2,
+        "utilization": 0.9983,
         "warnings": [
           "optional-excluded"
         ]
@@ -2593,20 +2593,20 @@
         "candidatePrecision": 0
       },
       "tokens": {
-        "candidate": 73,
-        "included": 73,
+        "candidate": 95,
+        "included": 95,
         "excluded": 0,
-        "total": 1431,
+        "total": 1583,
         "routingIndexes": 254,
         "superseded": 0,
-        "wholeFileBaseline": 1358
+        "wholeFileBaseline": 1488
       },
       "exactVsWhole": [
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
-          "selectedTokens": 73,
-          "wholeTokens": 492
+          "selectedTokens": 95,
+          "wholeTokens": 724
         }
       ],
       "selection": {
@@ -2614,16 +2614,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 821,
-          "remaining": 379
+          "used": 843,
+          "remaining": 357
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 379,
-        "utilization": 0.6842,
+        "remaining": 357,
+        "utilization": 0.7025,
         "warnings": []
       }
     },
@@ -2736,13 +2736,13 @@
         "candidatePrecision": 0
       },
       "tokens": {
-        "candidate": 764,
-        "included": 660,
+        "candidate": 778,
+        "included": 674,
         "excluded": 104,
-        "total": 1764,
+        "total": 1908,
         "routingIndexes": 0,
-        "superseded": 1686,
-        "wholeFileBaseline": 2790
+        "superseded": 1777,
+        "wholeFileBaseline": 3011
       },
       "exactVsWhole": [
         {
@@ -2754,8 +2754,8 @@
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 3,
-          "selectedTokens": 473,
-          "wholeTokens": 1536
+          "selectedTokens": 487,
+          "wholeTokens": 1627
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/unresolved.md",
@@ -2769,16 +2769,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1154,
-          "remaining": 46
+          "used": 1168,
+          "remaining": 32
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 46,
-        "utilization": 0.9617,
+        "remaining": 32,
+        "utilization": 0.9733,
         "warnings": [
           "optional-excluded"
         ]
@@ -2789,31 +2789,66 @@
       "level": "normal",
       "selected": [
         "spectra-core#FR-1",
+        "spectra-lifecycle#AC-1",
+        "spectra-lifecycle#AC-2",
+        "spectra-lifecycle#AC-4",
+        "spectra-lifecycle#AC-5",
+        "spectra-lifecycle#FR-1",
+        "spectra-lifecycle#FR-2",
+        "spectra-lifecycle#FR-3",
+        "spectra-lifecycle#FR-5",
         "RULE-SPE-001",
-        "RULE-SPE-002",
-        "RULE-SPE-003",
-        "RULE-SPE-004",
         "node:module:packages/cli",
         "node:test-target:packages/cli"
       ],
       "candidates": [
         "spectra-core#FR-1",
+        "spectra-lifecycle#AC-1",
+        "spectra-lifecycle#AC-2",
+        "spectra-lifecycle#AC-4",
+        "spectra-lifecycle#AC-5",
+        "spectra-lifecycle#FR-1",
+        "spectra-lifecycle#FR-2",
+        "spectra-lifecycle#FR-3",
+        "spectra-lifecycle#FR-5",
         "RULE-SPE-001",
+        "node:module:packages/cli",
+        "node:test-target:packages/cli",
         "RULE-SPE-002",
         "RULE-SPE-003",
         "RULE-SPE-004",
-        "node:module:packages/cli",
-        "node:test-target:packages/cli",
         "RULE-SPE-005",
-        "spectra-core#AC-1"
+        "spectra-core#AC-1",
+        "spectra-lifecycle#AC-3",
+        "spectra-lifecycle#FR-4"
       ],
       "excluded": [
+        {
+          "id": "RULE-SPE-002",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-003",
+          "exclusion": "budget"
+        },
+        {
+          "id": "RULE-SPE-004",
+          "exclusion": "budget"
+        },
         {
           "id": "RULE-SPE-005",
           "exclusion": "budget"
         },
         {
           "id": "spectra-core#AC-1",
+          "exclusion": "budget"
+        },
+        {
+          "id": "spectra-lifecycle#AC-3",
+          "exclusion": "budget"
+        },
+        {
+          "id": "spectra-lifecycle#FR-4",
           "exclusion": "budget"
         }
       ],
@@ -2824,28 +2859,82 @@
             "via": "spectra-core#AC-1"
           }
         ],
+        "spectra-lifecycle#AC-1": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#FR-1"
+          },
+          {
+            "reason": "feature-match",
+            "via": "layout,project,untouched"
+          }
+        ],
+        "spectra-lifecycle#AC-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#FR-2"
+          },
+          {
+            "reason": "feature-match",
+            "via": "project,schema"
+          }
+        ],
+        "spectra-lifecycle#AC-4": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#FR-4"
+          }
+        ],
+        "spectra-lifecycle#AC-5": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#FR-5"
+          },
+          {
+            "reason": "feature-match",
+            "via": "command,migrate,project,runs,schema"
+          }
+        ],
+        "spectra-lifecycle#FR-1": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#AC-1"
+          },
+          {
+            "reason": "feature-match",
+            "via": "command,explicit,layout,migrate,project,schema"
+          }
+        ],
+        "spectra-lifecycle#FR-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#AC-2"
+          },
+          {
+            "reason": "feature-match",
+            "via": "migrate,project"
+          }
+        ],
+        "spectra-lifecycle#FR-3": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#AC-3"
+          }
+        ],
+        "spectra-lifecycle#FR-5": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#AC-5"
+          },
+          {
+            "reason": "feature-match",
+            "via": "command,layout,project,schema"
+          }
+        ],
         "RULE-SPE-001": [
           {
             "reason": "business-rule-match",
             "via": "command,explicit,layout,migrate,schema"
-          }
-        ],
-        "RULE-SPE-002": [
-          {
-            "reason": "business-rule-match",
-            "via": "migrate,update"
-          }
-        ],
-        "RULE-SPE-003": [
-          {
-            "reason": "business-rule-match",
-            "via": "untouched"
-          }
-        ],
-        "RULE-SPE-004": [
-          {
-            "reason": "business-rule-match",
-            "via": "schema"
           }
         ],
         "node:module:packages/cli": [
@@ -2904,14 +2993,24 @@
       "required": [],
       "labels": {
         "spectra-core#FR-1": "irrelevant",
+        "spectra-lifecycle#AC-1": "unlabeled",
+        "spectra-lifecycle#AC-2": "unlabeled",
+        "spectra-lifecycle#AC-4": "unlabeled",
+        "spectra-lifecycle#AC-5": "unlabeled",
+        "spectra-lifecycle#FR-1": "unlabeled",
+        "spectra-lifecycle#FR-2": "unlabeled",
+        "spectra-lifecycle#FR-3": "unlabeled",
+        "spectra-lifecycle#FR-5": "unlabeled",
         "RULE-SPE-001": "relevant",
+        "node:module:packages/cli": "relevant",
+        "node:test-target:packages/cli": "relevant",
         "RULE-SPE-002": "relevant",
         "RULE-SPE-003": "irrelevant",
         "RULE-SPE-004": "acceptable",
-        "node:module:packages/cli": "relevant",
-        "node:test-target:packages/cli": "relevant",
         "RULE-SPE-005": "acceptable",
-        "spectra-core#AC-1": "irrelevant"
+        "spectra-core#AC-1": "irrelevant",
+        "spectra-lifecycle#AC-3": "unlabeled",
+        "spectra-lifecycle#FR-4": "unlabeled"
       },
       "falsePositives": [
         {
@@ -2919,26 +3018,60 @@
           "label": "irrelevant"
         },
         {
-          "id": "RULE-SPE-003",
-          "label": "irrelevant"
+          "id": "spectra-lifecycle#AC-1",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#AC-2",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#AC-4",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#AC-5",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#FR-1",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#FR-2",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#FR-3",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#FR-5",
+          "label": "unlabeled"
         }
       ],
-      "falseNegatives": [],
+      "falseNegatives": [
+        {
+          "id": "RULE-SPE-002",
+          "label": "relevant",
+          "cause": "budget-exclusion"
+        }
+      ],
       "metrics": {
         "requiredRecall": null,
-        "relevantRecall": 1,
-        "precision": 0.6667,
+        "relevantRecall": 0.75,
+        "precision": 0.25,
         "candidateRecall": 1,
-        "candidatePrecision": 0.5714
+        "candidatePrecision": 0.2353
       },
       "tokens": {
-        "candidate": 864,
-        "included": 665,
-        "excluded": 199,
-        "total": 1769,
+        "candidate": 1467,
+        "included": 687,
+        "excluded": 780,
+        "total": 1921,
         "routingIndexes": 0,
-        "superseded": 1686,
-        "wholeFileBaseline": 2790
+        "superseded": 1777,
+        "wholeFileBaseline": 3011
       },
       "exactVsWhole": [
         {
@@ -2951,13 +3084,19 @@
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 1,
           "selectedTokens": 30,
-          "wholeTokens": 492
+          "wholeTokens": 724
+        },
+        {
+          "source": "sdd/features/spectra-lifecycle/feature.spec.yaml",
+          "objects": 8,
+          "selectedTokens": 416,
+          "wholeTokens": 813
         },
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
-          "objects": 4,
-          "selectedTokens": 532,
-          "wholeTokens": 1536
+          "objects": 1,
+          "selectedTokens": 138,
+          "wholeTokens": 1627
         }
       ],
       "selection": {
@@ -2965,16 +3104,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1159,
-          "remaining": 41
+          "used": 1181,
+          "remaining": 19
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 41,
-        "utilization": 0.9658,
+        "remaining": 19,
+        "utilization": 0.9842,
         "warnings": [
           "optional-excluded"
         ]
@@ -3055,13 +3194,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 447,
-        "included": 447,
+        "candidate": 461,
+        "included": 461,
         "excluded": 0,
-        "total": 1805,
-        "routingIndexes": 254,
-        "superseded": 1686,
-        "wholeFileBaseline": 3044
+        "total": 1850,
+        "routingIndexes": 155,
+        "superseded": 1777,
+        "wholeFileBaseline": 3166
       },
       "exactVsWhole": [
         {
@@ -3073,26 +3212,28 @@
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
-          "selectedTokens": 344,
-          "wholeTokens": 1536
+          "selectedTokens": 358,
+          "wholeTokens": 1627
         }
       ],
       "selection": {
-        "status": "within-budget",
+        "status": "budget-exhausted",
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1195,
-          "remaining": 5
+          "used": 1110,
+          "remaining": 90
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 5,
-        "utilization": 0.9958,
-        "warnings": []
+        "remaining": 90,
+        "utilization": 0.925,
+        "warnings": [
+          "optional-excluded"
+        ]
       }
     },
     {
@@ -3170,13 +3311,13 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 399,
-        "included": 399,
+        "candidate": 413,
+        "included": 413,
         "excluded": 0,
-        "total": 1757,
+        "total": 1901,
         "routingIndexes": 254,
-        "superseded": 1686,
-        "wholeFileBaseline": 3044
+        "superseded": 1777,
+        "wholeFileBaseline": 3265
       },
       "exactVsWhole": [
         {
@@ -3188,8 +3329,8 @@
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
-          "selectedTokens": 296,
-          "wholeTokens": 1536
+          "selectedTokens": 310,
+          "wholeTokens": 1627
         }
       ],
       "selection": {
@@ -3197,16 +3338,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1147,
-          "remaining": 53
+          "used": 1161,
+          "remaining": 39
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 53,
-        "utilization": 0.9558,
+        "remaining": 39,
+        "utilization": 0.9675,
         "warnings": []
       }
     },
@@ -3214,41 +3355,68 @@
       "case": "spectra-changed-file",
       "level": "normal",
       "selected": [
-        "node:module:packages/core"
+        "spectra-lifecycle#FR-2",
+        "node:module:packages/core",
+        "spectra-lifecycle#AC-2"
       ],
       "candidates": [
-        "node:module:packages/core"
+        "spectra-lifecycle#FR-2",
+        "node:module:packages/core",
+        "spectra-lifecycle#AC-2"
       ],
       "excluded": [],
       "reasons": {
+        "spectra-lifecycle#FR-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#AC-2"
+          }
+        ],
         "node:module:packages/core": [
           {
             "reason": "changed-file",
             "via": "packages/core/package.json"
           }
+        ],
+        "spectra-lifecycle#AC-2": [
+          {
+            "reason": "feature-match",
+            "via": "change,current"
+          }
         ]
       },
       "required": [],
       "labels": {
-        "node:module:packages/core": "relevant"
+        "spectra-lifecycle#FR-2": "unlabeled",
+        "node:module:packages/core": "relevant",
+        "spectra-lifecycle#AC-2": "unlabeled"
       },
-      "falsePositives": [],
+      "falsePositives": [
+        {
+          "id": "spectra-lifecycle#FR-2",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#AC-2",
+          "label": "unlabeled"
+        }
+      ],
       "falseNegatives": [],
       "metrics": {
         "requiredRecall": null,
         "relevantRecall": 1,
-        "precision": 1,
+        "precision": 0.3333,
         "candidateRecall": 1,
-        "candidatePrecision": 1
+        "candidatePrecision": 0.3333
       },
       "tokens": {
-        "candidate": 50,
-        "included": 50,
+        "candidate": 141,
+        "included": 141,
         "excluded": 0,
-        "total": 1408,
+        "total": 1629,
         "routingIndexes": 254,
         "superseded": 0,
-        "wholeFileBaseline": 1358
+        "wholeFileBaseline": 1488
       },
       "exactVsWhole": [
         {
@@ -3256,6 +3424,12 @@
           "objects": 1,
           "selectedTokens": 50,
           "wholeTokens": 1910
+        },
+        {
+          "source": "sdd/features/spectra-lifecycle/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 91,
+          "wholeTokens": 813
         }
       ],
       "selection": {
@@ -3263,16 +3437,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 798,
-          "remaining": 402
+          "used": 889,
+          "remaining": 311
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 402,
-        "utilization": 0.665,
+        "remaining": 311,
+        "utilization": 0.7408,
         "warnings": []
       }
     },
@@ -3340,10 +3514,10 @@
         "candidate": 324,
         "included": 324,
         "excluded": 0,
-        "total": 1682,
+        "total": 1812,
         "routingIndexes": 254,
         "superseded": 0,
-        "wholeFileBaseline": 1358
+        "wholeFileBaseline": 1488
       },
       "exactVsWhole": [
         {
@@ -3356,7 +3530,7 @@
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 171,
-          "wholeTokens": 1536
+          "wholeTokens": 1627
         }
       ],
       "selection": {
@@ -3369,8 +3543,8 @@
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
         "remaining": 128,
         "utilization": 0.8933,
@@ -3449,17 +3623,17 @@
         "candidate": 324,
         "included": 171,
         "excluded": 153,
-        "total": 1820,
+        "total": 1950,
         "routingIndexes": 0,
         "superseded": 0,
-        "wholeFileBaseline": 1649
+        "wholeFileBaseline": 1779
       },
       "exactVsWhole": [
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 171,
-          "wholeTokens": 1536
+          "wholeTokens": 1627
         }
       ],
       "selection": {
@@ -3472,8 +3646,8 @@
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
         "remaining": -10,
         "utilization": 1.0083,
@@ -3555,17 +3729,17 @@
         "candidate": 324,
         "included": 171,
         "excluded": 153,
-        "total": 1918,
+        "total": 2048,
         "routingIndexes": 0,
         "superseded": 0,
-        "wholeFileBaseline": 1747
+        "wholeFileBaseline": 1877
       },
       "exactVsWhole": [
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
           "selectedTokens": 171,
-          "wholeTokens": 1536
+          "wholeTokens": 1627
         }
       ],
       "selection": {
@@ -3578,8 +3752,8 @@
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
         "remaining": -108,
         "utilization": 1.09,
@@ -3632,20 +3806,20 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 73,
-        "included": 73,
+        "candidate": 95,
+        "included": 95,
         "excluded": 0,
-        "total": 1431,
+        "total": 1583,
         "routingIndexes": 254,
         "superseded": 0,
-        "wholeFileBaseline": 1358
+        "wholeFileBaseline": 1488
       },
       "exactVsWhole": [
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
-          "selectedTokens": 73,
-          "wholeTokens": 492
+          "selectedTokens": 95,
+          "wholeTokens": 724
         }
       ],
       "selection": {
@@ -3653,16 +3827,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 821,
-          "remaining": 379
+          "used": 843,
+          "remaining": 357
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 379,
-        "utilization": 0.6842,
+        "remaining": 357,
+        "utilization": 0.7025,
         "warnings": []
       }
     },
@@ -3710,20 +3884,20 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 73,
-        "included": 73,
+        "candidate": 95,
+        "included": 95,
         "excluded": 0,
-        "total": 1431,
+        "total": 1583,
         "routingIndexes": 254,
         "superseded": 0,
-        "wholeFileBaseline": 1358
+        "wholeFileBaseline": 1488
       },
       "exactVsWhole": [
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
-          "selectedTokens": 73,
-          "wholeTokens": 492
+          "selectedTokens": 95,
+          "wholeTokens": 724
         }
       ],
       "selection": {
@@ -3731,16 +3905,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 821,
-          "remaining": 379
+          "used": 843,
+          "remaining": 357
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 379,
-        "utilization": 0.6842,
+        "remaining": 357,
+        "utilization": 0.7025,
         "warnings": []
       }
     },
@@ -3788,20 +3962,20 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 73,
-        "included": 73,
+        "candidate": 95,
+        "included": 95,
         "excluded": 0,
-        "total": 1848,
+        "total": 1989,
         "routingIndexes": 0,
         "superseded": 0,
-        "wholeFileBaseline": 1775
+        "wholeFileBaseline": 1894
       },
       "exactVsWhole": [
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
-          "selectedTokens": 73,
-          "wholeTokens": 492
+          "selectedTokens": 95,
+          "wholeTokens": 724
         }
       ],
       "selection": {
@@ -3809,16 +3983,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1238,
-          "remaining": -38
+          "used": 1249,
+          "remaining": -49
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": -38,
-        "utilization": 1.0317,
+        "remaining": -49,
+        "utilization": 1.0408,
         "warnings": [
           "mandatory-overflow",
           "optional-excluded"
@@ -3869,20 +4043,20 @@
         "candidatePrecision": 1
       },
       "tokens": {
-        "candidate": 73,
-        "included": 73,
+        "candidate": 95,
+        "included": 95,
         "excluded": 0,
-        "total": 1870,
+        "total": 2017,
         "routingIndexes": 0,
         "superseded": 0,
-        "wholeFileBaseline": 1797
+        "wholeFileBaseline": 1922
       },
       "exactVsWhole": [
         {
           "source": "sdd/features/spectra-core/feature.spec.yaml",
           "objects": 2,
-          "selectedTokens": 73,
-          "wholeTokens": 492
+          "selectedTokens": 95,
+          "wholeTokens": 724
         }
       ],
       "selection": {
@@ -3890,16 +4064,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1260,
-          "remaining": -60
+          "used": 1277,
+          "remaining": -77
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": -60,
-        "utilization": 1.05,
+        "remaining": -77,
+        "utilization": 1.0642,
         "warnings": [
           "mandatory-overflow",
           "optional-excluded"
@@ -3910,15 +4084,45 @@
       "case": "spectra-generic-change",
       "level": "normal",
       "selected": [
+        "spectra-lifecycle#AC-1",
+        "spectra-lifecycle#AC-3",
+        "spectra-lifecycle#FR-2",
         "node:module:packages/cli",
-        "node:test-target:packages/cli"
+        "node:test-target:packages/cli",
+        "spectra-lifecycle#AC-2",
+        "spectra-lifecycle#FR-1",
+        "spectra-lifecycle#FR-3"
       ],
       "candidates": [
+        "spectra-lifecycle#AC-1",
+        "spectra-lifecycle#AC-3",
+        "spectra-lifecycle#FR-2",
         "node:module:packages/cli",
-        "node:test-target:packages/cli"
+        "node:test-target:packages/cli",
+        "spectra-lifecycle#AC-2",
+        "spectra-lifecycle#FR-1",
+        "spectra-lifecycle#FR-3"
       ],
       "excluded": [],
       "reasons": {
+        "spectra-lifecycle#AC-1": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#FR-1"
+          }
+        ],
+        "spectra-lifecycle#AC-3": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#FR-3"
+          }
+        ],
+        "spectra-lifecycle#FR-2": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#AC-2"
+          }
+        ],
         "node:module:packages/cli": [
           {
             "reason": "module-match",
@@ -3930,30 +4134,79 @@
             "reason": "repo-index-evidence",
             "via": "node:module:packages/cli"
           }
+        ],
+        "spectra-lifecycle#AC-2": [
+          {
+            "reason": "feature-match",
+            "via": "change,project"
+          }
+        ],
+        "spectra-lifecycle#FR-1": [
+          {
+            "reason": "feature-match",
+            "via": "change,project"
+          }
+        ],
+        "spectra-lifecycle#FR-3": [
+          {
+            "reason": "feature-match",
+            "via": "change,project"
+          }
         ]
       },
       "required": [],
       "labels": {
+        "spectra-lifecycle#AC-1": "unlabeled",
+        "spectra-lifecycle#AC-3": "unlabeled",
+        "spectra-lifecycle#FR-2": "unlabeled",
         "node:module:packages/cli": "relevant",
-        "node:test-target:packages/cli": "relevant"
+        "node:test-target:packages/cli": "relevant",
+        "spectra-lifecycle#AC-2": "unlabeled",
+        "spectra-lifecycle#FR-1": "unlabeled",
+        "spectra-lifecycle#FR-3": "unlabeled"
       },
-      "falsePositives": [],
+      "falsePositives": [
+        {
+          "id": "spectra-lifecycle#AC-1",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#AC-3",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#FR-2",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#AC-2",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#FR-1",
+          "label": "unlabeled"
+        },
+        {
+          "id": "spectra-lifecycle#FR-3",
+          "label": "unlabeled"
+        }
+      ],
       "falseNegatives": [],
       "metrics": {
         "requiredRecall": null,
         "relevantRecall": 1,
-        "precision": 1,
+        "precision": 0.25,
         "candidateRecall": 1,
-        "candidatePrecision": 1
+        "candidatePrecision": 0.25
       },
       "tokens": {
-        "candidate": 103,
-        "included": 103,
+        "candidate": 402,
+        "included": 402,
         "excluded": 0,
-        "total": 1461,
+        "total": 1890,
         "routingIndexes": 254,
-        "superseded": 1686,
-        "wholeFileBaseline": 3044
+        "superseded": 1777,
+        "wholeFileBaseline": 3265
       },
       "exactVsWhole": [
         {
@@ -3961,6 +4214,12 @@
           "objects": 2,
           "selectedTokens": 103,
           "wholeTokens": 1910
+        },
+        {
+          "source": "sdd/features/spectra-lifecycle/feature.spec.yaml",
+          "objects": 6,
+          "selectedTokens": 299,
+          "wholeTokens": 813
         }
       ],
       "selection": {
@@ -3968,16 +4227,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 851,
-          "remaining": 349
+          "used": 1150,
+          "remaining": 50
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 349,
-        "utilization": 0.7092,
+        "remaining": 50,
+        "utilization": 0.9583,
         "warnings": []
       }
     },
@@ -4044,13 +4303,13 @@
         "candidatePrecision": 0.6667
       },
       "tokens": {
-        "candidate": 226,
-        "included": 226,
+        "candidate": 240,
+        "included": 240,
         "excluded": 0,
-        "total": 1584,
+        "total": 1728,
         "routingIndexes": 254,
-        "superseded": 1686,
-        "wholeFileBaseline": 3044
+        "superseded": 1777,
+        "wholeFileBaseline": 3265
       },
       "exactVsWhole": [
         {
@@ -4062,8 +4321,8 @@
         {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 1,
-          "selectedTokens": 123,
-          "wholeTokens": 1536
+          "selectedTokens": 137,
+          "wholeTokens": 1627
         }
       ],
       "selection": {
@@ -4071,16 +4330,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 974,
-          "remaining": 226
+          "used": 988,
+          "remaining": 212
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 226,
-        "utilization": 0.8117,
+        "remaining": 212,
+        "utilization": 0.8233,
         "warnings": []
       }
     },
@@ -4088,19 +4347,29 @@
       "case": "spectra-generic-command",
       "level": "normal",
       "selected": [
+        "spectra-lifecycle#AC-1",
         "RULE-SPE-001",
         "RULE-SPE-005",
         "node:module:packages/cli",
-        "node:test-target:packages/cli"
+        "node:test-target:packages/cli",
+        "spectra-lifecycle#FR-1"
       ],
       "candidates": [
+        "spectra-lifecycle#AC-1",
         "RULE-SPE-001",
         "RULE-SPE-005",
         "node:module:packages/cli",
-        "node:test-target:packages/cli"
+        "node:test-target:packages/cli",
+        "spectra-lifecycle#FR-1"
       ],
       "excluded": [],
       "reasons": {
+        "spectra-lifecycle#AC-1": [
+          {
+            "reason": "feature-relationship",
+            "via": "spectra-lifecycle#FR-1"
+          }
+        ],
         "RULE-SPE-001": [
           {
             "reason": "business-rule-match",
@@ -4140,16 +4409,28 @@
             "reason": "repo-index-evidence",
             "via": "node:module:packages/cli"
           }
+        ],
+        "spectra-lifecycle#FR-1": [
+          {
+            "reason": "feature-match",
+            "via": "command,require"
+          }
         ]
       },
       "required": [],
       "labels": {
+        "spectra-lifecycle#AC-1": "unlabeled",
         "RULE-SPE-001": "irrelevant",
         "RULE-SPE-005": "irrelevant",
         "node:module:packages/cli": "relevant",
-        "node:test-target:packages/cli": "relevant"
+        "node:test-target:packages/cli": "relevant",
+        "spectra-lifecycle#FR-1": "unlabeled"
       },
       "falsePositives": [
+        {
+          "id": "spectra-lifecycle#AC-1",
+          "label": "unlabeled"
+        },
         {
           "id": "RULE-SPE-001",
           "label": "irrelevant"
@@ -4157,24 +4438,28 @@
         {
           "id": "RULE-SPE-005",
           "label": "irrelevant"
+        },
+        {
+          "id": "spectra-lifecycle#FR-1",
+          "label": "unlabeled"
         }
       ],
       "falseNegatives": [],
       "metrics": {
         "requiredRecall": null,
         "relevantRecall": 1,
-        "precision": 0.5,
+        "precision": 0.3333,
         "candidateRecall": 1,
-        "candidatePrecision": 0.5
+        "candidatePrecision": 0.3333
       },
       "tokens": {
-        "candidate": 380,
-        "included": 380,
+        "candidate": 519,
+        "included": 519,
         "excluded": 0,
-        "total": 1738,
-        "routingIndexes": 254,
-        "superseded": 1686,
-        "wholeFileBaseline": 3044
+        "total": 1908,
+        "routingIndexes": 155,
+        "superseded": 1777,
+        "wholeFileBaseline": 3166
       },
       "exactVsWhole": [
         {
@@ -4184,28 +4469,36 @@
           "wholeTokens": 1910
         },
         {
+          "source": "sdd/features/spectra-lifecycle/feature.spec.yaml",
+          "objects": 2,
+          "selectedTokens": 111,
+          "wholeTokens": 813
+        },
+        {
           "source": "sdd/memory-bank/business/spectra-product/rules.md",
           "objects": 2,
-          "selectedTokens": 277,
-          "wholeTokens": 1536
+          "selectedTokens": 305,
+          "wholeTokens": 1627
         }
       ],
       "selection": {
-        "status": "within-budget",
+        "status": "budget-exhausted",
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 1128,
-          "remaining": 72
+          "used": 1168,
+          "remaining": 32
         },
         "summary": {
           "budget": 3200,
-          "used": 610,
-          "remaining": 2590
+          "used": 740,
+          "remaining": 2460
         },
-        "remaining": 72,
-        "utilization": 0.94,
-        "warnings": []
+        "remaining": 32,
+        "utilization": 0.9733,
+        "warnings": [
+          "optional-excluded"
+        ]
       }
     }
   ]

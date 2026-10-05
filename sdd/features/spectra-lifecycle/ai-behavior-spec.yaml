@@ -1,0 +1,91 @@
+apiVersion: spectra/v2
+kind: AIBehaviorSpec
+metadata:
+  id: spectra-lifecycle-ai
+  name: Spectra Lifecycle AI Behavior
+  version: 0.1.0
+  owner: eng-platform
+  status: draft
+feature_id: spectra-lifecycle
+objective:
+  user_outcome: Keep installation and project lifecycle changes explicit and recoverable.
+  completion_definition: Migration, update, uninstall and compatibility behave as specified.
+  success_criteria:
+    - No project file changes outside an explicit migrate
+    - Incompatible projects are refused with their status
+model_dependencies:
+  primary_model:
+    provider: openai
+    model: gpt-5
+    min_version: stable
+  fallback_models:
+    - provider: openai
+      model: gpt-5-mini
+      min_version: stable
+  required_capabilities:
+    - structured_output
+    - tool_use
+    - long_context
+tool_contracts:
+  - name: spectra.migrate
+    purpose: Migrate a project explicitly to the current schema.
+    allowed_when: The user explicitly requested migration
+    required_inputs:
+      - project
+    optional_inputs:
+      - yes
+      - check
+    output_contract:
+      - migration result and compatibility status
+    failure_modes:
+      - missing_runtime
+      - invalid_project
+      - validation_failed
+    on_failure: escalate
+allowed_actions:
+  - read compact summaries before raw markdown
+  - propose clarifying questions
+  - update specs and generated reports
+disallowed_actions:
+  - change project files outside an explicit migrate
+  - advance the schema before validation passes
+  - migrate over content that changed since the snapshot
+confidence_policy:
+  min_answer_confidence: 0.75
+  min_action_confidence: 0.8
+  min_write_confidence: 0.9
+  below_threshold_behavior: ask_followup
+fallback_behavior:
+  strategy_order:
+    - ask_targeted_followup
+    - use_summary_only_mode
+    - escalate_to_human
+  max_followup_rounds: 3
+  max_tool_retries: 1
+  preserve_partial_state: true
+escalation_rules:
+  - when: approval state is invalid for the requested action
+    action: ask_human
+    severity: high
+    owner: engineering
+human_review_points:
+  - stage: implementation_approval
+    required_when: app code or externally visible behavior is about to change
+    reviewer_role: engineering
+    decision_required: approve
+refusal_policy:
+  refuse_when:
+    - user requests implementation before implementation-approved
+    - user requests release before release-approved
+  refusal_style: brief_with_reason
+  safe_alternatives:
+    - run spectra validate
+    - run spectra approve --stage implementation-approved
+    - run spectra verify
+observability_events:
+  - name: spectra_context_pack_requested
+    trigger: context-pack command runs
+  - name: spectra_approval_stage_changed
+    trigger: approve command updates stage
+  - name: spectra_verify_completed
+    trigger: verify command completes

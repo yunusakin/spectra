@@ -60,7 +60,7 @@ function write(file, content) {
 const SPEC = {
   metadata: { id: "alpha" },
   requirements: {
-    functional: [{ id: "FR-1", statement: "Customers redeem loyalty credits" }, { id: "FR-2", statement: "Warehouse ships parcels" }],
+    functional: [{ id: "FR-1", statement: "Customers redeem loyalty credits", verifiedBy: ["node:test-target:packages/loyalty"] }, { id: "FR-2", statement: "Warehouse ships parcels" }],
     nonFunctional: [{ id: "NFR-1", statement: "Redemption answers within a second" }]
   },
   acceptance: {
@@ -225,7 +225,7 @@ test("recording rejects unknown test targets and results", () => {
 test("evidence goes stale when the rule, the requirement, the test target or the module mapping changes", () => {
   const changes = {
     rule: (root) => editRule(root, "Expired points cannot pay for orders.", "Expired points can pay for orders."),
-    requirement: (root) => { write(specFile(root), YAML.stringify({ ...SPEC, requirements: { ...SPEC.requirements, functional: [{ id: "FR-1", statement: "Customers redeem loyalty credits at the till" }, SPEC.requirements.functional[1]] } })); touch(specFile(root)); },
+    requirement: (root) => { write(specFile(root), YAML.stringify({ ...SPEC, requirements: { ...SPEC.requirements, functional: [{ ...SPEC.requirements.functional[0], statement: "Customers redeem loyalty credits at the till" }, SPEC.requirements.functional[1]] } })); touch(specFile(root)); },
     testTarget: (root) => { write(path.join(root, "packages", "loyalty", "package.json"), JSON.stringify({ name: "loyalty-api", scripts: { test: "node --test --watch" } })); assert.equal(run(root, ["index"]).status, 0); },
     moduleMapping: (root) => editRule(root, "Affected Modules: loyalty-api", "Affected Modules: loyalty-api, billing")
   };
@@ -236,19 +236,26 @@ test("evidence goes stale when the rule, the requirement, the test target or the
     change(root);
     const after = concludeVerification(buildTraceability(root), readVerificationEvidence(root), "RULE-LOY-001");
     assert.equal(after.verification, "stale", `${name} -> ${after.verification}`);
-    assert.ok(after.paths.some((entry) => entry.evidence?.fresh === false), `${name}: stale evidence is visible`);
+    assert.ok(after.scopes.some((scope) => scope.fresh === false), `${name}: stale evidence is visible`);
   }
 });
 
-test("evidence never verifies a path it did not observe: a rule added after the result is stale for that rule", () => {
+test("evidence never verifies what it did not observe: a rule added after the result is stale for that rule, a subject scoped after it is stale", () => {
+  const scoped = project();
+  recordVerificationEvidence(scoped, { testTarget: "node:test-target:packages/loyalty", result: "passed", command: "node --test" });
+  write(specFile(scoped), YAML.stringify({ ...SPEC, requirements: { ...SPEC.requirements, functional: [SPEC.requirements.functional[0], { ...SPEC.requirements.functional[1], verifiedBy: ["node:test-target:packages/loyalty"] }] } }));
+  touch(specFile(scoped));
+  assert.equal(concludeVerification(buildTraceability(scoped), readVerificationEvidence(scoped), "alpha#FR-2").verification, "stale", "FR-2 named the target only after the result was recorded");
   const root = project();
+  write(specFile(root), YAML.stringify({ ...SPEC, requirements: { ...SPEC.requirements, functional: [SPEC.requirements.functional[0], { ...SPEC.requirements.functional[1], verifiedBy: ["node:test-target:packages/loyalty"] }] } }));
+  touch(specFile(root));
   recordVerificationEvidence(root, { testTarget: "node:test-target:packages/loyalty", result: "passed", command: "node --test" });
   fs.appendFileSync(rulesFile(root, "loyalty"), "\n## RULE-LOY-003 — Late rule\n\nA rule added after the result was recorded.\n\nStatus: active\nAffected Modules: loyalty-api\nGoverns: alpha#FR-2\n");
   touch(rulesFile(root, "loyalty"));
   const trace = buildTraceability(root);
   const late = concludeVerification(trace, readVerificationEvidence(root), "RULE-LOY-003");
   assert.equal(late.verification, "stale", late.reason);
-  assert.equal(concludeVerification(trace, readVerificationEvidence(root), "alpha#FR-2").verification, "stale");
+  assert.equal(concludeVerification(trace, readVerificationEvidence(root), "alpha#FR-2").verification, "verified", "FR-2 was observed by the result");
   assert.equal(concludeVerification(trace, readVerificationEvidence(root), "RULE-LOY-001").verification, "verified", "the originally observed path stays verified");
 });
 
@@ -258,7 +265,7 @@ test("an empty Governs line is reported and never captures the next line", () =>
   assert.equal(errors.some((error) => error.includes("Confidence")), false, "the next metadata line is not read as a target");
 });
 
-test("only active rules govern: superseded and deprecated rules confer no coverage", () => {
+test("only active rules govern: superseded and deprecated rules confer no governance (a subject still verifies through its own scope)", () => {
   for (const status of ["superseded", "deprecated"]) {
     const root = project();
     recordVerificationEvidence(root, { testTarget: "node:test-target:packages/loyalty", result: "passed", command: "node --test" });
@@ -266,7 +273,7 @@ test("only active rules govern: superseded and deprecated rules confer no covera
     const trace = buildTraceability(root);
     assert.deepEqual(traceSubject(trace, "alpha#FR-1").governedBy, [], status);
     const conclusion = concludeVerification(trace, readVerificationEvidence(root), "alpha#FR-1");
-    assert.equal(conclusion.verification, "unverified", status);
+    assert.equal(conclusion.verification, "verified", status);
     assert.equal(traceabilityMetrics(trace, readVerificationEvidence(root)).requirementsWithGoverningRule, 0, status);
   }
 });
@@ -314,7 +321,12 @@ test("metrics are small, deterministic and honest about gaps", () => {
     requirementsWithTestTarget: 1,
     rulesWithCompletePath: 1,
     brokenEdges: 0,
+    rulesWithCanonicalSubject: 1,
+    canonicalSubjects: 1,
+    subjectsWithScope: 1,
     verification: { verified: 1, failed: 0, stale: 0, unverified: 1 },
+    subjectVerification: { verified: 1, failed: 0, stale: 0, unverified: 0 },
+    scopes: { total: 1, freshPassed: 1, freshFailed: 0, stale: 0, noEvidence: 0 },
     staleEvidence: 0,
     evidence: { freshPassed: 1, freshFailed: 0, stale: 0 }
   });

@@ -1,4 +1,5 @@
 import { collectRuleSections, enumerateFeatureObjects } from "../knowledge/address.js";
+import { readIndex } from "../index/cache.js";
 import { ruleGoverns, ruleGovernsLines, ruleHasEmptyGoverns } from "../business/rule-sections.js";
 
 const TARGET_SYNTAX = /^[A-Za-z0-9][A-Za-z0-9._-]*#[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -28,4 +29,46 @@ function validateGovernsLinks(projectRoot) {
   return errors;
 }
 
-export { validateGovernsLinks };
+const SCOPE_SYNTAX = /^[A-Za-z0-9][A-Za-z0-9._:/@#-]*$/;
+
+// Canonical `verifiedBy` scopes: syntax, duplicates, self-links, and (when a Repo Index exists)
+// that every target exists and is a test target. Absence is valid: it only means verification
+// coverage is incomplete.
+function validateVerificationScopes(projectRoot) {
+  const errors = [];
+  let entries = [];
+  try {
+    entries = enumerateFeatureObjects(projectRoot);
+  } catch {
+    return errors;
+  }
+  let kinds = null;
+  try {
+    kinds = new Map(readIndex(projectRoot).records.map((record) => [record.id, record.kind]));
+  } catch {
+    // no Repo Index yet: existence cannot be judged
+  }
+  const subjectKinds = new Map(entries.map(({ reference }) => [reference.id, reference.kind]));
+  for (const { reference, declaredVerifiedBy } of entries) {
+    if (declaredVerifiedBy === undefined) continue;
+    if (!Array.isArray(declaredVerifiedBy) || declaredVerifiedBy.length === 0) {
+      errors.push(`${reference.id} verifiedBy must be a non-empty list of test target IDs.`);
+      continue;
+    }
+    const seen = new Set();
+    for (const target of declaredVerifiedBy.map(String)) {
+      if (!SCOPE_SYNTAX.test(target)) errors.push(`${reference.id} verifiedBy target '${target}' has invalid ID syntax.`);
+      else if (seen.has(target)) errors.push(`${reference.id} has duplicate verifiedBy target ${target}.`);
+      else if (target === reference.id) errors.push(`${reference.id} verifiedBy cannot reference itself.`);
+      else {
+        const kind = kinds?.get(target) ?? subjectKinds.get(target);
+        if (kind !== undefined && kind !== "test-target") errors.push(`${reference.id} verifiedBy target ${target} is not a test target (${kind}).`);
+        else if (kind === undefined && kinds) errors.push(`${reference.id} verifiedBy target ${target} does not exist in the Repo Index.`);
+      }
+      seen.add(target);
+    }
+  }
+  return errors;
+}
+
+export { validateGovernsLinks, validateVerificationScopes };

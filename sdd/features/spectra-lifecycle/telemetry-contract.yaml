@@ -1,0 +1,70 @@
+apiVersion: spectra/v2
+kind: TelemetryContract
+metadata:
+  id: spectra-lifecycle-telemetry
+  version: 0.1.0
+  status: draft
+feature_id: spectra-lifecycle
+tracked_events:
+  - name: spectra_migrate_completed
+    trigger: migration finishes
+    requirement_ids:
+      - FR-1
+    required: true
+    fields:
+      - name: command
+        type: string
+        required: true
+        pii: none
+      - name: schema_status
+        type: string
+        required: true
+        pii: none
+  - name: spectra_project_refused
+    trigger: a project command is refused as incompatible
+    requirement_ids:
+      - FR-5
+    required: true
+    fields:
+      - name: compatibility_status
+        type: number
+        required: true
+        pii: none
+success_signals:
+  - id: refusal_rate
+    requirement_ids:
+      - FR-5
+    expression: refused_project_commands / total_project_commands
+    source_events:
+      - spectra_project_refused
+    target: ">= 0"
+    window: 24h
+    release_gate: true
+failure_signals:
+  - id: unexpected_schema_advance_rate
+    requirement_ids:
+      - FR-4
+    expression: schema_advances_without_validation / total_schema_advances
+    source_events:
+      - spectra_project_refused
+    threshold: ">= 0"
+    severity: high
+    release_gate: true
+alert_conditions:
+  - id: refusal-rate-alert
+    signal_ref: refusal_rate
+    condition: < 0 for 1h
+    for: 1h
+    severity: high
+    route_to: engineering
+dashboards:
+  - id: spectra-lifecycle-overview
+    name: Spectra Lifecycle Overview
+    audience: engineering
+    panels:
+      - refusal_rate
+      - unexpected_schema_advance_rate
+ownership:
+  product_owner: product
+  engineering_owner: engineering
+  oncall_team: engineering
