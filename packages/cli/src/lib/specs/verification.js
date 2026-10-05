@@ -80,7 +80,9 @@ function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}
       name: "verification",
       blocking: gate.status === "blocked",
       warnings: [
-        ...gate.blockers.map((entry) => `${entry.code}: ${entry.rule}${entry.subject ? ` ${entry.subject}` : ""}${entry.scope ? ` via ${entry.scope}` : ""} - ${entry.action}`),
+        // one line per code and scope: an aggregate target usually serves many subjects
+        ...[...gate.blockers.reduce((groups, entry) => groups.set(`${entry.code}\t${entry.scope ?? ""}`, [...(groups.get(`${entry.code}\t${entry.scope ?? ""}`) ?? []), entry]), new Map()).values()]
+          .map((group) => `${group[0].code}${group[0].scope ? ` via ${group[0].scope}` : ""}: ${group.length} subject/rule pair(s) (${[...new Set(group.map((entry) => entry.rule))].join(", ")}) - ${group[0].action}`),
         ...(gate.warnings.length > 0 ? [`${gate.warnings.length} verification coverage warning(s); see spectra verify --gate release`] : [])
       ],
       score: gate.status === "blocked" ? 0.3 : gate.warnings.length > 0 ? 0.7 : 1,
