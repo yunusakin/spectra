@@ -53,7 +53,7 @@ const touch = (file) => { const future = new Date(Date.now() + 5000); fs.utimesS
 const SPEC = {
   metadata: { id: "alpha" },
   requirements: { functional: [{ id: "FR-1", statement: "Customers redeem loyalty credits", verifiedBy: ["node:test-target:packages/loyalty"] }, { id: "FR-2", statement: "Warehouse ships parcels" }], nonFunctional: [] },
-  acceptance: { scenarios: [{ id: "AC-1", covers: ["FR-1"], given: "a customer", when: "they redeem", then: "credits drop" }] }
+  acceptance: { scenarios: [{ id: "AC-1", covers: ["FR-1"], given: "a customer", when: "they redeem", then: "credits drop", verifiedBy: ["node:test-target:packages/loyalty"] }] }
 };
 
 // loyalty and billing both have a test script; `exit.txt` decides the exit status of loyalty's.

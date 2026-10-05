@@ -6,6 +6,8 @@ import { verifyV2 } from "../lib/specs.js";
 import { buildTraceability, traceSubject } from "../lib/traceability/trace.js";
 import { concludeVerification, readVerificationEvidence } from "../lib/traceability/evidence.js";
 import { runTestTarget } from "../lib/traceability/run.js";
+import { STAGES, evaluateGate, rulesForChangedFiles } from "../lib/traceability/gates.js";
+import { getChangedFiles } from "../lib/git-diff.js";
 
 // Runs one test target, records the evidence and says what it now supports. Exit status follows the result.
 async function verifyTestTarget(cwd, testTarget) {
@@ -71,17 +73,80 @@ function explainSubject(cwd, id, json) {
   return 0;
 }
 
+// Read-only stage readiness: the verification gate for implementation, review or release. Review can be
+// narrowed to the rules the changed files concern; release is project-wide. Exit 1 only when blocked.
+function gateStage(cwd, stage, { changed, base, head, json }) {
+  const projectRoot = findSpectraRoot(cwd);
+  if (!projectRoot) {
+    fail(`Could not find a Spectra runtime from ${cwd}`);
+    return 1;
+  }
+  let result;
+  try {
+    const trace = buildTraceability(projectRoot);
+    const narrowed = changed || base;
+    result = evaluateGate(trace, readVerificationEvidence(projectRoot), stage, { rules: narrowed ? rulesForChangedFiles(trace, getChangedFiles(projectRoot, { base, head })) : null });
+  } catch (error) {
+    fail(error.message);
+    return 1;
+  }
+  if (json) {
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    return result.status === "blocked" ? 1 : 0;
+  }
+  const label = `${stage[0].toUpperCase()}${stage.slice(1)} gate`;
+  title(`${label}: ${result.status}${result.status === "blocked" ? " (verification incomplete)" : ""} [scope: ${result.scope.kind === "changed" ? `${result.scope.rules.length} rule(s) concerned by the changed files` : "project"}]`);
+  // Human view groups by code and scope (one aggregate target usually serves many subjects): the rerun
+  // action is stated once. --json keeps every blocker and warning.
+  const grouped = (items) => [...items.reduce((groups, item) => groups.set(`${item.code}\t${item.scope ?? item.module ?? ""}`, [...(groups.get(`${item.code}\t${item.scope ?? item.module ?? ""}`) ?? []), item]), new Map()).values()];
+  for (const group of grouped(result.blockers)) {
+    const [first] = group;
+    title(`  BLOCKER ${first.code}${first.scope ? ` via ${first.scope}` : ""} (${first.evidence}): ${group.length} subject/rule pair(s)`);
+    title(`    ${first.reason}`);
+    title(`    affects: ${[...new Set(group.map((item) => item.rule).filter(Boolean))].join(", ") || "no rule (canonical structure)"}`);
+    title(`    subjects: ${[...new Set(group.map((item) => item.subject).filter(Boolean))].join(", ")}`);
+    title(`    action: ${first.action}`);
+  }
+  for (const group of grouped(result.warnings)) {
+    const [first] = group;
+    title(`  warning ${first.code}${first.scope ? ` via ${first.scope}` : ""}${first.module ? ` ${first.module}` : ""}: ${[...new Set(group.map((item) => item.rule))].join(", ")}${group.some((item) => item.subject) ? ` (${[...new Set(group.map((item) => item.subject).filter(Boolean))].join(", ")})` : ""} - ${first.reason}`);
+  }
+  return result.status === "blocked" ? 1 : 0;
+}
+
 async function verifyCommand(argv) {
   const { options } = parseOptions(argv, {
-    booleanFlags: ["--help", "--json"],
-    stringFlags: ["--cwd", "--scope", "--item", "--test-target", "--explain"]
+    booleanFlags: ["--help", "--json", "--changed"],
+    stringFlags: ["--cwd", "--scope", "--item", "--test-target", "--explain", "--gate", "--base", "--head"]
   });
 
   if (options["--help"]) {
-    title("Usage: spectra verify [--cwd <path>] [--scope <all|spec|app>] [--item <id>] [--test-target <id>] [--explain <id> [--json]]");
+    title("Usage: spectra verify [--cwd <path>] [--scope <all|spec|app>] [--item <id>] [--test-target <id>] [--explain <id> [--json]] [--gate <implementation|review|release> [--changed|--base <ref> [--head <ref>]] [--json]]");
+    title("  --gate reports, read-only, whether the verification evidence lets that stage proceed (exit 1 when blocked). Implementation is never blocked; review and release are blocked by failed, stale or unexecuted declared scopes. Review can be narrowed to the changed files; release is project-wide.");
     title("  --explain shows, read-only, why a rule, requirement, scenario or invariant is verified, failed, stale or unverified, naming each missing layer.");
     title("  --test-target runs that Repo Index test target's own command once, records the completed result as local verification evidence and reports the subjects it supports; it skips the other stages.");
     return 0;
+  }
+
+  if (options["--gate"]) {
+    const gate = options["--gate"];
+    if (!STAGES.includes(gate)) {
+      fail(`Unknown gate stage: ${gate} (expected ${STAGES.join(", ")})`);
+      return 1;
+    }
+    if (options["--scope"] || options["--item"] || options["--test-target"] || options["--explain"]) {
+      fail("--gate is read-only and cannot be combined with --scope, --item, --test-target or --explain.");
+      return 1;
+    }
+    if (options["--head"] && !options["--base"]) {
+      fail("--head needs --base: it names the end of the compared range.");
+      return 1;
+    }
+    if (gate === "release" && (options["--changed"] || options["--base"])) {
+      fail("The release gate is project-wide by design; --changed and --base apply to the review gate.");
+      return 1;
+    }
+    return gateStage(options["--cwd"] ?? process.cwd(), gate, { changed: options["--changed"], base: options["--base"], head: options["--head"], json: options["--json"] });
   }
 
   if (options["--explain"]) {

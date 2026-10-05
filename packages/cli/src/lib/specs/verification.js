@@ -8,6 +8,9 @@ import { hasRealMarkdownContent, readJsonContract, readMarkdown } from "./primit
 import { validateSpectraV2 } from "./validation.js";
 import { computeApprovalState } from "./approval-state.js";
 import { runEvalSuite } from "./evaluation.js";
+import { buildTraceability } from "../traceability/trace.js";
+import { readVerificationEvidence } from "../traceability/evidence.js";
+import { evaluateGate } from "../traceability/gates.js";
 
 function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}) {
   const validation = validateSpectraV2(repoRoot);
@@ -63,6 +66,29 @@ function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}
     score: telemetryWarnings.length === 0 ? 1 : 0.7,
     detail: `${telemetryWarnings.length} warning(s)`
   });
+
+  // Release readiness includes the release verification gate (project-wide). It only reads evidence
+  // recorded by `spectra verify --test-target`; it never runs tests and never grants approval.
+  let gate = null;
+  try {
+    gate = evaluateGate(buildTraceability(repoRoot), readVerificationEvidence(repoRoot), "release");
+  } catch (error) {
+    stages.push({ name: "verification", blocking: false, warnings: [`verification gate not evaluated: ${error.message}`], score: 0.7, detail: "not evaluated" });
+  }
+  if (gate) {
+    stages.push({
+      name: "verification",
+      blocking: gate.status === "blocked",
+      warnings: [
+        // one line per code and scope: an aggregate target usually serves many subjects
+        ...[...gate.blockers.reduce((groups, entry) => groups.set(`${entry.code}\t${entry.scope ?? ""}`, [...(groups.get(`${entry.code}\t${entry.scope ?? ""}`) ?? []), entry]), new Map()).values()]
+          .map((group) => `${group[0].code}${group[0].scope ? ` via ${group[0].scope}` : ""}: ${group.length} subject/rule pair(s) (${[...new Set(group.map((entry) => entry.rule))].join(", ")}) - ${group[0].action}`),
+        ...(gate.warnings.length > 0 ? [`${gate.warnings.length} verification coverage warning(s); see spectra verify --gate release`] : [])
+      ],
+      score: gate.status === "blocked" ? 0.3 : gate.warnings.length > 0 ? 0.7 : 1,
+      detail: gate.status === "blocked" ? `release gate blocked (${gate.blockers.length} blocker(s))` : `release gate allowed (${gate.warnings.length} warning(s))`
+    });
+  }
 
   const releaseChecklistWarnings = [];
   if (featureDirs.length === 0) {
@@ -120,8 +146,9 @@ function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}
     policy: 20,
     "verify-work": 20,
     evals: 20,
-    telemetry: 10,
+    telemetry: 5,
     "release-readiness": 15,
+    verification: 5,
     "repo-index": 5
   };
 

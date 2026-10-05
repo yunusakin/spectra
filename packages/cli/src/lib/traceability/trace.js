@@ -83,6 +83,12 @@ function buildTraceability(projectRoot) {
   const subjects = map.references.filter((reference) => reference.kind === "business-rule" || GOVERNABLE_KINDS.has(reference.kind));
   return {
     subjects: Object.fromEntries(subjects.map((reference) => [reference.id, { kind: reference.kind, status: reference.status }])),
+    // Locators only (never identity): where each module and each canonical subject/rule lives, so a
+    // stage gate can map changed files to the rules they concern.
+    locators: {
+      modules: Object.fromEntries(records.filter((record) => record.kind === "module").map((record) => [record.id, record.path])),
+      sources: Object.fromEntries(subjects.map((reference) => [reference.id, reference.source]))
+    },
     edges: sorted,
     unresolved: unresolved.sort((a, b) => (a.from + a.target < b.from + b.target ? -1 : 1)),
     signatures: Object.fromEntries(unique([...used, ...Object.keys(Object.fromEntries(subjects.map((reference) => [reference.id, 1])))]).map((id) => [id, references.get(id)?.signature ?? null]))
@@ -103,13 +109,16 @@ function indexOf(trace) {
     push(bySource, edge.from, edge);
   }
   const from = (type, source) => byTypeSource.get(`${type}\t${source}`) ?? [];
+  const byTarget = new Map();
+  for (const edge of trace.edges.filter((candidate) => candidate.type === "covers")) push(byTarget, edge.to, edge.from);
+  const coveredBy = (requirement) => unique(byTarget.get(requirement) ?? []);
   const requirementsOfRule = (rule) => unique(from("governs", rule).flatMap((target) => (REQUIREMENT_KINDS.has(trace.subjects[target]?.kind) ? [target] : from("covers", target))));
   const governingRules = new Map();
   for (const id of Object.keys(trace.subjects)) {
     if (trace.subjects[id].kind !== "business-rule" || trace.subjects[id].status !== "active") continue;
     for (const requirement of requirementsOfRule(id)) push(governingRules, requirement, id);
   }
-  index = { from, bySource, requirementsOfRule, governing: (requirements) => unique(requirements.flatMap((requirement) => governingRules.get(requirement) ?? [])) };
+  index = { from, bySource, coveredBy, requirementsOfRule, governing: (requirements) => unique(requirements.flatMap((requirement) => governingRules.get(requirement) ?? [])) };
   indexes.set(trace, index);
   return index;
 }
@@ -117,7 +126,7 @@ function indexOf(trace) {
 // One subject's bounded chain: rule -> requirement -> module -> test target (each hop one lookup,
 // AC `covers` followed one hop). Missing hops are listed, never omitted.
 function traceSubject(trace, id) {
-  const { from, bySource, requirementsOfRule, governing } = indexOf(trace);
+  const { from, bySource, coveredBy, requirementsOfRule, governing } = indexOf(trace);
   const kind = trace.subjects[id]?.kind ?? null;
   const requirements = kind === "business-rule" ? requirementsOfRule(id) : kind === "acceptance-scenario" ? from("covers", id) : kind ? [id] : [];
   const involved = kind === "business-rule" ? [id] : governing(requirements);
@@ -133,6 +142,9 @@ function traceSubject(trace, id) {
     kind,
     requirements,
     governs: kind === "business-rule" ? from("governs", id) : [],
+    // Governed subjects plus the scenarios that cover a governed requirement: the verification obligations of a rule.
+    governsClosure: kind === "business-rule" ? unique(from("governs", id).flatMap((target) => [target, ...coveredBy(target)])) : [],
+    coveredBy: REQUIREMENT_KINDS.has(kind) ? coveredBy(id) : [],
     scopes: from("verifiedBy", id),
     governedBy: kind === "business-rule" ? [] : involved,
     modules: modules.map((module) => ({ id: module, via: involved.filter((rule) => from("affectsModule", rule).includes(module)), testTargets: testsOf(module) })),
