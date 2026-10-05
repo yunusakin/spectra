@@ -65,7 +65,7 @@ const SPEC = {
   },
   acceptance: {
     scenarios: [
-      { id: "AC-1", covers: ["FR-1"], given: "a customer", when: "they redeem", then: "credits drop" },
+      { id: "AC-1", covers: ["FR-1"], given: "a customer", when: "they redeem", then: "credits drop", verifiedBy: ["node:test-target:packages/loyalty"] },
       { id: "AC-2", covers: ["FR-2"], given: "a parcel", when: "it ships", then: "tracking appears" }
     ]
   }
@@ -243,11 +243,11 @@ test("evidence goes stale when the rule, the requirement, the test target or the
 test("evidence never verifies what it did not observe: a rule added after the result is stale for that rule, a subject scoped after it is stale", () => {
   const scoped = project();
   recordVerificationEvidence(scoped, { testTarget: "node:test-target:packages/loyalty", result: "passed", command: "node --test" });
-  write(specFile(scoped), YAML.stringify({ ...SPEC, requirements: { ...SPEC.requirements, functional: [SPEC.requirements.functional[0], { ...SPEC.requirements.functional[1], verifiedBy: ["node:test-target:packages/loyalty"] }] } }));
+  write(specFile(scoped), YAML.stringify({ ...SPEC, requirements: { ...SPEC.requirements, functional: [SPEC.requirements.functional[0], { ...SPEC.requirements.functional[1], verifiedBy: ["node:test-target:packages/loyalty"] }] }, acceptance: { scenarios: [SPEC.acceptance.scenarios[0], { ...SPEC.acceptance.scenarios[1], verifiedBy: ["node:test-target:packages/loyalty"] }] } }));
   touch(specFile(scoped));
   assert.equal(concludeVerification(buildTraceability(scoped), readVerificationEvidence(scoped), "alpha#FR-2").verification, "stale", "FR-2 named the target only after the result was recorded");
   const root = project();
-  write(specFile(root), YAML.stringify({ ...SPEC, requirements: { ...SPEC.requirements, functional: [SPEC.requirements.functional[0], { ...SPEC.requirements.functional[1], verifiedBy: ["node:test-target:packages/loyalty"] }] } }));
+  write(specFile(root), YAML.stringify({ ...SPEC, requirements: { ...SPEC.requirements, functional: [SPEC.requirements.functional[0], { ...SPEC.requirements.functional[1], verifiedBy: ["node:test-target:packages/loyalty"] }] }, acceptance: { scenarios: [SPEC.acceptance.scenarios[0], { ...SPEC.acceptance.scenarios[1], verifiedBy: ["node:test-target:packages/loyalty"] }] } }));
   touch(specFile(root));
   recordVerificationEvidence(root, { testTarget: "node:test-target:packages/loyalty", result: "passed", command: "node --test" });
   fs.appendFileSync(rulesFile(root, "loyalty"), "\n## RULE-LOY-003 — Late rule\n\nA rule added after the result was recorded.\n\nStatus: active\nAffected Modules: loyalty-api\nGoverns: alpha#FR-2\n");
@@ -326,6 +326,8 @@ test("metrics are small, deterministic and honest about gaps", () => {
     subjectsWithScope: 1,
     verification: { verified: 1, failed: 0, stale: 0, unverified: 1 },
     subjectVerification: { verified: 1, failed: 0, stale: 0, unverified: 0 },
+    verificationRequired: { subjects: 1, verified: 1, failed: 0, stale: 0, unverified: 0 },
+    rulesBlocked: { review: 0, release: 0 },
     scopes: { total: 1, freshPassed: 1, freshFailed: 0, stale: 0, noEvidence: 0 },
     staleEvidence: 0,
     evidence: { freshPassed: 1, freshFailed: 0, stale: 0 }

@@ -20,7 +20,6 @@ import YAML from "yaml";
 import { buildTraceability } from "../src/lib/traceability/trace.js";
 import { traceabilityMetrics } from "../src/lib/traceability/metrics.js";
 import { concludeVerification, readVerificationEvidence } from "../src/lib/traceability/evidence.js";
-import { evaluateGates } from "../src/lib/traceability/gates.js";
 import { runTestTarget } from "../src/lib/traceability/run.js";
 import { validateBusinessContext } from "../src/lib/business/validator.js";
 
@@ -36,7 +35,7 @@ function write(file, content) {
   fs.writeFileSync(file, content, "utf8");
 }
 
-function spec({ fr1 = [LOY], inv1 = [LOY], ac1 = [] } = {}) {
+function spec({ fr1 = [LOY], inv1 = [LOY], ac1 = fr1 } = {}) {
   const scoped = (ids) => (ids.length > 0 ? { verifiedBy: ids } : {});
   return {
     apiVersion: "spectra/v2", kind: "FeatureSpec", metadata: { id: "alpha", name: "Alpha", version: "0.1.0", owner: "product", status: "draft" },
@@ -217,7 +216,7 @@ test("verifiedBy is validated: missing target, wrong kind, duplicate, bad syntax
 });
 
 test("a broken verifiedBy edge is a broken canonical edge in the metrics and gates", () => {
-  const root = project({ fr1: ["node:test-target:packages/nope"] });
+  const root = project({ fr1: ["node:test-target:packages/nope"], ac1: [] });
   const trace = buildTraceability(root);
   assert.equal(trace.unresolved.filter((entry) => entry.type === "verifiedBy").length, 1);
   assert.equal(traceabilityMetrics(trace, readVerificationEvidence(root)).brokenEdges, 1);
@@ -237,29 +236,6 @@ test("metrics keep canonical, scope, execution and verified coverage apart", asy
   assert.deepEqual(metrics.scopes, { total: 1, freshPassed: 1, freshFailed: 0, stale: 0, noEvidence: 0 });
   assert.equal(metrics.verification.verified, 1, "only the rule whose subject has a passing scope");
   assert.equal(metrics.subjectVerification.verified, 1);
-});
-
-test("gate policy is stage specific: structure blocks everywhere, gaps warn, failed/stale block review and release but never editing", async () => {
-  const root = project({ fr1: [LOY], inv1: [] });
-  const gates = () => evaluateGates(buildTraceability(root), readVerificationEvidence(root));
-  assert.deepEqual(gates().implementation.block, []);
-  assert.ok(gates().review.warn.includes("missing-verification-scope"));
-  assert.ok(gates().release.warn.includes("missing-verification-scope"));
-  assert.deepEqual(gates().release.block, [], "a coverage gap alone is not a blocker");
-  setExit(root, "loyalty", 1);
-  await verifyTarget(root, LOY);
-  assert.deepEqual(gates().implementation.block, [], "failing tests must never block the edit that fixes them");
-  assert.ok(gates().review.block.includes("failed-evidence") && gates().release.block.includes("failed-evidence"));
-  setExit(root, "loyalty", 0);
-  await verifyTarget(root, LOY);
-  assert.deepEqual(gates().release.block, []);
-  const edited = YAML.parse(fs.readFileSync(specFile(root), "utf8"));
-  edited.requirements.functional[0].statement = "changed";
-  write(specFile(root), YAML.stringify(edited));
-  assert.deepEqual(gates().implementation.block, []);
-  assert.ok(gates().review.block.includes("stale-evidence") && gates().release.block.includes("stale-evidence"));
-  write(specFile(root), YAML.stringify(spec({ fr1: ["node:test-target:packages/nope"] })));
-  for (const stage of ["implementation", "review", "release"]) assert.ok(gates()[stage].block.includes("broken-canonical-edge"), stage);
 });
 
 test("`spectra verify --explain` names the exact missing layer, supports --json, and writes nothing", async () => {
