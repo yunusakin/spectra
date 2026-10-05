@@ -341,7 +341,11 @@ test("route rejects a business index path outside the business-memory root", () 
   fs.appendFileSync(path.join(root, ".spectra", "sdd", "memory-bank", "business", "INDEX.md"), "| loyalty | | ../../package.json | business/loyalty/unresolved.md | |\n");
   const result = run(root, ["route", "--task", "loyalty", "--format", "json"]);
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /outside business memory/);
+  // Under --format json the failure is the structured document on stdout (docs/agent-json-contract.md).
+  const failure = JSON.parse(result.stdout);
+  assert.equal(failure.ok, false);
+  assert.match(failure.error.message, /outside business memory/);
+  assert.equal(result.stdout.includes(root), false);
 });
 
 test("context pack composes routed business context and accounts for routed tokens", () => {

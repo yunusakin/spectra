@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { ContractError } from "./contract.js";
 
 function isGitRepo(repoRoot) {
   return (
@@ -49,7 +50,7 @@ function toDataRelative(gitPath) {
 function assertRefsResolve(repoRoot, refs) {
   for (const ref of refs.filter(Boolean)) {
     if (spawnSync("git", ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`], { cwd: repoRoot }).status !== 0) {
-      throw new Error(`Cannot resolve git ref ${ref}: the changed files, and so the review scope, cannot be determined.`);
+      throw new ContractError("invalid-ref", `Cannot resolve git ref ${ref}: the changed files, and so the review scope, cannot be determined.`);
     }
   }
 }

@@ -42,10 +42,12 @@ function project({ brief = true, filledImplementation = false } = {}) {
   return root;
 }
 
+// The CLI JSON is location-neutral (project-relative `path`); tests resolve files against the project root.
+const withAbsolute = (root, parsed) => { for (const entry of parsed.entries) entry.absolutePath = path.join(root, entry.path); return parsed; };
 function pack(root, role, goal, task = "Fix the order endpoint", extra = []) {
   const result = run(root, ["context", "--role", role, "--goal", goal, "--route-task", task, "--format", "json", ...extra]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  return JSON.parse(result.stdout);
+  return withAbsolute(root, JSON.parse(result.stdout));
 }
 const ids = (result) => result.entries.map((entry) => entry.id ?? entry.path);
 const MATRIX = [["planner", "discover"], ["planner", "decide"], ["architect", "decide"], ["implementer", "implement"], ["reviewer", "verify"], ["verifier", "verify"], ["release-manager", "ship"]];

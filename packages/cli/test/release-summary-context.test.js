@@ -56,10 +56,13 @@ function history(count, { oldestFirst = false } = {}) {
 
 const release = (current, count, options) => `# Release Summary\n\n${current}\n${history(count, options).join("\n")}`;
 
+// The CLI JSON is location-neutral (project-relative `path`); tests resolve files against the project root.
 function ship(root, task = "Prepare the release for shipping") {
   const result = run(root, ["context", "--role", "release-manager", "--goal", "ship", "--route-task", task, "--format", "json"]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  return JSON.parse(result.stdout);
+  const parsed = JSON.parse(result.stdout);
+  for (const item of parsed.entries) item.absolutePath = path.join(root, item.path);
+  return parsed;
 }
 const entry = (pack, id) => pack.entries.find((candidate) => candidate.id === id);
 const cachedRelease = (pack) => fs.readFileSync(entry(pack, "releaseSummary").absolutePath, "utf8");

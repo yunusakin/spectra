@@ -8,6 +8,7 @@ import { concludeVerification, readVerificationEvidence } from "../lib/traceabil
 import { runTestTarget } from "../lib/traceability/run.js";
 import { STAGES, evaluateGate, rulesForChangedFiles } from "../lib/traceability/gates.js";
 import { assertRefsResolve, getChangedFiles, isGitRepo } from "../lib/git-diff.js";
+import { ContractError, guardJson, parseArguments, versioned } from "../lib/contract.js";
 
 // Runs one test target, records the evidence and says what it now supports. Exit status follows the result.
 async function verifyTestTarget(cwd, testTarget) {
@@ -50,21 +51,12 @@ async function verifyTestTarget(cwd, testTarget) {
 // conclusion, naming every missing layer. Never runs tests and never writes.
 function explainSubject(cwd, id, json) {
   const projectRoot = findSpectraRoot(cwd);
-  if (!projectRoot) {
-    fail(`Could not find a Spectra runtime from ${cwd}`);
-    return 1;
-  }
-  let conclusion;
-  try {
-    const trace = buildTraceability(projectRoot);
-    if (!trace.subjects[id]) throw new Error(`Unknown subject: ${id} (expected a business rule, requirement, scenario or invariant ID)`);
-    conclusion = concludeVerification(trace, readVerificationEvidence(projectRoot), id);
-  } catch (error) {
-    fail(error.message);
-    return 1;
-  }
+  if (!projectRoot) throw new ContractError("project-not-found", `Could not find a Spectra runtime from ${cwd}`);
+  const trace = buildTraceability(projectRoot);
+  if (!trace.subjects[id]) throw new ContractError("subject-not-found", `Unknown subject: ${id} (expected a business rule, requirement, scenario or invariant ID)`);
+  const conclusion = concludeVerification(trace, readVerificationEvidence(projectRoot), id);
   if (json) {
-    process.stdout.write(`${JSON.stringify(conclusion, null, 2)}\n`);
+    process.stdout.write(`${JSON.stringify(versioned(conclusion), null, 2)}\n`);
     return 0;
   }
   title(`${id}: ${conclusion.verification}`);
@@ -77,25 +69,17 @@ function explainSubject(cwd, id, json) {
 // narrowed to the rules the changed files concern; release is project-wide. Exit 1 only when blocked.
 function gateStage(cwd, stage, { changed, base, head, json }) {
   const projectRoot = findSpectraRoot(cwd);
-  if (!projectRoot) {
-    fail(`Could not find a Spectra runtime from ${cwd}`);
-    return 1;
-  }
+  if (!projectRoot) throw new ContractError("project-not-found", `Could not find a Spectra runtime from ${cwd}`);
   let result;
-  try {
-    const trace = buildTraceability(projectRoot);
-    const narrowed = changed || base;
-    const determinable = !narrowed || isGitRepo(projectRoot);
-    if (determinable) assertRefsResolve(projectRoot, [base, head]);
-    // Scope that cannot be determined (not a git repository) never narrows the gate: it falls back to the whole project.
-    result = evaluateGate(trace, readVerificationEvidence(projectRoot), stage, { rules: narrowed && determinable ? rulesForChangedFiles(trace, getChangedFiles(projectRoot, { base, head })) : null });
-    if (narrowed && !determinable) result.warnings.unshift({ code: "scope-undeterminable", rule: null, reason: "this is not a git repository, so changed files cannot be determined; the gate covers the whole project" });
-  } catch (error) {
-    fail(error.message);
-    return 1;
-  }
+  const trace = buildTraceability(projectRoot);
+  const narrowed = changed || base;
+  const determinable = !narrowed || isGitRepo(projectRoot);
+  if (determinable) assertRefsResolve(projectRoot, [base, head]);
+  // Scope that cannot be determined (not a git repository) never narrows the gate: it falls back to the whole project.
+  result = evaluateGate(trace, readVerificationEvidence(projectRoot), stage, { rules: narrowed && determinable ? rulesForChangedFiles(trace, getChangedFiles(projectRoot, { base, head })) : null });
+  if (narrowed && !determinable) result.warnings.unshift({ code: "scope-undeterminable", rule: null, reason: "this is not a git repository, so changed files cannot be determined; the gate covers the whole project" });
   if (json) {
-    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    process.stdout.write(`${JSON.stringify(versioned(result), null, 2)}\n`);
     return result.status === "blocked" ? 1 : 0;
   }
   const label = `${stage[0].toUpperCase()}${stage.slice(1)} gate`;
@@ -118,11 +102,15 @@ function gateStage(cwd, stage, { changed, base, head, json }) {
   return result.status === "blocked" ? 1 : 0;
 }
 
-async function verifyCommand(argv) {
-  const { options } = parseOptions(argv, {
+function verifyCommand(argv) {
+  return guardJson(argv, () => runVerify(argv));
+}
+
+async function runVerify(argv) {
+  const { options } = parseArguments(() => parseOptions(argv, {
     booleanFlags: ["--help", "--json", "--changed"],
     stringFlags: ["--cwd", "--scope", "--item", "--test-target", "--explain", "--gate", "--base", "--head"]
-  });
+  }));
 
   if (options["--help"]) {
     title("Usage: spectra verify [--cwd <path>] [--scope <all|spec|app>] [--item <id>] [--test-target <id>] [--explain <id> [--json]] [--gate <implementation|review|release> [--changed|--base <ref> [--head <ref>]] [--json]]");
@@ -135,28 +123,23 @@ async function verifyCommand(argv) {
   if (options["--gate"]) {
     const gate = options["--gate"];
     if (!STAGES.includes(gate)) {
-      fail(`Unknown gate stage: ${gate} (expected ${STAGES.join(", ")})`);
-      return 1;
+      throw new ContractError("invalid-arguments", `Unknown gate stage: ${gate} (expected ${STAGES.join(", ")})`);
     }
     if (options["--scope"] || options["--item"] || options["--test-target"] || options["--explain"]) {
-      fail("--gate is read-only and cannot be combined with --scope, --item, --test-target or --explain.");
-      return 1;
+      throw new ContractError("invalid-arguments", "--gate is read-only and cannot be combined with --scope, --item, --test-target or --explain.");
     }
     if (options["--head"] && !options["--base"]) {
-      fail("--head needs --base: it names the end of the compared range.");
-      return 1;
+      throw new ContractError("invalid-arguments", "--head needs --base: it names the end of the compared range.");
     }
     if (gate === "release" && (options["--changed"] || options["--base"])) {
-      fail("The release gate is project-wide by design; --changed and --base apply to the review gate.");
-      return 1;
+      throw new ContractError("invalid-arguments", "The release gate is project-wide by design; --changed and --base apply to the review gate.");
     }
     return gateStage(options["--cwd"] ?? process.cwd(), gate, { changed: options["--changed"], base: options["--base"], head: options["--head"], json: options["--json"] });
   }
 
   if (options["--explain"]) {
     if (options["--scope"] || options["--item"] || options["--test-target"]) {
-      fail("--explain is read-only and cannot be combined with --scope, --item or --test-target.");
-      return 1;
+      throw new ContractError("invalid-arguments", "--explain is read-only and cannot be combined with --scope, --item or --test-target.");
     }
     return explainSubject(options["--cwd"] ?? process.cwd(), options["--explain"], options["--json"]);
   }
