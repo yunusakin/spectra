@@ -7,3 +7,15 @@ These outputs are the machine-readable contract for coding agents: `context --fo
 - **Errors:** an expected failure under `--json` / `--format json` prints one document on stdout and exits 1, with no stack trace and no absolute path: `{"contractVersion": 1, "ok": false, "error": {"code": "...", "message": "..."}}`. Codes: `invalid-arguments`, `project-not-found`, `subject-not-found`, `subject-not-inspectable`, `file-outside-project`, `invalid-ref`, `not-a-git-repository`, `command-failed`. Success documents have no `ok` or `error` field. Without a JSON request the failure is the usual `FAIL ...` line on stderr.
 - **Exit status:** unchanged. `verify --gate` exits 1 only when the gate is `blocked`; `status --json` exits 1 when the project is not compatible with this application.
 - **Read-only:** `inspect`, `verify --explain`, `verify --gate` and `status --json` write nothing. `context` and `route` may refresh derived caches, as before.
+
+## When to revisit MCP
+
+Spectra's agent-consumption boundary is the CLI, this deterministic JSON and the generated adapters. MCP is not part of it. Reconsider a thin MCP adapter over the same documents only if evidence shows one of:
+
+- agents still fail to discover or use Spectra despite the improved adapters;
+- an important target agent cannot run the local CLI;
+- typed tool discovery measurably increases real task success;
+- the JSON contract fragments again despite the shared `contractVersion` and error shape;
+- an important client requires MCP.
+
+Any such adapter would call the same internal functions and return these same documents; no business logic belongs in a transport.

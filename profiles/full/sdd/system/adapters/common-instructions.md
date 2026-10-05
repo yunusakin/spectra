@@ -15,7 +15,7 @@ Use Spectra's canonical system files as the source of truth.
 
 ## Project Intelligence
 
-Ask Spectra for governed project knowledge instead of broad manual exploration when Spectra already holds the answer. It does not replace reading or inspecting the code you are changing. Everything in this section is read-only.
+Ask Spectra for governed project knowledge instead of broad manual exploration when Spectra already holds the answer. It does not replace reading or inspecting the code you are changing. These intelligence operations do not mutate canonical project knowledge, governance, approvals, or verification evidence. `context` and `route` may refresh disposable derived caches.
 
 - Focused task context: `./.spectra/bin/spectra context --role <role> --goal <goal>` compiles the smallest useful context for a task.
 - One known subject (a business rule, requirement, scenario, invariant, module or test-target ID): `./.spectra/bin/spectra inspect <id> --json`.

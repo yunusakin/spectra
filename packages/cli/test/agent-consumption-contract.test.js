@@ -118,6 +118,9 @@ test("shared guidance stays read-only and vendor-neutral", () => {
   assert.ok(section);
   assert.doesNotMatch(section, /spectra (approve|migrate|update|uninstall|eval|adapters|knowledge|onboard|init|adopt)\b|doctor --fix|--test-target|checkpoint/i);
   assert.doesNotMatch(section, /\b(Claude|Codex|Cursor|Copilot|Windsurf|Antigravity|GPT|Gemini)\b/);
+  assert.match(section, /do not mutate canonical project knowledge, governance, approvals, or verification evidence/i);
+  assert.match(section, /`context` and `route` may refresh disposable derived caches/);
+  assert.doesNotMatch(section, /Everything in this section is read-only/);
   assert.doesNotMatch(section, /inspectSubject|analyzeImpact|concludeVerification|evaluateGate/);
 });
 
