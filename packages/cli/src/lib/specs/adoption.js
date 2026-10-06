@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getSddRoot } from "../project-layout.js";
-import { getFeatureDirs } from "./feature-bundles.js";
+import { getConsumerFeatureDirs } from "./feature-bundles.js";
 import { hasRealMarkdownContent, writeJsonContract } from "./primitives.js";
 
 function buildAdoptionArtifacts(repoRoot) {
@@ -22,7 +22,7 @@ function buildAdoptionArtifacts(repoRoot) {
   const hasImplementationBrief = hasRealMarkdownContent(
     path.join(sddRoot, "memory-bank", "core", "implementation-brief.md")
   );
-  const featureDirs = getFeatureDirs(repoRoot);
+  const featureDirs = getConsumerFeatureDirs(repoRoot);
   const items = [
     {
       requirement_id: "ADOPT-SPECS",

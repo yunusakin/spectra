@@ -4,12 +4,16 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  bash scripts/map-codebase.sh --root <project-root> [--spectra-root <spectra-root>]
+  bash scripts/map-codebase.sh --root <project-root> [--spectra-root <spectra-root>] [--preserve-reviewed]
+
+--preserve-reviewed keeps an existing business domain index and technical module index (reviewed project
+intelligence); only repository-derived discovery files are regenerated.
 USAGE
 }
 
 ROOT=""
 SPECTRA_ROOT=""
+PRESERVE_REVIEWED=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --root)
@@ -19,6 +23,10 @@ while [[ $# -gt 0 ]]; do
     --spectra-root)
       SPECTRA_ROOT="${2:-}"
       shift 2
+      ;;
+    --preserve-reviewed)
+      PRESERVE_REVIEWED=true
+      shift
       ;;
     -h|--help)
       usage
@@ -212,6 +220,7 @@ ${todo_hits:-"- No TODO/FIXME markers detected with simple heuristics"}
 EOF
 
 mkdir -p "${SPECTRA_ROOT}/sdd/memory-bank/tech" "${SPECTRA_ROOT}/sdd/memory-bank/business"
+if [[ "${PRESERVE_REVIEWED}" != "true" || ! -f "${SPECTRA_ROOT}/sdd/memory-bank/tech/modules.md" ]]; then
 cat > "${SPECTRA_ROOT}/sdd/memory-bank/tech/modules.md" <<EOF
 # Technical Module Index
 
@@ -221,7 +230,9 @@ cat > "${SPECTRA_ROOT}/sdd/memory-bank/tech/modules.md" <<EOF
 | --- | --- | --- | --- |
 ${module_rows:-"| (none) | No top-level modules detected | | |"}
 EOF
+fi
 
+if [[ "${PRESERVE_REVIEWED}" != "true" || ! -f "${SPECTRA_ROOT}/sdd/memory-bank/business/INDEX.md" ]]; then
 cat > "${SPECTRA_ROOT}/sdd/memory-bank/business/INDEX.md" <<EOF
 # Business Domain Index
 
@@ -230,5 +241,6 @@ cat > "${SPECTRA_ROOT}/sdd/memory-bank/business/INDEX.md" <<EOF
 | Domain | Keywords | Rules | Unresolved | Related Modules |
 | --- | --- | --- | --- | --- |
 EOF
+fi
 
 echo "Codebase mapping: OK"

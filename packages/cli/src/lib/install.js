@@ -250,8 +250,11 @@ function installSpectra({
   writeProjectConfig(absoluteTarget, { gitMode, ...(authorizedMigration ? { write: authorizedMigration.writeAuthority } : {}) });
   ensureDirectory(path.join(layout.docs, stableDocsName));
   updateManifestRepoMode(absoluteTarget, "consumer");
+  // A project that already carries Spectra state keeps it: re-running init/adopt refreshes derived output only. The
+  // starter feature is first-install scaffolding and is never recreated for the user, and governance files are not reset.
+  const reinstall = existingMetadata !== null && existingMetadata !== undefined;
   if (refreshV2Scaffolding) {
-    ensureV2Scaffolding(layout.root, { adopt });
+    ensureV2Scaffolding(layout.root, { adopt, preserveExisting: reinstall, starterBundle: !reinstall });
   }
   const nativeBinaryPath = detectNativeBinaryPath() ?? existingMetadata?.binaryPath ?? null;
   const stableCommandPath = detectStableMachineCommand(existingMetadata);
@@ -272,7 +275,7 @@ function installSpectra({
     runInstalledScript({
       cwd: absoluteTarget,
       scriptName: "map-codebase.sh",
-      args: ["--root", absoluteTarget, "--spectra-root", layout.root],
+      args: ["--root", absoluteTarget, "--spectra-root", layout.root, ...(reinstall ? ["--preserve-reviewed"] : [])],
       strict: true
     });
     let repoIndex = null;
@@ -282,7 +285,7 @@ function installSpectra({
     } catch (error) {
       warn(`Repo indexing failed during adopt: ${error.message}. Run "spectra index" manually once fixed.`);
     }
-    enrichDiscovery(absoluteTarget, repoIndex);
+    enrichDiscovery(absoluteTarget, repoIndex, { preserveReviewed: reinstall });
     buildAdoptionArtifacts(layout.root);
   }
 

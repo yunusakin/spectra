@@ -3,9 +3,28 @@ import path from "node:path";
 import { getSddRoot } from "../project-layout.js";
 import { normalize } from "../business/parser.js";
 
+// An existing module index is reviewed project intelligence: keep every row (and any edit) and only add modules the
+// manifests now show that no row names or covers by path. A bootstrap placeholder row is dropped once a real one is added.
+function mergeModuleRows(existing, detected) {
+  const lines = existing.split(/\r?\n/);
+  const cells = line => line.split("|").slice(1, -1).map(cell => cell.trim());
+  const isRow = line => /^\|/.test(line) && !/^\|\s*-/.test(line) && cells(line)[0] !== "Module";
+  const rowLines = lines.filter(isRow);
+  const names = new Set(rowLines.map(line => normalize(cells(line)[0])));
+  const covered = new Set(rowLines.flatMap(line => (cells(line)[2] ?? "").split(",").map(value => value.trim()).filter(Boolean)));
+  const additions = detected.filter(row => !names.has(normalize(row.name)) && !row.paths.split(",").map(value => value.trim()).some(value => covered.has(value)));
+  if (additions.length === 0) return existing;
+  const kept = lines.filter(line => !(isRow(line) && /^\(none\)$/.test(cells(line)[0])));
+  let last = kept.length - 1;
+  while (last >= 0 && kept[last].trim() === "") last--;
+  const lastRow = kept.map((line, index) => (/^\|/.test(line) ? index : -1)).filter(index => index >= 0).pop() ?? last;
+  kept.splice(lastRow + 1, 0, ...additions.map(row => row.line));
+  return `${kept.join("\n").replace(/\n*$/, "")}\n`;
+}
+
 // Discovery is a human-review projection of the existing index, not another
 // scanner. Manifest declarations prove structure, not business responsibility.
-function enrichDiscovery(repoRoot, index) {
+function enrichDiscovery(repoRoot, index, { preserveReviewed = false } = {}) {
   const memory = path.join(getSddRoot(repoRoot), "memory-bank");
   const append = (name, heading, lines, missing) => fs.appendFileSync(
     path.join(memory, "discovery", `${name}.md`),
@@ -63,7 +82,10 @@ function enrichDiscovery(repoRoot, index) {
       const paths = [previous?.paths, text(record.path)].filter(Boolean).join(", ");
       rows.set(name, { paths, evidence: evidence(record) });
     }
-    fs.writeFileSync(path.join(memory, "tech", "modules.md"), `# Technical Module Index\n\n> Unconfirmed bootstrap map from repository manifests. Review responsibilities and domain mappings.\n\n| Module | Responsibility | Paths | Business Domains |\n| --- | --- | --- | --- |\n${[...rows].map(([name, item]) => `| ${name} | Manifest module; responsibility unconfirmed (${item.evidence}) | ${item.paths} | |`).join("\n")}\n`);
+    const modulesPath = path.join(memory, "tech", "modules.md");
+    const detected = [...rows].map(([name, item]) => ({ name, paths: item.paths, line: `| ${name} | Manifest module; responsibility unconfirmed (${item.evidence}) | ${item.paths} | |` }));
+    if (preserveReviewed && fs.existsSync(modulesPath)) fs.writeFileSync(modulesPath, mergeModuleRows(fs.readFileSync(modulesPath, "utf8"), detected));
+    else fs.writeFileSync(modulesPath, `# Technical Module Index\n\n> Unconfirmed bootstrap map from repository manifests. Review responsibilities and domain mappings.\n\n| Module | Responsibility | Paths | Business Domains |\n| --- | --- | --- | --- |\n${detected.map(row => row.line).join("\n")}\n`);
   }
 }
 
