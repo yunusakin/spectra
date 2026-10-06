@@ -72,6 +72,7 @@ test("F1/F4: -ing and -ed fold to one stem; short stems, natural doubles and the
   assert.equal(one("running"), "running", "stem 'run' is below the minimum: not folded, never the malformed 'runn'");
   assert.equal(one("added"), "added", "stem 'add' is below the minimum: not folded, never 'ad'");
   for (const word of ["being", "thing", "string", "speed"]) assert.equal(one(word), word, `${word} has no useful stem`);
+  assert.equal(one("heading"), one("head"), "known, accepted collision of a four-letter stem");
   assert.notEqual(one("project"), one("projection"));
   assert.notEqual(one("product"), one("production"));
   assert.notEqual(one("general"), one("generation"));

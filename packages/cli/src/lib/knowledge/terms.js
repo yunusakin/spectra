@@ -7,8 +7,8 @@ const STOP = new Set([
   "rule", "status", "active", "unresolved", "affected", "module", "evidence", "confidence"
 ]);
 
-// counting/counted -> count. The stem must stay >= 4 letters (so being, thing, string, needed, running, added are
-// left as they are, never malformed). A doubled final consonant is restored only when the stem stays useful
+// counting/counted -> count. The stem must stay >= 4 letters (so being, thing, string, running, added are left as
+// they are, never malformed). Known, accepted cost: a four-letter stem can equal another word (heading/head). A doubled final consonant is restored only when the stem stays useful
 // (stopped -> stop); doubled l/s/z/f and vowels are natural (installed -> install, passed -> pass).
 function foldSuffix(term) {
   const stem = term.replace(/(?:ing|ed)$/, "");
