@@ -106,7 +106,7 @@ flowchart TD
 
 **Result:** Installation summary; adapter health when requested.
 
-**Modes and repeat runs:** `[path]`, `--git-mode local|shared`, `--agents <csv>`. Local mode leaves `.gitignore` unchanged; shared mode leaves generated state visible to Git. Existing user memory is copied only when missing. Existing foreign adapters cause refusal before install; regenerate deliberately through adapters if needed.
+**Modes and repeat runs:** `[path]`, `--git-mode local|shared`, `--agents <csv>`. Local mode leaves `.gitignore` unchanged. Shared mode versions durable team intelligence (specs, rules, brief, configuration) and writes `.spectra/.gitignore` so derived and observation-bearing state stays out of Git: `cache/` (context summaries, Knowledge Map, Repo Index, verification evidence) and each feature's `evals/reports/`. The project's own `.gitignore` is never changed. Existing user memory is copied only when missing. Existing foreign adapters cause refusal before install; regenerate deliberately through adapters if needed.
 
 **Example:**
 
@@ -133,7 +133,7 @@ CLAUDE.md absent → generated when --agents claude is requested
 
 **Result:** Discovery evidence, unconfirmed findings and onboarding next step.
 
-**Modes and repeat runs:** `[path]`, `--git-mode local|shared`, `--agents <csv>`. Does not execute manifest test commands or infer business responsibilities. Re-adoption regenerates discovery evidence; an indexing failure is reported and shell discovery remains available.
+**Modes and repeat runs:** `[path]`, `--git-mode local|shared`, `--agents <csv>`. Does not execute manifest test commands or infer business responsibilities. Re-adoption refreshes only repository-derived output: the Repo Index, discovery files, adoption summaries and gap analysis. It keeps reviewed project intelligence untouched: the business domain index and rules, the technical module index (newly detected modules are appended; existing rows are never rewritten), feature bundles, governance state, the project brief, documentation and unowned files, and it never recreates a starter feature you removed. An unmodified starter feature (`spectra-core` exactly as installed) is scaffolding, not a consumer feature: gap analysis does not count it and its release checklist does not block release readiness; editing it, or adding any feature, makes it yours. An indexing failure is reported and shell discovery remains available.
 
 **Example:**
 
@@ -161,7 +161,7 @@ spectra adopt .
 
 **Result:** Index summary or confirmation that the brief was written/skipped.
 
-**Modes and repeat runs:** `--force` permits replacing a brief that already has meaningful content, but still requires an interactive terminal. Missing index does not prevent interactive onboarding. Renaming the brief does not change persisted docsProjectName.
+**Modes and repeat runs:** `--force` permits replacing a brief that already has meaningful content, but still requires an interactive terminal. Missing index does not prevent interactive onboarding. After writing the brief, onboard runs the same policy check as `check` and lists what it would still reject (typically `activeContext.md` and `progress.md` still carrying template placeholders) with the next step, instead of implying the project is ready. Renaming the brief does not change persisted docsProjectName.
 
 **Example:**
 
@@ -286,7 +286,7 @@ spectra knowledge add --domain billing --title "Invoice review" --statement "Dra
 | `supersede --id <id>` | Updates the status in rules.md to superseded. |
 | `deprecate --id <id>` | Updates the status in rules.md to deprecated. |
 
-Additional add options: `--evidence`, `--modules`, `--confidence`. Direct Markdown edits remain supported; check validates rule/index integrity.
+Additional add options: `--evidence`, `--modules`, `--confidence`. Spectra never invents routing metadata from code or task text. When a domain has no Keywords in `business/INDEX.md` (so `route --task` cannot find its rules), or lists no Affected/Related Modules (so code changes cannot reach them), `add` and `promote` print a warning naming what is missing and where to add it; nothing is printed once the metadata is sufficient. Direct Markdown edits remain supported; check validates rule/index integrity.
 ## index
 
 **When to use:** Refresh evidence after bootstrap or manifest changes.
@@ -326,7 +326,7 @@ spectra index --explain
 
 **Result:** Human text or `--json` with stable ordering, stable IDs, project-relative paths and no timestamps.
 
-**Modes and repeat runs:** `spectra inspect <id>` takes one exact stable ID (a business rule, `<feature>#FR-1`/`NFR`/`AC`/`INV`, `node:module:<path>` or `node:test-target:<path>`); an unknown or other-kind ID exits 1, nothing is fuzzy-matched. It returns identity, relationships (each marked `canonical` or `derived`), modules, the verification conclusion (identical to `verify --explain`) and the review/release gate for the rules concerned. `spectra inspect --changed | --base <ref> [--head <ref>] | --file <path>[,<path>...]` returns `files`, `modules`, `canonicalSubjects`, `rules`, `verificationScopes`, `verificationState`, `reviewImpact`, `releaseImpact` and `warnings`; every item carries a reason (`affected-module:<id>`, `source-file-changed`, `governs-changed-subject:<id>`, `governed-by:<rule>`, `verified-by:<subject>`, `tested-by-module:<id>`). The rule set is the one `verify --gate review` uses for the same files, so the two agree. An empty change set reports `no-changed-files`; a change that concerns no rule reports `no-rule-impact`; an unresolvable ref or a non-Git directory fails instead of returning an empty impact. Impact is module- and canonical-source-level: it is not a code or dependency graph, and a change to a canonical file concerns everything defined in that file.
+**Modes and repeat runs:** `spectra inspect <id>` takes one exact stable ID (a business rule, `<feature>#FR-1`/`NFR`/`AC`/`INV`, `node:module:<path>` or `node:test-target:<path>`); an unknown or other-kind ID exits 1, nothing is fuzzy-matched. It returns identity, relationships (each marked `canonical` or `derived`), modules, the verification conclusion (identical to `verify --explain`) and the review/release gate for the rules concerned. `spectra inspect --changed | --base <ref> [--head <ref>] | --file <path>[,<path>...]` returns `files`, `modules`, `canonicalSubjects`, `rules`, `verificationScopes`, `verificationState`, `reviewImpact`, `releaseImpact` and `warnings`; every item carries a reason (`affected-module:<id>`, `source-file-changed`, `governs-changed-subject:<id>`, `governed-by:<rule>`, `verified-by:<subject>`, `tested-by-module:<id>`). The rule set is the one `verify --gate review` uses for the same files, so the two agree. An empty change set reports `no-changed-files`; a change that concerns no rule reports `no-rule-impact`; an unresolvable ref or a non-Git directory fails instead of returning an empty impact. Changed files exclude Spectra-derived files (caches, reports, evidence, approval and progress bookkeeping); canonical specs, rules and the module map still count. Impact is module- and canonical-source-level: it is not a code or dependency graph, and a change to a canonical file concerns everything defined in that file.
 
 **Example:**
 
@@ -347,7 +347,7 @@ spectra inspect --base main --json
 
 **Result:** Validation/policy warnings and success or failure exit status.
 
-**Modes and repeat runs:** `--base <ref> --head <ref>` selects a commit range; `--cwd` selects the project. Does not run the application’s general test command. Repeat checks inspect current state.
+**Modes and repeat runs:** `--base <ref> --head <ref>` selects a commit range; `--cwd` selects the project. Does not run the application’s general test command. Repeat checks inspect current state. `check` is the structural verdict; it also warns, without failing, about knowledge the review/release gates will refuse (an `Affected Modules` entry that does not resolve to a Repo Index module), using the same data the gates use.
 
 **Example:**
 
@@ -366,7 +366,7 @@ spectra check
 
 **Result:** Per-stage results and release-confidence score; failure when readiness is blocked.
 
-**Modes and repeat runs:** `--scope all|spec|app`, `--item`. App/item work requires implementation approval; final release readiness also checks implementation approval and checklists. Command-mode evals may run application commands and modify their chosen paths. Does not automatically run your generic npm/Maven test command. Reports can change even on a failed verify. `--test-target <id>` is a separate mode: it runs only that Repo Index test target's recorded command (for Node, `scripts.test`) once, records the completed result in `.spectra/cache/verification/evidence.json` (local cache, never committed) and prints which rules and requirements it now supports; it skips the other stages and exits 0 only when the tests pass. `--explain <id> [--json]` is a read-only mode: it shows why a rule, requirement, scenario or invariant is `verified`, `failed`, `stale` or `unverified` (each explicit `verifiedBy` scope, evidence state and missing layer); it runs nothing and cannot be combined with the other modes. `--gate <implementation|review|release> [--changed|--base <ref> [--head <ref>]] [--json]` is a read-only stage check over the recorded evidence: implementation is always allowed; review and release are blocked (exit 1) by failed, stale or unexecuted declared `verifiedBy` scopes and by broken canonical structure, with the exact rerun action per blocker; coverage that is not modeled is only a warning. The review gate can be narrowed to the changed files; release is project-wide.
+**Modes and repeat runs:** `--scope all|spec|app`, `--item`. App/item work requires implementation approval; final release readiness also checks implementation approval and checklists. Command-mode evals may run application commands and modify their chosen paths. Does not automatically run your generic npm/Maven test command. Reports can change even on a failed verify. Evidence freshness fingerprints the Git-tracked files under the test target's directory. Inside `.spectra/` only canonical declarations count (feature `feature.spec.yaml`, business `rules.md`, `tech/modules.md`); Spectra's own caches, reports, evidence, approvals, progress notes and checklists never stale evidence, so Spectra writing its own state cannot invalidate a passing run, while changed application source, tests, manifest or those declarations do. `--test-target <id>` is a separate mode: it runs only that Repo Index test target's recorded command (for Node, `scripts.test`) once, records the completed result in `.spectra/cache/verification/evidence.json` (local cache, never committed) and prints which rules and requirements it now supports; it skips the other stages and exits 0 only when the tests pass. `--explain <id> [--json]` is a read-only mode: it shows why a rule, requirement, scenario or invariant is `verified`, `failed`, `stale` or `unverified` (each explicit `verifiedBy` scope, evidence state and missing layer); it runs nothing and cannot be combined with the other modes. `--gate <implementation|review|release> [--changed|--base <ref> [--head <ref>]] [--json]` is a read-only stage check over the recorded evidence: implementation is always allowed; review and release are blocked (exit 1) by failed, stale or unexecuted declared `verifiedBy` scopes and by broken canonical structure, with the exact rerun action per blocker; coverage that is not modeled is only a warning. The review gate can be narrowed to the changed files; release is project-wide.
 
 **Example:**
 
