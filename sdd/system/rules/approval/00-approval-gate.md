@@ -7,7 +7,7 @@
 
 ## Pre-Approval Validation (Mandatory)
 Before asking for approval, the agent MUST:
-1. Run `bash scripts/validate-repo.sh --strict` and confirm it passes.
+1. Run `spectra check` and confirm it passes.
 2. Ensure `sdd/memory-bank/core/intake-state.md` has no `open` technical questions.
 3. Ensure `sdd/memory-bank/core/review-gate.md` has no unresolved `critical` or `warning` findings.
 4. If any check fails, resolve it first — do not ask for approval.

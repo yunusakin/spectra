@@ -4,21 +4,26 @@ Use Spectra's canonical system files as the source of truth.
 
 ## Required Behavior
 
-- Start from `spectra context --role <role> --goal <goal>` to determine what to read.
-- Use route-first context for normal development: run `spectra route --task "<task description>"` before broad exploration and load only selected module/domain context.
+- Run Spectra from the project root with `./.spectra/bin/spectra` (Windows: `.spectra\\bin\\spectra.cmd`).
+- Start from `./.spectra/bin/spectra context --role <role> --goal <goal>` to determine what to read.
 - Prefer summary-first packs and only escalate to raw markdown when ambiguity remains.
-- Treat `sdd/memory-bank/business/` as canonical agent-neutral business knowledge.
-- Check existing domain knowledge before adding business rules.
-- Unresolved is the default for new business claims.
-- Require verified evidence before active business knowledge; use `spectra knowledge add --status active --verified` only for authoritative rules.
-- Do not infer business truth from code alone; record ordinary code observations as unresolved.
-- Avoid duplicate business rules by inspecting the relevant domain's existing rules first.
-- Do not write a new business rule after every task; update memory only when reusable business knowledge was discovered.
 - Do not generate application code before explicit `implementation-approved`.
 - Keep project state in `.spectra/sdd/memory-bank/`.
 - In consumer repositories, update `.spectra/sdd/memory-bank/core/activeContext.md` and `.spectra/sdd/memory-bank/core/progress.md` after significant work.
 - Treat root agent files such as `AGENTS.md` as generated projections of `.spectra/` state.
-- Use `spectra verify` before marking work ready.
+- Use `./.spectra/bin/spectra verify` before marking work ready.
+
+## Project Intelligence
+
+Ask Spectra for governed project knowledge instead of broad manual exploration when Spectra already holds the answer. It does not replace reading or inspecting the code you are changing. These intelligence operations do not mutate canonical project knowledge, governance, approvals, or verification evidence. `context` and `route` may refresh disposable derived caches.
+
+- Focused task context: `./.spectra/bin/spectra context --role <role> --goal <goal>` compiles the smallest useful context for a task.
+- One known subject (a business rule, requirement, scenario, invariant, module or test-target ID): `./.spectra/bin/spectra inspect <id> --json`.
+- What the current changes affect: `./.spectra/bin/spectra inspect --changed --json`.
+- Why one subject is or is not verified: `./.spectra/bin/spectra verify --explain <id> --json`.
+- Whether the current work may pass review: `./.spectra/bin/spectra verify --gate review --changed --json`.
+- Release-wide readiness: `./.spectra/bin/spectra verify --gate release --json`.
+- `--json` output carries a `contractVersion`. A failed query prints `{"ok": false, "error": {"code": ..., "message": ...}}` and exits with status 1.
 
 ## Plugin and Skill Output Location
 

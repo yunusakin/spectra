@@ -18,9 +18,9 @@ After sprint plan creation, the agent follows this loop for each backlog item.
 
 ### 3. Skill Check (Hard Gate)
 - Run resolver before coding:
-  - `bash scripts/resolve-skills.sh --task-type <task_type>`
+  - `spectra skills --task-type <task_type>`
 - If using explicit skills/order, validate with:
-  - `bash scripts/resolve-skills.sh --task-type <task_type> --skills <csv>`
+  - `spectra skills --task-type <task_type> --skills <csv>`
 - If resolver exits non-zero, stop and fix selection/order first.
 - Record selected skills + execution order in `sdd/memory-bank/core/skill-runs.md`.
 - Record summary in `progress.md`.

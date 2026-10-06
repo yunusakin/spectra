@@ -1,9 +1,0 @@
-apiVersion: spectra/v2
-kind: GapAnalysis
-summary:
-  matches: 0
-  partial: 0
-  missing: 0
-  conflict: 0
-  unknown: 0
-items: []

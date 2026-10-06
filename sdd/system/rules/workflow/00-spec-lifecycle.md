@@ -26,7 +26,7 @@ If user runs `init` again:
 1. Clarify the requested change.
 2. Update impacted specs under `sdd/memory-bank/`.
 3. Append entry to `sdd/memory-bank/core/spec-history.md`.
-4. Update spec diff report (`bash scripts/spec-diff.sh --update`) when useful.
+4. Update spec diff report (`spectra diff update`) when useful.
 5. Re-run intake validation for impacted mandatory fields.
 6. Decide re-approval need.
 7. If re-approval required:
