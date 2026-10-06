@@ -93,7 +93,7 @@ function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}
   // An unmodified starter feature describes no consumer behavior, so its checklist is not the consumer's to complete.
   const checklistFeatureDirs = getConsumerFeatureDirs(repoRoot);
   const releaseChecklistWarnings = [];
-  if (checklistFeatureDirs.length === 0) {
+  if (featureDirs.length === 0) {
     releaseChecklistWarnings.push("no feature release checklists found");
   }
   for (const featureDir of checklistFeatureDirs) {

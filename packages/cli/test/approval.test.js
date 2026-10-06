@@ -2,7 +2,16 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { createGitProject, git, initProject, spectra } from "./helpers/project.js";
+import { createGitProject, git, initProject as installProject, spectra } from "./helpers/project.js";
+
+// The installed starter feature is scaffolding until its owner edits it; release checklists apply to the
+// project's own features. These tests exercise the checklist mechanism, so the project owns its feature.
+function initProject(...args) {
+  const root = installProject(...args);
+  const spec = path.join(root, ".spectra", "sdd", "features", "spectra-core", "feature.spec.yaml");
+  fs.writeFileSync(spec, fs.readFileSync(spec, "utf8").replace("Users need a controlled way", "Operators need a controlled way"));
+  return root;
+}
 
 function approve(root, stage) {
   return spectra(root, ["approve", "--stage", stage]);
