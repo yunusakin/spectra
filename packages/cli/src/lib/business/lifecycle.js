@@ -59,7 +59,7 @@ function routingGuidance(projectRoot, domain, { hasModules }) {
   if (!String(row.keywords ?? "").trim()) {
     guidance.push(`Domain "${domain}" has no routing keywords, so task-based routing (spectra route --task) cannot discover its rules. Add comma-separated keywords to its row in ${index}.`);
   }
-  if (!hasModules && !String(row["related modules"] ?? "").trim()) {
+  if (!hasModules && !String(row["related-modules"] ?? "").trim()) {
     guidance.push(`Domain "${domain}" lists no Affected Modules or Related Modules, so changes to code cannot be connected to its rules. Add Affected Modules to the rule, or Related Modules to its row in ${index}.`);
   }
   return guidance;

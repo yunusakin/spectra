@@ -1,5 +1,5 @@
 import { createInterface } from "node:readline/promises";
-import { findSpectraRoot } from "../lib/runtime.js";
+import { findSpectraRoot, runInstalledScript } from "../lib/runtime.js";
 import { parseOptions } from "../lib/options.js";
 import { ok, title, warn } from "../lib/output.js";
 import { readIndex } from "../lib/index/cache.js";
@@ -45,6 +45,18 @@ function printRepoIndexSummary(repoIndex) {
   title(`Modules known: ${repoIndex.stats.byKind.module ?? 0}`);
 }
 
+// What `spectra check` would still reject once the brief names the project. The brief alone does not make the project
+// valid: activeContext and progress must stop carrying template placeholders. This reuses the same policy script, so the
+// diagnosis cannot drift from what check reports.
+function remainingPolicyErrors(cwd) {
+  const result = runInstalledScript({ cwd, scriptName: "check-policy.sh", capture: true });
+  if (result.status === 0) return [];
+  const lines = String(result.stdout ?? "").split(/\r?\n/);
+  const start = lines.findIndex((line) => /^Policy check errors:/.test(line));
+  if (start < 0) return [];
+  return lines.slice(start + 1).filter((line) => /^- /.test(line));
+}
+
 async function onboardCommand(argv) {
   const { options } = parseOptions(argv, {
     booleanFlags: ["--help", "--force"],
@@ -83,6 +95,13 @@ async function onboardCommand(argv) {
   const draft = buildProjectBriefDraft({ answers, repoIndex });
   fs.writeFileSync(getProjectBriefPath(repoRoot), draft);
   ok(`Wrote ${toPosix(path.relative(repoRoot, getProjectBriefPath(repoRoot)))}`);
+  const remaining = remainingPolicyErrors(cwd);
+  if (remaining.length > 0) {
+    warn("The brief is saved, but spectra check will still fail:");
+    for (const line of remaining) title(line);
+    title("Next: complete those files, then run ./.spectra/bin/spectra check");
+    return 0;
+  }
   title("Next: spectra context --role planner --goal discover");
   return 0;
 }
