@@ -1,0 +1,68 @@
+// Spectra's own repository is a root-layout source repository (sdd/system/manifest.env has repo_mode=canonical), so it
+// carries copies of the runtime files that consumers receive. Failure modes recorded before any change:
+//  S1  root sdd/system lags the consumer source (stale commands, spectra_version=2.0.0)
+//  S2  packages/core/assets/runtime/sdd/system lags the consumer source (profiles/full/sdd/system)
+//  S3  a root runtime script (scripts/*.sh) lags the packaged runtime script it mirrors
+//  S4  root validate-repo.sh (source-specific extras allowed) misses a line of the packaged validator, e.g. a bug fix
+// Authoritative sources: profiles/full/sdd/system (system files) and packages/core/assets/runtime/scripts (scripts).
+// Refresh the mirrors with: node packages/cli/scripts/sync-assets.mjs --tracked
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
+import { fileURLToPath } from "node:url";
+
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+const fix = "run: node packages/cli/scripts/sync-assets.mjs --tracked";
+
+function files(dir) {
+  const out = [];
+  const walk = (current) => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      if (entry.name === ".DS_Store") continue;
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else out.push(path.relative(dir, full));
+    }
+  };
+  walk(dir);
+  return out.sort();
+}
+
+function compare(sourceDir, mirrorDir, { skip = [] } = {}) {
+  const problems = [];
+  const source = files(sourceDir).filter((file) => !skip.includes(file));
+  const mirror = files(mirrorDir).filter((file) => !skip.includes(file));
+  for (const file of source) {
+    if (!mirror.includes(file)) problems.push(`missing ${file}`);
+    else if (!fs.readFileSync(path.join(sourceDir, file)).equals(fs.readFileSync(path.join(mirrorDir, file)))) problems.push(`differs ${file}`);
+  }
+  for (const file of mirror) if (!source.includes(file)) problems.push(`extra ${file}`);
+  return problems;
+}
+
+const consumerSystem = path.join(repo, "profiles", "full", "sdd", "system");
+const runtimeScripts = path.join(repo, "packages", "core", "assets", "runtime", "scripts");
+
+test("S1: root sdd/system is the consumer system source, and its manifest is the current version", () => {
+  assert.deepEqual(compare(consumerSystem, path.join(repo, "sdd", "system")), [], fix);
+  assert.match(fs.readFileSync(path.join(repo, "sdd", "system", "manifest.env"), "utf8"), /^repo_mode=canonical$/m, "the source-repository marker stays");
+});
+
+test("S2: the packaged runtime's sdd/system is the consumer system source", () => {
+  assert.deepEqual(compare(consumerSystem, path.join(repo, "packages", "core", "assets", "runtime", "sdd", "system")), [], fix);
+});
+
+test("S3: root scripts mirror the packaged runtime scripts; validate-repo.sh may only add source-specific lines", () => {
+  assert.deepEqual(compare(runtimeScripts, path.join(repo, "scripts"), { skip: ["validate-repo.sh"] }), [], fix);
+  const packaged = fs.readFileSync(path.join(runtimeScripts, "validate-repo.sh"), "utf8").split("\n");
+  const root = fs.readFileSync(path.join(repo, "scripts", "validate-repo.sh"), "utf8").split("\n");
+  let at = 0;
+  const missing = [];
+  for (const line of packaged) {
+    const found = root.indexOf(line, at);
+    if (found === -1) missing.push(line);
+    else at = found + 1;
+  }
+  assert.deepEqual(missing.filter((line) => line.trim() !== ""), [], "every line of the packaged validator must appear, in order, in scripts/validate-repo.sh (add source-only checks, never drop a packaged fix)");
+});
