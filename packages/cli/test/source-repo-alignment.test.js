@@ -11,6 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { createGitProject, spectra } from "./helpers/project.js";
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const fix = "run: node packages/cli/scripts/sync-assets.mjs --tracked";
@@ -65,4 +66,18 @@ test("S3: root scripts mirror the packaged runtime scripts; validate-repo.sh may
     else at = found + 1;
   }
   assert.deepEqual(missing.filter((line) => line.trim() !== ""), [], "every line of the packaged validator must appear, in order, in scripts/validate-repo.sh (add source-only checks, never drop a packaged fix)");
+});
+
+// S5  the consumer system source lacked the business-memory guidance, so a freshly initialized project's generated
+//     adapters omitted it (the adapter unit test only passed because it generated from the source repository's own copy)
+test("S5: adapters generated in a freshly initialized consumer carry the business-memory policy", () => {
+  const root = createGitProject();
+  const init = spectra(root, ["init", ".", "--agents", "claude,codex"]);
+  assert.equal(init.status, 0, init.stdout + init.stderr);
+  for (const file of ["CLAUDE.md", "AGENTS.md"]) {
+    const content = fs.readFileSync(path.join(root, file), "utf8");
+    for (const marker of [/route-first context/i, /unresolved.*default/i, /verified evidence before active/i, /do not infer business truth from code alone/i]) {
+      assert.match(content, marker, `${file} is missing ${marker}`);
+    }
+  }
 });
