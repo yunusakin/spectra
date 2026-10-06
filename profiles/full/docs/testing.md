@@ -33,7 +33,7 @@ CI note:
 
 Purpose:
 
-- check feature behavior contracts
+- check feature behavior contracts, or run real application commands when a suite uses `tool_mode: command`
 - run release-threshold logic
 - catch regression against the feature’s eval definitions
 
@@ -49,18 +49,23 @@ Use it:
 - after implementation work
 - before release verification
 
+Generated suites use `tool_mode: contract` and check contract structure only. For application behavior, set `execution.tool_mode: command` in the feature's `evals/regression-suite.yaml`, add optional `execution.setup` shell commands, and give each selected scenario an `input.command` and `expected.exit_code`. Commands run from the project root. A scenario can also supply `input.fixture.files` and use `<case-fixture>` in its command; Spectra creates and removes a temporary fixture directory. `expected.stdout` and `expected.stderr` compare exact output, while `stdout_contains` and `stderr_contains` check fragments.
+
 ## `spectra verify`
 
 Purpose:
 
 - produce release confidence, not just pass/fail test status
-- aggregate validation, policy, legacy verify inputs, eval readiness, telemetry coverage, and release readiness
+- aggregate validation, policy, legacy verify inputs, eval readiness, telemetry coverage, repo-index freshness, and release readiness
 
 Run it:
 
 ```bash
 spectra verify
 ```
+
+`spectra verify` runs the release-grade verification suite, including release
+evals and approval checklist gates.
 
 Use it:
 
@@ -89,6 +94,7 @@ Warning-only:
 
 - optional docs gaps
 - non-blocking context-pack budget warnings
+- missing or stale repo index; run `spectra index` to refresh it
 - incomplete narrative Markdown when YAML contracts are valid
 
 ## Contributor Note

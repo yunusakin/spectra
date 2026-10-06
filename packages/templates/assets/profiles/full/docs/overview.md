@@ -1,6 +1,8 @@
 # Spectra Overview
 
-Spectra is a CLI-first operating system for AI-assisted product development.
+Spectra is persistent, governed project intelligence for interchangeable coding agents, delivered as a project-local CLI. Agents execute; Spectra understands, resolves, governs, traces and verifies project knowledge. See the [README](https://github.com/yunusakin/spectra#readme) for the short version and first steps.
+
+Paths below such as `sdd/features/<feature-id>/` are relative to the project's `.spectra/` directory.
 
 It gives teams one repository-native way to move from product intent to release confidence:
 
@@ -57,6 +59,18 @@ Implementation is blocked until `implementation-approved`. Release signoff is bl
 
 `spectra context --role <role> --goal <goal>` loads the minimum useful context instead of dumping the whole repo into every agent.
 
+Add `--route-task "<task>"` when the task touches business behavior. Spectra then uses `sdd/memory-bank/tech/modules.md` and `sdd/memory-bank/business/INDEX.md` to include only the relevant module and domain files, while unrelated domain rules stay deferred. Domain keywords are explicit index configuration, and JSON route output explains why each domain or module matched.
+
+## Project Intelligence
+
+Beyond staged approvals, Spectra answers questions about the project on demand and deterministically (no model calls):
+
+- `spectra context --route-task "<task>"` selects the rules, requirements, invariants and modules a task touches, within a token budget.
+- `spectra inspect <id>` explains one rule, requirement, scenario, invariant, module or test target: what governs it, what it relates to and why it is `verified`, `failed`, `stale` or `unverified`. `inspect --changed` reports the impact of changed files.
+- `spectra verify --test-target <id>` runs one recorded test target and stores the result as local evidence; `verify --explain <id>` and `verify --gate review|release` read that evidence. A passing test target supports the subjects that declare it through `verifiedBy`; it is scoped evidence, not proof that a requirement is true everywhere.
+
+Canonical knowledge (below) is the source of truth; the Repo Index, Knowledge Map and verification evidence under `cache/` are derived and rebuildable.
+
 ## Canonical State
 
 Structured source of truth:
@@ -81,9 +95,7 @@ Human-readable support context:
 1. [Quick Start](quick-start.md)
 2. [Getting Started](getting-started.md)
 3. [CLI Reference](cli-reference.md)
-4. [Structure](structure.md)
-5. [Workflow](workflow.md)
-6. [Examples](examples/README.md)
-# Business context routing
-
-Use `spectra route --task "<task description>"` before a normal development task. Spectra returns the smallest relevant technical-module and business-domain context and defers unrelated rule files. Business indexes may include explicit keywords, and JSON output explains the match reason. Business rules live once under `sdd/memory-bank/business/`; use `spectra knowledge add` for unresolved claims, `spectra knowledge add --status active --verified` only for authoritative rules, and `spectra knowledge promote` after resolving uncertainty.
+4. [Business Context](https://github.com/yunusakin/spectra/blob/main/docs/business-context.md)
+5. [Structure](structure.md)
+6. [Workflow](workflow.md)
+7. [Examples](examples/README.md)
