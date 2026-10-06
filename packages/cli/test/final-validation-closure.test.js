@@ -133,3 +133,18 @@ test("P2: the .bin of the target's own directory is used for a nested package", 
   const run = spectra(root, ["verify", "--test-target", target]);
   assert.equal(run.status, 0, run.stdout + run.stderr);
 });
+
+test("P2: a binary hoisted to an ancestor node_modules/.bin resolves for a nested package, like npm run", { skip: !posix }, () => {
+  const root = createGitProject();
+  write(path.join(root, "package.json"), JSON.stringify({ name: "company-project", version: "1.0.0", private: true, workspaces: ["packages/*"] }));
+  write(path.join(root, "packages/api/package.json"), JSON.stringify({ name: "api", version: "1.0.0", scripts: { "test:hoisted": "hoisted-tool" } }));
+  write(path.join(root, "node_modules/.bin/hoisted-tool"), "#!/bin/sh\nexit 0\n", 0o755);
+  git(root, "add", "-A"); git(root, "commit", "-qm", "app");
+  ok(root, ["init", ".", "--git-mode", "local"]);
+  ok(root, ["index"]);
+  const ids = JSON.parse(ok(root, ["index", "--format", "json"]).stdout).records.filter(record => record.kind === "test-target").map(record => record.id);
+  const target = ids.find(id => /packages\/api.*:test:hoisted$/.test(id));
+  assert.ok(target, `nested target missing from ${JSON.stringify(ids)}`);
+  const run = spectra(root, ["verify", "--test-target", target]);
+  assert.equal(run.status, 0, run.stdout + run.stderr);
+});
