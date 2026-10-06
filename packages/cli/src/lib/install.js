@@ -18,7 +18,7 @@ import {
   writeInstallMetadata
 } from "./runtime.js";
 import { buildAdoptionArtifacts, ensureV2Scaffolding } from "./specs.js";
-import { assertPathsUntracked, beginLocalGitPolicy, finishLocalGitPolicy } from "./git-policy.js";
+import { assertPathsUntracked, beginLocalGitPolicy, ensureSharedGitignore, finishLocalGitPolicy } from "./git-policy.js";
 import { getAdapterOutputPaths } from "./adapter-paths.js";
 import { findProjectRoot, getProjectLayout } from "./project-layout.js";
 import { SCHEMA_VERSION, createInstallMetadata } from "./install-metadata.js";
@@ -213,6 +213,7 @@ function installSpectra({
   }
 
   ensureDirectory(absoluteTarget);
+  if (gitMode === "shared" && !authorizedMigration) ensureSharedGitignore(layout.root);
 
   if (refresh) {
     if (authorizedMigration) fs.cpSync(path.join(profileAssetsDir, "sdd", "system"), path.join(layout.sdd, "system"), { recursive: true });

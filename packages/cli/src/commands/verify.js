@@ -8,6 +8,7 @@ import { concludeVerification, readVerificationEvidence } from "../lib/traceabil
 import { runTestTarget } from "../lib/traceability/run.js";
 import { STAGES, evaluateGate, rulesForChangedFiles } from "../lib/traceability/gates.js";
 import { assertRefsResolve, getChangedFiles, isGitRepo } from "../lib/git-diff.js";
+import { countsForImpact } from "../lib/source-boundary.js";
 import { ContractError, guardJson, parseArguments, versioned } from "../lib/contract.js";
 
 // Runs one test target, records the evidence and says what it now supports. Exit status follows the result.
@@ -76,7 +77,7 @@ function gateStage(cwd, stage, { changed, base, head, json }) {
   const determinable = !narrowed || isGitRepo(projectRoot);
   if (determinable) assertRefsResolve(projectRoot, [base, head]);
   // Scope that cannot be determined (not a git repository) never narrows the gate: it falls back to the whole project.
-  result = evaluateGate(trace, readVerificationEvidence(projectRoot), stage, { rules: narrowed && determinable ? rulesForChangedFiles(trace, getChangedFiles(projectRoot, { base, head })) : null });
+  result = evaluateGate(trace, readVerificationEvidence(projectRoot), stage, { rules: narrowed && determinable ? rulesForChangedFiles(trace, getChangedFiles(projectRoot, { base, head }).filter(countsForImpact)) : null });
   if (narrowed && !determinable) result.warnings.unshift({ code: "scope-undeterminable", rule: null, reason: "this is not a git repository, so changed files cannot be determined; the gate covers the whole project" });
   if (json) {
     process.stdout.write(`${JSON.stringify(versioned(result), null, 2)}\n`);

@@ -226,7 +226,7 @@ test("C3: shared mode keeps disposable caches and reports out of Git, and out of
   const spec = path.join(sdd(root), "features/ledger/feature.spec.yaml");
   write(spec, read(spec).replace("exact sum", "exact total"));
   files = json(root, ["inspect", "--changed", "--json"]).files.map(f => f.path);
-  assert.ok(files.includes(".spectra/sdd/features/ledger/feature.spec.yaml"), "canonical spec change must appear");
+  assert.ok(files.includes("sdd/features/ledger/feature.spec.yaml"), "canonical spec change must appear");
 });
 
 test("C3: local mode still keeps Spectra state out of normal tracking", () => {

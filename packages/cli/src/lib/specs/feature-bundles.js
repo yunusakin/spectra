@@ -61,8 +61,10 @@ function getFeatureDirs(repoRoot) {
 // still byte-for-byte what the template generates it describes no consumer behavior: it must not count as a product
 // feature in adoption analysis or block release readiness. Editing it (or adding any other feature) makes it real,
 // which also keeps Spectra's own repository safe: its spectra-core spec differs from the template.
+const STARTER_PROJECT_NAME = ".spectra"; // the data-root folder name the starter is generated under in every installed project
+
 function isUnmodifiedStarter(repoRoot, featureDir) {
-  const bundle = buildFeatureBundle(path.basename(path.resolve(repoRoot)));
+  const bundle = buildFeatureBundle(STARTER_PROJECT_NAME);
   if (path.basename(featureDir) !== bundle.featureId) return false;
   let current;
   try {

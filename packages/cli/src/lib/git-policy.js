@@ -217,8 +217,26 @@ function finishLocalGitPolicy(policy, existing = {}) {
   };
 }
 
+// Shared mode versions the durable team intelligence (specs, rules, brief, configuration) but never the state Spectra
+// regenerates or observes: caches (context summaries, Knowledge Map, Repo Index, verification evidence) and the
+// latest eval reports. Evidence records what ran on one machine; reports are overwritten by every run. The rules live
+// in Spectra's own data root, so the project's .gitignore is never touched.
+const SHARED_IGNORE_RULES = ["/cache/", "/sdd/features/*/evals/reports/"];
+
+function ensureSharedGitignore(spectraRoot) {
+  const file = path.join(spectraRoot, ".gitignore");
+  const existing = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+  const present = new Set(existing.split(/\r?\n/).map((line) => line.trim()));
+  const missing = SHARED_IGNORE_RULES.filter((rule) => !present.has(rule));
+  if (missing.length === 0) return;
+  const header = existing === "" ? "# Spectra: derived and observation-bearing state is not shared. Durable specs, rules and config are.\n" : "";
+  fs.mkdirSync(spectraRoot, { recursive: true });
+  fs.writeFileSync(file, `${existing}${existing === "" || existing.endsWith("\n") ? "" : "\n"}${header}${missing.join("\n")}\n`);
+}
+
 export {
   assertPathsUntracked,
+  ensureSharedGitignore,
   beginLocalGitPolicy,
   buildExcludePatterns,
   ensureLocalSpectraExclude,
