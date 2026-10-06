@@ -212,6 +212,14 @@ spectra verify
 
 Release verification aggregates structure, policy, verify-work checks (manifest, policy and memory files; project tests are not run), eval readiness, telemetry coverage, approval state, and release thresholds.
 
+To see what your tests actually support, record test results as evidence and ask Spectra to explain or gate them (details in [Testing and Verification](testing.md)):
+
+```bash
+spectra verify --test-target <test-target-id>
+spectra verify --explain <id>
+spectra verify --gate review
+```
+
 After verification passes:
 
 ```bash

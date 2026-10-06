@@ -331,7 +331,7 @@ spectra index --explain
 **Example:**
 
 ```bash
-spectra inspect RULE-SPE-006
+spectra inspect RULE-ABC-001
 spectra inspect --base main --json
 ```
 

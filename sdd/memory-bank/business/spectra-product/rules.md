@@ -17,7 +17,7 @@ Confidence: high
 Status: active
 Affected Modules: packages-cli
 Governs: spectra-lifecycle#FR-2, spectra-lifecycle#AC-2
-Evidence: packages/cli/src/commands/update.js (help text and retired `__update-project`); docs/lifecycle-verification.md "Final lifecycle milestone"
+Evidence: packages/cli/src/commands/update.js (help text and retired `__update-project`)
 Confidence: high
 
 ## RULE-SPE-003 — Uninstall never changes project files

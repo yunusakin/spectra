@@ -2,7 +2,7 @@
 
 `spectra-pack` installs the `spectra` CLI.
 
-Spectra is a project-local CLI for AI-assisted development. It bootstraps shared context for humans and agents: business knowledge, implementation intent, executable specs, staged approvals, eval contracts, role-aware context packs, and release-confidence verification.
+Spectra is persistent, governed project intelligence for interchangeable coding agents, delivered as a project-local CLI. Agents execute; Spectra resolves, governs, traces and verifies project knowledge: business rules, requirements and invariants, the tests declared to verify them, recorded verification evidence, staged approvals and release gates. Use `init` for a new project and `adopt` for an existing one; the default local Git mode keeps all Spectra state out of your repository.
 
 ## Install
 
@@ -48,10 +48,14 @@ Workflow:
 spectra onboard
 spectra context --role planner --goal discover
 spectra task --item TASK-001 --task-type feature --goal "Describe intended change"
+spectra inspect <id>
+spectra verify --explain <id>
+spectra verify --gate review
 spectra check
 spectra status
-spectra update
 ```
+
+Application and project lifecycles are separate: `spectra update` updates only the machine's native application, `spectra migrate` explicitly migrates one project, and `spectra uninstall` removes the native application without touching projects.
 
 Utilities:
 
@@ -98,7 +102,7 @@ Agent adapters such as `AGENTS.md` or `CLAUDE.md` are generated when requested w
 
 ## Command effects
 
-The [CLI Reference](https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#command-effects-at-a-glance) explains all 21 public commands with read/write paths, modes, examples and workflow diagrams. An installed copy is available at `.spectra/docs/spectra/cli-reference.md`.
+The [CLI Reference](https://github.com/yunusakin/spectra/blob/main/docs/cli-reference.md#command-effects-at-a-glance) explains all 24 public commands with read/write paths, modes, examples and workflow diagrams. An installed copy is available at `.spectra/docs/spectra/cli-reference.md`.
 
 - `context` refreshes derived summary caches; it is not a zero-write command.
 - `index` writes the repository index; `index --check` only checks freshness.
