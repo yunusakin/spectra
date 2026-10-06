@@ -249,7 +249,7 @@ test("references carry sorted lookup terms, never prose", () => {
   const root = projectWithKnowledge();
   const rule = lookupKnowledgeReference(buildKnowledgeMap(root), "RULE-LOY-001");
   assert.deepEqual(rule.terms, [...rule.terms].sort());
-  assert.ok(rule.terms.includes("expired") && rule.terms.includes("point"));
+  assert.ok(rule.terms.includes("expir") && rule.terms.includes("point"));
   assert.equal(rule.terms.includes("cannot"), false);
   assert.equal(lookupKnowledgeReference(buildKnowledgeMap(root), "alpha#FR-1").terms.includes("alpha"), true);
 });
