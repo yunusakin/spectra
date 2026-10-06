@@ -72,6 +72,18 @@ Use it:
 - before handoff
 - before release approval
 
+## Verification evidence and gates
+
+`spectra verify` can also tie your application's own tests to the requirements they support:
+
+1. A feature spec declares `verifiedBy: [<test-target-id>]` on a requirement, scenario or invariant. Test target IDs (`node:test-target:<path>[:test:<name>]`) come from the Repo Index (`spectra index`).
+2. `spectra verify --test-target <id>` runs that one target's recorded command once, from the target's directory, and records the completed result as local evidence under `.spectra/cache/verification/` (never committed).
+3. Each subject is then `verified` (every declared scope passed), `failed`, `stale` (the code under the target or the declarations changed since the run) or `unverified` (no result yet). A business rule is verified only when every subject it governs is.
+4. `spectra verify --explain <id>` and `spectra inspect <id>` show why a subject has its state; both are read-only.
+5. `spectra verify --gate review|release` reports, read-only, whether the evidence lets that stage proceed (exit 1 when blocked). Implementation is never blocked; review and release are blocked by failed, stale or unexecuted declared scopes. Review can be narrowed with `--changed` or `--base <ref>`; release is project-wide.
+
+Evidence is scoped. A passing test target supports exactly the subjects that declare it; it is not proof that a requirement holds everywhere, and an undeclared requirement stays unverified rather than being assumed covered.
+
 ## Recommended Sequence
 
 ```bash
