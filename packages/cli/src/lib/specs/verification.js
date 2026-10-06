@@ -3,7 +3,7 @@ import path from "node:path";
 import { checkIndexFreshness } from "../index/cache.js";
 import { getCacheRoot, getSddRoot } from "../project-layout.js";
 import { stageOrder } from "./stages.js";
-import { getFeatureBundle, getFeatureDirs } from "./feature-bundles.js";
+import { getConsumerFeatureDirs, getFeatureBundle, getFeatureDirs } from "./feature-bundles.js";
 import { hasRealMarkdownContent, readJsonContract, readMarkdown } from "./primitives.js";
 import { validateSpectraV2 } from "./validation.js";
 import { computeApprovalState } from "./approval-state.js";
@@ -90,11 +90,13 @@ function verifyV2(repoRoot, { scope = "all", item = null, shellStatus = 0 } = {}
     });
   }
 
+  // An unmodified starter feature describes no consumer behavior, so its checklist is not the consumer's to complete.
+  const checklistFeatureDirs = getConsumerFeatureDirs(repoRoot);
   const releaseChecklistWarnings = [];
   if (featureDirs.length === 0) {
     releaseChecklistWarnings.push("no feature release checklists found");
   }
-  for (const featureDir of featureDirs) {
+  for (const featureDir of checklistFeatureDirs) {
     const checklistPath = path.join(featureDir, "release-checklist.md");
     if (!fs.existsSync(checklistPath)) {
       releaseChecklistWarnings.push(`${path.relative(repoRoot, checklistPath)} release checklist is missing`);

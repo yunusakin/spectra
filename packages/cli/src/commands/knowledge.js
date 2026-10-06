@@ -1,6 +1,6 @@
 import { addBusinessRule, promoteBusinessRule, transitionBusinessRule } from "../lib/business-context.js";
 import { parseOptions } from "../lib/options.js";
-import { ok, title } from "../lib/output.js";
+import { ok, title, warn } from "../lib/output.js";
 
 function knowledgeCommand(argv) {
   const { options, positional } = parseOptions(argv, {
@@ -17,12 +17,14 @@ function knowledgeCommand(argv) {
     for (const flag of ["--domain", "--title", "--statement"]) if (!options[flag]) throw new Error(`${flag} is required.`);
     const result = addBusinessRule({ cwd: options["--cwd"] ?? process.cwd(), domain: options["--domain"], title: options["--title"], statement: options["--statement"], status: options["--status"] ?? "unresolved", evidence: options["--evidence"], modules: options["--modules"], confidence: options["--confidence"], verified: Boolean(options["--verified"]) });
     ok(`Business rule recorded: ${result.id} (${result.status})`);
+    for (const line of result.guidance) warn(line);
     return 0;
   }
   if (action === "promote" || action === "resolve") {
     if (!options["--id"]) throw new Error("--id is required.");
     const result = promoteBusinessRule({ cwd: options["--cwd"] ?? process.cwd(), id: options["--id"] });
     ok(`Business rule promoted: ${result.id} (${result.domain})`);
+    for (const line of result.guidance) warn(line);
     return 0;
   }
   if (action === "supersede" || action === "deprecate") {

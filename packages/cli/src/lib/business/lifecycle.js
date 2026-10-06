@@ -48,6 +48,23 @@ function ensureDomain(projectRoot, domain) {
   return normalized;
 }
 
+// A rule can be correct and still undiscoverable: task routing reads the domain's Keywords cell, and traceability links
+// a rule to code through Affected Modules. Spectra never invents either (that would be inferring business truth from
+// code or task text), so it says what is missing and where to put it, and stays quiet once the metadata is sufficient.
+function routingGuidance(projectRoot, domain, { hasModules }) {
+  const { businessIndexPath } = getBusinessPaths(projectRoot);
+  const row = readMarkdownTableContent(fs.readFileSync(businessIndexPath, "utf8")).find((candidate) => normalize(String(candidate.domain ?? "")) === domain) ?? {};
+  const index = "sdd/memory-bank/business/INDEX.md";
+  const guidance = [];
+  if (!String(row.keywords ?? "").trim()) {
+    guidance.push(`Domain "${domain}" has no routing keywords, so task-based routing (spectra route --task) cannot discover its rules. Add comma-separated keywords to its row in ${index}.`);
+  }
+  if (!hasModules && !String(row["related-modules"] ?? "").trim()) {
+    guidance.push(`Domain "${domain}" lists no Affected Modules or Related Modules, so changes to code cannot be connected to its rules. Add Affected Modules to the rule, or Related Modules to its row in ${index}.`);
+  }
+  return guidance;
+}
+
 function addBusinessRule({
   cwd,
   domain,
@@ -79,7 +96,7 @@ function addBusinessRule({
     .filter(Boolean)
     .join("\n");
   fs.appendFileSync(target, `\n## ${id} — ${title}\n\n${statement}\n\n${metadata}\n\n`);
-  return { id, domain: normalizedDomain, status };
+  return { id, domain: normalizedDomain, status, guidance: routingGuidance(projectRoot, normalizedDomain, { hasModules: Boolean(modules) }) };
 }
 
 function promoteBusinessRule({ cwd, id }) {
@@ -93,7 +110,7 @@ function promoteBusinessRule({ cwd, id }) {
     if (!section) continue;
     fs.writeFileSync(unresolved, spliceSection(content, section, "\n"));
     fs.appendFileSync(ruleFile(projectRoot, domain, "active"), `${leadingNewline(section)}${section.raw.replace("Status: unresolved", "Status: active")}\n`);
-    return { id, domain };
+    return { id, domain, guidance: routingGuidance(projectRoot, domain, { hasModules: /^Affected Modules:\s*\S/m.test(section.raw) }) };
   }
   throw new Error(`Unresolved business rule not found: ${id}`);
 }

@@ -4,6 +4,7 @@ import { parseOptions } from "../lib/options.js";
 import { findSpectraRoot } from "../lib/runtime.js";
 import { title } from "../lib/output.js";
 import { assertRefsResolve, getChangedFiles, isGitRepo, toDataRelative } from "../lib/git-diff.js";
+import { countsForImpact } from "../lib/source-boundary.js";
 import { analyzeImpact, inspectSubject } from "../lib/project-intelligence.js";
 import { ContractError, guardJson, parseArguments, versioned } from "../lib/contract.js";
 
@@ -104,7 +105,7 @@ function runInspect(argv) {
   } else {
     if (!isGitRepo(projectRoot)) throw new ContractError("not-a-git-repository", "This is not a git repository, so changed files cannot be determined; name them with --file.");
     assertRefsResolve(projectRoot, [options["--base"], options["--head"]]);
-    files = getChangedFiles(projectRoot, { base: options["--base"], head: options["--head"] });
+    files = getChangedFiles(projectRoot, { base: options["--base"], head: options["--head"] }).filter(countsForImpact);
     scope = options["--base"] ? { kind: "range", base: options["--base"], head: options["--head"] ?? "HEAD" } : { kind: "changed" };
   }
   const result = analyzeImpact(projectRoot, files, scope);

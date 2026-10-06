@@ -1,5 +1,6 @@
 import { collectRuleSections, enumerateFeatureObjects } from "../knowledge/address.js";
 import { readIndex } from "../index/cache.js";
+import { buildTraceability } from "./trace.js";
 import { ruleGoverns, ruleGovernsLines, ruleHasEmptyGoverns } from "../business/rule-sections.js";
 
 const TARGET_SYNTAX = /^[A-Za-z0-9][A-Za-z0-9._-]*#[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -71,4 +72,22 @@ function validateVerificationScopes(projectRoot) {
   return errors;
 }
 
-export { validateGovernsLinks, validateVerificationScopes };
+// Structurally valid canonical knowledge can still be one the review/release gates will refuse. `check` stays a structural
+// verdict, but it names this gap from the very data the gates evaluate (trace.unresolved), so the two cannot describe
+// different problems. Without a Repo Index modules cannot be judged, so nothing is claimed.
+function verificationReadinessWarnings(projectRoot) {
+  let trace;
+  try {
+    if (!readIndex(projectRoot)) return [];
+    trace = buildTraceability(projectRoot);
+  } catch {
+    return [];
+  }
+  const seen = new Set();
+  return trace.unresolved.filter((entry) => entry.type === "affectsModule").flatMap((entry) => {
+    const message = `Verification readiness: ${entry.from} lists Affected Modules entry "${entry.target}" that does not resolve to a Repo Index module; the review and release gates will block until it does (spectra verify --gate review).`;
+    return seen.has(message) ? [] : (seen.add(message), [message]);
+  });
+}
+
+export { validateGovernsLinks, validateVerificationScopes, verificationReadinessWarnings };
