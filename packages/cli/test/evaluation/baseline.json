@@ -11,7 +11,7 @@
     "falsePositivesUnlabeled": 15,
     "precisionLabeledOnly": 0.831,
     "falseNegativesNormal": 7,
-    "candidateTokens": 13060,
+    "candidateTokens": 13120,
     "selectedObjectTokens": 9698,
     "packTokens": 43961,
     "wholeFileBaselineTokens": 51016,
@@ -3341,7 +3341,8 @@
         "node:test-target:packages/cli:test:installer",
         "node:test-target:packages/cli:test:knowledge",
         "node:test-target:packages/cli:test:lifecycle",
-        "node:test-target:packages/cli:test:migration"
+        "node:test-target:packages/cli:test:migration",
+        "spectra-core#INV-3"
       ],
       "excluded": [
         {
@@ -3354,6 +3355,10 @@
         },
         {
           "id": "node:test-target:packages/cli:test:migration",
+          "exclusion": "budget"
+        },
+        {
+          "id": "spectra-core#INV-3",
           "exclusion": "budget"
         }
       ],
@@ -3467,7 +3472,8 @@
         "node:test-target:packages/cli:test:installer": "acceptable",
         "node:test-target:packages/cli:test:knowledge": "acceptable",
         "node:test-target:packages/cli:test:lifecycle": "acceptable",
-        "node:test-target:packages/cli:test:migration": "acceptable"
+        "node:test-target:packages/cli:test:migration": "acceptable",
+        "spectra-core#INV-3": "unlabeled"
       },
       "falsePositives": [],
       "falseNegatives": [],
@@ -3476,12 +3482,12 @@
         "relevantRecall": 1,
         "precision": 1,
         "candidateRecall": 1,
-        "candidatePrecision": 1
+        "candidatePrecision": 0.75
       },
       "tokens": {
-        "candidate": 883,
+        "candidate": 943,
         "included": 703,
-        "excluded": 180,
+        "excluded": 240,
         "total": 1937,
         "routingIndexes": 0,
         "superseded": 1777,

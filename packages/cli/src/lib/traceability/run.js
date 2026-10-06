@@ -61,6 +61,21 @@ function cleanEnv(env) {
   return rest;
 }
 
+// A recorded package script body is what `npm run <script>` would execute, and npm puts node_modules/.bin on PATH
+// for the package and every ancestor directory (nearest first), so hoisted workspace tools resolve too. Without it a
+// script that calls a locally installed tool (tsd, mocha, ...) cannot start (exit 127). Only the child's environment
+// changes, never the process-global one; the inherited PATH follows. With no inherited PATH the system default does.
+const DEFAULT_PATH = "/usr/local/bin:/usr/bin:/bin";
+function withPackageBin(env, cwd) {
+  const key = Object.keys(env).find((name) => name.toUpperCase() === "PATH") ?? "PATH";
+  const bins = [];
+  for (let dir = cwd; ; dir = path.dirname(dir)) {
+    bins.push(path.join(dir, "node_modules", ".bin"));
+    if (path.dirname(dir) === dir) break;
+  }
+  return { ...env, [key]: [...bins, env[key] || DEFAULT_PATH].join(path.delimiter) };
+}
+
 async function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOUT_MS, env = process.env } = {}) {
   const projectRoot = fs.realpathSync(givenRoot);
   let index = null;
@@ -78,7 +93,8 @@ async function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOU
 
   const observed = observeSupport(projectRoot, testTarget);
   const sourcesBefore = observeSources(projectRoot, testTarget);
-  const execution = await execute(command, { cwd: path.join(projectRoot, record.path), env: cleanEnv(env), timeoutMs });
+  const cwd = path.join(projectRoot, record.path);
+  const execution = await execute(command, { cwd, env: withPackageBin(cleanEnv(env), cwd), timeoutMs });
   const output = execution.output.slice(-OUTPUT_TAIL);
   const incomplete = execution.timedOut ? `timed out after ${timeoutMs} ms`
     : execution.error ? `did not complete: ${execution.error.message}`
