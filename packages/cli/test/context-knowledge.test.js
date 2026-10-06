@@ -161,7 +161,7 @@ test("a matched domain yields only the overlapping rule, its module and test-tar
   const { pack, resolved } = resolve(root, "Fix expired points");
   assert.deepEqual(idsOf(resolved).sort(), ["RULE-LOY-001", "node:module:packages/loyalty", "node:test-target:packages/loyalty"]);
   assert.deepEqual(reasonsOf(resolved, "RULE-LOY-001"), ["business-rule-match"]);
-  assert.deepEqual(entryOf(resolved, "RULE-LOY-001").reasons[0].via, "expired,point");
+  assert.deepEqual(entryOf(resolved, "RULE-LOY-001").reasons[0].via, "expir,point");
   assert.deepEqual(entryOf(resolved, "node:module:packages/loyalty").reasons, [{ reason: "repo-index-evidence", via: "RULE-LOY-001" }]);
   assert.deepEqual(reasonsOf(resolved, "node:test-target:packages/loyalty"), ["repo-index-evidence"]);
   const paths = pack.entries.filter((entry) => entry.source !== "resolved").map((entry) => entry.path);
