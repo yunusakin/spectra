@@ -61,6 +61,15 @@ function cleanEnv(env) {
   return rest;
 }
 
+// A recorded package script body is what `npm run <script>` would execute, and npm puts the package's own
+// node_modules/.bin first on PATH. Without it a script that calls a locally installed tool (tsd, mocha, ...) cannot
+// start (exit 127). Only the child's environment changes, never the process-global one; the inherited PATH follows.
+function withPackageBin(env, cwd) {
+  const key = Object.keys(env).find((name) => name.toUpperCase() === "PATH") ?? "PATH";
+  const bin = path.join(cwd, "node_modules", ".bin");
+  return { ...env, [key]: env[key] ? `${bin}${path.delimiter}${env[key]}` : bin };
+}
+
 async function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOUT_MS, env = process.env } = {}) {
   const projectRoot = fs.realpathSync(givenRoot);
   let index = null;
@@ -78,7 +87,8 @@ async function runTestTarget(givenRoot, testTarget, { timeoutMs = DEFAULT_TIMEOU
 
   const observed = observeSupport(projectRoot, testTarget);
   const sourcesBefore = observeSources(projectRoot, testTarget);
-  const execution = await execute(command, { cwd: path.join(projectRoot, record.path), env: cleanEnv(env), timeoutMs });
+  const cwd = path.join(projectRoot, record.path);
+  const execution = await execute(command, { cwd, env: withPackageBin(cleanEnv(env), cwd), timeoutMs });
   const output = execution.output.slice(-OUTPUT_TAIL);
   const incomplete = execution.timedOut ? `timed out after ${timeoutMs} ms`
     : execution.error ? `did not complete: ${execution.error.message}`

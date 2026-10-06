@@ -21,6 +21,10 @@ const REASON_PRIORITY = {
 };
 const reasonPriority = ({ reason }, kind) => (reason === "repo-index-evidence" && kind === "module" ? 3 : REASON_PRIORITY[reason]);
 const FEATURE_KINDS = new Set(["functional-requirement", "non-functional-requirement", "acceptance-scenario"]);
+// Objects a task can match by term overlap. Invariants are feature objects like requirements and scenarios, so they take
+// the same rule; they are not part of FEATURE_KINDS because that set also drives the requirement <-> scenario
+// expansion below, which invariants do not take part in.
+const FEATURE_MATCH_KINDS = new Set([...FEATURE_KINDS, "architectural-invariant"]);
 const MIN_FEATURE_TERM_OVERLAP = 2;
 // A term that many of a domain's rules share cannot tell them apart: it is "common"
 // when it is in at least MIN_COMMON_RULES rules and in more than 1/COMMON_TERM_SHARE
@@ -122,7 +126,7 @@ function resolveKnowledgeEntries({ projectRoot, task, route, changedFiles = [] }
   }
 
   for (const reference of map.references) {
-    const matched = FEATURE_KINDS.has(reference.kind) ? overlap(taskTerms, reference) : [];
+    const matched = FEATURE_MATCH_KINDS.has(reference.kind) ? overlap(taskTerms, reference) : [];
     if (matched.length >= MIN_FEATURE_TERM_OVERLAP) add(reference.id, "feature-match", matched.join(","));
   }
 
