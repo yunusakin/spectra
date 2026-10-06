@@ -72,9 +72,9 @@ test("S3: root scripts mirror the packaged runtime scripts; validate-repo.sh may
 //     adapters omitted it (the adapter unit test only passed because it generated from the source repository's own copy)
 test("S5: adapters generated in a freshly initialized consumer carry the business-memory policy", () => {
   const root = createGitProject();
-  const init = spectra(root, ["init", ".", "--agents", "claude,codex"]);
+  const init = spectra(root, ["init", ".", "--agents", "claude,copilot"]);
   assert.equal(init.status, 0, init.stdout + init.stderr);
-  for (const file of ["CLAUDE.md", "AGENTS.md"]) {
+  for (const file of ["CLAUDE.md", ".github/copilot-instructions.md"]) {
     const content = fs.readFileSync(path.join(root, file), "utf8");
     for (const marker of [/route-first context/i, /unresolved.*default/i, /verified evidence before active/i, /do not infer business truth from code alone/i]) {
       assert.match(content, marker, `${file} is missing ${marker}`);
