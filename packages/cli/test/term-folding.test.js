@@ -71,7 +71,7 @@ test("F1/F4: -ing and -ed fold to one stem; short stems, natural doubles and the
   assert.equal(one("installed"), "install", "a natural double (ll) is kept");
   assert.equal(one("running"), "running", "stem 'run' is below the minimum: not folded, never the malformed 'runn'");
   assert.equal(one("added"), "added", "stem 'add' is below the minimum: not folded, never 'ad'");
-  for (const word of ["being", "thing", "string", "needed"]) assert.equal(one(word), word, `${word} has no useful stem`);
+  for (const word of ["being", "thing", "string", "speed"]) assert.equal(one(word), word, `${word} has no useful stem`);
   assert.notEqual(one("project"), one("projection"));
   assert.notEqual(one("product"), one("production"));
   assert.notEqual(one("general"), one("generation"));
@@ -79,7 +79,7 @@ test("F1/F4: -ing and -ed fold to one stem; short stems, natural doubles and the
 });
 
 test("F3: a folded form never re-admits a STOP term", () => {
-  assert.deepEqual(termsOf("ruled"), [], "'ruled' would fold to the STOP term 'rule'");
+  assert.deepEqual(termsOf("willing"), [], "'willing' would fold to the STOP term 'will'");
   assert.deepEqual(termsOf("rules"), []);
 });
 
