@@ -4,6 +4,7 @@ import { parseOptions } from "../lib/options.js";
 import { findSpectraRoot } from "../lib/runtime.js";
 import { validateSpectraV2 } from "../lib/specs.js";
 import { validateBusinessContext } from "../lib/business-context.js";
+import { verificationReadinessWarnings } from "../lib/traceability/validate.js";
 
 function validateCommand(argv, { commandName = "validate" } = {}) {
   const { options } = parseOptions(argv, {
@@ -66,6 +67,8 @@ function validateCommand(argv, { commandName = "validate" } = {}) {
     }
     return 1;
   }
+
+  for (const warning of verificationReadinessWarnings(repoRoot)) warn(warning);
 
   ok("Validation and policy checks passed");
   return 0;
