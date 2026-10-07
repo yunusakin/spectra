@@ -93,7 +93,7 @@ curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh |
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/yunusakin/spectra/main/install.sh | \
-  SPECTRA_VERSION=v3.1.2 sh
+  SPECTRA_VERSION=v3.1.3 sh
 ```
 
 Version values use the Git tag form, such as `v3.0.9`.
@@ -121,7 +121,7 @@ spectra migrate --yes
 
 ## Versions and Distribution Source
 
-The public application release version (for example, `3.1.2`) identifies the npm package, CLI, native binary and packaged runtime. `install.json` separately records `cliVersion`, `runtimeVersion` and the numeric project `schemaVersion` (currently `3`). Feature, evaluation and governance contracts use `apiVersion: spectra/v2`; that contract format is separate from both the application release and the installation schema. Installer pins use the Git tag spelling, such as `SPECTRA_VERSION=v3.1.2`.
+The public application release version (for example, `3.1.3`) identifies the npm package, CLI, native binary and packaged runtime. `install.json` separately records `cliVersion`, `runtimeVersion` and the numeric project `schemaVersion` (currently `3`). Feature, evaluation and governance contracts use `apiVersion: spectra/v2`; that contract format is separate from both the application release and the installation schema. Installer pins use the Git tag spelling, such as `SPECTRA_VERSION=v3.1.3`.
 
 Native update discovery checks the configured npm registry, then the GitHub Releases API. The installer downloads its script from GitHub and the archive/checksum from GitHub Releases. `SPECTRA_REPO=owner/repository` selects the release repository for archive downloads; it is not a generic mirror or offline-install switch. If company network policy blocks those endpoints, use an approved package distribution path or ask the administrator for an accessible release source.
 
