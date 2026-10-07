@@ -68,7 +68,7 @@ spectra status
 
 The remaining examples use `spectra`. If you used only `npx`, replace `spectra` with `./.spectra/bin/spectra`.
 
-Use `spectra update` for CLI and runtime updates. Existing project memory is preserved.
+`spectra update` updates the Spectra application on your machine (a managed native install; npm users update through npm). It never changes a project: use `spectra migrate --check` and `spectra migrate --yes` to move a project to a newer layout. Existing project memory is preserved either way.
 
 ## 2. Review What Spectra Created
 

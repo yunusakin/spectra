@@ -29,6 +29,9 @@ const STALE = [
   [/`\/spectra\/`/, "3.0.8 Git exclude pattern"],
   [/does not (use|create)[\s\S]*?`\.spectra\/`[\s\S]*?\bcanonical\b/i, "lists .spectra/ as non-canonical (self-contradictory)"],
   [/does not create root-level `\.spectra\/`/i, "lists .spectra/ as a directory Spectra does not create"],
+  [/asks before migrat|refreshes the CLI and project runtime|upgrade the CLI\/runtime or migrate|run update inside a project|Use `spectra update` for CLI and runtime updates/i, "update taught as a project command (it updates the machine application; `migrate` changes a project)"],
+  [/based on this Spectra template/i, "stale 'template repository' identity"],
+  [/release confidence: ready/i, "verify taught as declaring release readiness by itself"],
   [/--profile\s+(?:<lite\|full>|full|lite)|spectra upgrade|spectra verify[^\n]*--profile|\bLite (?:profile|is the default)|\bFull profile\b|keeps profile, Git policy/i, "removed installation profile guidance"]
 ];
 

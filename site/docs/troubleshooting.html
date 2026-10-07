@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Troubleshoot Spectra install, update, doctor, and adapter issues."
+      content="Troubleshoot Spectra install, update, migrate, verification evidence, doctor and adapter issues."
     />
     <title>Troubleshooting Spectra</title>
     <link rel="icon" href="../logo.png" />
@@ -49,13 +49,42 @@
       </section>
 
       <section>
-        <h2>Update does not change anything</h2>
+        <h2>Update does not change my project</h2>
         <pre><code>spectra update
 spectra version
-spectra check</code></pre>
+spectra migrate --check</code></pre>
         <p>
-          <code>Spectra is already up to date.</code> means the installed
-          CLI/runtime does not need migration.
+          That is expected: <code>spectra update</code> updates only the
+          application on your machine (a managed native install; npm users
+          run <code>npm install -g spectra-pack@latest</code>) and never reads
+          or changes a project. "Already up to date" refers to the
+          application. If a project reports that it needs a newer layout,
+          <code>spectra migrate --check</code> lists the steps and
+          <code>spectra migrate --yes</code> applies them to that one project.
+        </p>
+      </section>
+
+      <section>
+        <h2>A command says the project needs migration</h2>
+        <pre><code>spectra migrate --check
+spectra migrate --yes</code></pre>
+        <p>
+          Migration is always explicit and creates a recovery snapshot first.
+          Derived caches (the repo index, Knowledge Map and verification
+          evidence) rebuild on their own and never need a migration.
+        </p>
+      </section>
+
+      <section>
+        <h2>Evidence shows as stale or unverified</h2>
+        <pre><code>spectra verify --explain &lt;id&gt;
+spectra verify --test-target &lt;test-target-id&gt;</code></pre>
+        <p>
+          <code>verified</code> means every declared test target passed;
+          <code>stale</code> means the code or the declarations changed since
+          the recorded run; <code>unverified</code> means no run is recorded.
+          <code>verify --explain</code> names the missing layer, and
+          <code>verify --test-target</code> records a fresh result.
         </p>
       </section>
 

@@ -20,7 +20,7 @@ async page => {
       await page.goto(`${base}docs/${name}.html?verify=${Date.now()}`);
       const sections = name === "commands" ? ["setup", "daily", "maintenance"] : ["workflow"];
       if (name === "commands") {
-        expect(await page.locator(".command-effects-table tbody tr").count() === 21, "Keep all 21 commands");
+        expect(await page.locator(".command-effects-table tbody tr").count() === 24, "Keep all 24 commands");
         expect(await page.locator(".diagram-card").count() === 13, "Missing diagram explanation cards (expected 13)");
         for (const id of ["setup", "daily", "maintenance"]) {
           const section = page.locator(`#${id}`);

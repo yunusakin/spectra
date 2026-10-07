@@ -32,7 +32,7 @@
         <div class="hero-copy">
           <p class="eyebrow">Persistent, governed project intelligence</p>
           <h1 id="hero-title">
-            Context, checks, and release confidence for agentic work.
+            Context, rules and verified evidence for agentic work.
           </h1>
           <p class="lead">
             Agents execute; Spectra resolves, governs, traces, and verifies
@@ -58,16 +58,19 @@
             <strong>spectra</strong>
           </div>
           <pre><code>$ npx spectra-pack@latest adopt .
-$ ./.spectra/bin/spectra index
-  ecosystems: maven
-  modules: 20
-  test-targets: 18
+  OK Adopted Spectra
+  Git mode: local
 
 $ ./.spectra/bin/spectra context --role planner --goal discover
   loaded focused project context
 
-$ ./.spectra/bin/spectra verify
-  release confidence: ready</code></pre>
+$ ./.spectra/bin/spectra inspect node:module:.
+  node:module:. [module, confirmed] .
+  testTargets: node:test-target:.
+  Review gate: allowed [0 rule(s): none]
+
+$ ./.spectra/bin/spectra check
+  OK Validation and policy checks passed</code></pre>
         </aside>
       </section>
 
@@ -80,12 +83,12 @@ $ ./.spectra/bin/spectra verify
           >
         </div>
         <div>
-          <strong>Token-aware</strong>
-          <span>Index and route context before loading it into agents.</span>
+          <strong>Governed and verified</strong>
+          <span>Rules and requirements trace to the tests that verify them. Evidence is scoped, and review and release gates say what blocks.</span>
         </div>
         <div>
           <strong>Agent-neutral</strong>
-          <span>Adapters point back to the same canonical project memory.</span>
+          <span>Adapters for Codex, Claude, Copilot, Cursor, Windsurf and Antigravity point back to the same canonical project knowledge.</span>
         </div>
       </section>
 
@@ -95,7 +98,11 @@ $ ./.spectra/bin/spectra verify
           <h2>Bootstrap once. Keep using the repo-local launcher.</h2>
           <p>
             Use npm for Node projects or the native binary when Node is not
-            available. Both flows install the same project-local Spectra layer.
+            available. Use <code>init</code> for a new project and
+            <code>adopt</code> for an existing one; the default local Git mode
+            keeps <code>.spectra/</code> out of your repository. Installing the
+            application and setting up a project are separate steps, and
+            <code>spectra update</code> never changes a project.
           </p>
         </div>
         <div class="install-grid">
@@ -124,28 +131,28 @@ spectra status</code></pre>
         <ol class="workflow-list">
           <li>
             <span>01</span>
-            <strong>Adopt</strong>
-            <p>Create the project-local Spectra layer.</p>
+            <strong>Init / Adopt</strong>
+            <p>Create the project-local layer; adoption records repository evidence, not business truth.</p>
           </li>
           <li>
             <span>02</span>
-            <strong>Index</strong>
-            <p>Map modules, dependencies, and test targets.</p>
+            <strong>Onboard</strong>
+            <p>Capture the project brief from your interactive answers and optional repo index.</p>
           </li>
           <li>
             <span>03</span>
-            <strong>Onboard</strong>
-            <p>Draft the project brief from your interactive answers and optional repo index.</p>
+            <strong>Context</strong>
+            <p>Load only the rules and modules a task touches, within a token budget.</p>
           </li>
           <li>
             <span>04</span>
-            <strong>Context</strong>
-            <p>Load the smallest useful role and goal context.</p>
+            <strong>Inspect</strong>
+            <p>Ask what governs a subject, or what changed files concern.</p>
           </li>
           <li>
             <span>05</span>
             <strong>Verify</strong>
-            <p>Run checks and aggregate release confidence.</p>
+            <p>Record test evidence, then gate review and release.</p>
           </li>
         </ol>
       </section>

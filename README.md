@@ -67,12 +67,12 @@ The generated guidance tells an agent to start from `spectra context`, look up t
 ./.spectra/bin/spectra check                          # validate the Spectra layer
 ./.spectra/bin/spectra context --role planner --goal discover
 ./.spectra/bin/spectra inspect <id>                   # what governs a rule/requirement/module, and why
-./.spectra/bin/spectra verify --explain <id>          # why it is verified, failed, stale or unverified
+./.spectra/bin/spectra verify --explain <id>          # why a rule or requirement is verified, failed, stale or unverified
 ./.spectra/bin/spectra verify --gate review           # does the evidence let review proceed?
 ./.spectra/bin/spectra status                         # recent changes and the suggested next step
 ```
 
-`<id>` is a stable ID such as `RULE-ABC-001`, `my-feature#FR-1` or `node:module:packages/api`. For a task, `context --route-task "<task>"` selects only the rules, requirements and modules that task touches. The [CLI reference](docs/cli-reference.md) lists every command and option.
+`inspect` takes any stable ID: a business rule (`RULE-ABC-001`), a requirement, scenario or invariant (`my-feature#FR-1`), a module (`node:module:packages/api`) or a test target. `verify --explain` takes a rule, requirement, scenario or invariant ID. For a task, `context --route-task "<task>"` selects only the rules, requirements and modules that task touches. The [CLI reference](docs/cli-reference.md) lists every command and option.
 
 ## Core concepts
 
