@@ -12,6 +12,8 @@ Coding agents forget between sessions. They also cannot tell which rules, requir
 
 Spectra is a local command-line tool. It is not an agent, a hosted service, a code generator or a replacement for your test runner and documentation. It owns `.spectra/`. Your application code, company documentation and repository layout stay yours. Every installation has the same features. There are no Lite or Full profiles.
 
+Spectra supports spec-driven development. Feature specifications have stable requirement IDs and staged approvals. Tests and release gates trace back to them.
+
 ## Get started
 
 Install Spectra one time for each machine (or use `npx`). Then do `init` or `adopt` one time for each project.
