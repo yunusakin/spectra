@@ -24,8 +24,17 @@ and links to those explanations. No browser-side renderer or JavaScript is neede
   White command cards have purple borders and monospace command headings; results
   use paper-teal, conditions use amber, and inputs use paper-blue. Rounded corners,
   subtle card shadows and group headings match the website documentation panels.
-- Condition nodes use compact rounded rectangles with explicit CONDITION / CHOICE
-  labels. This avoids the large empty corners required by diamond shapes.
+- Condition nodes use compact rounded rectangles with a dashed border and a
+  question-style heading, so they are distinguishable without color. This avoids the
+  large empty corners required by diamond shapes. Supporting (non-workflow) commands
+  use a grey border.
+- Diagram labels are a short heading plus a short function (commands in monospace,
+  everything else in the UI font). Exact side effects live in the HTML explanation
+  cards, not in the SVG. Edge labels stay at one to three words.
+- `theme.json` uses Mermaid's `look: neo` with `curve: rounded`, which both work in
+  the pinned 11.12.0; there is no reason to upgrade Mermaid or use ELK for these diagrams.
+  Each diagram must stay within about 1,160 units of `viewBox` width so the
+  16px minimum still fits the 1,036px desktop container (800px on the Workflow page).
 - Diagrams use their full height in the page, without a nested vertical scrollbar.
   Desktop diagrams fit the content width. Narrow screens retain horizontal
   scrolling when needed to keep labels at least 16px; left/right arrow keys and
