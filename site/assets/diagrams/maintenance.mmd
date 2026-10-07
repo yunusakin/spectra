@@ -1,17 +1,17 @@
 flowchart TB
-  accTitle: Spectra maintenance: separate update and doctor paths with preservation boundaries
-  accDescr: Update checks an installed or recognized legacy project and refreshes only when needed and confirmed; a newer CLI can change the installation outside the project. Doctor reports health without writes; doctor --fix refreshes generated project assets and repairs missing adapters only when safe. Preserved information is a boundary, not a subsequent action. Explicit adapter regeneration is a separate user command. Groups M1 to M4 have matching HTML explanations.
-  subgraph MAINT_UPDATE["M1 · Update installed versions and layout"]
+  accTitle: Spectra maintenance: application update, explicit project migration and doctor, with preservation boundaries
+  accDescr: Update changes only the application installed on the machine and never reads or writes a project; migrate is a separate, explicit command that checks and then migrates one project. Uninstall is also machine-only. Doctor reports health without writes; doctor --fix refreshes generated project assets and repairs missing adapters only when safe. Preserved information is a boundary, not a subsequent action. Explicit adapter regeneration is a separate user command. Groups M1 to M4 have matching HTML explanations.
+  subgraph MAINT_UPDATE["M1 · Update the application, migrate a project"]
     direction TB
-    UPDATE["COMMAND · spectra update<br/>Read published version and<br/>project metadata"]
-    NEED["CONDITION · Change needed?<br/>CLI, runtime,<br/>schema or layout"]
-    CHOICE["RESULT / CHOICE<br/>Already current: no project<br/>refresh<br/>Change needed: ask<br/>confirmation<br/>Declined: project unchanged<br/>--yes skips the prompt, not<br/>validation"]
-    REFRESH["RESULT · When needed and<br/>confirmed<br/>Refresh runtime, owned<br/>guides, launcher<br/>and install metadata"]
-    CLI["CONDITIONAL RESULT<br/>Newer CLI: update installation<br/>outside the project<br/>Legacy layout: migrate<br/>recognized<br/>Spectra paths into .spectra/"]
-    UPDATE -->|compares versions and layout| NEED
-    NEED -->|report result and request consent if needed| CHOICE
-    CHOICE -.->|change needed and confirmed| REFRESH
-    REFRESH -.->|only when each condition applies| CLI
+    UPDATE["COMMAND · spectra update<br/>Read published version and<br/>installation provenance"]
+    NATIVE["RESULT · Managed native install<br/>Updates the machine runtime<br/>and command only<br/>No project file is read or written"]
+    OTHER["RESULT · Other installs<br/>Prints npm or npx guidance;<br/>nothing is replaced silently"]
+    CHECK["COMMAND · spectra migrate --check<br/>Report required project steps<br/>No project writes"]
+    APPLY["COMMAND · spectra migrate --yes<br/>Explicitly migrate this one project<br/>after a recovery snapshot"]
+    UPDATE -->|managed native| NATIVE
+    UPDATE -.->|npm, npx or fallback| OTHER
+    NATIVE ~~~ CHECK
+    CHECK -->|only when you choose to migrate| APPLY
   end
   subgraph MAINT_DOCTOR["M2 · Inspect or repair local health"]
     direction TB
@@ -37,7 +37,7 @@ flowchart TB
   subgraph MAINT_ADAPTERS["M4 · Explicit adapter regeneration"]
     direction TB
     ADAPTERS["SEPARATE USER COMMAND ·<br/>spectra adapters<br/>Regenerate Spectra tool<br/>instructions deliberately"]
-    HEALTHY["CONDITION · Healthy existing<br/>adapters<br/>Update does not<br/>automatically<br/>regenerate them"]
+    HEALTHY["CONDITION · Healthy existing<br/>adapters<br/>Update does not<br/>regenerate them"]
   end
   %% Invisible links control layout only; these groups are not sequential steps.
   MAINT_UPDATE ~~~ MAINT_DOCTOR
@@ -47,7 +47,7 @@ flowchart TB
   classDef result fill:#effcf8,stroke:#007f68,color:#121827,stroke-width:1.5px;
   classDef condition fill:#fff5df,stroke:#8a5d00,color:#121827,stroke-width:1.5px;
   classDef neutral fill:#f2f8ff,stroke:#64748b,color:#121827;
-  class UPDATE,DOCTOR,FIX,ADAPTERS command;
-  class CHOICE,REFRESH,CLI,REPORT,REPAIR,ADAPTER_REPAIR,MANUAL result;
-  class NEED,SAFE,HEALTHY condition;
+  class UPDATE,CHECK,APPLY,DOCTOR,FIX,ADAPTERS command;
+  class NATIVE,OTHER,REPORT,REPAIR,ADAPTER_REPAIR,MANUAL result;
+  class SAFE,HEALTHY condition;
   class KEEP neutral;

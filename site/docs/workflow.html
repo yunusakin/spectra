@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Recommended Spectra workflow for project-local AI-assisted development."
+      content="Recommended Spectra workflow: context, inspect, verification evidence and review/release gates."
     />
     <title>Spectra Workflow</title>
     <link rel="icon" href="../logo.png" />
@@ -36,17 +36,33 @@
 
       <section id="workflow" aria-labelledby="workflow-title">
         <h2 id="workflow-title">Project workflow</h2>
-        <pre><code>spectra index
-spectra onboard
-spectra context --role planner --goal discover
+        <pre><code>spectra onboard                                   # capture project intent
+spectra context --role planner --goal discover    # bounded context for planning
 spectra task --item TASK-001 --task-type feature --goal "Describe the change"
-spectra context --role implementer --goal implement
+spectra context --role implementer --goal implement --route-task "Describe the change"
+spectra inspect &lt;id&gt;                              # what governs this subject, and why
+# ... read and edit the code ...
+spectra verify --test-target &lt;test-target-id&gt;     # run one test target, record evidence
+spectra verify --explain &lt;id&gt;                     # verified, failed, stale or unverified?
+spectra verify --gate review --changed            # may review proceed?
 spectra check
 spectra status</code></pre>
         <p>
-          Use approvals, evals, and release checks as needed for each project.
-          <code>spectra update</code> refreshes the CLI and project runtime
-          while preserving existing project memory.
+          Agents execute; Spectra resolves, governs, traces and verifies
+          project knowledge. <code>context</code> selects only the rules,
+          requirements and modules a task touches, within a token budget, and
+          <code>inspect --changed</code> reports what a set of changed files
+          concerns. Use approvals, evals and the release gate
+          (<code>verify --gate release</code>) as needed for each project.
+        </p>
+        <p>
+          <code>verify</code> without flags aggregates release-readiness
+          signals; it does not run your application's tests. Test evidence is
+          scoped: a passing test target supports exactly the requirements that
+          declare it with <code>verifiedBy</code>. Updating or migrating is a
+          separate lifecycle: <code>spectra update</code> only updates the
+          application on your machine, and <code>spectra migrate</code>
+          changes a project only when you ask.
         </p>
         <p><code>context</code> refreshes summary caches; <code>task</code> replaces the implementation brief. <code>eval</code> writes latest reports, and <code>verify</code> also recomputes approval validity and runs release evals. Configured command-mode evals may execute application commands. See <a href="./commands.html">command effects</a> for exact paths and modes.</p>
         <figure class="command-flow">

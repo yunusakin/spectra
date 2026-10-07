@@ -94,5 +94,7 @@ eight page/viewport or no-JavaScript results, and no browser errors. CLI errors 
 printed into the result file and return a nonzero status. Artifacts are local review
 evidence; do not publish them as website assets.
 
+Run `tools/verify-website-links.js` the same way (`--filename=tools/verify-website-links.js` after opening `http://127.0.0.1:8766/site/`) to check every internal link, anchor, image and page overflow at 1440 and 390 px. Both tools count the commands table, so update them when a public command is added.
+
 Also run `npm test`, `npm run check`, the version-parity check and branch policy
 check. The website change must not modify CLI behavior, installed guides or versions.

@@ -1,10 +1,10 @@
 # Multi-Project Setup
 
-This repository is designed to be a stable Spectra workspace for a single project. If you need to manage multiple projects, use one of the patterns below.
+A Spectra project is one repository with one `.spectra/` directory. If you need to manage multiple projects, use one of the patterns below.
 
 ## Recommended: One Repo Per Project
 
-- Create a new repo per project based on this Spectra template.
+- Create a repo per project and run `spectra init` (new) or `spectra adopt` (existing) in each.
 - Treat the repo root as the agent working directory.
 - Keep each project’s Spectra state under its own `.spectra/` directory and leave code in the project’s normal source layout.
 
