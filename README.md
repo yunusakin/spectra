@@ -6,20 +6,22 @@
 
 Persistent, governed project intelligence for interchangeable coding agents.
 
-Coding agents forget between sessions and cannot tell which of your project's rules, requirements and decisions are authoritative. Spectra keeps that knowledge in your repository in a form both people and agents can use: what the project does, which rules and requirements govern it, which tests are supposed to verify them, and what has actually been verified.
+Coding agents forget between sessions. They also cannot tell which rules, requirements and decisions of your project are authoritative. Spectra keeps this knowledge in your repository. People and agents can both use it. It records what the project does, which rules and requirements govern it, which tests must verify them, and what the tests have verified.
 
-**Agents execute. Spectra understands, resolves, governs, traces and verifies project knowledge.** An agent (or you) asks Spectra for the small slice of project knowledge a task needs, still reads and edits the real code, and later asks Spectra whether the evidence supports the change.
+**Agents execute. Spectra understands, resolves, governs, traces and verifies project knowledge.** An agent (or you) asks Spectra for the small part of the project knowledge that a task needs. The agent still reads and edits the real code. Later, the agent asks Spectra if the evidence supports the change.
 
-Spectra is a local command-line tool. It is not an agent, a hosted service, a code generator or a replacement for your test runner and documentation. It owns `.spectra/`; your application code, company documentation and repository layout remain yours. Every installation includes the same features; there are no Lite/Full profiles to select.
+Spectra is a local command-line tool. It is not an agent, a hosted service, a code generator or a replacement for your test runner and documentation. It owns `.spectra/`. Your application code, company documentation and repository layout stay yours. Every installation has the same features. There are no Lite or Full profiles.
+
+Spectra supports spec-driven development. Feature specifications have stable requirement IDs and staged approvals. Tests and release gates trace back to them.
 
 ## Get started
 
-Install Spectra once per machine (or just use `npx`), then run `init` or `adopt` once per project.
+Install Spectra one time for each machine (or use `npx`). Then do `init` or `adopt` one time for each project.
 
 | Your situation | Command | What it does |
 | --- | --- | --- |
 | New project | `spectra init .` | Creates the Spectra layer with generic starter files for you to fill in. |
-| Existing project | `spectra adopt .` | Installs the same layer and records **repository evidence** (a deterministic index of modules, manifests and tests, plus discovery notes). It never executes your tests or invents business rules: what the code does is evidence, not business truth, until you review and promote it. |
+| Existing project | `spectra adopt .` | Installs the same layer and records **repository evidence** (a deterministic index of modules, manifests and tests, plus discovery notes). It never runs your tests. It never invents business rules. What the code does is evidence, not business truth, until you review and promote it. |
 
 ### With Node.js and npm
 
@@ -40,11 +42,11 @@ cd my-project
 spectra adopt .          # or: init .
 ```
 
-See [Native Install](docs/native-install.md) for permanent PATH setup and troubleshooting. The examples below use the project-local launcher; with a native install you can write `spectra` instead.
+See [Native Install](docs/native-install.md) for permanent PATH setup and troubleshooting. The examples below use the project-local launcher. With a native install you can write `spectra` instead.
 
 ### Local or shared Git mode
 
-The default **local** mode keeps `.spectra/` private by recording it in `.git/info/exclude`; it does not edit `.gitignore` and nothing Spectra writes reaches your company repository unless you add it. Choose **shared** when your team wants to review and commit Spectra state (derived caches and evidence stay uncommitted):
+The default **local** mode keeps `.spectra/` private. It adds `.spectra/` to `.git/info/exclude` and does not change `.gitignore`. Nothing that Spectra writes goes into your company repository unless you add it. Use **shared** mode when your team wants to review and commit the Spectra state. Derived caches and evidence stay uncommitted.
 
 ```bash
 npx spectra-pack@latest adopt . --git-mode shared
@@ -52,13 +54,19 @@ npx spectra-pack@latest adopt . --git-mode shared
 
 ### Agent adapters
 
-Pass the agents you use and Spectra generates small guidance files that point back to `.spectra/`: `codex` (`AGENTS.md`), `claude` (`CLAUDE.md`), `copilot`, `cursor`, `windsurf` and `antigravity`.
+Pass the agents you use. Spectra generates small guidance files that point back to `.spectra/`. The tools are `codex` (`AGENTS.md`), `claude` (`CLAUDE.md`), `copilot`, `cursor`, `windsurf` and `antigravity`.
 
 ```bash
 npx spectra-pack@latest init . --agents codex,claude
 ```
 
-The generated guidance tells an agent to start from `spectra context`, look up the exact subject it is about to change with `spectra inspect`, and check `spectra verify --gate` before handing work off. Agents still inspect and edit the actual code; Spectra supplies bounded, explainable project knowledge, not a substitute for reading it.
+The generated guidance tells an agent to do these steps:
+
+1. Start with `spectra context`.
+2. Use `spectra inspect` to look up the subject that it will change.
+3. Run `spectra verify --gate` before it hands off the work.
+
+Agents still read and edit the actual code. Spectra gives limited project knowledge that you can explain. It does not replace the code.
 
 ## Your first five minutes
 
@@ -72,7 +80,7 @@ The generated guidance tells an agent to start from `spectra context`, look up t
 ./.spectra/bin/spectra status                         # recent changes and the suggested next step
 ```
 
-`inspect` takes any stable ID: a business rule (`RULE-ABC-001`), a requirement, scenario or invariant (`my-feature#FR-1`), a module (`node:module:packages/api`) or a test target. `verify --explain` takes a rule, requirement, scenario or invariant ID. For a task, `context --route-task "<task>"` selects only the rules, requirements and modules that task touches. The [CLI reference](docs/cli-reference.md) lists every command and option.
+`inspect` accepts one stable ID of these types: a business rule (`RULE-ABC-001`), a requirement, scenario or invariant (`my-feature#FR-1`), a module (`node:module:packages/api`) or a test target. `verify --explain` accepts a rule, requirement, scenario or invariant ID. For a task, `context --route-task "<task>"` selects only the rules, requirements and modules that task touches. The [CLI reference](docs/cli-reference.md) lists every command and option.
 
 ## Core concepts
 
@@ -83,18 +91,18 @@ The generated guidance tells an agent to start from `spectra context`, look up t
 | `Governs` | Optional rule metadata linking a rule to the requirement/scenario/invariant IDs it governs. |
 | `verifiedBy` | Optional feature-spec metadata naming the test targets that verify a subject. |
 | Repo Index | Deterministic, disposable evidence about the repository (modules, manifests, test targets): `cache/index/repo-index.json`. |
-| Knowledge Map | Derived lookup of every addressable object; rebuilt automatically from canonical files. |
-| Test target | A test command found in the Repo Index; `verify --test-target <id>` runs one and records the result. |
+| Knowledge Map | Derived lookup of every addressable object. Rebuilt automatically from canonical files. |
+| Test target | A test command from the Repo Index. `verify --test-target <id>` runs one and records the result. |
 | Verification evidence | The recorded outcome of a test target, kept locally and never committed. |
-| `verified` / `failed` / `stale` / `unverified` | A subject's state: its declared scopes all passed, one failed, the evidence is out of date because the code or declarations changed, or no scope has a result. |
-| Review / release gate | `verify --gate review\|release`: blocks only when a declared scope failed, is stale or has no result. Evidence is scoped: a passing test target supports the subjects that declare it, it does not prove a requirement true everywhere. |
+| `verified` / `failed` / `stale` / `unverified` | The state of a subject. `verified`: all declared scopes passed. `failed`: one scope failed. `stale`: the code or declarations changed after the evidence. `unverified`: no scope has a result. |
+| Review / release gate | `verify --gate review\|release`. It blocks only if a declared scope failed, is stale or has no result. Evidence has a scope. A passing test target supports the subjects that declare it. It does not prove that a requirement is true everywhere. |
 | Project Intelligence | The combined capability: resolve, trace and verify project knowledge on demand through `context`, `inspect` and `verify`. |
 
-Canonical knowledge (rules, feature specs, approvals) lives under `.spectra/sdd/`. Caches, the Repo Index, the Knowledge Map and verification evidence under `.spectra/cache/` are derived and can always be rebuilt.
+Canonical knowledge (rules, feature specs, approvals) lives under `.spectra/sdd/`. Spectra derives the caches, the Repo Index, the Knowledge Map and the verification evidence in `.spectra/cache/`. It can always rebuild them.
 
 ## What Spectra adds to a project
 
-Spectra keeps its runtime, project context, feature specifications and approvals under `.spectra/`. It does not use root-level `app/`, `docs/`, `sdd/`, `spectra/` or `.github/` as its data directories. If you request agent adapters, the small adapter files are written to the paths each tool requires.
+Spectra keeps its runtime, project context, feature specifications and approvals under `.spectra/`. It does not use root-level `app/`, `docs/`, `sdd/`, `spectra/` or `.github/` as its data directories. If you request agent adapters, Spectra writes the small adapter files to the paths that each tool requires.
 
 ```text
 acme/
@@ -125,40 +133,40 @@ acme/
 ./.spectra/bin/spectra check
 ```
 
-`spectra verify` without flags aggregates release-readiness signals and does not run your application's own test command; `verify --test-target` is the explicit way to run one. The staged approval and release process is described in the [Workflow guide](docs/workflow.md).
+`spectra verify` without flags collects the release-readiness signals. It does not run the test command of your application. Use `verify --test-target` to run one test target. The [Workflow guide](docs/workflow.md) describes the staged approval and release process.
 
 ## Updating, migrating and uninstalling
 
 These are three separate lifecycles:
 
-- **`spectra update`** updates the *application* on a machine (a verified native install). It never inspects or changes a project. Global npm users update with `npm install -g spectra-pack@latest`; npx users run `npx spectra-pack@latest` for a newer CLI.
-- **`spectra migrate`** advances one *project's* layout/schema, only when you ask. Nothing migrates silently. `migrate --check` reports the required steps without writing; `migrate --yes` applies them.
+- **`spectra update`** updates the *application* on a machine (a verified native install). It never reads or changes a project. Global npm users do `npm install -g spectra-pack@latest`. npx users do `npx spectra-pack@latest` to get a newer CLI.
+- **`spectra migrate`** moves the layout and schema of one *project* to a newer version. It does this only when you ask. `migrate --check` shows the required steps and writes nothing. `migrate --yes` does the steps.
 - **`spectra uninstall`** removes the verified native application files and leaves every project unchanged.
 
-Derived caches (such as the Knowledge Map) rebuild on their own after an update and never require `migrate`. See [Getting Started](docs/getting-started.md) for both update paths.
+Derived caches (for example, the Knowledge Map) rebuild automatically after an update. They never need `migrate`. See [Getting Started](docs/getting-started.md) for both update paths.
 
 ## Common commands
 
 | Command | Purpose | Project effect |
 | --- | --- | --- |
-| [`spectra init`](docs/cli-reference.md#init) | Set up a new project | Creates the Spectra layer; local mode updates Git info/exclude; optional adapters use tool-required paths. |
+| [`spectra init`](docs/cli-reference.md#init) | Set up a new project | Creates the Spectra layer. Local mode updates Git info/exclude. Optional adapters use tool-required paths. |
 | [`spectra adopt`](docs/cli-reference.md#adopt) | Add Spectra to an existing project | Installs the layer and writes repository index/discovery evidence. |
-| [`spectra onboard`](docs/cli-reference.md#onboard) | Capture project intent | Interactive runs write projectbrief.md; non-interactive runs only report context. |
-| [`spectra index`](docs/cli-reference.md#index) | Refresh repository evidence | Replaces cache/index/repo-index.json; --check does not write project files. |
+| [`spectra onboard`](docs/cli-reference.md#onboard) | Capture project intent | Interactive runs write projectbrief.md. Non-interactive runs only report context. |
+| [`spectra index`](docs/cli-reference.md#index) | Refresh repository evidence | Replaces cache/index/repo-index.json. `--check` does not write project files. |
 | [`spectra context`](docs/cli-reference.md#context) | Load focused context | Reads canonical memory and refreshes derived cache/context summaries. |
-| [`spectra route`](docs/cli-reference.md#route) | Select relevant modules/domains | Reads knowledge indexes; does not write project files. |
-| [`spectra inspect`](docs/cli-reference.md#inspect) | Explain one subject or the impact of changed files | Read-only; never runs tests or touches approvals. |
+| [`spectra route`](docs/cli-reference.md#route) | Select relevant modules/domains | Reads knowledge indexes. Does not write project files. |
+| [`spectra inspect`](docs/cli-reference.md#inspect) | Explain one subject or the impact of changed files | Read-only. Never runs tests or touches approvals. |
 | [`spectra task`](docs/cli-reference.md#task) | Record implementation intent | Replaces memory-bank/core/implementation-brief.md. |
-| [`spectra check`](docs/cli-reference.md#check) | Validate the Spectra layer | Reports structure/policy/contract errors; no persistent project writes. |
-| [`spectra eval`](docs/cli-reference.md#eval) / [`verify`](docs/cli-reference.md#verify) | Evaluate contracts / assess readiness and evidence | Writes eval reports; `verify` also refreshes approval validity; `--test-target` records local evidence; `--explain` and `--gate` are read-only. Configured command-mode evals can execute application commands. |
+| [`spectra check`](docs/cli-reference.md#check) | Validate the Spectra layer | Reports structure/policy/contract errors. No persistent project writes. |
+| [`spectra eval`](docs/cli-reference.md#eval) / [`verify`](docs/cli-reference.md#verify) | Evaluate contracts / assess readiness and evidence | Writes eval reports. `verify` also refreshes the approval validity. `--test-target` records local evidence. `--explain` and `--gate` only read. Command-mode evals can run application commands. |
 | [`spectra status`](docs/cli-reference.md#status) | Resume work | Recomputes approval validity and syncs approval status into project memory. |
-| [`spectra doctor`](docs/cli-reference.md#doctor) | Inspect or repair health | Read-only by default; --fix refreshes safe generated files and preserves user-owned documents/adapters. |
-| [`spectra update`](docs/cli-reference.md#update) | Update application software | Updates a verified native machine installation; it does not inspect or migrate projects. |
-| [`spectra migrate`](docs/cli-reference.md#migrate) | Migrate one project | `--check` is read-only; `--yes` explicitly applies supported layout/schema steps to that project. |
+| [`spectra doctor`](docs/cli-reference.md#doctor) | Inspect or repair health | Read-only by default. `--fix` refreshes safe generated files and keeps user-owned documents and adapters. |
+| [`spectra update`](docs/cli-reference.md#update) | Update application software | Updates a verified native machine installation. It does not inspect or migrate projects. |
+| [`spectra migrate`](docs/cli-reference.md#migrate) | Migrate one project | `--check` only reads. `--yes` applies the supported layout and schema steps to that project. |
 | [`spectra uninstall`](docs/cli-reference.md#uninstall) | Remove the native application | Removes verified machine-owned native files and leaves every project unchanged. |
-| [`spectra help`](docs/cli-reference.md#help) | Browse commands/options | Prints help; does not write project files. |
+| [`spectra help`](docs/cli-reference.md#help) | Browse commands/options | Prints help. Does not write project files. |
 
-Paths in this table are beneath `.spectra/` unless a Git or adapter path is stated. Advanced commands (`approve`, `eval`, `diff`, `quick`, `skills`, `adapters`) appear under `spectra help advanced`. See the [complete command effects reference](docs/cli-reference.md#command-effects-at-a-glance) for all **24 public commands**, prerequisites, options, before/after file trees and workflow diagrams.
+Paths in this table are in `.spectra/`, unless the table gives a Git or adapter path. The advanced commands (`approve`, `eval`, `diff`, `quick`, `skills`, `adapters`) are in `spectra help advanced`. See the [complete command effects reference](docs/cli-reference.md#command-effects-at-a-glance) for all **24 public commands**, prerequisites, options, before/after file trees and workflow diagrams.
 
 ## Documentation
 
@@ -182,7 +190,7 @@ npm test
 npm run check
 ```
 
-Spectra's source is organized into `packages/cli/`, `packages/core/`, and `packages/templates/`. The `sdd/` directory in this repository is Spectra's own project knowledge (it describes Spectra itself); the starter files other projects receive come from `profiles/full/` and `packages/core/assets/runtime/`.
+The Spectra source has three packages: `packages/cli/`, `packages/core/`, and `packages/templates/`. The `sdd/` directory in this repository is the project knowledge of Spectra itself. The starter files for other projects come from `profiles/full/` and `packages/core/assets/runtime/`.
 
 ## Releases and license
 

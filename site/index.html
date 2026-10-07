@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Spectra is a project-local CLI that gives coding agents persistent, governed project intelligence: context, rules, traceability, verification evidence, and release gates."
+      content="Spectra is a project-local CLI that gives coding agents persistent, governed project intelligence: spec-driven context, rules, traceability, verification evidence, and release gates."
     />
     <title>Spectra - Governed project intelligence for coding agents</title>
     <link rel="icon" href="./logo.png" />
@@ -35,8 +35,7 @@
             Context, rules and verified evidence for agentic work.
           </h1>
           <p class="lead">
-            Agents execute; Spectra resolves, governs, traces, and verifies
-            project knowledge. One repository-local source of truth for
+            Agents execute. Spectra resolves, governs, traces, and verifies project knowledge. One repository-local source of truth for
             business rules, requirements, task intent, test evidence, and
             release readiness, usable by any coding agent.
           </p>
@@ -84,7 +83,7 @@ $ ./.spectra/bin/spectra check
         </div>
         <div>
           <strong>Governed and verified</strong>
-          <span>Rules and requirements trace to the tests that verify them. Evidence is scoped, and review and release gates say what blocks.</span>
+          <span>Rules and requirements trace to the tests that verify them. Evidence has a scope. The review and release gates show what blocks.</span>
         </div>
         <div>
           <strong>Agent-neutral</strong>
@@ -99,10 +98,7 @@ $ ./.spectra/bin/spectra check
           <p>
             Use npm for Node projects or the native binary when Node is not
             available. Use <code>init</code> for a new project and
-            <code>adopt</code> for an existing one; the default local Git mode
-            keeps <code>.spectra/</code> out of your repository. Installing the
-            application and setting up a project are separate steps, and
-            <code>spectra update</code> never changes a project.
+            <code>adopt</code> for an existing one. The default local Git mode keeps <code>.spectra/</code> out of your repository. Installing the application and setting up a project are two separate steps. <code>spectra update</code> never changes a project.
           </p>
         </div>
         <div class="install-grid">
@@ -132,7 +128,7 @@ spectra status</code></pre>
           <li>
             <span>01</span>
             <strong>Init / Adopt</strong>
-            <p>Create the project-local layer; adoption records repository evidence, not business truth.</p>
+            <p>Create the project-local layer. Adoption records repository evidence, not business truth.</p>
           </li>
           <li>
             <span>02</span>
@@ -177,7 +173,7 @@ spectra status</code></pre>
           </article>
           <article>
             <code>spectra inspect</code
-            ><span>Explain what governs a subject and why it is verified.</span>
+            ><span>Show what governs a subject and why it is verified.</span>
           </article>
           <article>
             <code>spectra check</code

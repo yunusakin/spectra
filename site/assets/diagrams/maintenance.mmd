@@ -3,41 +3,47 @@ flowchart TB
   accDescr: Update changes only the application installed on the machine and never reads or writes a project; migrate is a separate, explicit command that checks and then migrates one project. Uninstall is also machine-only. Doctor reports health without writes; doctor --fix refreshes generated project assets and repairs missing adapters only when safe. Preserved information is a boundary, not a subsequent action. Explicit adapter regeneration is a separate user command. Groups M1 to M4 have matching HTML explanations.
   subgraph MAINT_UPDATE["M1 · Update the application, migrate a project"]
     direction TB
-    UPDATE["COMMAND · spectra update<br/>Read published version and<br/>installation provenance"]
-    NATIVE["RESULT · Managed native install<br/>Updates the machine runtime<br/>and command only<br/>No project file is read or written"]
-    OTHER["RESULT · Other installs<br/>Prints npm or npx guidance;<br/>nothing is replaced silently"]
-    CHECK["COMMAND · spectra migrate --check<br/>Report required project steps<br/>No project writes"]
-    APPLY["COMMAND · spectra migrate --yes<br/>Explicitly migrate this one project<br/>after a recovery snapshot"]
-    UPDATE -->|managed native| NATIVE
-    UPDATE -.->|npm, npx or fallback| OTHER
-    NATIVE ~~~ CHECK
-    CHECK -->|only when you choose to migrate| APPLY
+    subgraph MACHINE["Machine lifecycle"]
+      direction LR
+      UPDATE["spectra update<br/>Update this machine"]
+      NATIVE["Managed native<br/>Runtime only"]
+      OTHER["Other installs<br/>Guidance only"]
+      UNINSTALL["spectra uninstall<br/>Remove native app"]
+      UPDATE -->|managed native| NATIVE
+      UPDATE -.->|npm, npx| OTHER
+      NATIVE ~~~ UNINSTALL
+    end
+    NOTE["update ≠ migrate<br/>Update never touches a project"]
+    subgraph PROJECT["Project lifecycle"]
+      direction LR
+      CHECK["migrate --check<br/>Check migration"]
+      APPLY["migrate --yes<br/>Migrate this project"]
+      CHECK -->|explicit migration| APPLY
+    end
+    MACHINE ~~~ NOTE
+    NOTE ~~~ PROJECT
   end
   subgraph MAINT_DOCTOR["M2 · Inspect or repair local health"]
-    direction TB
-    DOCTOR["COMMAND · spectra doctor"]
-    REPORT["RESULT · Health report<br/>No project files written"]
-    FIX["COMMAND · spectra doctor<br/>--fix"]
-    REPAIR["RESULT · Refresh generated<br/>project assets<br/>Runtime, guides, launcher,<br/>metadata and exclude"]
-    SAFE["CONDITION · All true?<br/>Detected set missing files<br/>Required tool available<br/>No user-owned siblings"]
-    ADAPTER_REPAIR["RESULT · Repair safe missing<br/>adapter set"]
-    MANUAL["RESULT · Report remaining<br/>health state<br/>Unsafe repairs skipped;<br/>report any manual problems"]
-    DOCTOR -->|inspect only| REPORT
-    REPORT ~~~ FIX
-    FIX -->|repair generated assets| REPAIR
-    REPAIR -->|assess missing adapters| SAFE
-    SAFE -.->|yes: safe to repair| ADAPTER_REPAIR
-    SAFE -->|otherwise: report health and unresolved issues| MANUAL
-    ADAPTER_REPAIR ~~~ MANUAL
+    direction LR
+    DOCTOR["spectra doctor<br/>Inspect only"]
+    FIX["doctor --fix<br/>Refresh assets"]
+    SAFE["Adapters safe?<br/>Tool and set present"]
+    ADAPTER_REPAIR["Adapters fixed<br/>Missing files"]
+    MANUAL["Reported<br/>Unsafe skipped"]
+    DOCTOR -.->|--fix| FIX
+    FIX -->|then| SAFE
+    SAFE -.->|yes| ADAPTER_REPAIR
+    SAFE -->|no| MANUAL
   end
   subgraph MAINT_PRESERVED["M3 · Preserved project information"]
-    direction TB
-    KEEP["PRESERVATION BOUNDARY ·<br/>Applies to refresh and<br/>repair<br/>Project memory and business<br/>knowledge<br/>Feature and governance<br/>state;<br/>plugin documents<br/>Unowned guide collisions and<br/>user adapters"]
+    direction LR
+    KEEP["Preserved on refresh and repair<br/>Memory, features, governance<br/>Plugin docs, user adapters"]
   end
   subgraph MAINT_ADAPTERS["M4 · Explicit adapter regeneration"]
-    direction TB
-    ADAPTERS["SEPARATE USER COMMAND ·<br/>spectra adapters<br/>Regenerate Spectra tool<br/>instructions deliberately"]
-    HEALTHY["CONDITION · Healthy existing<br/>adapters<br/>Update does not<br/>regenerate them"]
+    direction LR
+    HEALTHY["Healthy adapters?<br/>Update skips them"]
+    ADAPTERS["spectra adapters<br/>Regenerate on request"]
+    HEALTHY -.->|only on request| ADAPTERS
   end
   %% Invisible links control layout only; these groups are not sequential steps.
   MAINT_UPDATE ~~~ MAINT_DOCTOR
@@ -45,9 +51,9 @@ flowchart TB
   MAINT_PRESERVED ~~~ MAINT_ADAPTERS
   classDef command fill:#ffffff,stroke:#6c5ce7,color:#5143c6,stroke-width:2px;
   classDef result fill:#effcf8,stroke:#007f68,color:#121827,stroke-width:1.5px;
-  classDef condition fill:#fff5df,stroke:#8a5d00,color:#121827,stroke-width:1.5px;
+  classDef condition fill:#fff9ea,stroke:#8a5d00,color:#121827,stroke-width:1.5px;
   classDef neutral fill:#f2f8ff,stroke:#64748b,color:#121827;
-  class UPDATE,CHECK,APPLY,DOCTOR,FIX,ADAPTERS command;
-  class NATIVE,OTHER,REPORT,REPAIR,ADAPTER_REPAIR,MANUAL result;
+  class UPDATE,UNINSTALL,CHECK,APPLY,DOCTOR,FIX,ADAPTERS command;
+  class NATIVE,OTHER,ADAPTER_REPAIR,MANUAL result;
   class SAFE,HEALTHY condition;
-  class KEEP neutral;
+  class NOTE,KEEP neutral;

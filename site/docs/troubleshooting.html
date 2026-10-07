@@ -54,10 +54,7 @@
 spectra version
 spectra migrate --check</code></pre>
         <p>
-          That is expected: <code>spectra update</code> updates only the
-          application on your machine (a managed native install; npm users
-          run <code>npm install -g spectra-pack@latest</code>) and never reads
-          or changes a project. "Already up to date" refers to the
+          This is expected. <code>spectra update</code> updates only the application on your machine (a managed native install). npm users do <code>npm install -g spectra-pack@latest</code>. The command never reads or changes a project. "Already up to date" refers to the
           application. If a project reports that it needs a newer layout,
           <code>spectra migrate --check</code> lists the steps and
           <code>spectra migrate --yes</code> applies them to that one project.
@@ -80,9 +77,7 @@ spectra migrate --yes</code></pre>
         <pre><code>spectra verify --explain &lt;id&gt;
 spectra verify --test-target &lt;test-target-id&gt;</code></pre>
         <p>
-          <code>verified</code> means every declared test target passed;
-          <code>stale</code> means the code or the declarations changed since
-          the recorded run; <code>unverified</code> means no run is recorded.
+          <code>verified</code> means that every declared test target passed. <code>stale</code> means that the code or the declarations changed after the recorded run. <code>unverified</code> means that no run is recorded.
           <code>verify --explain</code> names the missing layer, and
           <code>verify --test-target</code> records a fresh result.
         </p>
@@ -102,7 +97,7 @@ spectra check</code></pre>
       </section>
 
       <section>
-        <h2>Codex is used through VS Code</h2>
+        <h2>Use Codex through VS Code</h2>
         <p>
           A VS Code extension can be usable even when the standalone
           <code>codex</code> command is not on PATH. Spectra doctor checks
@@ -115,8 +110,7 @@ spectra check</code></pre>
         <h2>Repo index looks too technical</h2>
         <p>
           <code>spectra index</code> records modules, dependencies, projects,
-          and test targets. It is technical evidence for context loading and
-          verification; it does not infer business intent. Use
+          and test targets. It is technical evidence for context loading and verification. It does not infer business intent. Use
           <code>onboard</code> and memory-bank files for durable product
           knowledge.
         </p>

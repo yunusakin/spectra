@@ -1,54 +1,61 @@
 flowchart TB
   accTitle: Spectra daily work: context, approval conditions, implementation and readiness
-  accDescr: The recommended workflow separates preparation, specification approval, human or agent implementation, and validation. Approval stages advance in order; app work requires valid implementation approval. Manual eval is optional and not a prerequisite for verify, which runs release evals itself. Supporting commands do not form required workflow steps. Groups W1 to W5 have matching HTML explanations.
+  accDescr: The recommended workflow separates preparation, specification approval, human or agent implementation, and validation. Approval stages advance in order; app work requires valid implementation approval. Route, inspect and change-impact lookups are optional read-only aids. Manual eval is optional and not a prerequisite for verify, which runs release evals itself. Supporting commands do not form required workflow steps. Groups W1 to W5 have matching HTML explanations.
   subgraph WORK_PREPARE["W1 · Prepare context and intent"]
-    direction TB
-    ROUTE["COMMAND · route<br/>Select relevant references;<br/>no writes"]
-    CONTEXT["COMMAND · context<br/>Read sources and refresh<br/>summary cache"]
-    TASK["COMMAND · task<br/>Replace implementation brief"]
-    ROUTE -.->|optional reference selection| CONTEXT
-    CONTEXT -->|use loaded context to define intent| TASK
+    direction LR
+    ROUTE["route<br/>Pick references"]
+    INSPECT["inspect<br/>Look up relations"]
+    CONTEXT["context<br/>Load sources"]
+    TASK["task<br/>Record intent"]
+    ROUTE -.->|optional| CONTEXT
+    INSPECT -.->|optional| CONTEXT
+    CONTEXT -->|intent| TASK
   end
   subgraph WORK_APPROVAL["W2 · Prepare specifications and approvals"]
     direction TB
-    SPECS["HUMAN / AGENT WORK<br/>Prepare and review<br/>specifications"]
-    STAGES["COMMAND · approve stages in<br/>order<br/>1. product-approved<br/>2. technical-approved<br/>3. implementation-approved"]
-    GATE["CONDITION · Valid<br/>implementation approval?"]
-    SPECS -->|meaningful brief and valid contracts| STAGES
-    STAGES -->|each preceding stage must remain valid| GATE
+    SPECS["Specs and contracts<br/>Prepare and review"]
+    STAGES["approve --stage<br/>product, technical,<br/>implementation"]
+    GATE["Build approved?<br/>Required for app work"]
+    SPECS -->|valid brief| STAGES
+    STAGES -->|in order| GATE
   end
-  WORK_PREPARE -->|use recorded intent to prepare specifications| WORK_APPROVAL
+  WORK_PREPARE --> WORK_APPROVAL
   subgraph WORK_APP["W3 · Implement application changes"]
-    APP["HUMAN / AGENT WORK<br/>Change application code and<br/>run project tests"]
+    direction LR
+    APP["Implement<br/>Human or agent, with tests"]
   end
-  WORK_APPROVAL -->|only with valid implementation approval| WORK_APP
+  WORK_APPROVAL -->|approved only| WORK_APP
   subgraph WORK_VALIDATE["W4 · Validate and assess readiness"]
     direction TB
-    CHECK["COMMAND · check<br/>Validate Spectra structure<br/>and policy"]
-    EVAL["OPTIONAL COMMAND · eval<br/>Run selected suite; write<br/>reports"]
-    VERIFY["COMMAND · verify<br/>Recompute approval validity<br/>Check readiness and run<br/>release evals"]
-    READY["CONDITION · Readiness and release<br/>prerequisites satisfied?"]
-    RELEASE["COMMAND · approve<br/>release-approved<br/>Runs verification again before approval"]
-    CHECK -.->|optional selected suite| EVAL
-    EVAL ~~~ VERIFY
-    CHECK -->|assess release readiness| VERIFY
-    VERIFY -->|reports result; may write even on failure| READY
-    READY -.->|yes: request final approval| RELEASE
+    CHECK["check<br/>Validate structure"]
+    IMPACT["inspect --changed<br/>Change impact"]
+    EVAL["eval<br/>Selected suite"]
+    VERIFY["verify<br/>Readiness, release evals"]
+    READY["Release ready?<br/>Prerequisites met"]
+    RELEASE["approve release<br/>Verifies again first"]
+    CHECK --> VERIFY
+    IMPACT -.->|optional| VERIFY
+    EVAL -.->|optional| VERIFY
+    VERIFY -->|report| READY
+    READY -.->|yes| RELEASE
   end
-  WORK_APP -->|recommended validation after changes| WORK_VALIDATE
+  WORK_APP -->|validate| WORK_VALIDATE
   subgraph WORK_SUPPORT["W5 · Supporting commands"]
-    direction TB
-    STATUS["COMMAND · status<br/>Read current state; no writes"]
-    INDEX["COMMAND · index<br/>Rebuild repository evidence<br/>cache"]
-    FRESH["COMMAND · index --check<br/>Report freshness; no writes"]
+    direction LR
+    STATUS["status<br/>Read state"]
+    INDEX["index<br/>Rebuild evidence"]
+    FRESH["index --check<br/>Report freshness"]
     STATUS ~~~ INDEX
     INDEX ~~~ FRESH
   end
   %% Layout only: supporting commands are not a required next step.
   WORK_VALIDATE ~~~ WORK_SUPPORT
   classDef command fill:#ffffff,stroke:#6c5ce7,color:#5143c6,stroke-width:2px;
-  classDef condition fill:#fff5df,stroke:#8a5d00,color:#121827,stroke-width:1.5px;
+  classDef result fill:#effcf8,stroke:#007f68,color:#121827,stroke-width:1.5px;
+  classDef condition fill:#fff9ea,stroke:#8a5d00,color:#121827,stroke-width:1.5px;
+  classDef support fill:#ffffff,stroke:#94a3b8,color:#475569,stroke-width:1.5px;
   classDef neutral fill:#f2f8ff,stroke:#64748b,color:#121827;
-  class ROUTE,CONTEXT,TASK,STAGES,CHECK,EVAL,VERIFY,RELEASE,STATUS,INDEX,FRESH command;
+  class ROUTE,INSPECT,CONTEXT,TASK,STAGES,CHECK,IMPACT,EVAL,VERIFY,RELEASE command;
+  class STATUS,INDEX,FRESH support;
   class GATE,READY condition;
   class SPECS,APP neutral;

@@ -299,7 +299,8 @@ pre {
   margin: 0 clamp(20px, 6vw, 92px);
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: var(--line);
+    background: #dfe5f1;
+  box-shadow: 0 18px 44px rgba(18, 24, 39, 0.16);
   overflow: hidden;
   transform: translateY(50%);
 }
@@ -308,17 +309,20 @@ pre {
   display: grid;
   gap: 6px;
   padding: 22px;
-  background:
-    linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(0, 184, 148, 0.05)),
-    rgba(23, 23, 41, 0.96);
+    background: #ffffff;
 }
 
 .signal-row strong {
+  color: #121827;
   font-size: 1rem;
 }
 
+.signal-row code {
+  color: #5143c6;
+}
+
 .signal-row span {
-  color: var(--muted);
+  color: #4a566b;
   font-size: 0.95rem;
 }
 
@@ -757,7 +761,7 @@ pre {
 .diagram-key { display: inline-block; flex: 0 0 14px; height: 14px; border: 2px solid; border-radius: 4px; }
 .diagram-key-command { background: #fff; border-color: var(--purple); }
 .diagram-key-result { background: var(--paper-teal); border-color: var(--teal-dark); }
-.diagram-key-condition { background: #fff5df; border-color: var(--amber-ink); border-radius: 4px; }
+.diagram-key-condition { background: #fff9ea; border-color: var(--amber-ink); border-style: dashed; border-radius: 4px; }
 .diagram-key-neutral { background: var(--paper-blue); border-color: #64748b; }
 .diagram-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 12px; scroll-margin-top: 110px; }
 .diagram-card { min-width: 0; padding: 22px; border: 1px solid #c7d0df; border-top: 4px solid var(--purple); border-radius: 14px; background: #fff; scroll-margin-top: 110px; }
