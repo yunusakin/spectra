@@ -45,9 +45,12 @@ function compare(sourceDir, mirrorDir, { skip = [] } = {}) {
 const consumerSystem = path.join(repo, "profiles", "full", "sdd", "system");
 const runtimeScripts = path.join(repo, "packages", "core", "assets", "runtime", "scripts");
 
-test("S1: root sdd/system is the consumer system source, and its manifest is the current version", () => {
+test("S1: root sdd/system is the consumer system source, keeps the source-repository marker and the current version", () => {
   assert.deepEqual(compare(consumerSystem, path.join(repo, "sdd", "system")), [], fix);
-  assert.match(fs.readFileSync(path.join(repo, "sdd", "system", "manifest.env"), "utf8"), /^repo_mode=canonical$/m, "the source-repository marker stays");
+  const manifest = fs.readFileSync(path.join(repo, "sdd", "system", "manifest.env"), "utf8");
+  assert.match(manifest, /^repo_mode=canonical$/m, "the source-repository marker stays");
+  const version = JSON.parse(fs.readFileSync(path.join(repo, "package.json"), "utf8")).version;
+  assert.match(manifest, new RegExp(`^spectra_version=${version.replaceAll(".", "\\.")}$`, "m"), "the root manifest carries the package version");
 });
 
 test("S2: the packaged runtime's sdd/system is the consumer system source", () => {
@@ -58,14 +61,20 @@ test("S3: root scripts mirror the packaged runtime scripts; validate-repo.sh may
   assert.deepEqual(compare(runtimeScripts, path.join(repo, "scripts"), { skip: ["validate-repo.sh"] }), [], fix);
   const packaged = fs.readFileSync(path.join(runtimeScripts, "validate-repo.sh"), "utf8").split("\n");
   const root = fs.readFileSync(path.join(repo, "scripts", "validate-repo.sh"), "utf8").split("\n");
+  // Bare shell punctuation (`fi`, `done`, `}`) appears everywhere, so a match proves nothing: only meaningful lines are
+  // checked. They must appear in order, and as often as in the packaged validator, so a dropped duplicate is caught too.
+  const trivial = (line) => /^(?:fi|done|else|then|do|esac|[\s\W]*)$/.test(line.trim());
+  const meaningful = packaged.filter((line) => !trivial(line));
   let at = 0;
   const missing = [];
-  for (const line of packaged) {
+  for (const line of meaningful) {
     const found = root.indexOf(line, at);
     if (found === -1) missing.push(line);
     else at = found + 1;
   }
-  assert.deepEqual(missing.filter((line) => line.trim() !== ""), [], "every line of the packaged validator must appear, in order, in scripts/validate-repo.sh (add source-only checks, never drop a packaged fix)");
+  const count = (lines, line) => lines.filter((candidate) => candidate === line).length;
+  for (const line of new Set(meaningful)) if (count(root, line) < count(packaged, line)) missing.push(`(fewer copies than packaged) ${line}`);
+  assert.deepEqual(missing, [], "every meaningful line of the packaged validator must appear, in order and as often, in scripts/validate-repo.sh (add source-only checks, never drop a packaged fix)");
 });
 
 // S5  the consumer system source lacked the business-memory guidance, so a freshly initialized project's generated
