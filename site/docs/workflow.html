@@ -48,8 +48,7 @@ spectra verify --gate review --changed            # may review proceed?
 spectra check
 spectra status</code></pre>
         <p>
-          Agents execute; Spectra resolves, governs, traces and verifies
-          project knowledge. <code>context</code> selects only the rules,
+          Agents execute. Spectra resolves, governs, traces and verifies project knowledge. <code>context</code> selects only the rules,
           requirements and modules a task touches, within a token budget, and
           <code>inspect --changed</code> reports what a set of changed files
           concerns. Use approvals, evals and the release gate
@@ -57,9 +56,7 @@ spectra status</code></pre>
         </p>
         <p>
           <code>verify</code> without flags aggregates release-readiness
-          signals; it does not run your application's tests. Test evidence is
-          scoped: a passing test target supports exactly the requirements that
-          declare it with <code>verifiedBy</code>. Updating or migrating is a
+          signals. It does not run your application's tests. Test evidence has a scope. A passing test target supports only the requirements that declare it with <code>verifiedBy</code>. Updating or migrating is a
           separate lifecycle: <code>spectra update</code> only updates the
           application on your machine, and <code>spectra migrate</code>
           changes a project only when you ask.
@@ -69,7 +66,7 @@ spectra status</code></pre>
           <div class="diagram-scroll" tabindex="0" role="region" aria-label="Daily workflow diagram; use left and right arrow keys on narrow screens" style="--diagram-min-width: 702px">
             <img src="../assets/command-effects-workflow.svg" alt="Recommended daily workflow with approval conditions. Full explanations for groups W1 to W5 are on the command effects page." />
           </div>
-          <figcaption>Application work requires valid implementation approval. Manual eval is optional; verify runs release evals itself. The full flow is visible vertically; narrow screens can scroll horizontally or open the full-size view. <a class="diagram-open" href="../assets/command-effects-workflow.svg">Open full-size workflow diagram</a>.</figcaption>
+          <figcaption>Application work requires valid implementation approval. Manual eval is optional. Verify runs the release evals itself. The full flow is visible vertically. On narrow screens, scroll horizontally or open the full-size view. <a class="diagram-open" href="../assets/command-effects-workflow.svg">Open full-size workflow diagram</a>.</figcaption>
         </figure>
         <p><a href="./commands.html#daily">Read the full workflow explanation: commands, file effects, approval conditions and failed-run behavior.</a></p>
       </section>

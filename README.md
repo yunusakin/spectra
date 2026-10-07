@@ -19,7 +19,7 @@ Install Spectra one time for each machine (or use `npx`). Then do `init` or `ado
 | Your situation | Command | What it does |
 | --- | --- | --- |
 | New project | `spectra init .` | Creates the Spectra layer with generic starter files for you to fill in. |
-| Existing project | `spectra adopt .` | Installs the same layer and records **repository evidence** (a deterministic index of modules, manifests and tests, plus discovery notes). It never executes your tests or invents business rules: what the code does is evidence, not business truth, until you review and promote it. |
+| Existing project | `spectra adopt .` | Installs the same layer and records **repository evidence** (a deterministic index of modules, manifests and tests, plus discovery notes). It never runs your tests. It never invents business rules. What the code does is evidence, not business truth, until you review and promote it. |
 
 ### With Node.js and npm
 
@@ -40,7 +40,7 @@ cd my-project
 spectra adopt .          # or: init .
 ```
 
-See [Native Install](docs/native-install.md) for permanent PATH setup and troubleshooting. The examples below use the project-local launcher; with a native install you can write `spectra` instead.
+See [Native Install](docs/native-install.md) for permanent PATH setup and troubleshooting. The examples below use the project-local launcher. With a native install you can write `spectra` instead.
 
 ### Local or shared Git mode
 
@@ -52,7 +52,7 @@ npx spectra-pack@latest adopt . --git-mode shared
 
 ### Agent adapters
 
-Pass the agents you use and Spectra generates small guidance files that point back to `.spectra/`: `codex` (`AGENTS.md`), `claude` (`CLAUDE.md`), `copilot`, `cursor`, `windsurf` and `antigravity`.
+Pass the agents you use. Spectra generates small guidance files that point back to `.spectra/`. The tools are `codex` (`AGENTS.md`), `claude` (`CLAUDE.md`), `copilot`, `cursor`, `windsurf` and `antigravity`.
 
 ```bash
 npx spectra-pack@latest init . --agents codex,claude
@@ -89,18 +89,18 @@ Agents still read and edit the actual code. Spectra gives limited project knowle
 | `Governs` | Optional rule metadata linking a rule to the requirement/scenario/invariant IDs it governs. |
 | `verifiedBy` | Optional feature-spec metadata naming the test targets that verify a subject. |
 | Repo Index | Deterministic, disposable evidence about the repository (modules, manifests, test targets): `cache/index/repo-index.json`. |
-| Knowledge Map | Derived lookup of every addressable object; rebuilt automatically from canonical files. |
-| Test target | A test command found in the Repo Index; `verify --test-target <id>` runs one and records the result. |
+| Knowledge Map | Derived lookup of every addressable object. Rebuilt automatically from canonical files. |
+| Test target | A test command from the Repo Index. `verify --test-target <id>` runs one and records the result. |
 | Verification evidence | The recorded outcome of a test target, kept locally and never committed. |
 | `verified` / `failed` / `stale` / `unverified` | The state of a subject. `verified`: all declared scopes passed. `failed`: one scope failed. `stale`: the code or declarations changed after the evidence. `unverified`: no scope has a result. |
 | Review / release gate | `verify --gate review\|release`. It blocks only if a declared scope failed, is stale or has no result. Evidence has a scope. A passing test target supports the subjects that declare it. It does not prove that a requirement is true everywhere. |
 | Project Intelligence | The combined capability: resolve, trace and verify project knowledge on demand through `context`, `inspect` and `verify`. |
 
-Canonical knowledge (rules, feature specs, approvals) lives under `.spectra/sdd/`. Caches, the Repo Index, the Knowledge Map and verification evidence under `.spectra/cache/` are derived and can always be rebuilt.
+Canonical knowledge (rules, feature specs, approvals) lives under `.spectra/sdd/`. Spectra derives the caches, the Repo Index, the Knowledge Map and the verification evidence in `.spectra/cache/`. It can always rebuild them.
 
 ## What Spectra adds to a project
 
-Spectra keeps its runtime, project context, feature specifications and approvals under `.spectra/`. It does not use root-level `app/`, `docs/`, `sdd/`, `spectra/` or `.github/` as its data directories. If you request agent adapters, the small adapter files are written to the paths each tool requires.
+Spectra keeps its runtime, project context, feature specifications and approvals under `.spectra/`. It does not use root-level `app/`, `docs/`, `sdd/`, `spectra/` or `.github/` as its data directories. If you request agent adapters, Spectra writes the small adapter files to the paths that each tool requires.
 
 ```text
 acme/
@@ -131,7 +131,7 @@ acme/
 ./.spectra/bin/spectra check
 ```
 
-`spectra verify` without flags aggregates release-readiness signals and does not run your application's own test command; `verify --test-target` is the explicit way to run one. The staged approval and release process is described in the [Workflow guide](docs/workflow.md).
+`spectra verify` without flags collects the release-readiness signals. It does not run the test command of your application. Use `verify --test-target` to run one test target. The [Workflow guide](docs/workflow.md) describes the staged approval and release process.
 
 ## Updating, migrating and uninstalling
 
@@ -147,22 +147,22 @@ Derived caches (for example, the Knowledge Map) rebuild automatically after an u
 
 | Command | Purpose | Project effect |
 | --- | --- | --- |
-| [`spectra init`](docs/cli-reference.md#init) | Set up a new project | Creates the Spectra layer; local mode updates Git info/exclude; optional adapters use tool-required paths. |
+| [`spectra init`](docs/cli-reference.md#init) | Set up a new project | Creates the Spectra layer. Local mode updates Git info/exclude. Optional adapters use tool-required paths. |
 | [`spectra adopt`](docs/cli-reference.md#adopt) | Add Spectra to an existing project | Installs the layer and writes repository index/discovery evidence. |
-| [`spectra onboard`](docs/cli-reference.md#onboard) | Capture project intent | Interactive runs write projectbrief.md; non-interactive runs only report context. |
-| [`spectra index`](docs/cli-reference.md#index) | Refresh repository evidence | Replaces cache/index/repo-index.json; --check does not write project files. |
+| [`spectra onboard`](docs/cli-reference.md#onboard) | Capture project intent | Interactive runs write projectbrief.md. Non-interactive runs only report context. |
+| [`spectra index`](docs/cli-reference.md#index) | Refresh repository evidence | Replaces cache/index/repo-index.json. `--check` does not write project files. |
 | [`spectra context`](docs/cli-reference.md#context) | Load focused context | Reads canonical memory and refreshes derived cache/context summaries. |
-| [`spectra route`](docs/cli-reference.md#route) | Select relevant modules/domains | Reads knowledge indexes; does not write project files. |
-| [`spectra inspect`](docs/cli-reference.md#inspect) | Explain one subject or the impact of changed files | Read-only; never runs tests or touches approvals. |
+| [`spectra route`](docs/cli-reference.md#route) | Select relevant modules/domains | Reads knowledge indexes. Does not write project files. |
+| [`spectra inspect`](docs/cli-reference.md#inspect) | Explain one subject or the impact of changed files | Read-only. Never runs tests or touches approvals. |
 | [`spectra task`](docs/cli-reference.md#task) | Record implementation intent | Replaces memory-bank/core/implementation-brief.md. |
-| [`spectra check`](docs/cli-reference.md#check) | Validate the Spectra layer | Reports structure/policy/contract errors; no persistent project writes. |
+| [`spectra check`](docs/cli-reference.md#check) | Validate the Spectra layer | Reports structure/policy/contract errors. No persistent project writes. |
 | [`spectra eval`](docs/cli-reference.md#eval) / [`verify`](docs/cli-reference.md#verify) | Evaluate contracts / assess readiness and evidence | Writes eval reports. `verify` also refreshes the approval validity. `--test-target` records local evidence. `--explain` and `--gate` only read. Command-mode evals can run application commands. |
 | [`spectra status`](docs/cli-reference.md#status) | Resume work | Recomputes approval validity and syncs approval status into project memory. |
-| [`spectra doctor`](docs/cli-reference.md#doctor) | Inspect or repair health | Read-only by default; --fix refreshes safe generated files and preserves user-owned documents/adapters. |
-| [`spectra update`](docs/cli-reference.md#update) | Update application software | Updates a verified native machine installation; it does not inspect or migrate projects. |
-| [`spectra migrate`](docs/cli-reference.md#migrate) | Migrate one project | `--check` is read-only; `--yes` explicitly applies supported layout/schema steps to that project. |
+| [`spectra doctor`](docs/cli-reference.md#doctor) | Inspect or repair health | Read-only by default. `--fix` refreshes safe generated files and keeps user-owned documents and adapters. |
+| [`spectra update`](docs/cli-reference.md#update) | Update application software | Updates a verified native machine installation. It does not inspect or migrate projects. |
+| [`spectra migrate`](docs/cli-reference.md#migrate) | Migrate one project | `--check` only reads. `--yes` applies the supported layout and schema steps to that project. |
 | [`spectra uninstall`](docs/cli-reference.md#uninstall) | Remove the native application | Removes verified machine-owned native files and leaves every project unchanged. |
-| [`spectra help`](docs/cli-reference.md#help) | Browse commands/options | Prints help; does not write project files. |
+| [`spectra help`](docs/cli-reference.md#help) | Browse commands/options | Prints help. Does not write project files. |
 
 Paths in this table are in `.spectra/`, unless the table gives a Git or adapter path. The advanced commands (`approve`, `eval`, `diff`, `quick`, `skills`, `adapters`) are in `spectra help advanced`. See the [complete command effects reference](docs/cli-reference.md#command-effects-at-a-glance) for all **24 public commands**, prerequisites, options, before/after file trees and workflow diagrams.
 
@@ -188,7 +188,7 @@ npm test
 npm run check
 ```
 
-Spectra's source is organized into `packages/cli/`, `packages/core/`, and `packages/templates/`. The `sdd/` directory in this repository is the project knowledge of Spectra itself. The starter files for other projects come from `profiles/full/` and `packages/core/assets/runtime/`.
+The Spectra source has three packages: `packages/cli/`, `packages/core/`, and `packages/templates/`. The `sdd/` directory in this repository is the project knowledge of Spectra itself. The starter files for other projects come from `profiles/full/` and `packages/core/assets/runtime/`.
 
 ## Releases and license
 

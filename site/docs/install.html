@@ -44,9 +44,7 @@ npx spectra-pack@latest adopt .
         <p>
           Use <code>adopt</code> for a repository that already has application
           code. Spectra writes its own layer under <code>.spectra/</code> and
-          leaves the product structure alone. It records repository evidence;
-          it does not run your tests or turn what the code does into business
-          truth.
+          leaves the product structure alone. It records repository evidence. It does not run your tests. It does not change what the code does into business truth.
         </p>
       </section>
 
@@ -75,10 +73,7 @@ spectra adopt .  # init . for a new project</code></pre>
       <section>
         <h2>Local or shared Git mode</h2>
         <p>
-          The default <code>local</code> mode keeps <code>.spectra/</code> out
-          of your repository through <code>.git/info/exclude</code>; it does not
-          edit <code>.gitignore</code>, so nothing Spectra writes reaches a
-          company repository unless you add it. Pass
+          The default <code>local</code> mode keeps <code>.spectra/</code> out of your repository. It uses <code>.git/info/exclude</code> and does not change <code>.gitignore</code>. Nothing that Spectra writes goes into a company repository unless you add it. Pass
           <code>--git-mode shared</code> to <code>init</code> or
           <code>adopt</code> when your team wants to review and commit Spectra
           state. Derived caches and verification evidence stay uncommitted.
@@ -99,9 +94,7 @@ spectra migrate --yes     # apply it to this one project
 spectra uninstall --yes   # remove the native application</code></pre>
         <p>
           <code>spectra update</code> updates a verified native installation
-          only; it never inspects or changes a project. npm users update with
-          <code>npm install -g spectra-pack@latest</code>, and npx users run
-          <code>npx spectra-pack@latest</code> for a newer CLI.
+          only. It never reads or changes a project. npm users do <code>npm install -g spectra-pack@latest</code>. npx users do <code>npx spectra-pack@latest</code> to get a newer CLI.
           <code>spectra migrate</code> advances one project's layout or schema
           only when you ask for it, and nothing migrates silently.
           <code>spectra uninstall</code> removes verified native files and
@@ -109,14 +102,9 @@ spectra uninstall --yes   # remove the native application</code></pre>
           and never need a migration.
         </p>
         <p>
-          After updating, run <code>spectra doctor</code> in a project to see
-          whether generated runtime files or agent guidance are out of date;
-          <code>doctor --fix</code> refreshes safe generated files, and
-          <code>spectra adapters --agents &lt;csv&gt;</code> regenerates agent
-          guidance deliberately. Shipped guides live under
-          <code>.spectra/docs/spectra/</code>; compatible plugin artifacts use
-          <code>.spectra/docs/&lt;project-name&gt;/&lt;plugin-or-skill&gt;/</code>.
-          Existing files are not automatically moved. See
+          After an update, run <code>spectra doctor</code> in a project. It shows if the generated runtime files or agent guidance are old. <code>doctor --fix</code> refreshes the safe generated files. <code>spectra adapters --agents &lt;csv&gt;</code> regenerates the agent guidance when you ask. </p>
+        <p>
+          The shipped guides are in <code>.spectra/docs/spectra/</code>. Compatible plugin artifacts use <code>.spectra/docs/&lt;project-name&gt;/&lt;plugin-or-skill&gt;/</code>. Spectra does not move existing files automatically. See
           <a href="./commands.html">command effects</a> for preservation and
           repair details.
         </p>
