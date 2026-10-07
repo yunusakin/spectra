@@ -1,13 +1,16 @@
 # Release Summary
 
-## Unreleased
+## v3.1.3
 
-Separates application lifecycle from project migration. `spectra update` updates a managed native application only; global npm users update through npm, and npx users select a version per invocation. `spectra migrate` checks or explicitly advances one project's layout/schema, while `spectra uninstall` removes verified native machine files without touching projects.
+Adds Project Intelligence queries and verification evidence on top of the existing deterministic project knowledge, and separates the machine lifecycle from the project lifecycle. The `spectra/v2` identifier and installation schema version 3 are unchanged; no project migration is required.
 
-- Explains provenance-specific behavior for managed native, global npm, npx, project-local fallback and development checkouts.
-- Distinguishes the synchronized application release, numeric install schema version, and `spectra/v2` contract namespace.
-- Documents retained native versions and executable recovery bytes, plus the limits of native update sources on restricted networks.
-- Updates lifecycle diagrams, status-write effects and installed Full-guide mirrors.
+- `spectra inspect <id>` explains what governs one rule, requirement, scenario, invariant, module or test target and whether it is verified. `inspect --changed`, `--base <ref>` and `--file <path>` report the impact of changed files at module and canonical-source level, not a code graph.
+- `spectra verify --test-target <id>` records scoped, local verification evidence. Subjects report `verified`, `failed`, `stale` or `unverified`; `verify --explain <id>` says why, and `verify --gate review|release` reports whether the evidence lets a stage proceed. Passing evidence supports the subjects that declare it; it does not prove a requirement everywhere.
+- `spectra update` changes the machine application only and never touches a project. `spectra migrate` is the explicit per-project step and `spectra uninstall` removes the native application while leaving every project unchanged. Derived caches rebuild on their own and never need a migration.
+- `context --route-task` selects exact knowledge objects within the role budget, now also matches architectural invariants, and folds `-ing`/`-ed` term variants. Retrieval stays deterministic, lexical and budget-aware; there is no semantic or vector search.
+- Generated agent guidance covers route-first context, business memory, Project Intelligence commands and the verification gates. Agent-facing JSON carries `contractVersion` 1 and structured errors.
+- After updating an existing project, run `spectra doctor --fix` and then `spectra adapters --agents <csv>` to receive the new guidance. Handwritten `AGENTS.md` and `CLAUDE.md` files are never overwritten without `--force`. A native installation made by 3.1.2 cannot be replaced in place (its own `spectra update` and the installer both refuse); follow the installer's instructions to install 3.1.3 into a fresh managed location, or update an npm installation with `npm install -g spectra-pack@latest`. Projects are not touched.
+- Documentation and the website describe all 24 commands, local vs shared mode and the three lifecycles.
 
 ## v3.1.2
 

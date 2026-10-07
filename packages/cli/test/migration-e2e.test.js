@@ -54,7 +54,7 @@ function scenario(name, action) {
     const execute = (root, args, fault) => {
       const before = inventory(root);
       const result = spawnSync(process.execPath, [...(fault ? ['--import', hook] : []), cliPath, ...args], { cwd: root, encoding: 'utf8', env: { ...process.env,
-        SPECTRA_ASSETS_DIR: path.join(cliRoot, 'assets'), SPECTRA_LATEST_VERSION: '3.1.2', SPECTRA_E2E_FAULT: fault ?? '', SPECTRA_E2E_PROJECT: root } });
+        SPECTRA_ASSETS_DIR: path.join(cliRoot, 'assets'), SPECTRA_LATEST_VERSION: '3.1.3', SPECTRA_E2E_FAULT: fault ?? '', SPECTRA_E2E_PROJECT: root } });
       report.commands.push({ root, args, fault, exitStatus: result.status, stdout: result.stdout, stderr: result.stderr, before, after: inventory(root) }); save(); return result;
     };
     const fixture = (schema = 2, layout = 'canonical', gitMode = 'local') => {
