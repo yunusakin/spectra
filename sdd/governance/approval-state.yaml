@@ -1,31 +1,22 @@
 apiVersion: spectra/v2
 kind: ApprovalState
 current_state: implementation-approved
-highest_valid_state: draft
+highest_valid_state: implementation-approved
 stages:
   product-approved:
-    approved_at: 2026-07-10T09:46:45.477Z
-    baseline_commit: ef7021016d46af88ba8b281ace0147ea53aeeb86
-    dirty: true
+    approved_at: 2026-10-08T08:09:34.792Z
+    baseline_commit: 8e55ed581a93a2fe30bffedba98e777a5ac746b1
+    dirty: false
   technical-approved:
-    approved_at: 2026-07-10T09:46:46.540Z
-    baseline_commit: ef7021016d46af88ba8b281ace0147ea53aeeb86
+    approved_at: 2026-10-08T08:09:38.327Z
+    baseline_commit: 8e55ed581a93a2fe30bffedba98e777a5ac746b1
     dirty: true
   implementation-approved:
-    approved_at: 2026-07-10T09:46:48.121Z
-    baseline_commit: ef7021016d46af88ba8b281ace0147ea53aeeb86
+    approved_at: 2026-10-08T08:09:41.447Z
+    baseline_commit: 8e55ed581a93a2fe30bffedba98e777a5ac746b1
     dirty: true
   release-approved:
     approved_at: null
     baseline_commit: null
     dirty: false
-invalidations:
-  - stage: product-approved
-    categories:
-      - scope increase
-      - contract break
-      - behavior change
-      - observability-only
-      - infra-only
-      - copy-only
-    since: ef7021016d46af88ba8b281ace0147ea53aeeb86
+invalidations: []
