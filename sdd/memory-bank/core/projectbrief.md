@@ -6,7 +6,7 @@
 Spectra
 
 ## Purpose
-Provide a native, CLI-first spec-driven development framework that keeps product intent, working context, validation, and release governance in a portable project-local layer.
+Provide persistent, governed project intelligence for interchangeable coding agents: a native, CLI-first, project-local layer that keeps product intent, rules, requirements, traceability and verification evidence resolvable on demand. Spec-driven development with staged approvals is one capability of that layer.
 
 ## App Type
 Developer CLI and reusable project runtime
@@ -34,7 +34,8 @@ Example:
 ### Functional Requirements
 - Initialize and adopt repositories with the complete Spectra workflow by default.
 - Keep all Spectra-owned generated content under `.spectra/`.
-- Provide concise context, task, check, status, help, and update workflows.
+- Provide concise context, route, inspect, task, check, verify, status, and help commands, so an agent or person can resolve what governs a subject and whether the evidence supports it.
+- Keep the machine lifecycle (install, update, uninstall) separate from the project lifecycle (init, adopt, migrate).
 - Support safe legacy-layout migration and native installation without Node or npm.
 
 ### Non-Functional Requirements
@@ -59,10 +60,11 @@ Example:
 ### Technical Constraints
 - Node.js ESM powers the npm CLI; native macOS/Linux builds use Node SEA.
 - Generated runtime must work from the repository-local launcher.
+- Spectra supplies project knowledge and does not run coding agents; retrieval is deterministic, lexical and budget-aware, with no semantic or vector search.
 
 ### Security & Compliance
 - Local mode must not modify `.gitignore` and must use Git's repository-local exclude file.
-- Updates and migrations must require confirmation before mutating a project.
+- Only an explicit `spectra migrate` changes a project's layout or schema; `spectra update` changes the machine application only and never reads or writes a project.
 
 ### Organizational
 - Spectra documentation must not be committed to company projects by default.

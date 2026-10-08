@@ -13,9 +13,9 @@
     "falseNegativesNormal": 7,
     "candidateTokens": 13041,
     "selectedObjectTokens": 9634,
-    "packTokens": 43897,
-    "wholeFileBaselineTokens": 50896,
-    "packTokenReduction": 0.1375,
+    "packTokens": 43949,
+    "wholeFileBaselineTokens": 50948,
+    "packTokenReduction": 0.1374,
     "exactObjectTokens": 9634,
     "wholeSourceTokens": 66381,
     "exactTokenReduction": 0.8549,
@@ -2696,10 +2696,10 @@
         "candidate": 129,
         "included": 129,
         "excluded": 0,
-        "total": 1617,
-        "routingIndexes": 254,
+        "total": 1630,
+        "routingIndexes": 267,
         "superseded": 0,
-        "wholeFileBaseline": 1488
+        "wholeFileBaseline": 1501
       },
       "exactVsWhole": [
         {
@@ -2714,16 +2714,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 877,
-          "remaining": 323
+          "used": 890,
+          "remaining": 310
         },
         "summary": {
           "budget": 3200,
           "used": 740,
           "remaining": 2460
         },
-        "remaining": 323,
-        "utilization": 0.7308,
+        "remaining": 310,
+        "utilization": 0.7417,
         "warnings": []
       }
     },
@@ -3761,10 +3761,10 @@
         "candidate": 148,
         "included": 148,
         "excluded": 0,
-        "total": 1636,
-        "routingIndexes": 254,
+        "total": 1649,
+        "routingIndexes": 267,
         "superseded": 0,
-        "wholeFileBaseline": 1488
+        "wholeFileBaseline": 1501
       },
       "exactVsWhole": [
         {
@@ -3785,16 +3785,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 896,
-          "remaining": 304
+          "used": 909,
+          "remaining": 291
         },
         "summary": {
           "budget": 3200,
           "used": 740,
           "remaining": 2460
         },
-        "remaining": 304,
-        "utilization": 0.7467,
+        "remaining": 291,
+        "utilization": 0.7575,
         "warnings": []
       }
     },
@@ -4302,10 +4302,10 @@
         "candidate": 129,
         "included": 129,
         "excluded": 0,
-        "total": 1617,
-        "routingIndexes": 254,
+        "total": 1630,
+        "routingIndexes": 267,
         "superseded": 0,
-        "wholeFileBaseline": 1488
+        "wholeFileBaseline": 1501
       },
       "exactVsWhole": [
         {
@@ -4320,16 +4320,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 877,
-          "remaining": 323
+          "used": 890,
+          "remaining": 310
         },
         "summary": {
           "budget": 3200,
           "used": 740,
           "remaining": 2460
         },
-        "remaining": 323,
-        "utilization": 0.7308,
+        "remaining": 310,
+        "utilization": 0.7417,
         "warnings": []
       }
     },
@@ -4380,10 +4380,10 @@
         "candidate": 129,
         "included": 129,
         "excluded": 0,
-        "total": 1617,
-        "routingIndexes": 254,
+        "total": 1630,
+        "routingIndexes": 267,
         "superseded": 0,
-        "wholeFileBaseline": 1488
+        "wholeFileBaseline": 1501
       },
       "exactVsWhole": [
         {
@@ -4398,16 +4398,16 @@
         "knowledge": "fresh",
         "full": {
           "budget": 1200,
-          "used": 877,
-          "remaining": 323
+          "used": 890,
+          "remaining": 310
         },
         "summary": {
           "budget": 3200,
           "used": 740,
           "remaining": 2460
         },
-        "remaining": 323,
-        "utilization": 0.7308,
+        "remaining": 310,
+        "utilization": 0.7417,
         "warnings": []
       }
     },
