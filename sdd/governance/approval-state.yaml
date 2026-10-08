@@ -1,7 +1,7 @@
 apiVersion: spectra/v2
 kind: ApprovalState
 current_state: implementation-approved
-highest_valid_state: implementation-approved
+highest_valid_state: draft
 stages:
   product-approved:
     approved_at: 2026-07-10T09:46:45.477Z
@@ -19,4 +19,13 @@ stages:
     approved_at: null
     baseline_commit: null
     dirty: false
-invalidations: []
+invalidations:
+  - stage: product-approved
+    categories:
+      - scope increase
+      - contract break
+      - behavior change
+      - observability-only
+      - infra-only
+      - copy-only
+    since: ef7021016d46af88ba8b281ace0147ea53aeeb86
