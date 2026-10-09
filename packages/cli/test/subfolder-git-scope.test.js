@@ -115,3 +115,17 @@ test("context --changed resolves the changed file's module for a project below t
   assert.equal(result.status, 0);
   assert.ok(JSON.parse(result.stdout).entries.some((entry) => entry.knowledgeId === MODULE && entry.reasons.some(({ reason }) => reason === "changed-file")), "the changed file selects its own module");
 });
+
+test("an approval is invalidated by a spec change in a project below the Git root", () => {
+  const { repo, project } = fixture("service");
+  write(path.join(project, ".spectra", "sdd", "memory-bank", "core", "projectbrief.md"), "# Project Brief\n\n## Problem\nUsers need a flow.\n\n## Outcome\nGoverned delivery.\n\n## Scope\nCore.\n");
+  git(repo, "add", "-A");
+  git(repo, "commit", "-q", "-m", "brief");
+  assert.equal(run(project, ["approve", "--stage", "product-approved"]).status, 0);
+  git(repo, "add", "-A");
+  git(repo, "commit", "-q", "-m", "approved");
+  const spec = path.join(project, ".spectra", "sdd", "features", "spectra-core", "feature.spec.yaml");
+  fs.writeFileSync(spec, fs.readFileSync(spec, "utf8").replace(/^ {2}problem:.*$/m, "  problem: A different problem statement"));
+  const { doc } = json(project, ["status"]);
+  assert.deepEqual(doc.approval.invalidations.map((entry) => entry.stage), ["product-approved"]);
+});
