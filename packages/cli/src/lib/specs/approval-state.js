@@ -75,7 +75,8 @@ function syncLegacyApprovalStatus(repoRoot, stage) {
   fs.writeFileSync(stateFile, `${lines.join("\n")}\n`);
 }
 
-function computeApprovalState(repoRoot) {
+// `persist: false` computes the same state without writing governance files (read-only callers).
+function computeApprovalState(repoRoot, { persist = true } = {}) {
   const { path: approvalPath, state } = loadApprovalState(repoRoot);
 
   if (!isGitRepo(repoRoot)) {
@@ -84,8 +85,10 @@ function computeApprovalState(repoRoot) {
       highest_valid_state: state.current_state ?? state.highest_valid_state ?? "draft",
       invalidations: []
     };
-    writeJsonContract(approvalPath, nextState);
-    syncLegacyApprovalStatus(repoRoot, nextState.current_state ?? "draft");
+    if (persist) {
+      writeJsonContract(approvalPath, nextState);
+      syncLegacyApprovalStatus(repoRoot, nextState.current_state ?? "draft");
+    }
     return nextState;
   }
 
@@ -117,8 +120,10 @@ function computeApprovalState(repoRoot) {
     invalidations
   };
 
-  writeJsonContract(approvalPath, nextState);
-  syncLegacyApprovalStatus(repoRoot, nextState.highest_valid_state ?? "draft");
+  if (persist) {
+    writeJsonContract(approvalPath, nextState);
+    syncLegacyApprovalStatus(repoRoot, nextState.highest_valid_state ?? "draft");
+  }
   return nextState;
 }
 

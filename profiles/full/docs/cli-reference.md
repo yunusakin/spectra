@@ -34,7 +34,7 @@ Local and installed invocations operate on the same project state. Most project 
 | [`inspect`](#inspect) | Ask what a rule, requirement, module or test target relates to and why it is verified or not; or what changed files impact | Does not write project files; may rebuild the disposable Knowledge Map cache |
 | [`check`](#check) | Validate the Spectra layer after changes | Does not write persistent project files; validation smoke checks use temporary directories |
 | [`verify`](#verify) | Assess release readiness before handoff | Refreshes `.spectra/sdd/governance/approval-state.yaml` and intake approval status; runs release evals and overwrites each selected feature’s `evals/reports/latest.json` and `latest.md` |
-| [`status`](#status) | Resume work and see recent changes | Recomputes `.spectra/sdd/governance/approval-state.yaml` and syncs approval status in `.spectra/sdd/memory-bank/core/intake-state.md` |
+| [`status`](#status) | Resume work and see recent changes | Recomputes `.spectra/sdd/governance/approval-state.yaml` and syncs approval status in `.spectra/sdd/memory-bank/core/intake-state.md`; `--json` writes nothing |
 | [`update`](#update) | Update application software | Updates a verified managed native installation; other provenances receive package-manager or installation guidance. Project files are not read or written |
 | [`migrate`](#migrate) | Migrate one project's layout or schema | `--check` is read-only; an explicit migration changes only the selected project and validates it |
 | [`uninstall`](#uninstall) | Remove the managed native application | Removes verified machine-owned versions and command; never accesses project files |
@@ -392,7 +392,7 @@ spectra verify
 
 **Reads:** Git status/latest commit, install metadata and resume memory files.
 
-**Writes/changes:** Recomputes `.spectra/sdd/governance/approval-state.yaml` and syncs approval status in `.spectra/sdd/memory-bank/core/intake-state.md`.
+**Writes/changes:** Recomputes `.spectra/sdd/governance/approval-state.yaml` and syncs approval status in `.spectra/sdd/memory-bank/core/intake-state.md`. With `--json` it reports the recomputed state and writes nothing.
 
 **Result:** Recent changes and suggested next action; with `--json` the same state as one document (`recentUpdates`, `approval.currentState`, `approval.highestValid`, `approval.invalidations`, `nextAction`, `compatibility.status`; see [Agent-facing JSON contract](agent-json-contract.md)).
 
