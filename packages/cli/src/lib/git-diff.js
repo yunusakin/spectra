@@ -55,6 +55,8 @@ function assertRefsResolve(repoRoot, refs) {
   }
 }
 
+// `diff --relative` reports paths relative to repoRoot (and drops changes outside it) instead of the Git top level, so a
+// Spectra project below the Git root (monorepo folder) gets project-relative paths; `ls-files` is already cwd-relative.
 function getChangedFiles(repoRoot, { base = null, head = null, includeWorktree = true, sort = true } = {}) {
   if (!isGitRepo(repoRoot)) {
     return [];
@@ -68,12 +70,12 @@ function getChangedFiles(repoRoot, { base = null, head = null, includeWorktree =
   };
 
   if (base) {
-    addFiles(collectGitDiff(repoRoot, ["diff", "--name-only", base, head ?? "HEAD"]));
+    addFiles(collectGitDiff(repoRoot, ["diff", "--relative", "--name-only", base, head ?? "HEAD"]));
   }
 
   if (includeWorktree || !base) {
-    addFiles(collectGitDiff(repoRoot, ["diff", "--name-only", "HEAD"]));
-    addFiles(collectGitDiff(repoRoot, ["diff", "--cached", "--name-only"]));
+    addFiles(collectGitDiff(repoRoot, ["diff", "--relative", "--name-only", "HEAD"]));
+    addFiles(collectGitDiff(repoRoot, ["diff", "--relative", "--cached", "--name-only"]));
     addFiles(collectGitDiff(repoRoot, ["ls-files", "--others", "--exclude-standard"]));
   }
 

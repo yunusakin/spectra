@@ -8,11 +8,11 @@ import { inspectProjectCompatibility } from "../lib/project-compatibility.js";
 import { ContractError, guardJson, parseArguments, versioned } from "../lib/contract.js";
 
 // One status state, two renderings (human lines and --json). Compatibility that is not current stops the report.
-function collectStatus(repoRoot) {
+function collectStatus(repoRoot, { persist }) {
   const compatibility = inspectProjectCompatibility(repoRoot);
   const sourceRuntime = compatibility.sourceRepository && compatibility.layout === "root-sdd" && compatibility.conflicts.length === 0;
   if (compatibility.status !== "CURRENT" && !sourceRuntime) return { compatible: false, compatibility };
-  const approval = computeApprovalState(repoRoot);
+  const approval = computeApprovalState(repoRoot, { persist });
   const invalidated = approval.invalidations.length > 0;
   return {
     compatible: true,
@@ -71,7 +71,7 @@ function runStatus(argv) {
   if (!repoRoot) {
     throw new ContractError("project-not-found", `Could not find a Spectra runtime from ${cwd}`);
   }
-  const status = collectStatus(repoRoot);
+  const status = collectStatus(repoRoot, { persist: !options["--json"] });
   if (options["--json"]) {
     const { compatible, ...document } = status;
     title(JSON.stringify(versioned(document), null, 2));

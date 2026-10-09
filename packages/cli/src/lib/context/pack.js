@@ -203,7 +203,8 @@ function buildContextPack({
     review: readSummary(repoRoot, "review.summary.json"),
     implementation: readSummary(repoRoot, "implementation.summary.json")
   };
-  const changedFiles = getChangedFiles(repoRoot, { changed, base, head });
+  // Git runs from the project root (not the data root): diff paths are then project-relative.
+  const changedFiles = getChangedFiles(projectRoot, { changed, base, head });
 
   const rolePolicy = ROLE_POLICIES[resolvedRole];
   const goalPolicy = GOAL_POLICIES[resolvedGoal];
