@@ -215,6 +215,8 @@ spectra context --role planner --goal discover
 
 **Modes and repeat runs:** `--item`, `--task-type`, `--goal`. Repeated runs replace the previous brief; they do not implement the task or advance approvals.
 
+**Not a task store:** `spectra task` records Spectra's single current implementation intent (the brief). It is not a durable multi-task runtime, and an external development environment should not use it as its own Task, conversation or run store. Project Intelligence JSON consumption does not need it.
+
 **Example:**
 
 ```bash
