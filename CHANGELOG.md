@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.1.4] - 2026-10-16
+
+No project schema change or migration is required. Installation `schemaVersion` stays 3, `apiVersion` stays `spectra/v2`, and `contractVersion` stays 1.
+
+### Fixed
+- `spectra verify` no longer intermittently reports populated memory-bank documents as empty. Content checks read the whole file without an early-closing pipeline, avoiding SIGPIPE failures under Bash `pipefail` (#65, #66).
+- Changed-file queries in projects below the Git repository root now use project-relative paths. `inspect`, `context`, review gates and approval invalidation correctly identify affected project modules (#64).
+- `spectra status --json` no longer writes approval or intake state while reporting project status (#64).
+
+### Documentation
+- README includes a copyable AI-agent prompt for installing or updating Spectra, preserving project knowledge, checking the project-local version and requesting approval before migration (#66).
+
 ## [3.1.3] - 2026-10-07
 
 No project schema change and no migration: `install.json` `schemaVersion` stays 3 and `apiVersion: spectra/v2` is unchanged. Derived caches (Knowledge Map, Repo Index) rebuild automatically. No command or flag is removed.

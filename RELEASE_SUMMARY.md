@@ -1,5 +1,18 @@
 # Release Summary
 
+## v3.1.4
+
+Patch release for verification reliability and project-relative queries. No project migration is required: installation schema version 3, `spectra/v2` and JSON contract version 1 are unchanged.
+
+- Populated progress, active-context, traceability and implementation-brief documents no longer fail content checks because of SIGPIPE (#65, #66).
+- Projects below the Git root correctly scope changed-file inspection, context, review gates and approval invalidation (#64).
+- `spectra status --json` reports status without rewriting approval or intake state (#64).
+- README offers a copyable setup prompt for an AI coding agent. The prompt covers installation, updates, adapter preservation, explicit migration approval and setup checks; it has not yet been tested in an independent agent installation session.
+
+Upgrade global npm installations with `npm install -g spectra-pack@latest`, or use `npx spectra-pack@latest`. Managed native installations from 3.1.3 onward can use `spectra update`. Use the updated CLI's `spectra doctor --fix` to refresh generated project files. Older native installations should follow [Native Install](docs/native-install.md). Project knowledge and the project schema do not need to change for this patch.
+
+For rollback, npm users can pin `spectra-pack@3.1.3`. Managed native updates retain original executable bytes as `.rollback` files for recovery; old executable paths forward to the current version, and there is no public version-switch command. No project data rollback is required by this release. After updating, check the version through the project-local launcher and run `spectra doctor` and `spectra check`.
+
 ## v3.1.3
 
 Adds Project Intelligence queries and verification evidence on top of the existing deterministic project knowledge, and separates the machine lifecycle from the project lifecycle. The `spectra/v2` identifier and installation schema version 3 are unchanged; no project migration is required.
