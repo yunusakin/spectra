@@ -23,6 +23,50 @@ Install Spectra one time for each machine (or use `npx`). Then do `init` or `ado
 | New project | `spectra init .` | Creates the Spectra layer with generic starter files for you to fill in. |
 | Existing project | `spectra adopt .` | Installs the same layer and records **repository evidence** (a deterministic index of modules, manifests and tests, plus discovery notes). It never runs your tests. It never invents business rules. What the code does is evidence, not business truth, until you review and promote it. |
 
+### With your AI agent
+
+Open your project in an AI coding agent that can read files and run terminal commands. Copy the prompt below into its chat to install Spectra or update an existing installation. The agent will check the result and tell you what to do next.
+
+<details>
+<summary>Show the setup prompt</summary>
+
+```text
+Install or update Spectra in this project using the official instructions:
+https://github.com/yunusakin/spectra
+
+Inspect the project and available environment first.
+
+If Spectra is not installed:
+- Use adopt for an existing project or init for a new project.
+- Use local Git mode.
+- Choose the appropriate supported installation method.
+
+If Spectra is already installed:
+- Detect its installation method and current version.
+- Update it to the latest stable version using the official instructions.
+- Confirm that the project-local launcher uses the updated version.
+- Check whether the project requires migration. Explain any required
+  migration and ask before applying it.
+
+Configure the adapter for the AI agent you are running as. Preserve
+existing project knowledge, configuration, and agent instructions.
+
+Verify the installed version through the project-local launcher, then
+run doctor and check. Resolve installation-related issues and report
+anything that remains blocked.
+
+Do not treat incomplete release readiness from spectra verify as an
+installation failure. Do not invent project facts or mark approvals
+and checklists complete merely to make verification pass.
+
+Finish by reporting the installed version, changes made, verification
+results, and the recommended next step.
+```
+
+</details>
+
+Prefer to run the commands yourself? Choose a setup method below.
+
 ### With Node.js and npm
 
 ```bash

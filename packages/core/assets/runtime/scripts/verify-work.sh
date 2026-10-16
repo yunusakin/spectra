@@ -51,7 +51,11 @@ blocked=0
 has_real_content() {
   local file="$1"
   [[ -f "${file}" ]] || return 1
-  grep -v '^#\|^>\|^$\|^<!--\|^-->' "${file}" 2>/dev/null | grep -v '^[[:space:]]*$' | head -1 | grep -q .
+  awk '
+    /^#/ || /^>/ || /^<!--/ || /^-->/ || /^[[:space:]]*$/ { next }
+    { found = 1 }
+    END { exit(found ? 0 : 1) }
+  ' "${file}" 2>/dev/null
 }
 
 echo "Spectra Verify Work"
